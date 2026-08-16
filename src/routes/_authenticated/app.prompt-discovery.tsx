@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, Compass, Info, Loader2, Sparkles, TrendingUp, X } from "lucide-react";
@@ -38,12 +38,13 @@ function PromptDiscoveryPage() {
   const addPrompts = useServerFn(addDiscoveredPrompts);
   const [dismissed, setDismissed] = useState<string[]>([]);
 
-  const { data = [], isFetching, refetch } = useQuery({
-    queryKey: ["prompt-discovery", brand?.id],
-    queryFn: () => discover({ data: { brandId: brand!.id } }),
-    enabled: Boolean(brand?.id),
-    staleTime: 10 * 60_000,
+  // Sayfa açılışında otomatik çalışmaz; aday üretimi her zaman kullanıcı tetikler.
+  const run = useMutation({
+    mutationFn: () => discover({ data: { brandId: brand!.id } }),
+    onError: (error: Error) => toast.error(error.message),
   });
+  const data = run.data ?? [];
+  const isFetching = run.isPending;
 
   const add = useMutation({
     mutationFn: (item: DiscoveredPrompt) =>
@@ -79,7 +80,7 @@ function PromptDiscoveryPage() {
           icon: Compass,
         }}
         action={
-          <Button size="sm" onClick={() => { setDismissed([]); void refetch(); }} disabled={isFetching}>
+          <Button size="sm" onClick={() => { setDismissed([]); run.mutate(); }} disabled={isFetching}>
             {isFetching ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />} Aday üret
           </Button>
         }
@@ -106,7 +107,7 @@ function PromptDiscoveryPage() {
           <Card><CardContent className="flex items-center gap-2 p-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Fırsat soruları hazırlanıyor…</CardContent></Card>
         ) : null}
         {!isFetching && visible.length === 0 ? (
-          <Card><CardContent className="p-6 text-sm text-muted-foreground">Henüz aday yok — “Aday üret” ile marka zekânızdan yeni fırsat soruları çıkarın.</CardContent></Card>
+          <Card><CardContent className="p-6 text-sm text-muted-foreground">Bu sayfa kendiliğinden çalışmaz. “Aday üret” dediğinizde marka zekânızdan yeni fırsat soruları çıkarılır.</CardContent></Card>
         ) : null}
         {visible.map((c) => (
           <Card key={c.text}>
