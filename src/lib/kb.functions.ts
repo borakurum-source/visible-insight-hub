@@ -266,6 +266,7 @@ export const generateDraft = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { embedOne } = await import("./embeddings.server");
     const { aiJson } = await import("./ai.server");
+    const { resolveSystemPrompt } = await import("./system-prompts.server");
     const { supabase } = context;
 
     const [{ data: prompt }, { data: brand }, { data: intel }] = await Promise.all([
@@ -297,8 +298,7 @@ export const generateDraft = createServerFn({ method: "POST" })
       [
         {
           role: "system",
-          content:
-            "Sen bir GEO içerik editörüsün. Yalnızca sana verilen bilgi bankası alıntılarına ve marka zekâsına dayanarak Türkçe içerik taslağı yaz. Bilgi bankasında olmayan iddia uydurma. Yanıtı {title, body} JSON'u olarak ver; body markdown başlıklar içersin ve 400-700 kelime olsun.",
+          content: await resolveSystemPrompt(supabase, "content_draft"),
         },
         {
           role: "user",

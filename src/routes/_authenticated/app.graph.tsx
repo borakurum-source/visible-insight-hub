@@ -22,9 +22,9 @@ const VectorMap3D = lazy(() => import("@/components/app/vector-map-3d"));
 export const Route = createFileRoute("/_authenticated/app/graph")({
   head: () => ({
     meta: [
-      { title: "Bilgi Grafiği — OneCite Paneli" },
+      { title: "Marka Zekası — OneCite Paneli" },
       { name: "description", content: "Bilgi bankanızın vektör uzayındaki 3B haritası: güçlü konu kümeleri ve kanıt boşlukları." },
-      { property: "og:title", content: "Bilgi Grafiği — OneCite Paneli" },
+      { property: "og:title", content: "Marka Zekası — OneCite Paneli" },
       { property: "og:description", content: "Marka zekânızın vektör haritası." },
       { name: "robots", content: "noindex" },
     ],
@@ -85,7 +85,7 @@ function GraphPage() {
     return (
       <>
         <PanelSubnav items={KNOWLEDGE_SUBNAV} />
-        <PanelPageHeading meta={{ title: "Bilgi Grafiği", description: "Önce bir marka ekleyin.", icon: Waypoints }} />
+        <PanelPageHeading meta={{ title: "Marka Zekası", description: "Önce bir marka ekleyin.", icon: Waypoints }} />
         <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
       </>
     );
@@ -101,7 +101,7 @@ function GraphPage() {
       <PanelSubnav items={KNOWLEDGE_SUBNAV} />
       <PanelPageHeading
         meta={{
-          title: "Bilgi Grafiği",
+          title: "Marka Zekası",
           description: "Bilgi bankanızdaki her parça bir vektöre dönüşür. Yakın noktalar benzer konulardır; seyrek bölgeler kanıt boşluğudur.",
           icon: Waypoints,
         }}

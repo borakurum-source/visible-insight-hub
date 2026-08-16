@@ -41,7 +41,7 @@ export const pricingPlans: PricingPlan[] = [
     monthly: 79,
     annualTotal: 790,
     limits: ["5 müşteri", "100 soru / müşteri", "15 rakip takibi"],
-    features: ["Bilgi Bankası", "Bilgi Grafiği", "GSC / GA4 Entegrasyonu"],
+    features: ["Bilgi Bankası", "Marka Zekası", "GSC / GA4 Entegrasyonu"],
     highlight: true,
   },
   {
@@ -51,6 +51,6 @@ export const pricingPlans: PricingPlan[] = [
     monthly: 199,
     annualTotal: 1990,
     limits: ["Sınırsız müşteri", "Sınırsız soru", "Sınırsız rakip takibi"],
-    features: ["Bilgi Bankası", "Bilgi Grafiği", "GSC / GA4 Entegrasyonu"],
+    features: ["Bilgi Bankası", "Marka Zekası", "GSC / GA4 Entegrasyonu"],
   },
 ];

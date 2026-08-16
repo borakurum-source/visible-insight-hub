@@ -10,7 +10,7 @@ export const VISIBILITY_SUBNAV = [
 ];
 
 export const KNOWLEDGE_SUBNAV = [
-  { to: "/app/graph", label: "Bilgi Grafiği" },
+  { to: "/app/graph", label: "Marka Zekası" },
   { to: "/app/knowledge-base", label: "Bilgi Bankası" },
   { to: "/app/claims", label: "Marka İddiaları" },
 ];
@@ -18,6 +18,7 @@ export const KNOWLEDGE_SUBNAV = [
 export const WORKSPACE_SUBNAV = [
   { to: "/app/settings", label: "Ayarlar" },
   { to: "/app/integrations", label: "Entegrasyonlar" },
+  { to: "/app/system-prompts", label: "Sistem Talimatları" },
   { to: "/app/account", label: "Hesabım" },
   { to: "/app/pricing", label: "Plan" },
 ];

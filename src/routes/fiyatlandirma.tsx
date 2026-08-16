@@ -36,7 +36,7 @@ const comparisonRows = [
   { label: "Rakip takibi", values: ["2", "5", "15", "Sınırsız"] },
   { label: "Ölçüm & skor kırılımı", values: [true, true, true, true] },
   { label: "Bilgi Bankası", values: [false, true, true, true] },
-  { label: "Bilgi Grafiği", values: [false, false, true, true] },
+  { label: "Marka Zekası", values: [false, false, true, true] },
   { label: "GSC / GA4 entegrasyonu", values: [false, false, true, true] },
   { label: "Çoklu çalışma alanı", values: [false, false, false, true] },
 ];

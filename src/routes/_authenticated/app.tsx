@@ -55,7 +55,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         to: "/app/graph",
-        label: "Bilgi Grafiği",
+        label: "Marka Zekası",
         icon: Waypoints,
         exact: false,
       },
@@ -90,6 +90,7 @@ const NAV_GROUPS: NavGroup[] = [
         children: [
           { to: "/app/settings", label: "Marka ayarları" },
           { to: "/app/integrations", label: "Entegrasyonlar" },
+          { to: "/app/system-prompts", label: "Sistem Talimatları" },
           { to: "/app/account", label: "Hesabım" },
           { to: "/app/pricing", label: "Plan" },
         ],

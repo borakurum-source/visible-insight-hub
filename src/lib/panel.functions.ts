@@ -52,17 +52,19 @@ export const generateBrandIntelligence = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { aiJson, fetchSiteText } = await import("./ai.server");
+    const { resolveSystemPrompt } = await import("./system-prompts.server");
     const { data: brand } = await context.supabase
       .from("brands").select("id, name, domain").eq("id", data.brandId).single();
     if (!brand) throw new Error("Marka bulunamadı");
 
     const siteText = await fetchSiteText(brand.domain);
+    const systemPrompt = await resolveSystemPrompt(context.supabase, "brand_intelligence");
     const result = await aiJson<{
       summary: string; positioning: string; tone: string;
       products: string[]; audiences: string[]; competitors: string[]; keywords: string[];
     }>(
       [
-        { role: "system", content: "Sen bir marka analistisin. Yanıtı SADECE Türkçe ve şu JSON şemasıyla ver: {summary, positioning, tone, products[], audiences[], competitors[], keywords[]}. Diziler 3-6 kısa madde içersin." },
+        { role: "system", content: systemPrompt },
         { role: "user", content: `Marka: ${brand.name}\nAlan adı: ${brand.domain}\nSite metni:\n${siteText || "(site metni alınamadı, alan adından çıkarım yap)"}` },
       ],
       { summary: "", positioning: "", tone: "", products: [], audiences: [], competitors: [], keywords: [] },
@@ -113,13 +115,14 @@ export const suggestKnowledgeSources = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { fetchSitemapUrls, aiJson } = await import("./ai.server");
+    const { resolveSystemPrompt } = await import("./system-prompts.server");
     const { data: brand } = await context.supabase.from("brands").select("domain, name").eq("id", data.brandId).single();
     if (!brand) throw new Error("Marka bulunamadı");
     const urls = await fetchSitemapUrls(brand.domain);
     if (urls.length) {
       const picked = await aiJson<{ items: Array<{ title: string; url: string }> }>(
         [
-          { role: "system", content: "Verilen URL listesinden markanın AI görünürlüğü için en değerli 8 sayfayı seç (ürün, hizmet, fiyat, hakkımızda, SSS, referans). Yanıt JSON: {items:[{title,url}]} — başlıklar Türkçe ve kısa." },
+          { role: "system", content: await resolveSystemPrompt(context.supabase, "knowledge_source_pick") },
           { role: "user", content: `Marka: ${brand.name}\nURL'ler:\n${urls.join("\n")}` },
         ],
         { items: urls.slice(0, 8).map((u) => ({ title: u, url: u })) },
@@ -183,9 +186,10 @@ export const generatePromptCandidates = createServerFn({ method: "POST" })
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
 
+    const { resolveSystemPrompt } = await import("./system-prompts.server");
     const result = await aiJson<{ items: Array<{ text: string; category: string; intent: string }> }>(
       [
-        { role: "system", content: "Bir kullanıcının ChatGPT/Gemini gibi asistanlara soracağı, markanın görünür olması gereken 24 gerçekçi Türkçe soru üret. Marka adını her soruda kullanma; çoğu jenerik satın alma/araştırma sorusu olsun. JSON: {items:[{text,category,intent}]} — category: 'marka'|'kategori'|'rakip'|'problem', intent: 'bilgi'|'karşılaştırma'|'satın alma'." },
+        { role: "system", content: await resolveSystemPrompt(context.supabase, "prompt_generation") },
         { role: "user", content: `Marka: ${brand.name} (${brand.domain})\nÖzet: ${intel?.summary ?? ""}\nÜrünler: ${JSON.stringify(intel?.products ?? [])}\nKitle: ${JSON.stringify(intel?.audiences ?? [])}\nRakipler: ${JSON.stringify(intel?.competitors ?? [])}\nBilgi bankası: ${(sources ?? []).map((s) => s.title).join(", ")}` },
       ],
       { items: [] },
@@ -238,12 +242,12 @@ export const discoverPromptCandidates = createServerFn({ method: "POST" })
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
 
+    const { resolveSystemPrompt } = await import("./system-prompts.server");
     const result = await aiJson<{ items: DiscoveredPrompt[] }>(
       [
         {
           role: "system",
-          content:
-            "Sen bir GEO (generative engine optimization) analistisin. Marka adı GEÇMEYEN, gerçek kullanıcıların ChatGPT/Perplexity gibi asistanlara soracağı 12 Türkçe fırsat sorusu üret. Yanıt json: {items:[{text, cluster, intent, rationale, opportunityScore}]}. cluster kısa tema adı; intent 'bilgi'|'karşılaştırma'|'satın alma'; rationale tek cümle, neden bu markanın kaynak gösterilebileceğini kanıta bağla; opportunityScore 0-100 arası tam sayı.",
+          content: await resolveSystemPrompt(context.supabase, "prompt_discovery"),
         },
         {
           role: "user",
@@ -291,26 +295,155 @@ export const listCitationSources = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
       .from("citations")
-      .select("domain, url, is_own_domain, created_at")
+      .select("domain, url, title, citation_type, is_own_domain, created_at")
       .eq("brand_id", data.brandId)
       .order("created_at", { ascending: false })
       .limit(500);
-    const map = new Map<string, { domain: string; count: number; isOwn: boolean; lastSeen: string; sampleUrl: string }>();
+    type Link = { url: string; title: string; lastSeen: string };
+    const map = new Map<
+      string,
+      { domain: string; count: number; isOwn: boolean; type: string; lastSeen: string; firstSeen: string; sampleUrl: string; links: Link[] }
+    >();
     for (const row of rows ?? []) {
       const current = map.get(row.domain);
+      const link: Link = { url: row.url, title: row.title ?? row.domain, lastSeen: row.created_at };
       if (current) {
         current.count += 1;
+        current.firstSeen = row.created_at;
+        if (current.links.length < 8 && !current.links.some((l) => l.url === row.url)) current.links.push(link);
       } else {
         map.set(row.domain, {
           domain: row.domain,
           count: 1,
           isOwn: row.is_own_domain,
+          type: row.citation_type ?? (row.is_own_domain ? "own" : "neutral"),
           lastSeen: row.created_at,
+          firstSeen: row.created_at,
           sampleUrl: row.url,
+          links: [link],
         });
       }
     }
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
+  });
+
+// Ölçüm ekranı: her sorunun yanıtı ve o yanıtta yapay zekânın kullandığı kaynaklar.
+export const listRunCitations = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; limit?: number }) => input)
+  .handler(async ({ data, context }) => {
+    const limit = Math.min(Math.max(data.limit ?? 25, 1), 60);
+    const { data: runs } = await context.supabase
+      .from("prompt_runs")
+      .select("id, prompt_id, brand_mentioned, position, answer_summary, created_at, prompts(text)")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    const runIds = (runs ?? []).map((r) => r.id);
+    const { data: citations } = runIds.length
+      ? await context.supabase
+          .from("citations")
+          .select("run_id, url, domain, title, citation_type, is_own_domain")
+          .in("run_id", runIds)
+      : { data: [] as Array<{ run_id: string | null; url: string; domain: string; title: string | null; citation_type: string; is_own_domain: boolean }> };
+
+    const byRun = new Map<string, Array<{ url: string; domain: string; title: string; type: string }>>();
+    for (const c of citations ?? []) {
+      if (!c.run_id) continue;
+      const list = byRun.get(c.run_id) ?? [];
+      list.push({
+        url: c.url,
+        domain: c.domain,
+        title: c.title ?? c.domain,
+        type: c.citation_type ?? (c.is_own_domain ? "own" : "neutral"),
+      });
+      byRun.set(c.run_id, list);
+    }
+
+    return (runs ?? []).map((run) => ({
+      id: run.id,
+      promptText: (run as unknown as { prompts?: { text?: string } }).prompts?.text ?? "",
+      brandMentioned: run.brand_mentioned,
+      position: run.position,
+      answerSummary: run.answer_summary ?? "",
+      createdAt: run.created_at,
+      sources: byRun.get(run.id) ?? [],
+    }));
+  });
+
+// Komuta merkezi grafikleri: skor trendi, rakip payı, kaynak dağılımı, kategori kırılımı.
+export const getVisibilityAnalytics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const [{ data: batches }, { data: runs }, { data: citations }, { data: intel }, { data: brand }] = await Promise.all([
+      context.supabase
+        .from("measurement_batches")
+        .select("id, score, finished_at, created_at, status")
+        .eq("brand_id", data.brandId)
+        .eq("status", "completed")
+        .order("created_at", { ascending: true })
+        .limit(24),
+      context.supabase
+        .from("prompt_runs")
+        .select("brand_mentioned, position, raw_answer, prompt_id, prompts(category)")
+        .eq("brand_id", data.brandId)
+        .order("created_at", { ascending: false })
+        .limit(400),
+      context.supabase.from("citations").select("citation_type, is_own_domain, domain").eq("brand_id", data.brandId).limit(1000),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase.from("brands").select("name").eq("id", data.brandId).single(),
+    ]);
+
+    const trend = (batches ?? []).map((b) => ({
+      date: (b.finished_at ?? b.created_at).slice(0, 10),
+      score: Number(b.score ?? 0),
+    }));
+
+    const runRows = runs ?? [];
+    const competitors = ((intel?.competitors as string[] | null) ?? []).slice(0, 6);
+    const share = [
+      {
+        name: brand?.name ?? "Markanız",
+        mentions: runRows.filter((r) => r.brand_mentioned).length,
+        isOwn: true,
+      },
+      ...competitors.map((competitor) => ({
+        name: competitor,
+        mentions: runRows.filter((r) => (r.raw_answer ?? "").toLowerCase().includes(competitor.toLowerCase())).length,
+        isOwn: false,
+      })),
+    ].sort((a, b) => b.mentions - a.mentions);
+
+    const citationRows = citations ?? [];
+    const mix = [
+      { name: "Kendi siteniz", value: citationRows.filter((c) => c.is_own_domain).length },
+      { name: "Rakip", value: citationRows.filter((c) => !c.is_own_domain && c.citation_type === "competitor").length },
+      { name: "Tarafsız kaynak", value: citationRows.filter((c) => !c.is_own_domain && c.citation_type !== "competitor").length },
+    ];
+
+    const categoryMap = new Map<string, { category: string; total: number; mentioned: number }>();
+    for (const run of runRows) {
+      const category = (run as unknown as { prompts?: { category?: string } }).prompts?.category ?? "genel";
+      const entry = categoryMap.get(category) ?? { category, total: 0, mentioned: 0 };
+      entry.total += 1;
+      if (run.brand_mentioned) entry.mentioned += 1;
+      categoryMap.set(category, entry);
+    }
+    const categories = Array.from(categoryMap.values())
+      .map((c) => ({ ...c, rate: c.total ? Math.round((c.mentioned / c.total) * 100) : 0 }))
+      .sort((a, b) => b.total - a.total);
+
+    const positions = runRows.map((r) => r.position).filter((p): p is number => typeof p === "number");
+    return {
+      trend,
+      share,
+      mix,
+      categories,
+      totalRuns: runRows.length,
+      mentionRate: runRows.length ? Math.round((runRows.filter((r) => r.brand_mentioned).length / runRows.length) * 100) : 0,
+      avgPosition: positions.length ? Math.round((positions.reduce((a, b) => a + b, 0) / positions.length) * 10) / 10 : null,
+    };
   });
 
 export const setPromptStatus = createServerFn({ method: "POST" })
@@ -522,12 +655,15 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
   .inputValidator((input: { batchId: string; brandId: string; promptIds: string[] }) => input)
   .handler(async ({ data, context }) => {
     const { measurePrompt } = await import("./measurement.server");
+    const { resolveSystemPrompt } = await import("./system-prompts.server");
+    const systemPrompt = await resolveSystemPrompt(context.supabase, "measurement_answer");
     const [{ data: brand }, { data: intel }, { data: prompts }] = await Promise.all([
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
       context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
       context.supabase.from("prompts").select("id, text").in("id", data.promptIds),
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
+    const competitors = ((intel?.competitors as string[] | null) ?? []).map((c) => String(c).toLowerCase());
 
     for (const prompt of prompts ?? []) {
       const measured = await measurePrompt({
@@ -535,6 +671,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         brandDomain: brand.domain,
         competitors: (intel?.competitors as string[] | null) ?? [],
         promptText: prompt.text,
+        systemPrompt,
       });
       const { data: run } = await context.supabase.from("prompt_runs").insert({
         brand_id: data.brandId,
@@ -546,16 +683,25 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         answer_summary: measured.answer.slice(0, 280),
       }).select("id").single();
 
-      const unique = Array.from(new Set(measured.sources)).slice(0, 8);
+      const seen = new Set<string>();
+      const unique = measured.sources.filter((s) => (seen.has(s.url) ? false : seen.add(s.url)));
       if (unique.length) {
         await context.supabase.from("citations").insert(
-          unique.map((domain) => ({
-            brand_id: data.brandId,
-            run_id: run?.id ?? null,
-            domain,
-            url: `https://${domain}`,
-            is_own_domain: domain.includes(brand.domain),
-          })),
+          unique.map((source) => {
+            const isOwn = source.domain.includes(brand.domain) || brand.domain.includes(source.domain);
+            const isCompetitor =
+              !isOwn && competitors.some((c) => c.length > 2 && (source.domain.includes(c.replace(/\s+/g, "")) || source.title.toLowerCase().includes(c)));
+            return {
+              brand_id: data.brandId,
+              run_id: run?.id ?? null,
+              prompt_id: prompt.id,
+              domain: source.domain,
+              url: source.url,
+              title: source.title || source.domain,
+              is_own_domain: isOwn,
+              citation_type: isOwn ? "own" : isCompetitor ? "competitor" : "neutral",
+            };
+          }),
         );
       }
     }

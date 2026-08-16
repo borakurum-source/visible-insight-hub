@@ -2,16 +2,18 @@ import { useEffect, useRef } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, Play, Gauge, ListChecks } from "lucide-react";
+import { Activity, Play, Gauge, ListChecks, ExternalLink, Quote } from "lucide-react";
 import { toast } from "sonner";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { QuerySkeleton } from "@/components/app/panel-query-states";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
-import { getMeasurementState } from "@/lib/panel.functions";
+import { getMeasurementState, listRunCitations } from "@/lib/panel.functions";
 import { useMeasurementRun } from "@/lib/use-measurement-run";
 import { useActiveBrand } from "@/lib/use-panel";
 
@@ -41,6 +43,12 @@ function MeasurementPage() {
     queryKey: ["measurement-state", brand?.id],
     queryFn: () => fetchState({ data: { brandId: brand!.id } }),
     enabled: Boolean(brand?.id),
+  });
+  const fetchRuns = useServerFn(listRunCitations);
+  const { data: runs } = useQuery({
+    queryKey: ["run-citations", brand?.id, running],
+    queryFn: () => fetchRuns({ data: { brandId: brand!.id, limit: 30 } }),
+    enabled: Boolean(brand?.id) && !running,
   });
 
   // Kurulum bitiminde /app/measurement?autostart=1 ile gelindiğinde ilk ölçümü kendiliğinden başlat.
@@ -108,6 +116,77 @@ function MeasurementPage() {
               lastRunAt={data?.batch?.finished_at ?? null}
             />
           )}
+
+          {runs && runs.length ? (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Quote className="h-4 w-4 text-primary" aria-hidden="true" /> Yanıtlar ve kullanılan kaynaklar
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Yapay zekâ her soruyu yanıtlarken hangi sayfaları kaynak gösterdi? Kendi sayfanız listede yoksa o soruda kanıt boşluğunuz var.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {runs.map((run) => (
+                    <AccordionItem key={run.id} value={run.id}>
+                      <AccordionTrigger className="gap-3 text-left text-sm">
+                        <span className="flex-1">{run.promptText || "Soru"}</span>
+                        <span className="flex shrink-0 items-center gap-2">
+                          {run.brandMentioned ? (
+                            <Badge variant="outline" className="border-success/40 text-success">
+                              {run.position ? `${run.position}. sırada` : "Geçti"}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">Geçmedi</Badge>
+                          )}
+                          <span className="text-xs text-muted-foreground">{run.sources.length} kaynak</span>
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-3">
+                        {run.answerSummary ? (
+                          <p className="rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">{run.answerSummary}</p>
+                        ) : null}
+                        {run.sources.length ? (
+                          <ul className="space-y-1.5">
+                            {run.sources.map((source) => (
+                              <li key={source.url} className="flex items-start justify-between gap-3 rounded-md border border-border px-3 py-2">
+                                <a
+                                  href={source.url}
+                                  target="_blank"
+                                  rel="noreferrer noopener"
+                                  className="flex-1 text-xs font-medium hover:text-primary"
+                                >
+                                  {source.title}
+                                  <span className="ml-1 inline-flex text-muted-foreground"><ExternalLink className="h-3 w-3" /></span>
+                                  <span className="mt-0.5 block font-mono text-[11px] font-normal text-muted-foreground">{source.domain}</span>
+                                </a>
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    source.type === "own"
+                                      ? "border-success/40 text-success"
+                                      : source.type === "competitor"
+                                        ? "border-warning/40 text-warning"
+                                        : ""
+                                  }
+                                >
+                                  {source.type === "own" ? "Sizin siteniz" : source.type === "competitor" ? "Rakip" : "Tarafsız"}
+                                </Badge>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Bu yanıtta kaynak bağlantısı dönmedi.</p>
+                        )}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       )}
     </>
