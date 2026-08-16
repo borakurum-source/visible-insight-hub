@@ -90,10 +90,10 @@ export function PublicReportAnalyzer() {
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="ornek.com"
-            className="sm:w-56"
+            className="border-white/20 bg-white/10 text-white placeholder:text-slate-400 sm:w-56"
             data-testid="input-hero-domain"
           />
-          <Button type="submit" size="lg" variant="outline" data-testid="button-public-report-cta">
+          <Button type="submit" size="lg" className="bg-cyan text-foreground hover:bg-cyan/85" data-testid="button-public-report-cta">
             Ücretsiz AI Hazırlık Raporu Al <ArrowRight className="h-4 w-4 ml-1.5" />
           </Button>
         </div>
