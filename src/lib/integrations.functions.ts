@@ -165,14 +165,6 @@ export type TrafficOverview = {
   };
 };
 
-function lastDays(count: number) {
-  const days: string[] = [];
-  for (let i = count - 1; i >= 0; i -= 1) {
-    days.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
-  }
-  return days;
-}
-
 // Komuta merkezi için GSC anlık görüntüsü + yapay zekâ atıf/görünürlük trafiği.
 export const getTrafficOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -215,7 +207,9 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
       queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
     };
 
-    const days = lastDays(30);
+    const days = Array.from({ length: 30 }, (_, index) =>
+      new Date(Date.now() - (29 - index) * 86400000).toISOString().slice(0, 10),
+    );
     const citationRows = citations ?? [];
     const runRows = runs ?? [];
 
