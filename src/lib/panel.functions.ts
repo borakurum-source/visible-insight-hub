@@ -740,7 +740,11 @@ export const finishMeasurement = createServerFn({ method: "POST" })
       finished_at: new Date().toISOString(),
     }).eq("id", data.batchId);
     if (error) throw new Error(error.message);
-    return score;
+
+    // Ölçüm sonrası otomatik 3 öncelikli aksiyon.
+    const { createPriorityTasks } = await import("./tasks.server");
+    const created = await createPriorityTasks(context.supabase, data.brandId, citationRows);
+    return { ...score, tasksCreated: created };
   });
 
 export const getMeasurementState = createServerFn({ method: "POST" })
