@@ -84,17 +84,21 @@ export function PublicReportAnalyzer() {
   return (
     <>
       <form onSubmit={handleStart} className="space-y-1.5" data-testid="form-public-report-start">
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
           <Input
             required
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="ornek.com"
-            className="border-white/20 bg-white/10 text-white placeholder:text-slate-400 sm:w-56"
+            className="h-11 min-w-0 flex-1 border-white/20 bg-white/10 text-white placeholder:text-slate-400"
             data-testid="input-hero-domain"
           />
-          <Button type="submit" size="lg" className="bg-cyan text-foreground hover:bg-cyan/85" data-testid="button-public-report-cta">
-            Ücretsiz AI Hazırlık Raporu Al <ArrowRight className="h-4 w-4 ml-1.5" />
+          <Button
+            type="submit"
+            className="h-11 w-full shrink-0 whitespace-nowrap bg-cyan px-5 text-foreground hover:bg-cyan/85 sm:w-auto"
+            data-testid="button-public-report-cta"
+          >
+            Ücretsiz raporu al <ArrowRight className="ml-1.5 h-4 w-4 shrink-0" />
           </Button>
         </div>
       </form>
