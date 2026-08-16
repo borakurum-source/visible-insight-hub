@@ -117,10 +117,10 @@ function FilmFolkCaseStudy() {
           description="Aynı satın alma niyetli soru havuzunda yapılan ilk ve son ölçüm karşılaştırması. Bu vaka tek bir yanıtı değil; hangi niyetlerde kaynak olarak daha sık seçildiğini gösterir."
           image={heroEvidenceGap}
           imageAlt="Eksik parçası olan ışıklı cam köprü; FilmFolk vaka incelemesinde kanıt boşluğunu temsil eden OneCite görseli"
-          visualLabel="CASE STUDY / FILMFOLK"
+          visualLabel="VAKA ÇALIŞMASI"
           primaryHref="#metodoloji"
           primaryLabel="Metodolojiyi incele"
-          secondaryHref="/free-ai-readiness-report"
+          secondaryHref="/ucretsiz-yapay-zeka-gorunurluk-raporu"
           secondaryLabel="Kendi ölçümünü başlat"
         >
           <div className="grid max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
@@ -218,7 +218,7 @@ function FilmFolkCaseStudy() {
               <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300">Düzenli soru takibi, güçlü artışları ve kaybedilen niyet alanlarını aynı ölçüm çerçevesinde görünür kılar. Amaç garanti vermek değil, bir sonraki kanıt üretim kararını daha doğru almaktır.</p>
               <MotionPress className="mt-8 inline-block">
                 <Button size="lg" className="bg-cyan text-foreground hover:bg-[#B8F4FF]" asChild>
-                  <Link to="/free-ai-readiness-report">Kendi ölçüm çerçeveni oluştur <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+                  <Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">Kendi ölçüm çerçeveni oluştur <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
                 </Button>
               </MotionPress>
               <p className="mt-6 text-xs text-slate-400">Kaynaklar: kullanıcı tarafından sağlanan prompt takip tablosu ve GSC exportu.</p>
@@ -277,7 +277,7 @@ function GenericArticle({ article }: { article: Article }) {
             <FileText className="h-5 w-5 text-primary" />
             <h2 className="mt-4 text-lg font-extrabold text-foreground">Bu kavramı markanızda görün.</h2>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">Ücretsiz raporla ilk kaynak ve kanıt çerçevenizi çıkarın.</p>
-            <Button className="mt-5 w-full" asChild><Link to="/free-ai-readiness-report">Ücretsiz ölçüm</Link></Button>
+            <Button className="mt-5 w-full" asChild><Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">Ücretsiz ölçüm</Link></Button>
             <Link to="/platform" className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-primary">Platformu inceleyin <SearchCheck className="h-4 w-4" /></Link>
           </aside>
         </div>

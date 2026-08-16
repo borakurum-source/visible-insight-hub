@@ -26,7 +26,7 @@ function PricingPage() {
       <PanelSubnav items={WORKSPACE_SUBNAV} />
       <PanelPageHeading meta={{ title: "Fiyatlandırma", description: "İhtiyacınıza uygun planı seçin veya mevcut planınızı yükseltin.", icon: CreditCard }} />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {mockPlans.map((plan) => (
           <Card key={plan.id} className={plan.highlight ? "border-primary shadow-sm" : ""}>
             <CardHeader className="pb-3">
@@ -38,10 +38,27 @@ function PricingPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <ul className="space-y-1.5 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> {plan.clients} marka</li>
-                <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> Marka başına {plan.prompts} prompt</li>
+                {plan.contactOnly ? (
+                  <>
+                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> Özel marka ve prompt limiti</li>
+                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> White-label rapor ve çoklu çalışma alanı</li>
+                  </>
+                ) : (
+                  <>
+                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> {plan.clients} marka</li>
+                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> Marka başına {plan.prompts} prompt</li>
+                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> {plan.competitors} rakip takibi</li>
+                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> {plan.content > 0 ? `Ayda ${plan.content} AI atıf içeriği` : "İçerik üretimi yok"}</li>
+                  </>
+                )}
               </ul>
-              <Button className="w-full" variant={plan.highlight ? "default" : "outline"}>Planı seç</Button>
+              {plan.contactOnly ? (
+                <Button asChild className="w-full" variant="outline">
+                  <a href="mailto:hello@1cite.com?subject=Ajans%20plan%C4%B1%20teklif%20talebi">İletişime geç</a>
+                </Button>
+              ) : (
+                <Button className="w-full" variant={plan.highlight ? "default" : "outline"}>Planı seç</Button>
+              )}
             </CardContent>
           </Card>
         ))}

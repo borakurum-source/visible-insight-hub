@@ -359,7 +359,7 @@ export const listContentGaps = createServerFn({ method: "POST" })
 
 export const generateDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; promptId: string }) => input)
+  .inputValidator((input: { brandId: string; promptId: string; format?: string; length?: string; tone?: string }) => input)
   .handler(async ({ data, context }) => {
     const { embedOne } = await import("./embeddings.server");
     const { aiJson } = await import("./ai.server");
@@ -391,6 +391,19 @@ export const generateDraft = createServerFn({ method: "POST" })
 
     const context_text = evidence.map((e, i) => `[${i + 1}] ${e.content}`).join("\n\n") || "(bilgi bankasında ilgili içerik bulunamadı)";
 
+    const formatLabel: Record<string, string> = {
+      blog: "alıntılanabilir blog yazısı",
+      faq: "soru-cevap (SSS) formatı",
+      comparison: "karşılaştırma tablosu ağırlıklı içerik",
+      landing: "hizmet/çözüm sayfası metni",
+    };
+    const lengthLabel: Record<string, string> = {
+      kisa: "yaklaşık 400 kelime",
+      orta: "yaklaşık 800 kelime",
+      uzun: "yaklaşık 1400 kelime",
+    };
+    const briefing = `İçerik biçimi: ${formatLabel[data.format ?? "blog"] ?? formatLabel["blog"]}\nUzunluk hedefi: ${lengthLabel[data.length ?? "orta"] ?? lengthLabel["orta"]}\nTon tercihi: ${data.tone ?? intel?.tone ?? "marka tonuna sadık"}`;
+
     const result = await aiJson<{ title: string; body: string }>(
       [
         {
@@ -399,7 +412,7 @@ export const generateDraft = createServerFn({ method: "POST" })
         },
         {
           role: "user",
-          content: `Marka: ${brand.name} (${brand.domain})\nKonumlandırma: ${intel?.positioning ?? "-"}\nTon: ${intel?.tone ?? "-"}\nÖzet: ${intel?.summary ?? "-"}\n\nHedef soru: ${prompt.text}\n\nBilgi bankası alıntıları:\n${context_text}`,
+          content: `Marka: ${brand.name} (${brand.domain})\nKonumlandırma: ${intel?.positioning ?? "-"}\nTon: ${intel?.tone ?? "-"}\nÖzet: ${intel?.summary ?? "-"}\n\n${briefing}\n\nHedef soru: ${prompt.text}\n\nBilgi bankası alıntıları:\n${context_text}`,
         },
       ],
       { title: prompt.text, body: "" },
@@ -431,7 +444,7 @@ export const listDrafts = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
       .from("content_drafts")
-      .select("id, title, body, target_prompt, status, word_count, sources, updated_at")
+      .select("id, title, body, prompt_id, target_prompt, status, word_count, sources, updated_at")
       .eq("brand_id", data.brandId)
       .order("updated_at", { ascending: false });
     return rows ?? [];

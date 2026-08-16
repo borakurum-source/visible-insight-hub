@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { MarketingShell } from "@/components/site/MarketingShell";
 import { Reveal } from "@/components/site/marketing-motion";
+import { HeroVisual } from "@/components/site/hero-visual";
 import { PublicReportAnalyzer } from "@/components/site/public-report-analyzer";
 import { EngineRotator, MetricRise } from "@/components/site/citation-motion";
 import { Button } from "@/components/ui/button";
@@ -98,17 +99,17 @@ function Hero() {
           </dl>
           <p className="text-[11px] text-slate-500">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
         </div>
-        <Reveal className="relative h-full" delay={0.06}>
-          <div className="visual-panel-shadow relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-[28px] border border-white/15 bg-ink" data-testid="hero-visual-panel">
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-ink/45 via-transparent to-transparent" aria-hidden="true" />
-            <div className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/15 bg-ink/70 px-3 py-1.5 backdrop-blur"><span className="h-1.5 w-1.5 rounded-full bg-cyan" /><span className="visual-source-label text-slate-300">SOURCE SIGNAL · 01</span></div>
-            <img src={heroCitationOrb} alt="Karanlık bir yüzey üzerinde, üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre" className="block h-full w-full flex-1 object-cover object-[72%_45%]" width="2560" height="1440" fetchPriority="high" />
-            <div className="absolute bottom-5 left-5 right-5 z-20 flex items-end justify-between gap-4">
-              <div><p className="visual-source-label text-cyan">EVIDENCE LAYER</p><p className="mt-1 text-sm font-semibold text-white">Görünmek ile kaynak olarak seçilmek aynı şey değil.</p></div>
-              <span className="font-mono text-[10px] text-slate-400">1C / 001</span>
-            </div>
-          </div>
-        </Reveal>
+        <div className="flex items-center" data-testid="hero-visual-panel">
+          <HeroVisual
+            image={heroCitationOrb}
+            imageAlt="Karanlık bir yüzey üzerinde, üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre"
+            label="EVIDENCE LAYER"
+            caption="Görünmek ile kaynak olarak seçilmek aynı şey değil."
+            meta="AI CITATION INTELLIGENCE"
+            priority
+            className="w-full"
+          />
+        </div>
       </div>
     </section>
   );
@@ -126,7 +127,7 @@ function Problem() {
         <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_.98fr] lg:gap-16">
           <Reveal className="visual-panel-shadow relative overflow-hidden rounded-[26px] border border-white/15 bg-ink">
             <img src={heroEvidenceGap} alt="Eksik bir parçaya sahip ışıklı cam köprü; OneCite evidence gap kavramının görsel metaforu" className="block h-auto w-full" width="2560" height="1440" loading="lazy" />
-            <div className="absolute inset-x-5 bottom-5 flex items-center justify-between gap-4"><span className="visual-source-label text-cyan">EVIDENCE GAP / 02</span><span className="font-mono text-[10px] text-slate-400">MISSING SOURCE</span></div>
+            <div className="absolute inset-x-5 bottom-5 flex items-center justify-between gap-4"><span className="visual-source-label text-cyan">EVIDENCE GAP</span><span className="font-mono text-[10px] text-slate-400">MISSING SOURCE</span></div>
           </Reveal>
           <div>
             <p className="editorial-eyebrow text-cyan">Görünmeyen kırılma</p>
@@ -270,8 +271,8 @@ function PlanlarVeKimIcin() {
               </div>
               <p className="mt-3 text-xs font-semibold leading-5 text-foreground">{planFits[plan.slug] ?? plan.desc}</p>
               <p className="mt-4 font-mono text-2xl font-medium text-foreground">
-                {plan.monthly === 0 ? "$0" : formatUsd(plan.monthly)}
-                <span className="text-xs text-muted-foreground"> /ay</span>
+                {plan.monthly === null ? "Teklif" : plan.monthly === 0 ? "$0" : formatUsd(plan.monthly)}
+                {plan.monthly !== null && <span className="text-xs text-muted-foreground"> /ay</span>}
               </p>
               <ul className="mt-4 flex-1 space-y-1.5 text-sm text-muted-foreground">
                 {plan.limits.map((limit) => (
@@ -320,7 +321,7 @@ function SonCagri() {
         <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">Markanızın yapay zeka cevaplarında nerede durduğunu tahmin etmeyin.</h2>
         <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-slate-300">İlk ölçümle soru, kaynak ve eksik kanıt zincirini görün. Sonra yalnızca en yüksek etkili uygulamaya odaklanın.</p>
         <Button size="lg" className="mt-8 bg-cyan text-foreground hover:bg-[#B8F4FF]" asChild>
-          <Link to="/free-ai-readiness-report">Ücretsiz ölçümünü başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+          <Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">Ücretsiz ölçümünü başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
         </Button>
       </div>
     </section>

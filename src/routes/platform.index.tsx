@@ -42,7 +42,7 @@ function PlatformPage() {
         description="OneCite, marka kaynaklarınızı, yapay zeka cevaplarındaki seçim sinyalini ve en yüksek etkili içeriği aynı çalışma döngüsünde birleştirir."
         image={heroSignalAction}
         imageAlt="Üç ışıklı yolun şeffaf bir prizma içinde tek kaynak noktasında birleşmesi"
-        visualLabel="SOURCE / SIGNAL / ACTION"
+        visualLabel="SİNYAL → KANIT → AKSİYON"
         secondaryHref="/platform/citation-share"
         secondaryLabel="Atıf payını incele"
       >
@@ -86,7 +86,7 @@ function PlatformPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Platform modülleri</p>
             <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Her sinyalin yanında açıklanabilir bir sonraki adım.</h2>
           </div>
-          <Link to="/free-ai-readiness-report" className="text-sm font-bold text-primary hover:text-foreground">Kendi markanızla deneyin →</Link>
+          <Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu" className="text-sm font-bold text-primary hover:text-foreground">Kendi markanızla deneyin →</Link>
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {modules.map(({ icon: Icon, title, body, href }) => (

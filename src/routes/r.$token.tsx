@@ -133,7 +133,7 @@ function PublicReportPage() {
         <div className="rounded-lg border border-border bg-card p-5">
           <ReportTeaser testId="report-teaser" />
           <p className="mt-4 text-sm text-muted-foreground">Bu bulguları OneCite ile birlikte çözelim.</p>
-          <Button className="mt-3" asChild><Link to="/free-ai-readiness-report">Ücretsiz ölçüm başlat</Link></Button>
+          <Button className="mt-3" asChild><Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">Ücretsiz ölçüm başlat</Link></Button>
         </div>
       </div>
     </main>

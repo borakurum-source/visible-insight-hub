@@ -35,7 +35,7 @@ function CitationSharePage() {
         description="Atıf payı, görünürlükten daha dar ve daha yararlı bir sinyaldir: Yapay zeka cevaplarında markanızın kaynak olarak seçildiği soru payını gösterir."
         image={heroCitationOrb}
         imageAlt="Üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre"
-        visualLabel="CITATION SHARE / 01"
+        visualLabel="ATIF PAYI"
         secondaryHref="/platform/evidence-gaps"
         secondaryLabel="Eksik kanıtları görün"
       >

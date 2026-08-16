@@ -12,7 +12,7 @@ const CONTENT = `# OneCite (1cite.com)
 
 ## Önemli sayfalar
 - Ana sayfa: https://1cite.com/
-- Ücretsiz yapay zeka hazırlık raporu: https://1cite.com/free-ai-readiness-report
+- Ücretsiz yapay zeka hazırlık raporu: https://1cite.com/ucretsiz-yapay-zeka-gorunurluk-raporu
 - Platform: https://1cite.com/platform
 - Atıf payı: https://1cite.com/platform/citation-share
 - Eksik kanıtlar: https://1cite.com/platform/evidence-gaps

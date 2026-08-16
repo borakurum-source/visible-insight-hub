@@ -16,7 +16,7 @@ export function MarketingCta({
   eyebrow = "SIGNAL → EVIDENCE → ACTION",
   title,
   description,
-  primaryHref = "/free-ai-readiness-report",
+  primaryHref = "/ucretsiz-yapay-zeka-gorunurluk-raporu",
   primaryLabel = "Ücretsiz ölçümünü başlat",
   secondaryHref = "/fiyatlandirma",
   secondaryLabel = "Planları karşılaştır",
