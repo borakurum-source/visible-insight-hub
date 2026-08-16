@@ -1,42 +1,16 @@
 type ChatMessage = { role: "system" | "user"; content: string };
 
 export async function aiJson<T>(messages: ChatMessage[], fallback: T): Promise<T> {
-  // Üretim ve analiz işlemleri için DeepSeek'i öncelikli kullan; anahtar yoksa Lovable AI Gateway'e düş.
-  const deepseekKey = process.env["DEEPSEEK_API_KEY"];
-  if (deepseekKey) {
-    try {
-      const { deepseekJson } = await import("./deepseek.server");
-      return await deepseekJson<T>(messages, fallback);
-    } catch (error) {
-      console.error("DeepSeek path failed, falling back to Lovable AI Gateway", error);
-    }
+  // Üretim ve analiz işlemleri yalnızca DeepSeek üzerinden çalışır (önbellekli).
+  if (!process.env["DEEPSEEK_API_KEY"]) {
+    console.warn("DEEPSEEK_API_KEY missing");
+    return fallback;
   }
-
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) return fallback;
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Lovable-API-Key": key, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "openai/gpt-5.6-sol",
-        messages: [
-          ...messages,
-          { role: "system" as const, content: "Yanıtı yalnızca geçerli json olarak döndür." },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (!res.ok) {
-      console.error("AI gateway error", res.status, await res.text());
-      return fallback;
-    }
-    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const content = json.choices?.[0]?.message?.content;
-    if (!content) return fallback;
-    return JSON.parse(content) as T;
+    const { deepseekJson } = await import("./deepseek.server");
+    return await deepseekJson<T>(messages, fallback);
   } catch (error) {
-    console.error("AI gateway failure", error);
+    console.error("DeepSeek failure", error);
     return fallback;
   }
 }
