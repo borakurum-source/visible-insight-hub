@@ -49,7 +49,7 @@ function MeasurementPage() {
     if (!autostart || autostarted.current) return;
     if (!brand?.id || isLoading) return;
     autostarted.current = true;
-    navigate({ to: "/app/measurement", search: { autostart: undefined }, replace: true });
+    navigate({ to: "/app/measurement", search: () => ({}), replace: true });
     if ((data?.approvedPrompts ?? 0) > 0) {
       toast.info("Kurulum tamam — ilk ölçümünüz başlıyor.");
       void run();
