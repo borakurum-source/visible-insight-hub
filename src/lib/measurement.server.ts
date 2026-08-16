@@ -1,5 +1,5 @@
-// Ölçüm motoru: bir promptu yapay zekâ asistanına sorar, cevabı analiz eder
-// ve markanın geçip geçmediğini + kaynak alan adlarını çıkarır.
+// Ölçüm motoru: Perplexity sonar ile gerçek web araması yapar,
+// markanın geçip geçmediğini, sıralamasını ve gerçek kaynak alan adlarını çıkarır.
 export type MeasuredAnswer = {
   answer: string;
   brandMentioned: boolean;
@@ -13,21 +13,32 @@ export async function measurePrompt(input: {
   competitors: string[];
   promptText: string;
 }): Promise<MeasuredAnswer> {
-  const { aiJson } = await import("./ai.server");
-  const result = await aiJson<{
+  const { perplexityJson, extractDomainsFromCitations } = await import("./perplexity.server");
+
+  const { result, citations } = await perplexityJson<{
     answer: string;
     mentionedBrands: string[];
-    sources: string[];
   }>(
     [
       {
         role: "system",
         content:
-          "Sen bir yapay zekâ arama asistanısın. Kullanıcının sorusunu Türkçe, tarafsız ve kısa (en fazla 150 kelime) yanıtla; gerçekte hangi markaları önerirsen onları sırayla listele. json: {answer, mentionedBrands[], sources[]} — mentionedBrands cevapta geçen marka adları ÖNEM SIRASIYLA, sources ise cevabı dayandırdığın kaynak site alan adları (yalnızca alan adı).",
+          "Sen bir yapay zekâ arama asistanısın. Kullanıcının sorusunu Türkçe, tarafsız ve kısa (en fazla 150 kelime) yanıtla; gerçekte hangi markaları önerirsen onları sırayla listele. Yanıtı şu JSON şemasında ver: {\"answer\":\"...\",\"mentionedBrands\":[\"...\"]}. mentionedBrands cevapta geçen marka adları ÖNEM SIRASIYLA.",
       },
       { role: "user", content: input.promptText },
     ],
-    { answer: "", mentionedBrands: [], sources: [] },
+    {
+      name: "measurement_result",
+      schema: {
+        type: "object",
+        properties: {
+          answer: { type: "string" },
+          mentionedBrands: { type: "array", items: { type: "string" } },
+        },
+        required: ["answer", "mentionedBrands"],
+      },
+    },
+    { answer: "", mentionedBrands: [] },
   );
 
   const brands = (result.mentionedBrands ?? []).map((b) => String(b).toLowerCase());
@@ -40,9 +51,7 @@ export async function measurePrompt(input: {
     answer: String(result.answer ?? ""),
     brandMentioned: idx >= 0 || inText,
     position: idx >= 0 ? idx + 1 : null,
-    sources: (result.sources ?? [])
-      .map((s) => String(s).trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "").replace(/^www\./i, "").toLowerCase())
-      .filter((s) => s.includes(".")),
+    sources: extractDomainsFromCitations(citations).slice(0, 8),
   };
 }
 

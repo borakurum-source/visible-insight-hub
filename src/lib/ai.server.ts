@@ -1,6 +1,17 @@
 type ChatMessage = { role: "system" | "user"; content: string };
 
 export async function aiJson<T>(messages: ChatMessage[], fallback: T): Promise<T> {
+  // Üretim ve analiz işlemleri için DeepSeek'i öncelikli kullan; anahtar yoksa Lovable AI Gateway'e düş.
+  const deepseekKey = process.env["DEEPSEEK_API_KEY"];
+  if (deepseekKey) {
+    try {
+      const { deepseekJson } = await import("./deepseek.server");
+      return await deepseekJson<T>(messages, fallback);
+    } catch (error) {
+      console.error("DeepSeek path failed, falling back to Lovable AI Gateway", error);
+    }
+  }
+
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) return fallback;
   try {

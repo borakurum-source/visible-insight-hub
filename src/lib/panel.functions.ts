@@ -535,7 +535,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
       const { data: run } = await context.supabase.from("prompt_runs").insert({
         brand_id: data.brandId,
         prompt_id: prompt.id,
-        engine: "onecite",
+        engine: "perplexity",
         brand_mentioned: measured.brandMentioned,
         position: measured.position,
         raw_answer: measured.answer,
