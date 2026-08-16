@@ -34,7 +34,9 @@ export const Route = createFileRoute("/api/public/cron/sync-analytics")({
           if (!siteUrl) continue;
           try {
             const payload =
-              connection.provider === "gsc" ? await buildGscSnapshot(siteUrl) : await buildGa4Snapshot(siteUrl);
+              connection.provider === "gsc"
+                ? await buildGscSnapshot(connection.brand_id, siteUrl)
+                : await buildGa4Snapshot(connection.brand_id, siteUrl);
             await supabaseAdmin.from("analytics_snapshots").upsert(
               { brand_id: connection.brand_id, provider: connection.provider, snapshot_date: today, payload },
               { onConflict: "brand_id,provider,snapshot_date" },
