@@ -1,117 +1,149 @@
-import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { ListChecks, Plus, Search } from "lucide-react";
+import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { ListChecks, Loader2, Plus, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { FunnelStageBadge, SentimentPositionTag } from "@/components/app/panel-shared";
-import { ActionStatusBadge } from "@/components/app/panel-shared";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mockPrompts } from "@/lib/panel-mock/prompts";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createPrompt, deletePrompt, listPrompts, setPromptStatus } from "@/lib/panel.functions";
+import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/prompts")({
   head: () => ({
     meta: [
       { title: "Promptlar — OneCite Paneli" },
-      { name: "description", content: "Takip edilen promptları, cluster ve huni aşamasına göre filtreleyip son ölçüm sonuçlarını inceleyin." },
+      { name: "description", content: "Yapay zekâ motorlarında takip ettiğiniz soruları yönetin ve onaylayın." },
       { property: "og:title", content: "Promptlar — OneCite Paneli" },
-      { property: "og:description", content: "Takip edilen prompt listesi ve son ölçüm sonuçları." },
+      { property: "og:description", content: "Takip edilen soruları yönetin." },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: PromptsPage,
 });
 
+const FILTERS = [
+  { value: "approved", label: "Onaylı" },
+  { value: "candidate", label: "Aday" },
+  { value: "inactive", label: "Pasif" },
+] as const;
+
 function PromptsPage() {
-  const [search, setSearch] = useState("");
-  const [cluster, setCluster] = useState("all");
-  const [funnelStage, setFunnelStage] = useState("all");
+  const { brand } = useActiveBrand();
+  const queryClient = useQueryClient();
+  const fetchPrompts = useServerFn(listPrompts);
+  const updateStatus = useServerFn(setPromptStatus);
+  const addPrompt = useServerFn(createPrompt);
+  const removePrompt = useServerFn(deletePrompt);
+  const [filter, setFilter] = useState<string>("approved");
+  const [draft, setDraft] = useState("");
 
-  const clusters = useMemo(() => Array.from(new Set(mockPrompts.map((p) => p.cluster))), []);
+  const key = ["prompts", brand?.id];
+  const { data = [], isLoading } = useQuery({
+    queryKey: key,
+    queryFn: () => fetchPrompts({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
 
-  const filtered = useMemo(() => {
-    return mockPrompts.filter((p) => {
-      if (cluster !== "all" && p.cluster !== cluster) return false;
-      if (funnelStage !== "all" && p.funnelStage !== funnelStage) return false;
-      if (search && !p.promptText.toLowerCase().includes(search.toLowerCase())) return false;
-      return true;
-    });
-  }, [cluster, funnelStage, search]);
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: key });
+    void queryClient.invalidateQueries({ queryKey: ["brand-overview", brand?.id] });
+  };
+
+  const statusMutation = useMutation({
+    mutationFn: (input: { ids: string[]; status: string }) => updateStatus({ data: input }),
+    onSuccess: invalidate,
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: () => addPrompt({ data: { brandId: brand!.id, text: draft.trim() } }),
+    onSuccess: () => { setDraft(""); invalidate(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => removePrompt({ data: { id } }),
+    onSuccess: invalidate,
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const visible = data.filter((prompt) => prompt.status === filter);
+
+  if (!brand) {
+    return (
+      <>
+        <PanelPageHeading meta={{ title: "Promptlar", description: "Önce bir marka ekleyin.", icon: ListChecks }} />
+        <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
+      </>
+    );
+  }
 
   return (
     <>
       <PanelPageHeading
-        meta={{ title: "Promptlar", description: "Seçili domain için takip edilen prompt listesi ve son ölçüm sonuçları.", icon: ListChecks }}
-        action={<Button size="sm"><Plus className="mr-2 h-3.5 w-3.5" /> Prompt Ekle</Button>}
+        meta={{
+          title: "Promptlar",
+          description: "Yapay zekâ motorlarında görünmek istediğiniz sorular. Adayları onaylayın, kendi sorunuzu ekleyin.",
+          icon: ListChecks,
+        }}
       />
 
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[220px] max-w-sm flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Prompt ara..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-8" />
-          </div>
-          <Select value={cluster} onValueChange={setCluster}>
-            <SelectTrigger className="w-56"><SelectValue placeholder="Cluster filtrele" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tüm cluster'lar</SelectItem>
-              {clusters.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Select value={funnelStage} onValueChange={setFunnelStage}>
-            <SelectTrigger className="w-48"><SelectValue placeholder="Huni aşaması" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tüm huni aşamaları</SelectItem>
-              <SelectItem value="tofu">TOFU · Farkındalık</SelectItem>
-              <SelectItem value="mofu">MOFU · Değerlendirme</SelectItem>
-              <SelectItem value="bofu">BOFU · Karar</SelectItem>
-            </SelectContent>
-          </Select>
-          <span className="ml-auto text-xs text-muted-foreground">{filtered.length} / {mockPrompts.length} prompt gösteriliyor</span>
-        </div>
-
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[220px] px-3">Prompt</TableHead>
-                <TableHead className="px-3">Cluster</TableHead>
-                <TableHead className="px-2">Huni Aşaması</TableHead>
-                <TableHead className="px-2">Mentioned</TableHead>
-                <TableHead className="px-2">Cited</TableHead>
-                <TableHead className="px-2">Runs</TableHead>
-                <TableHead className="px-2">Rakip</TableHead>
-                <TableHead className="px-2">Durum</TableHead>
-                <TableHead className="px-2">Son Çalıştırma</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={9} className="py-8 text-center text-sm text-muted-foreground">Kriterlere uyan prompt bulunamadı.</TableCell></TableRow>
-              )}
-              {filtered.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="px-3 font-medium">
-                    {p.promptText}
-                    <SentimentPositionTag position={p.latestRun?.position ?? null} sentiment={p.latestRun?.sentiment ?? null} />
-                  </TableCell>
-                  <TableCell className="px-3"><Badge variant="secondary">{p.cluster}</Badge></TableCell>
-                  <TableCell className="px-2"><FunnelStageBadge stage={p.funnelStage} /></TableCell>
-                  <TableCell className="px-2">{p.latestRun ? (p.latestRun.mentioned ? "Evet" : "Hayır") : "—"}</TableCell>
-                  <TableCell className="px-2">{p.latestRun ? (p.latestRun.cited ? "Evet" : "Hayır") : "—"}</TableCell>
-                  <TableCell className="px-2">{p.totalRuns}</TableCell>
-                  <TableCell className="px-2 text-xs text-muted-foreground">{p.latestRun?.competitorsFound.join(", ") || "—"}</TableCell>
-                  <TableCell className="px-2"><ActionStatusBadge status={p.latestRun?.actionStatus ?? null} /></TableCell>
-                  <TableCell className="px-2 text-xs text-muted-foreground">{p.latestRun?.timestamp ?? "—"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="Yeni bir soru yazın…"
+          className="max-w-md"
+          onKeyDown={(event) => { if (event.key === "Enter" && draft.trim()) createMutation.mutate(); }}
+        />
+        <Button onClick={() => createMutation.mutate()} disabled={!draft.trim() || createMutation.isPending}>
+          <Plus className="mr-1.5 h-4 w-4" /> Ekle
+        </Button>
       </div>
+
+      <Tabs value={filter} onValueChange={setFilter}>
+        <TabsList>
+          {FILTERS.map((item) => (
+            <TabsTrigger key={item.value} value={item.value}>
+              {item.label} ({data.filter((prompt) => prompt.status === item.value).length})
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      <Card>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <p className="flex items-center gap-2 p-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Yükleniyor…</p>
+          ) : visible.length === 0 ? (
+            <p className="p-6 text-sm text-muted-foreground">Bu listede prompt yok.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {visible.map((prompt) => (
+                <li key={prompt.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
+                  <span className="min-w-0 flex-1">{prompt.text}</span>
+                  <Badge variant="outline" className="text-[10px]">{prompt.category}</Badge>
+                  {prompt.status !== "approved" ? (
+                    <Button size="sm" variant="outline" disabled={statusMutation.isPending}
+                      onClick={() => statusMutation.mutate({ ids: [prompt.id], status: "approved" })}>Onayla</Button>
+                  ) : (
+                    <Button size="sm" variant="ghost" disabled={statusMutation.isPending}
+                      onClick={() => statusMutation.mutate({ ids: [prompt.id], status: "inactive" })}>Duraklat</Button>
+                  )}
+                  <Button size="icon" variant="ghost" aria-label="Promptu sil" onClick={() => deleteMutation.mutate(prompt.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }
