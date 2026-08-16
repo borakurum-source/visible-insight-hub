@@ -362,93 +362,6 @@ function StepProfile({ brandId, onDone, onBack }: { brandId: string; onDone: () 
   );
 }
 
-function StepKnowledge({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
-  const suggest = useServerFn(suggestKnowledgeSources);
-  const add = useServerFn(addKnowledgeSources);
-  const [items, setItems] = useState<Array<{ title: string; url: string }>>([]);
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
-  const [loading, setLoading] = useState(true);
-  const [manualUrl, setManualUrl] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    suggest({ data: { brandId } })
-      .then((result) => {
-        if (cancelled) return;
-        setItems(result);
-        setSelected(Object.fromEntries(result.map((r) => [r.url, true])));
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-    return () => { cancelled = true; };
-  }, [brandId]);
-
-  const savePicked = useMutation({
-    mutationFn: () => add({ data: { brandId, items: items.filter((i) => selected[i.url]).map((i) => ({ title: i.title, url: i.url })) } }),
-    onSuccess: () => { void onDone(); },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const pickedCount = items.filter((i) => selected[i.url]).length;
-
-  return (
-    <StepFrame
-      step={STEPS[2]}
-      footer={
-        <>
-          <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
-          <Button onClick={() => savePicked.mutate()} disabled={pickedCount === 0 || savePicked.isPending}>
-            {savePicked.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {pickedCount} sayfayı ekle ve devam et <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Button>
-        </>
-      }
-    >
-      {loading ? (
-        <p className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Site haritanız taranıyor…
-        </p>
-      ) : (
-        <div className="divide-y divide-border rounded-lg border border-border">
-          {items.map((item) => (
-            <label key={item.url} className="flex cursor-pointer items-start gap-3 p-3 text-sm">
-              <Checkbox
-                checked={Boolean(selected[item.url])}
-                onCheckedChange={(value) => setSelected({ ...selected, [item.url]: value === true })}
-              />
-              <span className="min-w-0">
-                <span className="block font-medium">{item.title}</span>
-                <span className="block truncate font-mono text-xs text-muted-foreground">{item.url}</span>
-              </span>
-            </label>
-          ))}
-          {items.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Öneri bulunamadı, aşağıdan elle ekleyin.</p> : null}
-        </div>
-      )}
-
-      <div className="space-y-1.5">
-        <Label htmlFor="manual-url">Kendi sayfanızı ekleyin</Label>
-        <div className="flex gap-2">
-          <Input id="manual-url" value={manualUrl} onChange={(e) => setManualUrl(e.target.value)} placeholder="https://…" />
-          <Button
-            variant="outline"
-            onClick={() => {
-              const url = manualUrl.trim();
-              if (!url) return;
-              setItems([{ title: url.replace(/^https?:\/\//, ""), url }, ...items]);
-              setSelected({ ...selected, [url]: true });
-              setManualUrl("");
-            }}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground">Neden soruyoruz? Yapay zekâ cevaplarında kaynak gösterilmesini istediğiniz sayfalar bunlar.</p>
-      </div>
-    </StepFrame>
-  );
-}
-
 function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
   const generate = useServerFn(generatePromptCandidates);
   const setStatus = useServerFn(setPromptStatus);
@@ -487,7 +400,7 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
 
   return (
     <StepFrame
-      step={STEPS[3]}
+      step={STEPS[2]}
       footer={
         <>
           <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
