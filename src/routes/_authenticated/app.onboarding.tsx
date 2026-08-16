@@ -39,10 +39,9 @@ export const Route = createFileRoute("/_authenticated/app/onboarding")({
 });
 
 const STEPS = [
-  { n: 1, title: "Marka", hint: "Hangi markayı takip edeceğiz?" },
-  { n: 2, title: "Marka zekâsı", hint: "Sitenizi okuyup markanızı özetliyoruz." },
-  { n: 3, title: "Bilgi bankası", hint: "Yapay zekânın kaynak göstereceği sayfalar." },
-  { n: 4, title: "Promptlar", hint: "Görünmeniz gereken sorular." },
+  { n: 1, title: "Marka", hint: "Hangi markayı takip edeceğiz? Tek alan yeterli." },
+  { n: 2, title: "Marka profili", hint: "Sitenizi okuduk: özeti ve kanıt sayfalarını onaylayın." },
+  { n: 3, title: "Promptlar", hint: "AI cevaplarında görünmeniz gereken sorular." },
 ] as const;
 
 type Intel = {
@@ -67,7 +66,9 @@ function OnboardingPage() {
   useEffect(() => {
     if (isLoading) return;
     if (!brand || forceNew) { setStep(1); return; }
-    setStep(brand.onboarding_completed ? 4 : Math.min(Math.max(brand.onboarding_step, 1), 4));
+    if (brand.onboarding_completed) { setStep(3); return; }
+    const dbStep = Math.min(Math.max(brand.onboarding_step, 1), 4);
+    setStep(dbStep <= 1 ? 1 : dbStep === 4 ? 3 : 2);
   }, [brand?.id, brand?.onboarding_step, brand?.onboarding_completed, isLoading, forceNew]);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["panel-session"] });
@@ -80,9 +81,9 @@ function OnboardingPage() {
           <h1 className="font-display text-2xl font-semibold">Kurulum</h1>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Dört kısa adım. Her adımda biz hazırlıyoruz, siz onaylıyorsunuz — boş bir sayfaya hiçbir şey yazmanız gerekmiyor.
+          Üç kısa adım. Her adımda biz hazırlıyoruz, siz onaylıyorsunuz — boş bir sayfaya hiçbir şey yazmanız gerekmiyor.
         </p>
-        <Progress value={(step / 4) * 100} className="h-1.5" />
+        <Progress value={(step / 3) * 100} className="h-1.5" />
         <ol className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
           {STEPS.map((s) => (
             <li key={s.n} className={`flex items-center gap-1.5 ${s.n === step ? "font-semibold text-foreground" : s.n < step ? "text-primary" : "text-muted-foreground"}`}>
@@ -106,17 +107,13 @@ function OnboardingPage() {
       ) : null}
 
       {step === 2 && brand ? (
-        <StepIntelligence brandId={brand.id} onDone={async () => { await refresh(); setStep(3); }} onBack={() => setStep(1)} />
+        <StepProfile brandId={brand.id} onDone={async () => { await refresh(); setStep(3); }} onBack={() => setStep(1)} />
       ) : null}
 
       {step === 3 && brand ? (
-        <StepKnowledge brandId={brand.id} onDone={async () => { await refresh(); setStep(4); }} onBack={() => setStep(2)} />
-      ) : null}
-
-      {step === 4 && brand ? (
         <StepPrompts
           brandId={brand.id}
-          onBack={() => setStep(3)}
+          onBack={() => setStep(2)}
           onDone={async () => { await refresh(); toast.success("Kurulum tamamlandı"); navigate({ to: "/app" }); }}
         />
       ) : null}
