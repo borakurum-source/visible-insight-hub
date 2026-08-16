@@ -85,7 +85,6 @@ export const Route = createFileRoute("/free-ai-readiness-report")({
           url: PAGE_URL,
           inLanguage: "tr-TR",
           isPartOf: { "@type": "WebSite", name: "OneCite", url: "https://1cite.com" },
-          primaryImageOfPage: undefined,
           mainEntity: {
             "@type": "Service",
             name: "Ücretsiz yapay zeka görünürlük (GEO) hazırlık raporu",
@@ -252,7 +251,7 @@ function FreeReportPage() {
           </Accordion>
           <p className="mt-8 text-sm leading-7 text-muted-foreground">
             Daha derine inmek isterseniz{" "}
-            <Link to="/makaleler/yapay-zeka-gorunurlugu-nedir" className="font-semibold text-primary underline-offset-4 hover:underline">yapay zeka görünürlüğü nedir</Link>,{" "}
+            <Link to="/makaleler/$slug" params={{ slug: "yapay-zeka-gorunurlugu-nedir" }} className="font-semibold text-primary underline-offset-4 hover:underline">yapay zeka görünürlüğü nedir</Link>,{" "}
             <Link to="/platform/evidence-gaps" className="font-semibold text-primary underline-offset-4 hover:underline">eksik kanıt analizi</Link> ve{" "}
             <Link to="/platform/citation-share" className="font-semibold text-primary underline-offset-4 hover:underline">atıf payı ölçümü</Link> sayfalarına göz atın.
           </p>
