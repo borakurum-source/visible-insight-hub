@@ -26,12 +26,16 @@ function MetricCard({
   title,
   value,
   caption,
+  metric,
+  days,
   children,
 }: {
   icon: typeof Search;
   title: string;
   value: string;
   caption: string;
+  metric?: string;
+  days: number;
   children: React.ReactNode;
 }) {
   return (
@@ -39,7 +43,14 @@ function MetricCard({
       <CardHeader className="pb-1">
         <CardTitle className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <Icon className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-          {title}
+          {metric ? (
+            <Link to="/app/traffic/$metric" params={{ metric }} search={{ days }} className="hover:text-foreground hover:underline">
+              {title}
+            </Link>
+          ) : (
+            title
+          )}
+          {metric ? <ArrowUpRight className="h-3 w-3 opacity-60" aria-hidden="true" /> : null}
         </CardTitle>
         <p className="font-display text-2xl font-semibold">{value}</p>
         <CardDescription className="text-[11px]">{caption}</CardDescription>
@@ -73,6 +84,8 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
     <div className="grid gap-4 md:grid-cols-2">
       <MetricCard
         icon={Search}
+        days={data.rangeDays}
+        metric="gsc-clicks"
         title="Google Arama Trafiği (GSC)"
         value={data.gsc.connected ? fmt(data.gsc.totals.clicks) : "—"}
         caption={data.gsc.connected ? `tıklama · ${fmt(data.gsc.totals.impressions)} gösterim · ${period}` : "Search Console bağlı değil"}
@@ -99,6 +112,8 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
 
       <MetricCard
         icon={BarChart3}
+        days={data.rangeDays}
+        metric="gsc-impressions"
         title="Arama Görünürlüğü (Gösterim)"
         value={data.gsc.connected ? fmt(data.gsc.totals.impressions) : "—"}
         caption={data.gsc.connected ? `gösterim · ${data.gsc.queries.length} sorgu takipte` : "Bağlantı sonrası dolar"}
@@ -119,7 +134,9 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
 
       <MetricCard
         icon={Sparkles}
-        title="Yapay Zekâ Görünürlüğü"
+        days={data.rangeDays}
+        metric="ai-visibility"
+        title="Yapay Zeka Görünürlüğü"
         value={`%${data.aiOverview.rate}`}
         caption={`${fmt(data.aiOverview.mentioned)} / ${fmt(data.aiOverview.total)} yanıtta markanız geçti (30 gün)`}
       >
@@ -140,6 +157,8 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
 
       <MetricCard
         icon={Users}
+        days={data.rangeDays}
+        metric="ga4-sessions"
         title="Site Trafiği (GA4)"
         value={data.ga4.connected ? fmt(data.ga4.totals.sessions) : "—"}
         caption={
@@ -170,6 +189,8 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
 
       <MetricCard
         icon={Bot}
+        days={data.rangeDays}
+        metric="ai-citations"
         title="AI Atıf Trafiği"
         value={fmt(data.aiReferral.total)}
         caption={`atıf · ${fmt(data.aiReferral.ownDomain)} tanesi kendi siteniz (30 gün)`}

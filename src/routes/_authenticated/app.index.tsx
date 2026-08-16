@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { LayoutDashboard, ListChecks, BookOpen, ShieldCheck, Quote, Gauge, Sparkles } from "lucide-react";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
 import { VisibilityCharts } from "@/components/app/visibility-charts";
 import { TrafficCharts } from "@/components/app/traffic-charts";
+import { GscStatusPanel } from "@/components/app/gsc-status";
 import { getBrandOverview, getMeasurementState, getVisibilityAnalytics } from "@/lib/panel.functions";
 import { getTrafficOverview } from "@/lib/integrations.functions";
 import { useActiveBrand } from "@/lib/use-panel";
@@ -45,10 +47,11 @@ function DashboardPage() {
     queryFn: () => fetchAnalytics({ data: { brandId: brand!.id } }),
     enabled: Boolean(brand?.id),
   });
+  const [rangeDays, setRangeDays] = useState<7 | 30 | 90>(30);
   const fetchTraffic = useServerFn(getTrafficOverview);
   const { data: traffic } = useQuery({
-    queryKey: ["traffic-overview", brand?.id],
-    queryFn: () => fetchTraffic({ data: { brandId: brand!.id } }),
+    queryKey: ["traffic-overview", brand?.id, rangeDays],
+    queryFn: () => fetchTraffic({ data: { brandId: brand!.id, days: rangeDays } }),
     enabled: Boolean(brand?.id),
   });
 
@@ -83,6 +86,15 @@ function DashboardPage() {
         </Card>
       ) : (
         <>
+          {data && data.runs > 0 ? (
+            <ScoreBreakdown
+              total={measurement?.score.total ?? 0}
+              components={measurement?.score.components ?? []}
+              runs={measurement?.totalRuns ?? data.runs}
+              lastRunAt={measurement?.batch?.finished_at ?? null}
+            />
+          ) : null}
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map(({ label, value, icon: Icon, to }) => (
               <Link key={label} to={to} className="group">
@@ -99,41 +111,25 @@ function DashboardPage() {
             ))}
           </div>
 
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-xs text-muted-foreground">Tarih araligi:</span>
+            {([7, 30, 90] as const).map((range) => (
+              <Button
+                key={range}
+                size="sm"
+                variant={range === rangeDays ? "default" : "outline"}
+                onClick={() => setRangeDays(range)}
+              >
+                Son {range} gun
+              </Button>
+            ))}
+          </div>
+
+          {traffic ? <GscStatusPanel data={traffic} /> : null}
           {traffic ? <TrafficCharts data={traffic} /> : null}
 
-          {traffic?.gsc.connected && traffic.gsc.queries.length ? (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Search Console — en çok tıklanan sorgular</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ul className="divide-y divide-border text-sm">
-                  {traffic.gsc.queries.map((row) => (
-                    <li key={row.query} className="flex items-center gap-3 px-4 py-2">
-                      <span className="min-w-0 flex-1 truncate">{row.query}</span>
-                      <span className="w-16 text-right font-mono text-xs">{row.clicks}</span>
-                      <span className="w-20 text-right font-mono text-xs text-muted-foreground">{row.impressions}</span>
-                      <span className="w-16 text-right font-mono text-xs text-muted-foreground">{row.position}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
-                  Sütunlar: sorgu · tıklama · gösterim · ortalama sıra
-                </p>
-              </CardContent>
-            </Card>
-          ) : null}
-
           {data && data.runs > 0 ? (
-            <>
-              <ScoreBreakdown
-                total={measurement?.score.total ?? 0}
-                components={measurement?.score.components ?? []}
-                runs={measurement?.totalRuns ?? data.runs}
-                lastRunAt={measurement?.batch?.finished_at ?? null}
-              />
-              {analytics ? <VisibilityCharts data={analytics} /> : null}
-            </>
+            analytics ? <VisibilityCharts data={analytics} /> : null
           ) : (
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 space-y-0">

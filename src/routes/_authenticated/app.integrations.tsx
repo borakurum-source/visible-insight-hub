@@ -99,7 +99,7 @@ function IntegrationsPage() {
     mutationFn: () => fetchGa4Properties({ data: { brandId: brand!.id } }),
     onSuccess: (list) => {
       if (!list.length) {
-        toast.error("Bağlı Google hesabında GA4 mülkü bulunamadı.");
+        toast.error("Google Analytics bağlantısı bulunamadı. Google hesabınızı bağlayın, ardından mülkleri tekrar yükleyin.");
         return;
       }
       setGa4Candidates(list);

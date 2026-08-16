@@ -1082,3 +1082,41 @@ export const suggestGeoTasks = createServerFn({ method: "POST" })
     const created = await createPriorityTasks(context.supabase, data.brandId, citations ?? []);
     return { created };
   });
+
+// Olcum sonuclarindaki kaynaklardan potansiyel rakip adaylari cikarir.
+export const getCompetitorInsights = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const [{ data: citations }, { data: intel }, { data: brand }] = await Promise.all([
+      context.supabase
+        .from("citations")
+        .select("domain, is_own_domain, created_at")
+        .eq("brand_id", data.brandId)
+        .order("created_at", { ascending: false })
+        .limit(1000),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase.from("brands").select("domain").eq("id", data.brandId).single(),
+    ]);
+
+    const tracked = ((intel?.competitors as string[] | null) ?? []).map((name) => String(name).toLowerCase());
+    const ownDomain = (brand?.domain ?? "").replace(/^https?:\/\//, "").replace(/^www\./, "").toLowerCase();
+    const counts = new Map<string, number>();
+    for (const row of citations ?? []) {
+      if (row.is_own_domain) continue;
+      const domain = String(row.domain ?? "").replace(/^www\./, "").toLowerCase();
+      if (!domain || domain === ownDomain) continue;
+      counts.set(domain, (counts.get(domain) ?? 0) + 1);
+    }
+
+    const suggestions = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([domain, mentions]) => ({
+        domain,
+        mentions,
+        tracked: tracked.some((name) => domain.includes(name) || name.includes(domain.split(".")[0] ?? "")),
+      }));
+
+    return { suggestions, totalCitations: (citations ?? []).length };
+  });

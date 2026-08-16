@@ -21,6 +21,9 @@ export function isGa4Configured() {
 
 // Bağlı Google hesabındaki tüm GA4 mülklerini listeler.
 export async function listGa4Properties(): Promise<Ga4Property[]> {
+  // Konnektör henüz projeye bağlı değilse hata fırlatmak yerine boş liste döndür;
+  // arayüz kullanıcıyı bağlantı akışına yönlendirir.
+  if (!isGa4Configured()) return [];
   const response = await fetch(`${GATEWAY}/v1beta/accountSummaries?pageSize=200`, { headers: headers() });
   if (!response.ok) {
     throw new Error(`GA4 mülkleri okunamadı [${response.status}]: ${await response.text()}`);

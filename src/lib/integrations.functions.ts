@@ -233,6 +233,7 @@ export const syncGa4 = createServerFn({ method: "POST" })
   });
 
 export type TrafficOverview = {
+  rangeDays: number;
   gsc: {
     connected: boolean;
     status: string | null;
@@ -268,9 +269,11 @@ export type TrafficOverview = {
 // Komuta merkezi için GSC anlık görüntüsü + yapay zekâ atıf/görünürlük trafiği.
 export const getTrafficOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string }) => input)
+  .inputValidator((input: { brandId: string; days?: number }) => input)
   .handler(async ({ data, context }): Promise<TrafficOverview> => {
-    const since = new Date(Date.now() - 30 * 86400000).toISOString();
+    // Tarih aralığı filtresi: 7 / 30 / 90 gün.
+    const rangeDays = [7, 30, 90].includes(data.days ?? 30) ? (data.days ?? 30) : 30;
+    const since = new Date(Date.now() - rangeDays * 86400000).toISOString();
     const [{ data: connections }, { data: snapshot }, { data: ga4Snapshot }, { data: citations }, { data: runs }] = await Promise.all([
       context.supabase
         .from("integration_connections")
@@ -321,8 +324,8 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
       queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
     };
 
-    const days = Array.from({ length: 30 }, (_, index) =>
-      new Date(Date.now() - (29 - index) * 86400000).toISOString().slice(0, 10),
+    const days = Array.from({ length: rangeDays }, (_, index) =>
+      new Date(Date.now() - (rangeDays - 1 - index) * 86400000).toISOString().slice(0, 10),
     );
     const citationRows = citations ?? [];
     const runRows = runs ?? [];
@@ -337,24 +340,38 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
     });
     const mentioned = runRows.filter((r) => r.brand_mentioned).length;
 
+    // Anlık görüntüler 28-30 günlük seri tutar; seçilen aralığa göre kırpıyoruz.
+    const rangeStart = days[0] ?? "";
+    const gscDaily = (payload?.daily ?? []).filter((row) => row.date >= rangeStart);
+    const gscTotals = gscDaily.reduce(
+      (acc, row) => ({ clicks: acc.clicks + row.clicks, impressions: acc.impressions + row.impressions }),
+      { clicks: 0, impressions: 0 },
+    );
+    const ga4Daily = (ga4Payload?.daily ?? []).filter((row) => row.date >= rangeStart);
+    const ga4Totals = ga4Daily.reduce(
+      (acc, row) => ({ sessions: acc.sessions + row.sessions, users: Math.max(acc.users, row.users) }),
+      { sessions: 0, users: 0 },
+    );
+
     return {
+      rangeDays,
       gsc: {
         connected: gscConnection?.status === "bagli",
         status: gscConnection?.status ?? null,
         property: gscConnection?.property_id ?? null,
         lastSyncAt: gscConnection?.last_sync_at ?? null,
-        startDate: payload?.startDate ?? null,
-        endDate: payload?.endDate ?? null,
-        totals: payload?.totals ?? { clicks: 0, impressions: 0 },
-        daily: payload?.daily ?? [],
+        startDate: gscDaily[0]?.date ?? payload?.startDate ?? null,
+        endDate: gscDaily[gscDaily.length - 1]?.date ?? payload?.endDate ?? null,
+        totals: gscTotals,
+        daily: gscDaily,
         queries: (payload?.queries ?? []).slice(0, 10),
       },
       ga4: {
         connected: ga4Connection?.status === "bagli",
         property: ga4Connection?.property_id ?? null,
         lastSyncAt: ga4Connection?.last_sync_at ?? null,
-        totals: ga4Payload?.totals ?? { sessions: 0, users: 0 },
-        daily: ga4Payload?.daily ?? [],
+        totals: ga4Totals,
+        daily: ga4Daily,
         channels: (ga4Payload?.channels ?? []).slice(0, 6),
       },
       aiReferral: {
