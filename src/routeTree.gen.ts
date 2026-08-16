@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
 import { Route as FreeAiReadinessReportRouteImport } from './routes/free-ai-readiness-report'
@@ -49,6 +50,10 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -97,9 +102,9 @@ const SunumRoute = SunumRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
-  id: '/_authenticated/app',
+  id: '/app',
   path: '/app',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const MakalelerIndexRoute = MakalelerIndexRouteImport.update({
   id: '/',
@@ -311,6 +316,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
@@ -424,6 +430,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/auth'
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
@@ -463,6 +470,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   FiyatlandirmaRoute: typeof FiyatlandirmaRoute
   FreeAiReadinessReportRoute: typeof FreeAiReadinessReportRoute
@@ -472,7 +480,6 @@ export interface RootRouteChildren {
   PlatformRoute: typeof PlatformRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   SunumRoute: typeof SunumRoute
-  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
   ProofFilmfolkRoute: typeof ProofFilmfolkRoute
   RTokenRoute: typeof RTokenRoute
   SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
@@ -486,6 +493,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -556,7 +570,7 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/makaleler/': {
       id: '/makaleler/'
@@ -736,36 +750,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface MakalelerRouteChildren {
-  MakalelerSlugRoute: typeof MakalelerSlugRoute
-  MakalelerIndexRoute: typeof MakalelerIndexRoute
-}
-
-const MakalelerRouteChildren: MakalelerRouteChildren = {
-  MakalelerSlugRoute: MakalelerSlugRoute,
-  MakalelerIndexRoute: MakalelerIndexRoute,
-}
-
-const MakalelerRouteWithChildren = MakalelerRoute._addFileChildren(
-  MakalelerRouteChildren,
-)
-
-interface PlatformRouteChildren {
-  PlatformCitationShareRoute: typeof PlatformCitationShareRoute
-  PlatformEvidenceGapsRoute: typeof PlatformEvidenceGapsRoute
-  PlatformIndexRoute: typeof PlatformIndexRoute
-}
-
-const PlatformRouteChildren: PlatformRouteChildren = {
-  PlatformCitationShareRoute: PlatformCitationShareRoute,
-  PlatformEvidenceGapsRoute: PlatformEvidenceGapsRoute,
-  PlatformIndexRoute: PlatformIndexRoute,
-}
-
-const PlatformRouteWithChildren = PlatformRoute._addFileChildren(
-  PlatformRouteChildren,
-)
-
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAccountRoute: typeof AuthenticatedAppAccountRoute
   AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
@@ -808,8 +792,50 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
 const AuthenticatedAppRouteWithChildren =
   AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface MakalelerRouteChildren {
+  MakalelerSlugRoute: typeof MakalelerSlugRoute
+  MakalelerIndexRoute: typeof MakalelerIndexRoute
+}
+
+const MakalelerRouteChildren: MakalelerRouteChildren = {
+  MakalelerSlugRoute: MakalelerSlugRoute,
+  MakalelerIndexRoute: MakalelerIndexRoute,
+}
+
+const MakalelerRouteWithChildren = MakalelerRoute._addFileChildren(
+  MakalelerRouteChildren,
+)
+
+interface PlatformRouteChildren {
+  PlatformCitationShareRoute: typeof PlatformCitationShareRoute
+  PlatformEvidenceGapsRoute: typeof PlatformEvidenceGapsRoute
+  PlatformIndexRoute: typeof PlatformIndexRoute
+}
+
+const PlatformRouteChildren: PlatformRouteChildren = {
+  PlatformCitationShareRoute: PlatformCitationShareRoute,
+  PlatformEvidenceGapsRoute: PlatformEvidenceGapsRoute,
+  PlatformIndexRoute: PlatformIndexRoute,
+}
+
+const PlatformRouteWithChildren = PlatformRoute._addFileChildren(
+  PlatformRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   FiyatlandirmaRoute: FiyatlandirmaRoute,
   FreeAiReadinessReportRoute: FreeAiReadinessReportRoute,
@@ -819,7 +845,6 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformRoute: PlatformRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   SunumRoute: SunumRoute,
-  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
   ProofFilmfolkRoute: ProofFilmfolkRoute,
   RTokenRoute: RTokenRoute,
   SolutionsAgenciesRoute: SolutionsAgenciesRoute,
