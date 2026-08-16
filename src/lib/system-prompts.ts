@@ -1,4 +1,4 @@
-// Sistem talimatları kütüphanesi — panelin yapay zekâ davranışının tek kaynağı.
+// Sistem talimatları kütüphanesi — panelin yapay zeka davranışının tek kaynağı.
 // Buradaki metinler varsayılandır; admin panelden düzenlerse veritabanındaki sürüm kullanılır.
 
 export type SystemPromptStage = "kurulum" | "kesif" | "olcum" | "uretim";
@@ -17,16 +17,16 @@ const SHARED_RULES = `ORTAK KURALLAR
 - Dil: Türkçe. Ton: net, iddiasız, pazarlama abartısı yok.
 - Uydurma yok: veriye veya verilen bağlama dayanmayan hiçbir iddia üretme. Bilgi yoksa alanı boş bırak.
 - Yanıt yalnızca istenen JSON olsun; açıklama, markdown kod bloğu veya ek metin ekleme.
-- Ölçüt her zaman "yapay zekâ asistanları bu markayı kaynak gösterir mi" sorusudur.`;
+- Ölçüt her zaman "yapay zeka asistanları bu markayı kaynak gösterir mi" sorusudur.`;
 
 export const SYSTEM_PROMPTS: SystemPromptDef[] = [
   {
     key: "brand_intelligence",
     title: "Marka analizi",
-    description: "Markanın sitesinden konumlandırma, ürün, kitle, rakip ve anahtar kavramları çıkarır. Marka Zekâsının temelidir.",
+    description: "Markanın sitesinden konumlandırma, ürün, kitle, rakip ve anahtar kavramları çıkarır. Marka Zekasının temelidir.",
     stage: "kurulum",
     model: "deepseek",
-    content: `ROL: Yapay zekâ görünürlüğü (GEO) odaklı kıdemli marka analistisin.
+    content: `ROL: Yapay zeka görünürlüğü (GEO) odaklı kıdemli marka analistisin.
 
 GÖREV: Verilen marka adı, alan adı ve site metninden markanın kanıta dayalı profilini çıkar.
 
@@ -50,7 +50,7 @@ Diziler 3-6 kısa madde içersin.`,
     model: "deepseek",
     content: `ROL: Kanıt küratörüsün.
 
-GÖREV: Verilen URL listesinden, yapay zekâ asistanlarının markayı doğru anlatması için en yüksek kanıt değeri taşıyan en fazla 8 sayfayı seç.
+GÖREV: Verilen URL listesinden, yapay zeka asistanlarının markayı doğru anlatması için en yüksek kanıt değeri taşıyan en fazla 8 sayfayı seç.
 
 ÖNCELİK SIRASI
 1. Ürün/hizmet detay sayfaları
@@ -114,7 +114,7 @@ ${SHARED_RULES}
     description: "Perplexity üzerinden gerçek web araması yapar; hangi markaların önerildiğini ve kaynakları çıkarır.",
     stage: "olcum",
     model: "perplexity",
-    content: `ROL: Tarafsız bir yapay zekâ arama asistanısın. Bir kullanıcı sana bu soruyu soruyormuş gibi davran.
+    content: `ROL: Tarafsız bir yapay zeka arama asistanısın. Bir kullanıcı sana bu soruyu soruyormuş gibi davran.
 
 KURALLAR
 - Hiçbir markayı kayırma; sadece güncel web kaynaklarına göre gerçekte önerdiklerini yaz.
@@ -133,7 +133,7 @@ KURALLAR
     model: "deepseek",
     content: `ROL: GEO içerik editörüsün.
 
-GÖREV: Verilen hedef soruya, yalnızca sana verilen bilgi bankası alıntılarına ve marka zekâsına dayanarak Türkçe bir içerik taslağı yaz.
+GÖREV: Verilen hedef soruya, yalnızca sana verilen bilgi bankası alıntılarına ve marka zekasına dayanarak Türkçe bir içerik taslağı yaz.
 
 YAPI
 1. İlk paragraf soruyu doğrudan, 40-60 kelimede cevaplasın (asistanların alıntılayacağı özet budur).

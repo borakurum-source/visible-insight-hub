@@ -5,7 +5,7 @@ import { supabaseForUser } from "../supabase";
 export default defineTool({
   name: "get_visibility",
   title: "Görünürlük özeti",
-  description: "Bir markanın yapay zekâ görünürlük skorunu, ölçülen prompt sayısını ve son atıf kaynaklarını döner.",
+  description: "Bir markanın yapay zeka görünürlük skorunu, ölçülen prompt sayısını ve son atıf kaynaklarını döner.",
   inputSchema: { brand_id: z.string().uuid().describe("OneCite marka kimliği (list_brands ile alınır).") },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ brand_id }, ctx) => {

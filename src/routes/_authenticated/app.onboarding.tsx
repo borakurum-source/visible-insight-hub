@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/app/onboarding")({
   head: () => ({
     meta: [
       { title: "Kurulum — OneCite Paneli" },
-      { name: "description", content: "Markanızı ekleyin, marka zekâsını onaylayın, bilgi bankasını doldurun ve promptları seçin." },
+      { name: "description", content: "Markanızı ekleyin, marka zekasını onaylayın, bilgi bankasını doldurun ve promptları seçin." },
       { property: "og:title", content: "Kurulum — OneCite Paneli" },
       { property: "og:description", content: "Dört adımda AI görünürlük kurulumu." },
       { name: "robots", content: "noindex" },
@@ -236,7 +236,7 @@ function StepProfile({ brandId, onDone, onBack }: { brandId: string; onDone: () 
     });
   };
 
-  // Sadece kayıtlı veriyi okur. Yapay zekâ çağrıları butonla tetiklenir.
+  // Sadece kayıtlı veriyi okur. Yapay zeka çağrıları butonla tetiklenir.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -297,7 +297,7 @@ function StepProfile({ brandId, onDone, onBack }: { brandId: string; onDone: () 
       >
         <p className="text-sm text-muted-foreground">
           Hazır olduğunuzda sitenizi okuyup marka özeti, ürünler, hedef kitle ve rakip listesini çıkaralım.
-          Bu adım yapay zekâ kullanır ve yalnızca siz başlattığınızda çalışır.
+          Bu adım yapay zeka kullanır ve yalnızca siz başlattığınızda çalışır.
         </p>
       </StepFrame>
     );

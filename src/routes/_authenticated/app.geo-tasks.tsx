@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/app/geo-tasks")({
   head: () => ({
     meta: [
       { title: "GEO Görevleri — OneCite Paneli" },
-      { name: "description", content: "Yapay zekâ görünürlüğünüzü artıracak somut içerik ve kanıt görevleri." },
+      { name: "description", content: "Yapay zeka görünürlüğünüzü artıracak somut içerik ve kanıt görevleri." },
       { property: "og:title", content: "GEO Görevleri — OneCite Paneli" },
       { property: "og:description", content: "Görünürlük görevlerinizi takip edin." },
       { name: "robots", content: "noindex" },

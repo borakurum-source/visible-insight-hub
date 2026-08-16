@@ -331,7 +331,7 @@ export const listCitationSources = createServerFn({ method: "POST" })
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
   });
 
-// Ölçüm ekranı: her sorunun yanıtı ve o yanıtta yapay zekânın kullandığı kaynaklar.
+// Ölçüm ekranı: her sorunun yanıtı ve o yanıtta yapay zekanın kullandığı kaynaklar.
 export const listRunCitations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; limit?: number }) => input)
@@ -892,7 +892,7 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       actions.push({
         key: "evidence-content",
         title: `"${(prompt?.text ?? "").slice(0, 80)}" sorusu için kanıt içeriği yayımlayın`,
-        description: `Yapay zekâ bu soruda ${brand?.name ?? "markanızı"} anmadı. Soruyu doğrudan yanıtlayan, veri ve kaynak içeren bir sayfa yayımlayın; İçerik Üretimi ekranından taslak alabilirsiniz.`,
+        description: `Yapay zeka bu soruda ${brand?.name ?? "markanızı"} anmadı. Soruyu doğrudan yanıtlayan, veri ve kaynak içeren bir sayfa yayımlayın; İçerik Üretimi ekranından taslak alabilirsiniz.`,
         priority: "high",
       });
       if (sources.length) {
@@ -922,7 +922,7 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       actions.push({
         key: "kb-source",
         title: "Bilgi Bankası'na bu konuda kaynak ekleyin",
-        description: "Konuyla ilgili teknik doküman, vaka çalışması veya SSS ekleyip indeksleyin; marka zekâsı yanıt üretiminde bu kanıtları kullanır.",
+        description: "Konuyla ilgili teknik doküman, vaka çalışması veya SSS ekleyip indeksleyin; marka zekası yanıt üretiminde bu kanıtları kullanır.",
         priority: "low",
       });
     }
@@ -1048,7 +1048,7 @@ Arama: ${data.query?.trim() || "aynı sektördeki başlıca rakipler"}`,
       .slice(0, 8);
   });
 
-// Marka zekâsındaki rakip listesini okur / günceller.
+// Marka zekasındaki rakip listesini okur / günceller.
 export const getCompetitors = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
@@ -1081,4 +1081,42 @@ export const suggestGeoTasks = createServerFn({ method: "POST" })
       .from("citations").select("is_own_domain").eq("brand_id", data.brandId).limit(500);
     const created = await createPriorityTasks(context.supabase, data.brandId, citations ?? []);
     return { created };
+  });
+
+// Olcum sonuclarindaki kaynaklardan potansiyel rakip adaylari cikarir.
+export const getCompetitorInsights = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const [{ data: citations }, { data: intel }, { data: brand }] = await Promise.all([
+      context.supabase
+        .from("citations")
+        .select("domain, is_own_domain, created_at")
+        .eq("brand_id", data.brandId)
+        .order("created_at", { ascending: false })
+        .limit(1000),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase.from("brands").select("domain").eq("id", data.brandId).single(),
+    ]);
+
+    const tracked = ((intel?.competitors as string[] | null) ?? []).map((name) => String(name).toLowerCase());
+    const ownDomain = (brand?.domain ?? "").replace(/^https?:\/\//, "").replace(/^www\./, "").toLowerCase();
+    const counts = new Map<string, number>();
+    for (const row of citations ?? []) {
+      if (row.is_own_domain) continue;
+      const domain = String(row.domain ?? "").replace(/^www\./, "").toLowerCase();
+      if (!domain || domain === ownDomain) continue;
+      counts.set(domain, (counts.get(domain) ?? 0) + 1);
+    }
+
+    const suggestions = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([domain, mentions]) => ({
+        domain,
+        mentions,
+        tracked: tracked.some((name) => domain.includes(name) || name.includes(domain.split(".")[0] ?? "")),
+      }));
+
+    return { suggestions, totalCitations: (citations ?? []).length };
   });

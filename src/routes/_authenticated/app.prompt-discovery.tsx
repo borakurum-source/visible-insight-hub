@@ -107,7 +107,7 @@ function PromptDiscoveryPage() {
           <Card><CardContent className="flex items-center gap-2 p-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Fırsat soruları hazırlanıyor…</CardContent></Card>
         ) : null}
         {!isFetching && visible.length === 0 ? (
-          <Card><CardContent className="p-6 text-sm text-muted-foreground">Bu sayfa kendiliğinden çalışmaz. “Aday üret” dediğinizde marka zekânızdan yeni fırsat soruları çıkarılır.</CardContent></Card>
+          <Card><CardContent className="p-6 text-sm text-muted-foreground">Bu sayfa kendiliğinden çalışmaz. “Aday üret” dediğinizde marka zekanızdan yeni fırsat soruları çıkarılır.</CardContent></Card>
         ) : null}
         {visible.map((c) => (
           <Card key={c.text}>

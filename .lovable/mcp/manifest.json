@@ -35,7 +35,7 @@
       {
         "name": "get_visibility",
         "title": "Görünürlük özeti",
-        "description": "Bir markanın yapay zekâ görünürlük skorunu, ölçülen prompt sayısını ve son atıf kaynaklarını döner.",
+        "description": "Bir markanın yapay zeka görünürlük skorunu, ölçülen prompt sayısını ve son atıf kaynaklarını döner.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -61,7 +61,7 @@
       {
         "name": "list_prompts",
         "title": "Promptları listele",
-        "description": "Bir markanın izlenen yapay zekâ sorularını durum filtresiyle listeler.",
+        "description": "Bir markanın izlenen yapay zeka sorularını durum filtresiyle listeler.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,

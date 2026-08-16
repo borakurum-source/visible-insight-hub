@@ -5,7 +5,7 @@ import { supabaseForUser } from "../supabase";
 export default defineTool({
   name: "list_prompts",
   title: "Promptları listele",
-  description: "Bir markanın izlenen yapay zekâ sorularını durum filtresiyle listeler.",
+  description: "Bir markanın izlenen yapay zeka sorularını durum filtresiyle listeler.",
   inputSchema: {
     brand_id: z.string().uuid(),
     status: z.enum(["approved", "candidate", "inactive"]).optional().describe("Varsayılan: approved."),

@@ -15,7 +15,7 @@ export default defineMcp({
   title: "OneCite",
   version: "0.1.0",
   instructions:
-    "OneCite yapay zekâ görünürlük paneli araçları. Önce list_brands ile marka kimliğini alın; ardından get_visibility ile skoru, list_prompts ile izlenen soruları, search_knowledge ile marka bilgi bankasındaki kanıtları okuyun. add_knowledge_source ile yeni kaynak ekleyebilirsiniz.",
+    "OneCite yapay zeka görünürlük paneli araçları. Önce list_brands ile marka kimliğini alın; ardından get_visibility ile skoru, list_prompts ile izlenen soruları, search_knowledge ile marka bilgi bankasındaki kanıtları okuyun. add_knowledge_source ile yeni kaynak ekleyebilirsiniz.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",

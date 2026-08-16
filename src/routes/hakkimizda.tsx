@@ -30,7 +30,7 @@ function AboutPage() {
         description="OneCite, markaların yalnızca görünür olup olmadığını değil; hangi soruda, hangi kaynakla ve hangi eksik kanıt yüzünden seçilip seçilmediğini anlamak için kuruldu."
         image={heroCitationOrb}
         imageAlt="Kaynak noktalarını birleştiren ışıklı cam küre; OneCite’ın kanıt ağı metaforu"
-        visualLabel="MARKA HİKÂYESİ"
+        visualLabel="MARKA HİKAYESİ"
         primaryHref="/ucretsiz-yapay-zeka-gorunurluk-raporu"
         primaryLabel="İlk ölçümü başlat"
         secondaryHref="#neden"
@@ -82,7 +82,7 @@ function AboutPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Kurucu</p>
             <h2 className="mt-4 text-3xl font-extrabold text-foreground">Bora Kurum</h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground">OneCite, AI görünürlüğünü yalnızca bir pazarlama iddiası olarak değil, soru ve kaynak düzeyinde izlenebilir bir çalışma alanı olarak ele alma ihtiyacından doğdu.</p>
-            <a href="https://borakurum.com" target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-foreground">Kurucu hikâyesini incele <ExternalLink className="h-4 w-4" /></a>
+            <a href="https://borakurum.com" target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-foreground">Kurucu hikayesini incele <ExternalLink className="h-4 w-4" /></a>
           </div>
         </div>
       </section>

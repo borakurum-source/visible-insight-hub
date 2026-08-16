@@ -152,7 +152,7 @@ function ContentPage() {
       <PanelPageHeading
         meta={{
           title: "İçerik Üretimi",
-          description: "Kanıt boşluğu = yapay zekânın sizi anmadığı soru + bilgi bankanızda karşılığı olmayan konu. Taslaklar yalnızca kendi kaynaklarınıza dayanır.",
+          description: "Kanıt boşluğu = yapay zekanın sizi anmadığı soru + bilgi bankanızda karşılığı olmayan konu. Taslaklar yalnızca kendi kaynaklarınıza dayanır.",
           icon: PenSquare,
         }}
         action={

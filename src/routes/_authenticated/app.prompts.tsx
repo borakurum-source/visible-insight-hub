@@ -23,6 +23,7 @@ import {
   setPromptActionDone,
   setPromptStatus,
 } from "@/lib/panel.functions";
+import { toPlainText } from "@/lib/plain-text";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/prompts")({
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/app/prompts")({
   head: () => ({
     meta: [
       { title: "Promptlar — OneCite Paneli" },
-      { name: "description", content: "Yapay zekâ motorlarında takip ettiğiniz soruları yönetin ve onaylayın." },
+      { name: "description", content: "Yapay zeka motorlarında takip ettiğiniz soruları yönetin ve onaylayın." },
       { property: "og:title", content: "Promptlar — OneCite Paneli" },
       { property: "og:description", content: "Takip edilen soruları yönetin." },
       { name: "robots", content: "noindex" },
@@ -117,7 +118,7 @@ function PromptsPage() {
       <PanelPageHeading
         meta={{
           title: "Promptlar",
-          description: "Yapay zekâ motorlarında görünmek istediğiniz sorular. Adayları onaylayın, kendi sorunuzu ekleyin.",
+          description: "Yapay zeka motorlarında görünmek istediğiniz sorular. Adayları onaylayın, kendi sorunuzu ekleyin.",
           icon: ListChecks,
         }}
       />
@@ -301,7 +302,7 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
             <span>{new Date(data.run.createdAt).toLocaleString("tr-TR")} · {data.run.engine}</span>
           </div>
           <div className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-md bg-background p-3 text-xs leading-relaxed text-muted-foreground">
-            {data.run.answer}
+            {toPlainText(data.run.answer)}
           </div>
         </>
       ) : (

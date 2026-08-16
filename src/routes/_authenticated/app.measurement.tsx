@@ -15,6 +15,7 @@ import { QuerySkeleton } from "@/components/app/panel-query-states";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
 import { getMeasurementState, listRunCitations } from "@/lib/panel.functions";
 import { useMeasurementRun } from "@/lib/use-measurement-run";
+import { toPlainText } from "@/lib/plain-text";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/measurement")({
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/app/measurement")({
   head: () => ({
     meta: [
       { title: "Ölçüm — OneCite Paneli" },
-      { name: "description", content: "Onaylı promptlarınızı yapay zekâ asistanlarında çalıştırın ve görünürlük skorunuzu kırılımıyla görün." },
+      { name: "description", content: "Onaylı promptlarınızı yapay zeka asistanlarında çalıştırın ve görünürlük skorunuzu kırılımıyla görün." },
       { property: "og:title", content: "Ölçüm — OneCite Paneli" },
       { property: "og:description", content: "AI görünürlük ölçüm turu ve skor kırılımı." },
       { name: "robots", content: "noindex" },
@@ -70,7 +71,7 @@ function MeasurementPage() {
       <PanelPageHeading
         meta={{
           title: "Ölçüm",
-          description: "Onaylı promptlarınızı yapay zekâ asistanlarında çalıştırıp görünürlüğünüzü puanlıyoruz.",
+          description: "Onaylı promptlarınızı yapay zeka asistanlarında çalıştırıp görünürlüğünüzü puanlıyoruz.",
           icon: Gauge,
         }}
         action={
@@ -124,7 +125,7 @@ function MeasurementPage() {
                   <Quote className="h-4 w-4 text-primary" aria-hidden="true" /> Yanıtlar ve kullanılan kaynaklar
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Yapay zekâ her soruyu yanıtlarken hangi sayfaları kaynak gösterdi? Kendi sayfanız listede yoksa o soruda kanıt boşluğunuz var.
+                  Yapay zeka her soruyu yanıtlarken hangi sayfaları kaynak gösterdi? Kendi sayfanız listede yoksa o soruda kanıt boşluğunuz var.
                 </p>
               </CardHeader>
               <CardContent>
@@ -147,7 +148,7 @@ function MeasurementPage() {
                       <AccordionContent className="space-y-3">
                         {run.answer ? (
                           <div className="max-h-96 overflow-y-auto whitespace-pre-wrap rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">
-                            {run.answer}
+                            {toPlainText(run.answer)}
                           </div>
                         ) : null}
                         {!run.brandMentioned ? (

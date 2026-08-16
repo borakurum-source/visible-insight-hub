@@ -6,6 +6,7 @@ export const VISIBILITY_SUBNAV = [
   { to: "/app/prompt-discovery", label: "Prompt Keşfi" },
   { to: "/app/measurement", label: "Ölçüm & Skor" },
   { to: "/app/citation-discovery", label: "Atıf Kaynakları" },
+  { to: "/app/competitors", label: "Rakip Takibi" },
   { to: "/app/report", label: "Rapor" },
 ];
 

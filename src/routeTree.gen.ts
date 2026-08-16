@@ -42,6 +42,7 @@ import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppCitationDiscoveryRouteImport } from './routes/_authenticated/app.citation-discovery'
 import { Route as AuthenticatedAppClaimsRouteImport } from './routes/_authenticated/app.claims'
+import { Route as AuthenticatedAppCompetitorsRouteImport } from './routes/_authenticated/app.competitors'
 import { Route as AuthenticatedAppContentRouteImport } from './routes/_authenticated/app.content'
 import { Route as AuthenticatedAppGeoTasksRouteImport } from './routes/_authenticated/app.geo-tasks'
 import { Route as AuthenticatedAppGraphRouteImport } from './routes/_authenticated/app.graph'
@@ -55,6 +56,8 @@ import { Route as AuthenticatedAppPromptsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppReportRouteImport } from './routes/_authenticated/app.report'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedAppSystemPromptsRouteImport } from './routes/_authenticated/app.system-prompts'
+import { Route as AuthenticatedAppTrafficMetricRouteImport } from './routes/_authenticated/app.traffic.$metric'
+import { Route as ApiPublicCronSyncAnalyticsRouteImport } from './routes/api/public/cron/sync-analytics'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -226,6 +229,12 @@ const AuthenticatedAppClaimsRoute = AuthenticatedAppClaimsRouteImport.update({
   path: '/claims',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppCompetitorsRoute =
+  AuthenticatedAppCompetitorsRouteImport.update({
+    id: '/competitors',
+    path: '/competitors',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppContentRoute = AuthenticatedAppContentRouteImport.update({
   id: '/content',
   path: '/content',
@@ -299,6 +308,18 @@ const AuthenticatedAppSystemPromptsRoute =
     path: '/system-prompts',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppTrafficMetricRoute =
+  AuthenticatedAppTrafficMetricRouteImport.update({
+    id: '/traffic/$metric',
+    path: '/traffic/$metric',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const ApiPublicCronSyncAnalyticsRoute =
+  ApiPublicCronSyncAnalyticsRouteImport.update({
+    id: '/api/public/cron/sync-analytics',
+    path: '/api/public/cron/sync-analytics',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -338,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/app/claims': typeof AuthenticatedAppClaimsRoute
+  '/app/competitors': typeof AuthenticatedAppCompetitorsRoute
   '/app/content': typeof AuthenticatedAppContentRoute
   '/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/app/graph': typeof AuthenticatedAppGraphRoute
@@ -352,6 +374,8 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
+  '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
@@ -383,6 +407,7 @@ export interface FileRoutesByTo {
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/app/claims': typeof AuthenticatedAppClaimsRoute
+  '/app/competitors': typeof AuthenticatedAppCompetitorsRoute
   '/app/content': typeof AuthenticatedAppContentRoute
   '/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/app/graph': typeof AuthenticatedAppGraphRoute
@@ -397,6 +422,8 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
+  '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
@@ -433,6 +460,7 @@ export interface FileRoutesById {
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/_authenticated/app/claims': typeof AuthenticatedAppClaimsRoute
+  '/_authenticated/app/competitors': typeof AuthenticatedAppCompetitorsRoute
   '/_authenticated/app/content': typeof AuthenticatedAppContentRoute
   '/_authenticated/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/_authenticated/app/graph': typeof AuthenticatedAppGraphRoute
@@ -447,6 +475,8 @@ export interface FileRoutesById {
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
+  '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
@@ -483,6 +513,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/citation-discovery'
     | '/app/claims'
+    | '/app/competitors'
     | '/app/content'
     | '/app/geo-tasks'
     | '/app/graph'
@@ -497,6 +528,8 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/system-prompts'
     | '/app/'
+    | '/app/traffic/$metric'
+    | '/api/public/cron/sync-analytics'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -528,6 +561,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/citation-discovery'
     | '/app/claims'
+    | '/app/competitors'
     | '/app/content'
     | '/app/geo-tasks'
     | '/app/graph'
@@ -542,6 +576,8 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/system-prompts'
     | '/app'
+    | '/app/traffic/$metric'
+    | '/api/public/cron/sync-analytics'
     | '/lovable/email/transactional/preview'
   id:
     | '__root__'
@@ -577,6 +613,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin'
     | '/_authenticated/app/citation-discovery'
     | '/_authenticated/app/claims'
+    | '/_authenticated/app/competitors'
     | '/_authenticated/app/content'
     | '/_authenticated/app/geo-tasks'
     | '/_authenticated/app/graph'
@@ -591,6 +628,8 @@ export interface FileRouteTypes {
     | '/_authenticated/app/settings'
     | '/_authenticated/app/system-prompts'
     | '/_authenticated/app/'
+    | '/_authenticated/app/traffic/$metric'
+    | '/api/public/cron/sync-analytics'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
@@ -617,6 +656,7 @@ export interface RootRouteChildren {
   SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicCronSyncAnalyticsRoute: typeof ApiPublicCronSyncAnalyticsRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
@@ -853,6 +893,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppClaimsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/competitors': {
+      id: '/_authenticated/app/competitors'
+      path: '/competitors'
+      fullPath: '/app/competitors'
+      preLoaderRoute: typeof AuthenticatedAppCompetitorsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/content': {
       id: '/_authenticated/app/content'
       path: '/content'
@@ -944,6 +991,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSystemPromptsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/traffic/$metric': {
+      id: '/_authenticated/app/traffic/$metric'
+      path: '/traffic/$metric'
+      fullPath: '/app/traffic/$metric'
+      preLoaderRoute: typeof AuthenticatedAppTrafficMetricRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/api/public/cron/sync-analytics': {
+      id: '/api/public/cron/sync-analytics'
+      path: '/api/public/cron/sync-analytics'
+      fullPath: '/api/public/cron/sync-analytics'
+      preLoaderRoute: typeof ApiPublicCronSyncAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -959,6 +1020,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppCitationDiscoveryRoute: typeof AuthenticatedAppCitationDiscoveryRoute
   AuthenticatedAppClaimsRoute: typeof AuthenticatedAppClaimsRoute
+  AuthenticatedAppCompetitorsRoute: typeof AuthenticatedAppCompetitorsRoute
   AuthenticatedAppContentRoute: typeof AuthenticatedAppContentRoute
   AuthenticatedAppGeoTasksRoute: typeof AuthenticatedAppGeoTasksRoute
   AuthenticatedAppGraphRoute: typeof AuthenticatedAppGraphRoute
@@ -973,6 +1035,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppSystemPromptsRoute: typeof AuthenticatedAppSystemPromptsRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppTrafficMetricRoute: typeof AuthenticatedAppTrafficMetricRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -981,6 +1044,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppCitationDiscoveryRoute:
     AuthenticatedAppCitationDiscoveryRoute,
   AuthenticatedAppClaimsRoute: AuthenticatedAppClaimsRoute,
+  AuthenticatedAppCompetitorsRoute: AuthenticatedAppCompetitorsRoute,
   AuthenticatedAppContentRoute: AuthenticatedAppContentRoute,
   AuthenticatedAppGeoTasksRoute: AuthenticatedAppGeoTasksRoute,
   AuthenticatedAppGraphRoute: AuthenticatedAppGraphRoute,
@@ -995,6 +1059,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppSystemPromptsRoute: AuthenticatedAppSystemPromptsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppTrafficMetricRoute: AuthenticatedAppTrafficMetricRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =
@@ -1066,6 +1131,7 @@ const rootRouteChildren: RootRouteChildren = {
   SolutionsAgenciesRoute: SolutionsAgenciesRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicCronSyncAnalyticsRoute: ApiPublicCronSyncAnalyticsRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport

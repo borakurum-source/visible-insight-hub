@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/app/knowledge-base")({
   head: () => ({
     meta: [
       { title: "Bilgi Bankası — OneCite Paneli" },
-      { name: "description", content: "Yapay zekânın kaynak göstermesini istediğiniz sayfaları yönetin." },
+      { name: "description", content: "Yapay zekanın kaynak göstermesini istediğiniz sayfaları yönetin." },
       { property: "og:title", content: "Bilgi Bankası — OneCite Paneli" },
       { property: "og:description", content: "Kaynak sayfalarınızı yönetin." },
       { name: "robots", content: "noindex" },
@@ -138,10 +138,10 @@ function KnowledgeBasePage() {
     <>
       <PanelSubnav items={KNOWLEDGE_SUBNAV} />
       <PanelPageHeading
-        hint={<><p>Buraya eklediğiniz sayfalar ve notlar, yapay zekânın markanız hakkında okuduğu <strong>kaynak dosyanızdır</strong>.</p><p>1) Site haritanızı veya önemli URL'leri ekleyin. 2) "İndeksle" deyin. 3) İçerik vektöre dönüşür ve ölçüm/üretim adımlarında kullanılır.</p></>}
+        hint={<><p>Buraya eklediğiniz sayfalar ve notlar, yapay zekanın markanız hakkında okuduğu <strong>kaynak dosyanızdır</strong>.</p><p>1) Site haritanızı veya önemli URL'leri ekleyin. 2) "İndeksle" deyin. 3) İçerik vektöre dönüşür ve ölçüm/üretim adımlarında kullanılır.</p></>}
         meta={{
           title: "Bilgi Bankası",
-          description: "Yapay zekâ cevaplarında kaynak gösterilmesini istediğiniz sayfalar. Ne kadar net, o kadar çok alıntı.",
+          description: "Yapay zeka cevaplarında kaynak gösterilmesini istediğiniz sayfalar. Ne kadar net, o kadar çok alıntı.",
           icon: BookOpen,
         }}
         action={
@@ -184,7 +184,7 @@ function KnowledgeBasePage() {
               Ölçümden gelen aday kaynaklar
             </div>
             <p className="text-xs text-muted-foreground">
-              Yapay zekânın cevaplarında alıntıladığı, bilgi bankanızda henüz olmayan sayfalar. Ekleyince marka zekâsına dahil olur.
+              Yapay zekanın cevaplarında alıntıladığı, bilgi bankanızda henüz olmayan sayfalar. Ekleyince marka zekasına dahil olur.
             </p>
             <ul className="divide-y divide-border">
               {candidates.map((candidate) => (

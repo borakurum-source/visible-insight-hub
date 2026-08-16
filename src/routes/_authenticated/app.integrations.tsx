@@ -99,7 +99,7 @@ function IntegrationsPage() {
     mutationFn: () => fetchGa4Properties({ data: { brandId: brand!.id } }),
     onSuccess: (list) => {
       if (!list.length) {
-        toast.error("Bağlı Google hesabında GA4 mülkü bulunamadı.");
+        toast.error("Google Analytics bağlantısı bulunamadı. Google hesabınızı bağlayın, ardından mülkleri tekrar yükleyin.");
         return;
       }
       setGa4Candidates(list);
@@ -215,7 +215,7 @@ function IntegrationsPage() {
               )}
             </div>
             <CardDescription className="pt-1">
-              {ga4?.property_id ? `Mülk ${ga4.property_id}` : "Site trafiğinizi yapay zekâ görünürlüğüyle karşılaştırın."}
+              {ga4?.property_id ? `Mülk ${ga4.property_id}` : "Site trafiğinizi yapay zeka görünürlüğüyle karşılaştırın."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">

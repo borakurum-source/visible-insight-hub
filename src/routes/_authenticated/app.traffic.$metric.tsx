@@ -1,0 +1,136 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { ArrowLeft, LineChart } from "lucide-react";
+import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { getTrafficOverview } from "@/lib/integrations.functions";
+import { useActiveBrand } from "@/lib/use-panel";
+
+export const Route = createFileRoute("/_authenticated/app/traffic/$metric")({
+  head: () => ({
+    meta: [
+      { title: "Metrik Detayi — OneCite Paneli" },
+      { name: "description", content: "Secilen metrigin gunluk serisi ve kaynak kirilimlari." },
+      { property: "og:title", content: "Metrik Detayi — OneCite Paneli" },
+      { property: "og:description", content: "Gunluk seri ve kaynak kirilimlari." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  validateSearch: (search: Record<string, unknown>): { days: number } => ({
+    days: [7, 30, 90].includes(Number(search["days"])) ? Number(search["days"]) : 30,
+  }),
+  component: MetricDetailPage,
+});
+
+const RANGES = [7, 30, 90] as const;
+
+function fmt(value: number) {
+  return new Intl.NumberFormat("tr-TR").format(value);
+}
+
+function MetricDetailPage() {
+  const { metric } = Route.useParams();
+  const { brand } = useActiveBrand();
+  const { days } = Route.useSearch();
+  const fetchTraffic = useServerFn(getTrafficOverview);
+  const { data } = useQuery({
+    queryKey: ["traffic-overview", brand?.id, days],
+    queryFn: () => fetchTraffic({ data: { brandId: brand!.id, days } }),
+    enabled: Boolean(brand?.id),
+  });
+
+  const config = {
+    "gsc-clicks": { title: "Google Arama Tiklamalari", key: "clicks", label: "Tiklama" },
+    "gsc-impressions": { title: "Arama Gosterimleri", key: "impressions", label: "Gosterim" },
+    "ga4-sessions": { title: "Site Trafigi (GA4)", key: "sessions", label: "Oturum" },
+    "ai-citations": { title: "AI Atif Trafigi", key: "citations", label: "Atif" },
+    "ai-visibility": { title: "Yapay Zeka Gorunurlugu", key: "mentioned", label: "Markanin gectigi yanit" },
+  }[metric as string] ?? { title: "Metrik", key: "value", label: "Deger" };
+
+  const series: Array<Record<string, number | string>> = data
+    ? metric.startsWith("gsc")
+      ? data.gsc.daily
+      : metric === "ga4-sessions"
+        ? data.ga4.daily
+        : metric === "ai-citations"
+          ? data.aiReferral.daily
+          : data.aiOverview.daily
+    : [];
+
+  const total = series.reduce((sum, row) => sum + Number(row[config.key] ?? 0), 0);
+
+  const breakdown =
+    data && metric.startsWith("gsc")
+      ? data.gsc.queries.map((q) => ({ label: q.query, value: metric === "gsc-clicks" ? q.clicks : q.impressions }))
+      : data && metric === "ga4-sessions"
+        ? data.ga4.channels.map((c) => ({ label: c.channel, value: c.sessions }))
+        : [];
+
+  return (
+    <>
+      <PanelPageHeading
+        meta={{ title: config.title, description: `Son ${days} gunluk gunluk seri ve kaynak kirilimi.`, icon: LineChart }}
+        action={
+          <Button asChild variant="outline" size="sm">
+            <Link to="/app"><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Komuta Merkezi</Link>
+          </Button>
+        }
+      />
+
+      <div className="flex gap-1.5">
+        {RANGES.map((range) => (
+          <Button key={range} asChild size="sm" variant={range === days ? "default" : "outline"}>
+            <Link to="/app/traffic/$metric" params={{ metric }} search={{ days: range }}>Son {range} gun</Link>
+          </Button>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">
+            {config.label} · toplam {fmt(total)}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="h-64">
+          {series.length ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={series} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="detailFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} minTickGap={24} />
+                <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={40} />
+                <Tooltip formatter={(value: number) => [fmt(value), config.label]} />
+                <Area type="monotone" dataKey={config.key} stroke="var(--chart-1)" strokeWidth={2} fill="url(#detailFill)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="flex h-full items-center justify-center text-xs text-muted-foreground">Bu aralikta veri yok.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {breakdown.length ? (
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Kaynak kirilimi</CardTitle></CardHeader>
+          <CardContent className="p-0">
+            <ul className="divide-y divide-border text-sm">
+              {breakdown.map((row) => (
+                <li key={row.label} className="flex items-center gap-3 px-4 py-2">
+                  <span className="min-w-0 flex-1 truncate">{row.label}</span>
+                  <span className="font-mono text-xs">{fmt(row.value)}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
+    </>
+  );
+}
