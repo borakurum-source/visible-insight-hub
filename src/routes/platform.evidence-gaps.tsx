@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpenCheck, FileStack, Network, Quote, SearchCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarketingShell } from "@/components/site/MarketingShell";
+import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
 import heroEvidenceGap from "@/assets/landing/hero-evidence-gap.webp";
 import shotContent from "@/assets/landing/shot-content.webp";
@@ -78,23 +79,10 @@ function EvidenceGapsPage() {
         </div>
       </section>
 
-      <section className="marketing-container py-16 md:py-24">
-        <div className="grid gap-4 md:grid-cols-3">
-          {actions.map(({ icon: Icon, title, body }, index) => (
-            <article key={title} className="rounded-2xl border border-border bg-background p-6">
-              <span className="font-mono text-sm text-primary">0{index + 1}</span>
-              <Icon className="mt-7 h-5 w-5 text-foreground" />
-              <h3 className="mt-5 text-lg font-extrabold text-foreground">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{body}</p>
-            </article>
-          ))}
-        </div>
-        <div className="mt-12 rounded-3xl bg-muted p-8 text-center md:p-12">
-          <h2 className="text-3xl font-extrabold tracking-[-0.04em] text-foreground">Önce hangi kanıtın eksik olduğunu görün.</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted-foreground">Ücretsiz ölçüm, herkese açık site verisiyle ilk atıf ve eksik kanıt çerçevenizi oluşturur.</p>
-          <Button className="mt-7" asChild><Link to="/free-ai-readiness-report">Ücretsiz ölçüm başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
-        </div>
-      </section>
+      <MarketingCta
+        title="Önce hangi kanıtın eksik olduğunu görün."
+        description="Ücretsiz ölçüm, herkese açık site verisiyle ilk atıf ve eksik kanıt çerçevenizi oluşturur."
+      />
     </MarketingShell>
   );
 }

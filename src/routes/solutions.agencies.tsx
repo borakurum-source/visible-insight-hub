@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BarChart3, BriefcaseBusiness, FileOutput, Layers3, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarketingShell } from "@/components/site/MarketingShell";
+import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 
@@ -78,11 +79,10 @@ function AgenciesPage() {
         </div>
       </section>
 
-      <section className="marketing-container px-4 py-16 text-center md:px-6 md:py-24">
-        <h2 className="text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Bir müşteri ile başlayın, kanıta dayalı GEO iş akışını görün.</h2>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted-foreground">İlk ücretsiz ölçüm, gerçek müşteri verisiyle nasıl bir rapor ve uygulama sistemi kurabileceğinizi gösterir.</p>
-        <Button className="mt-8" asChild><Link to="/free-ai-readiness-report">Müşteri ölçümünü başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
-      </section>
+      <MarketingCta
+        title="Bir müşteri ile başlayın, kanıta dayalı GEO iş akışını görün."
+        description="İlk ücretsiz ölçüm, gerçek müşteri verisiyle nasıl bir rapor ve uygulama sistemi kurabileceğinizi gösterir."
+      />
     </MarketingShell>
   );
 }

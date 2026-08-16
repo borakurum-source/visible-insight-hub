@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, CircleDotDashed, FileSearch, LineChart, Target, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarketingShell } from "@/components/site/MarketingShell";
+import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
 import heroEvidenceGap from "@/assets/landing/hero-evidence-gap.webp";
 
@@ -139,14 +140,10 @@ function FilmFolkPage() {
         </div>
       </section>
 
-      <section className="bg-muted px-4 py-16 md:px-6 md:py-24">
-        <div className="marketing-container rounded-3xl bg-ink px-7 py-12 text-center text-white md:px-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan">Ne anlatıyor?</p>
-          <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">Atıf payı büyüyebilir; ancak her niyette aynı anda büyümeyebilir.</h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300">FilmFolk verisi, düzenli soru takibinin hem güçlü artışları hem de kaybedilen niyet alanlarını aynı tabloda görünür kıldığını gösteriyor. Bu bir performans garantisi değildir; karar vermek için daha doğru bir ölçüm çerçevesidir.</p>
-          <Button size="lg" className="mt-8 bg-cyan text-foreground hover:bg-[#B8F4FF]" asChild><Link to="/free-ai-readiness-report">Kendi ölçüm çerçeveni oluştur <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
-        </div>
-      </section>
+      <MarketingCta
+        title="Kendi ölçüm çerçevenizi oluşturun."
+        description="FilmFolk verisi bir garanti değil, bir yöntemdir. Aynı yöntemi kendi markanızda ücretsiz ölçümle başlatın."
+      />
     </MarketingShell>
   );
 }

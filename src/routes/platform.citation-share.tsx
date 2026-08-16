@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Eye, MessageSquareText, Scale } from "lucide-react";
 import { MarketingShell } from "@/components/site/MarketingShell";
+import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
 import { EngineRotator } from "@/components/site/citation-motion";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
@@ -92,6 +93,10 @@ function CitationSharePage() {
           </div>
         </div>
       </section>
+      <MarketingCta
+        title="Atıf payınızı bugün ölçün."
+        description="Soru bazında kaynak olarak seçilme oranınızı ve rakip kaynakları ilk ölçümde görün."
+      />
     </MarketingShell>
   );
 }

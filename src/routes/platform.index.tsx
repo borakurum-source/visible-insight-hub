@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BarChart3, FileCheck2, Goal, Network, SearchCheck } from "lucide-react";
 import { MarketingShell } from "@/components/site/MarketingShell";
+import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
 import { EngineRotator } from "@/components/site/citation-motion";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
@@ -98,6 +99,10 @@ function PlatformPage() {
           ))}
         </div>
       </section>
+      <MarketingCta
+        title="Platformun tamamını kendi markanızla deneyin."
+        description="Ücretsiz ölçüm; hangi soruda kaynak olarak seçildiğinizi, hangi kanıtın eksik olduğunu ve önce ne üretmeniz gerektiğini gösterir."
+      />
     </MarketingShell>
   );
 }
