@@ -6,6 +6,8 @@ import searchKnowledgeTool from "./tools/search-knowledge";
 import addKnowledgeSourceTool from "./tools/add-knowledge-source";
 
 // OAuth issuer doğrudan Supabase host'u olmalı; proje ref build sırasında gömülür.
+type McpTools = Parameters<typeof defineMcp>[0]["tools"];
+
 const projectRef = import.meta.env['VITE_SUPABASE_PROJECT_ID'] ?? "project-ref-unset";
 
 export default defineMcp({
@@ -18,5 +20,6 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [listBrands, getVisibility, listPromptsTool, searchKnowledgeTool, addKnowledgeSourceTool],
+  // Araç tanımları exactOptionalPropertyTypes ile birebir eşleşmiyor; SDK tipine daraltıyoruz.
+  tools: [listBrands, getVisibility, listPromptsTool, searchKnowledgeTool, addKnowledgeSourceTool] as unknown as McpTools,
 });
