@@ -435,6 +435,53 @@ export type Database = {
           },
         ]
       }
+      google_oauth_accounts: {
+        Row: {
+          access_token: string | null
+          access_token_expires_at: string | null
+          brand_id: string
+          created_at: string
+          created_by: string
+          google_email: string | null
+          id: string
+          refresh_token: string
+          scopes: string[]
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          brand_id: string
+          created_at?: string
+          created_by?: string
+          google_email?: string | null
+          id?: string
+          refresh_token: string
+          scopes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          brand_id?: string
+          created_at?: string
+          created_by?: string
+          google_email?: string | null
+          id?: string
+          refresh_token?: string
+          scopes?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_oauth_accounts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: true
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       graph_edges: {
         Row: {
           brand_id: string
