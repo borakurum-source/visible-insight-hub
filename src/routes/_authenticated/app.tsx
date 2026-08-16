@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   LayoutDashboard, Sparkles, Settings, Menu, Building2, Gauge,
   KanbanSquare, BookOpen, PenSquare, Waypoints,
-  Users, Lock, LogOut, Plus,
+  Users, Lock, LogOut, Plus, ChevronDown,
 } from "lucide-react";
 import BrandLogo from "@/components/site/BrandLogo";
 import { supabase } from "@/integrations/supabase/client";
