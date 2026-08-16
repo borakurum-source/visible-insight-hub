@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createPrompt, deletePrompt, listPrompts, setPromptStatus } from "@/lib/panel.functions";
+import { createPrompt, deletePrompt, getPlanUsage, listPrompts, setPromptStatus } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/prompts")({
@@ -41,6 +41,7 @@ function PromptsPage() {
   const updateStatus = useServerFn(setPromptStatus);
   const addPrompt = useServerFn(createPrompt);
   const removePrompt = useServerFn(deletePrompt);
+  const fetchPlanUsage = useServerFn(getPlanUsage);
   const [filter, setFilter] = useState<string>("approved");
   const [draft, setDraft] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -52,8 +53,15 @@ function PromptsPage() {
     enabled: Boolean(brand?.id),
   });
 
+  const { data: plan } = useQuery({
+    queryKey: ["plan-usage", brand?.id],
+    queryFn: () => fetchPlanUsage({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
+
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: key });
+    void queryClient.invalidateQueries({ queryKey: ["plan-usage", brand?.id] });
     void queryClient.invalidateQueries({ queryKey: ["brand-overview", brand?.id] });
   };
 
@@ -101,6 +109,20 @@ function PromptsPage() {
       />
 
       <div className="flex flex-wrap items-center gap-2">
+        {plan ? (
+          <div className="w-full text-xs text-muted-foreground">
+            <strong className="text-foreground">{plan.planLabel}</strong> planı ·{" "}
+            {plan.maxPrompts > 0
+              ? `${plan.approvedPrompts} / ${plan.maxPrompts} onaylı prompt`
+              : `${plan.approvedPrompts} onaylı prompt (sınırsız)`}
+            {plan.maxPrompts > 0 && plan.approvedPrompts >= plan.maxPrompts ? (
+              <>
+                {" — limit doldu. "}
+                <Link to="/fiyatlandirma" className="underline">Planı yükseltin</Link>
+              </>
+            ) : null}
+          </div>
+        ) : null}
         <Input
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
