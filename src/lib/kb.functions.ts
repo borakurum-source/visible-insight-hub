@@ -402,7 +402,7 @@ export const generateDraft = createServerFn({ method: "POST" })
       orta: "yaklaşık 800 kelime",
       uzun: "yaklaşık 1400 kelime",
     };
-    const briefing = `İçerik biçimi: ${formatLabel[data.format ?? "blog"] ?? formatLabel.blog}\nUzunluk hedefi: ${lengthLabel[data.length ?? "orta"] ?? lengthLabel.orta}\nTon tercihi: ${data.tone ?? intel?.tone ?? "marka tonuna sadık"}`;
+    const briefing = `İçerik biçimi: ${formatLabel[data.format ?? "blog"] ?? formatLabel["blog"]}\nUzunluk hedefi: ${lengthLabel[data.length ?? "orta"] ?? lengthLabel["orta"]}\nTon tercihi: ${data.tone ?? intel?.tone ?? "marka tonuna sadık"}`;
 
     const result = await aiJson<{ title: string; body: string }>(
       [
