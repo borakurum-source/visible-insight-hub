@@ -18,13 +18,48 @@ export const Route = createFileRoute("/makaleler/$slug")({
     const article = articles.find((item) => item.slug === params.slug);
     const title = article ? `${article.title} | OneCite` : "Makale bulunamadı | OneCite";
     const description = article?.description ?? "Aradığınız makale bulunamadı.";
+    const url = `https://1cite.com/makaleler/${params.slug}`;
     return {
       meta: [
         { title },
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "article" },
+        { name: "twitter:card", content: "summary_large_image" },
+        ...(article ? [] : [{ name: "robots", content: "noindex" }]),
       ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: article
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Article",
+                headline: article.title,
+                description: article.description,
+                inLanguage: "tr-TR",
+                mainEntityOfPage: url,
+                author: { "@type": "Organization", name: "OneCite" },
+                publisher: { "@type": "Organization", name: "OneCite" },
+              }),
+            },
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                  { "@type": "ListItem", position: 1, name: "Ana sayfa", item: "https://1cite.com" },
+                  { "@type": "ListItem", position: 2, name: "Makaleler", item: "https://1cite.com/makaleler" },
+                  { "@type": "ListItem", position: 3, name: article.title, item: url },
+                ],
+              }),
+            },
+          ]
+        : [],
     };
   },
   component: ArticleDetailPage,
