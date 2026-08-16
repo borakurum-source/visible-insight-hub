@@ -71,7 +71,7 @@ export async function cacheSet(key: string, kind: CacheKind, value: unknown, ttl
       {
         cache_key: key,
         kind,
-        payload: { v: value },
+        payload: { v: value } as never,
         expires_at: new Date(Date.now() + ttlSeconds * 1000).toISOString(),
       },
       { onConflict: "cache_key" },
