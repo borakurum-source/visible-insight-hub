@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { MarketingShell } from "@/components/site/MarketingShell";
 import { Reveal } from "@/components/site/marketing-motion";
+import { HeroVisual } from "@/components/site/hero-visual";
 import { PublicReportAnalyzer } from "@/components/site/public-report-analyzer";
 import { EngineRotator, MetricRise } from "@/components/site/citation-motion";
 import { Button } from "@/components/ui/button";
