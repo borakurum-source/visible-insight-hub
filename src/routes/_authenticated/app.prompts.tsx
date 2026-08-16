@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, ChevronDown, ExternalLink, ListChecks, ListTodo, Loader2, Pause, Plus, Trash2 } from "lucide-react";
+import { Hint } from "@/components/app/hint";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +20,7 @@ import {
   getPlanUsage,
   getPromptInsight,
   listPrompts,
+  setPromptActionDone,
   setPromptStatus,
 } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
@@ -247,6 +249,27 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
     queryKey: ["prompt-insight", promptId],
     queryFn: () => fetchInsight({ data: { brandId, promptId } }),
   });
+
+  const toggleAction = useServerFn(setPromptActionDone);
+  const queryClient = useQueryClient();
+  const toggleMutation = useMutation({
+    mutationFn: ({ action, done }: { action: { key: string; title: string; description: string; priority: string }; done: boolean }) =>
+      toggleAction({
+        data: {
+          brandId,
+          promptId,
+          key: action.key,
+          title: action.title,
+          description: action.description,
+          priority: action.priority,
+          done,
+        },
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["prompt-insight", promptId] }),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const doneCount = data?.actions?.filter((action) => action.done).length ?? 0;
 
   const taskMutation = useMutation({
     mutationFn: (input: { title: string; description: string; priority: string }) =>
