@@ -138,3 +138,120 @@ export const disconnectIntegration = createServerFn({ method: "POST" })
       .eq("provider", data.provider);
     return { ok: true };
   });
+
+export type TrafficOverview = {
+  gsc: {
+    connected: boolean;
+    status: string | null;
+    property: string | null;
+    lastSyncAt: string | null;
+    startDate: string | null;
+    endDate: string | null;
+    totals: { clicks: number; impressions: number };
+    daily: Array<{ date: string; clicks: number; impressions: number }>;
+    queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+  };
+  ga4: { connected: boolean };
+  aiReferral: {
+    total: number;
+    ownDomain: number;
+    daily: Array<{ date: string; citations: number }>;
+  };
+  aiOverview: {
+    total: number;
+    mentioned: number;
+    rate: number;
+    daily: Array<{ date: string; mentioned: number; total: number }>;
+  };
+};
+
+function lastDays(count: number) {
+  const days: string[] = [];
+  for (let i = count - 1; i >= 0; i -= 1) {
+    days.push(new Date(Date.now() - i * 86400000).toISOString().slice(0, 10));
+  }
+  return days;
+}
+
+// Komuta merkezi için GSC anlık görüntüsü + yapay zekâ atıf/görünürlük trafiği.
+export const getTrafficOverview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }): Promise<TrafficOverview> => {
+    const since = new Date(Date.now() - 30 * 86400000).toISOString();
+    const [{ data: connections }, { data: snapshot }, { data: citations }, { data: runs }] = await Promise.all([
+      context.supabase
+        .from("integration_connections")
+        .select("provider, status, property_id, last_sync_at")
+        .eq("brand_id", data.brandId),
+      context.supabase
+        .from("analytics_snapshots")
+        .select("payload")
+        .eq("brand_id", data.brandId)
+        .eq("provider", "gsc")
+        .order("snapshot_date", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      context.supabase
+        .from("citations")
+        .select("created_at, is_own_domain")
+        .eq("brand_id", data.brandId)
+        .gte("created_at", since)
+        .limit(2000),
+      context.supabase
+        .from("prompt_runs")
+        .select("created_at, brand_mentioned")
+        .eq("brand_id", data.brandId)
+        .gte("created_at", since)
+        .limit(2000),
+    ]);
+
+    const gscConnection = (connections ?? []).find((c) => c.provider === "gsc") ?? null;
+    const payload = (snapshot?.payload ?? null) as null | {
+      startDate: string;
+      endDate: string;
+      totals: { clicks: number; impressions: number };
+      daily: Array<{ date: string; clicks: number; impressions: number }>;
+      queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+    };
+
+    const days = lastDays(30);
+    const citationRows = citations ?? [];
+    const runRows = runs ?? [];
+
+    const aiReferralDaily = days.map((date) => ({
+      date,
+      citations: citationRows.filter((c) => (c.created_at ?? "").slice(0, 10) === date).length,
+    }));
+    const aiOverviewDaily = days.map((date) => {
+      const dayRuns = runRows.filter((r) => (r.created_at ?? "").slice(0, 10) === date);
+      return { date, total: dayRuns.length, mentioned: dayRuns.filter((r) => r.brand_mentioned).length };
+    });
+    const mentioned = runRows.filter((r) => r.brand_mentioned).length;
+
+    return {
+      gsc: {
+        connected: gscConnection?.status === "bagli",
+        status: gscConnection?.status ?? null,
+        property: gscConnection?.property_id ?? null,
+        lastSyncAt: gscConnection?.last_sync_at ?? null,
+        startDate: payload?.startDate ?? null,
+        endDate: payload?.endDate ?? null,
+        totals: payload?.totals ?? { clicks: 0, impressions: 0 },
+        daily: payload?.daily ?? [],
+        queries: (payload?.queries ?? []).slice(0, 10),
+      },
+      ga4: { connected: (connections ?? []).some((c) => c.provider === "ga4" && c.status === "bagli") },
+      aiReferral: {
+        total: citationRows.length,
+        ownDomain: citationRows.filter((c) => c.is_own_domain).length,
+        daily: aiReferralDaily,
+      },
+      aiOverview: {
+        total: runRows.length,
+        mentioned,
+        rate: runRows.length ? Math.round((mentioned / runRows.length) * 100) : 0,
+        daily: aiOverviewDaily,
+      },
+    };
+  });
