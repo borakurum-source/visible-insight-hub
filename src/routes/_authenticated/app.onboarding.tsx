@@ -18,6 +18,7 @@ import {
   createBrand,
   generateBrandIntelligence,
   generatePromptCandidates,
+  listPrompts,
   getBrandIntelligence,
   saveBrandIntelligence,
   setPromptStatus,
@@ -406,21 +407,29 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
   const complete = useServerFn(completeOnboarding);
   const [prompts, setPrompts] = useState<Array<{ id: string; text: string; category: string }>>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const listAll = useServerFn(listPrompts);
   const [loading, setLoading] = useState(true);
 
+  const applyRows = (rows: Array<{ id: string; text: string; category: string }>) => {
+    const list = rows.map((r) => ({ id: r.id, text: r.text, category: r.category }));
+    setPrompts(list);
+    setSelected(Object.fromEntries(list.map((r) => [r.id, true])));
+  };
+
+  // Kayıtlı adayları okur; yeni üretim yalnızca butonla tetiklenir.
   useEffect(() => {
     let cancelled = false;
-    generate({ data: { brandId } })
-      .then((rows) => {
-        if (cancelled) return;
-        const list = rows.map((r) => ({ id: r.id, text: r.text, category: r.category }));
-        setPrompts(list);
-        setSelected(Object.fromEntries(list.map((r) => [r.id, true])));
-        setLoading(false);
-      })
+    listAll({ data: { brandId } })
+      .then((rows) => { if (!cancelled) { applyRows(rows); setLoading(false); } })
       .catch(() => setLoading(false));
     return () => { cancelled = true; };
   }, [brandId]);
+
+  const produce = useMutation({
+    mutationFn: () => generate({ data: { brandId } }),
+    onSuccess: (rows) => applyRows(rows),
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const finish = useMutation({
     mutationFn: async () => {
@@ -442,6 +451,10 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
       footer={
         <>
           <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+          <Button variant="outline" onClick={() => produce.mutate()} disabled={produce.isPending}>
+            {produce.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {prompts.length ? "Yeniden üret" : "Soruları üret"}
+          </Button>
           <Button onClick={() => finish.mutate()} disabled={count === 0 || finish.isPending}>
             {finish.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {count} promptu onayla ve kurulumu bitir <Check className="ml-1.5 h-4 w-4" />
@@ -449,9 +462,9 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
         </>
       }
     >
-      {loading ? (
+      {loading || produce.isPending ? (
         <p className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Markanız için sorular hazırlanıyor…
+          <Loader2 className="h-4 w-4 animate-spin" /> Sorular hazırlanıyor…
         </p>
       ) : (
         <>
@@ -470,7 +483,7 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
                 <Badge variant="outline" className="shrink-0 text-[10px]">{prompt.category}</Badge>
               </label>
             ))}
-            {prompts.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Prompt üretilemedi, tekrar deneyin.</p> : null}
+            {prompts.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Henüz soru yok — “Soruları üret” ile markanıza özel soruları oluşturun.</p> : null}
           </div>
         </>
       )}
