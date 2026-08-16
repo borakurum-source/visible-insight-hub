@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, Settings2, Sparkles } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { PanelSubnav } from "@/components/app/panel-subnav";
+import { PanelSubnav, WORKSPACE_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,7 +57,7 @@ function SettingsPage() {
   if (!brand) {
     return (
       <>
-        <PanelSubnav items={[{ to: "/app/settings", label: "Ayarlar" }, { to: "/app/integrations", label: "Entegrasyonlar" }, { to: "/app/account", label: "Hesabım" }, { to: "/app/pricing", label: "Fiyatlandırma" }]} />
+        <PanelSubnav items={WORKSPACE_SUBNAV} />
         <PanelPageHeading meta={{ title: "Marka Ayarları", description: "Önce bir marka ekleyin.", icon: Settings2 }} />
         <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
       </>
@@ -66,7 +66,7 @@ function SettingsPage() {
 
   return (
     <>
-      <PanelSubnav items={[{ to: "/app/settings", label: "Ayarlar" }, { to: "/app/integrations", label: "Entegrasyonlar" }, { to: "/app/account", label: "Hesabım" }, { to: "/app/pricing", label: "Fiyatlandırma" }]} />
+      <PanelSubnav items={WORKSPACE_SUBNAV} />
       <PanelPageHeading
         meta={{ title: "Marka Ayarları", description: "Takip edilen markanın temel bilgileri.", icon: Settings2 }}
         action={

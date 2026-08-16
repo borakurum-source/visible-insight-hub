@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { FileBarChart, Printer } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { PanelSubnav } from "@/components/app/panel-subnav";
+import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { QuerySkeleton, QueryEmpty } from "@/components/app/panel-query-states";
@@ -50,7 +50,7 @@ function ReportPage() {
 
   return (
     <>
-      <PanelSubnav items={SUBNAV} />
+      <PanelSubnav items={VISIBILITY_SUBNAV} />
       <PanelPageHeading
         meta={{ title: "Rapor", description: "Ölçüm verilerinizden deterministik olarak üretilen yazdırılabilir rapor.", icon: FileBarChart }}
         action={<Button size="sm" onClick={() => window.print()}><Printer className="mr-2 h-3.5 w-3.5" /> Yazdır / PDF</Button>}

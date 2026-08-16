@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Check, CreditCard } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { PanelSubnav } from "@/components/app/panel-subnav";
+import { PanelSubnav, WORKSPACE_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/app/pricing")({
 function PricingPage() {
   return (
     <>
-      <PanelSubnav items={[{ to: "/app/settings", label: "Ayarlar" }, { to: "/app/integrations", label: "Entegrasyonlar" }, { to: "/app/account", label: "Hesabım" }, { to: "/app/pricing", label: "Fiyatlandırma" }]} />
+      <PanelSubnav items={WORKSPACE_SUBNAV} />
       <PanelPageHeading meta={{ title: "Fiyatlandırma", description: "İhtiyacınıza uygun planı seçin veya mevcut planınızı yükseltin.", icon: CreditCard }} />
 
       <div className="grid gap-4 md:grid-cols-3">
