@@ -145,8 +145,20 @@ function MeasurementPage() {
                         </span>
                       </AccordionTrigger>
                       <AccordionContent className="space-y-3">
-                        {run.answerSummary ? (
-                          <p className="rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">{run.answerSummary}</p>
+                        {run.answer ? (
+                          <div className="max-h-96 overflow-y-auto whitespace-pre-wrap rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">
+                            {run.answer}
+                          </div>
+                        ) : null}
+                        {!run.brandMentioned ? (
+                          <div className="flex flex-wrap items-center gap-2 rounded-md border border-warning/30 bg-warning/5 p-2.5 text-xs">
+                            <span className="flex-1 text-muted-foreground">
+                              Bu yanıtta markanız geçmiyor. Ne yapmanız gerektiğini prompt detayında görebilirsiniz.
+                            </span>
+                            <Button asChild size="sm" variant="outline">
+                              <Link to="/app/prompts" search={{ prompt: run.promptId }}>Aksiyonları gör</Link>
+                            </Button>
+                          </div>
                         ) : null}
                         {run.sources.length ? (
                           <ul className="space-y-1.5">

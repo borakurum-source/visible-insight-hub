@@ -185,7 +185,7 @@ function NavList({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
                     <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {label}
                   </Link>
-                  {active && item.children ? (
+                  {item.children ? (
                     <div className="ml-[1.4rem] mt-px space-y-px border-l border-border pl-2">
                       {item.children.map((child) => {
                         const childActive = location.pathname === child.to;
