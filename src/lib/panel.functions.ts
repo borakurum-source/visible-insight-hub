@@ -517,7 +517,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { batchId: string; brandId: string; promptIds: string[] }) => input)
   .handler(async ({ data, context }) => {
-    const { measurePrompt } = await import("./score-model");
+    const { measurePrompt } = await import("./measurement.server");
     const [{ data: brand }, { data: intel }, { data: prompts }] = await Promise.all([
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
       context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
