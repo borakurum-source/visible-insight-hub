@@ -129,6 +129,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
