@@ -4,14 +4,16 @@ import { ClientOnly } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, RefreshCw, Waypoints } from "lucide-react";
+import { Loader2, RefreshCw, Search, Waypoints } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, KNOWLEDGE_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getKnowledgeGraph, rebuildGraphEntities, rebuildVectorMap } from "@/lib/kb.functions";
+import { Input } from "@/components/ui/input";
+import { EntityGraph } from "@/components/app/entity-graph";
+import { getKnowledgeGraph, rebuildGraphEntities, rebuildVectorMap, searchKnowledge } from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 import type { VectorPoint } from "@/components/app/vector-map-3d";
 
@@ -53,6 +55,12 @@ function GraphPage() {
   const reproject = useServerFn(rebuildVectorMap);
   const rebuildEntities = useServerFn(rebuildGraphEntities);
   const [selected, setSelected] = useState<VectorPoint | null>(null);
+  const runSearch = useServerFn(searchKnowledge);
+  const [query, setQuery] = useState("");
+  const search = useMutation({
+    mutationFn: (value: string) => runSearch({ data: { brandId: brand!.id, query: value } }),
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const key = ["knowledge-graph", brand?.id];
   const { data, isLoading } = useQuery({
@@ -108,7 +116,8 @@ function GraphPage() {
       <Tabs defaultValue="vector">
         <TabsList>
           <TabsTrigger value="vector">3D Vektör Haritası</TabsTrigger>
-          <TabsTrigger value="entities">Varlıklar</TabsTrigger>
+          <TabsTrigger value="entities">Varlık Ağı</TabsTrigger>
+          <TabsTrigger value="retrieval">Geri Getirme Testi</TabsTrigger>
         </TabsList>
 
         <TabsContent value="vector" className="mt-4 space-y-4">
@@ -200,6 +209,7 @@ function GraphPage() {
                 </p>
               ) : (
                 <>
+                  <EntityGraph entities={entities} edges={edges} />
                   <div className="flex flex-wrap gap-2">
                     {entities.map((entity) => (
                       <span
@@ -222,6 +232,46 @@ function GraphPage() {
                   </div>
                 </>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="retrieval" className="mt-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Bilgi bankası geri getirme (RAG)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                İçerik üretimi ve boşluk analizi tam olarak bu adımı kullanır: sorunuz vektöre çevrilir ve
+                bilgi bankanızdaki en yakın parçalar getirilir. Buradan neyin bulunduğunu görebilirsiniz.
+              </p>
+              <form
+                className="flex flex-col gap-2 sm:flex-row"
+                onSubmit={(event) => { event.preventDefault(); if (query.trim()) search.mutate(query.trim()); }}
+              >
+                <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Örn. kurumsal müşteriler için fiyatlandırma nasıl?" />
+                <Button type="submit" disabled={search.isPending || !query.trim()}>
+                  {search.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Search className="mr-1.5 h-4 w-4" />}
+                  Ara
+                </Button>
+              </form>
+              {search.data ? (
+                search.data.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Eşleşme yok — bu konuda bilgi bankanızda kanıt eksik.</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {search.data.map((match) => (
+                      <li key={match.id} className="rounded-md border border-border p-3">
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <span className="text-xs font-medium">{match.sourceTitle}</span>
+                          <Badge variant="outline" className="text-[10px]">Benzerlik %{match.similarity}</Badge>
+                        </div>
+                        <p className="text-xs leading-relaxed text-muted-foreground">{match.content}…</p>
+                      </li>
+                    ))}
+                  </ul>
+                )
+              ) : null}
             </CardContent>
           </Card>
         </TabsContent>
