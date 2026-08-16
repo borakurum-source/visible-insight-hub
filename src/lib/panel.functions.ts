@@ -482,9 +482,13 @@ export const deleteBrand = createServerFn({ method: "POST" })
 export const adminListBrands = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: isAdmin } = await context.supabase
-      .rpc("has_role", { _user_id: context.userId, _role: "admin" });
-    if (!isAdmin) throw new Error("Bu sayfaya erişim yetkiniz yok");
+    const { data: roleRow } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleRow) throw new Error("Bu sayfaya erişim yetkiniz yok");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: brands }, { data: members }] = await Promise.all([
       supabaseAdmin.from("brands").select("id, name, domain, onboarding_completed, created_at").order("created_at", { ascending: false }),
