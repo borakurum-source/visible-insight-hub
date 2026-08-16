@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_snapshots: {
+        Row: {
+          brand_id: string
+          created_at: string
+          id: string
+          payload: Json
+          provider: string
+          snapshot_date: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          provider: string
+          snapshot_date?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          provider?: string
+          snapshot_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_snapshots_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_domains: {
         Row: {
           brand_id: string
@@ -179,29 +217,38 @@ export type Database = {
       citations: {
         Row: {
           brand_id: string
+          citation_type: string
           created_at: string
           domain: string
           id: string
           is_own_domain: boolean
+          prompt_id: string | null
           run_id: string | null
+          title: string | null
           url: string
         }
         Insert: {
           brand_id: string
+          citation_type?: string
           created_at?: string
           domain: string
           id?: string
           is_own_domain?: boolean
+          prompt_id?: string | null
           run_id?: string | null
+          title?: string | null
           url: string
         }
         Update: {
           brand_id?: string
+          citation_type?: string
           created_at?: string
           domain?: string
           id?: string
           is_own_domain?: boolean
+          prompt_id?: string | null
           run_id?: string | null
+          title?: string | null
           url?: string
         }
         Relationships: [
@@ -210,6 +257,13 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "citations_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
             referencedColumns: ["id"]
           },
           {
@@ -426,6 +480,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "graph_entities_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_connections: {
+        Row: {
+          brand_id: string
+          config: Json
+          created_at: string
+          id: string
+          last_error: string | null
+          last_sync_at: string | null
+          property_id: string | null
+          provider: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          config?: Json
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          property_id?: string | null
+          provider: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          property_id?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_connections_brand_id_fkey"
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "brands"
@@ -767,6 +868,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_prompts: {
+        Row: {
+          content: string
+          created_at: string
+          description: string
+          id: string
+          key: string
+          model: string
+          stage: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          description?: string
+          id?: string
+          key: string
+          model?: string
+          stage?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          description?: string
+          id?: string
+          key?: string
+          model?: string
+          stage?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

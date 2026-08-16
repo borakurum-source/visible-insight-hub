@@ -47,7 +47,7 @@ Ajans için önemli fark, müşteriye yalnızca “AI görünürlüğünüz yüz
 **Eksileri:**
 
 - Ajans planının maliyeti küçük portföyler için yüksek olabilir.
-- Bilgi Grafiği ve GSC/GA4 entegrasyonları üst planlarda yer alır.
+- Marka Zekası ve GSC/GA4 entegrasyonları üst planlarda yer alır.
 - Bağımsız ajans incelemeleri henüz sınırlı.
 
 **Fiyatlandırma:** Ücretsiz plan $0; tek marka Başlangıç $199/ay, Büyüme $299/ay ve Ajans $599/aydır; USD fiyatlara KDV dahil değildir.[2]

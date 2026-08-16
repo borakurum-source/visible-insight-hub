@@ -10,7 +10,7 @@ export const VISIBILITY_SUBNAV = [
 ];
 
 export const KNOWLEDGE_SUBNAV = [
-  { to: "/app/graph", label: "Bilgi Grafiği" },
+  { to: "/app/graph", label: "Marka Zekası" },
   { to: "/app/knowledge-base", label: "Bilgi Bankası" },
   { to: "/app/claims", label: "Marka İddiaları" },
 ];

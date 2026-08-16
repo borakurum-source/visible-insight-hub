@@ -1,6 +1,7 @@
 type ChatMessage = { role: "system" | "user"; content: string };
 
-export type PerplexityResult<T> = { result: T; citations: string[] };
+export type CitationSource = { url: string; domain: string; title: string };
+export type PerplexityResult<T> = { result: T; citations: string[]; sources: CitationSource[] };
 
 function normalizeDomainFromUrl(raw: string): string {
   try {
@@ -11,6 +12,30 @@ function normalizeDomainFromUrl(raw: string): string {
   }
 }
 
+type RawSearchResult = { url?: string; title?: string; name?: string };
+
+export function buildCitationSources(
+  citations: string[] | undefined,
+  searchResults: RawSearchResult[] | undefined,
+): CitationSource[] {
+  const out = new Map<string, CitationSource>();
+  for (const item of searchResults ?? []) {
+    const url = String(item?.url ?? "").trim();
+    if (!url) continue;
+    const domain = normalizeDomainFromUrl(url);
+    if (!domain.includes(".")) continue;
+    if (!out.has(url)) out.set(url, { url, domain, title: String(item?.title ?? item?.name ?? "").trim() || domain });
+  }
+  for (const raw of citations ?? []) {
+    const url = String(raw ?? "").trim();
+    if (!url) continue;
+    const domain = normalizeDomainFromUrl(url);
+    if (!domain.includes(".")) continue;
+    if (!out.has(url)) out.set(url, { url, domain, title: domain });
+  }
+  return Array.from(out.values());
+}
+
 export async function perplexityJson<T>(
   messages: ChatMessage[],
   schema: { name: string; schema: object },
@@ -19,7 +44,7 @@ export async function perplexityJson<T>(
   const key = process.env["PERPLEXITY_API_KEY"];
   if (!key) {
     console.warn("PERPLEXITY_API_KEY missing");
-    return { result: fallback, citations: [] };
+    return { result: fallback, citations: [], sources: [] };
   }
   try {
     const res = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -39,18 +64,20 @@ export async function perplexityJson<T>(
       if (res.status === 401 && bodyText.includes("insufficient_quota")) {
         throw new Error("Perplexity API credits exhausted. Buy credits at https://console.perplexity.ai");
       }
-      return { result: fallback, citations: [] };
+      return { result: fallback, citations: [], sources: [] };
     }
     const json = JSON.parse(bodyText) as {
       choices?: Array<{ message?: { content?: string } }>;
       citations?: string[];
+      search_results?: RawSearchResult[];
     };
+    const sources = buildCitationSources(json.citations, json.search_results);
     const content = json.choices?.[0]?.message?.content;
-    if (!content) return { result: fallback, citations: json.citations ?? [] };
-    return { result: JSON.parse(content) as T, citations: json.citations ?? [] };
+    if (!content) return { result: fallback, citations: json.citations ?? [], sources };
+    return { result: JSON.parse(content) as T, citations: json.citations ?? [], sources };
   } catch (error) {
     console.error("Perplexity failure", error);
-    return { result: fallback, citations: [] };
+    return { result: fallback, citations: [], sources: [] };
   }
 }
 

@@ -55,7 +55,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         to: "/app/graph",
-        label: "Bilgi Grafiği",
+        label: "Marka Zekası",
         icon: Waypoints,
         exact: false,
       },

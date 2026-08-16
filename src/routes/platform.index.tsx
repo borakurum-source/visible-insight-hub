@@ -30,7 +30,7 @@ const steps = [
 const modules = [
   { icon: SearchCheck, title: "Atıf Payı", body: "Soru bazında kaynak olarak seçilme oranınızı ve değişim trendini izleyin.", href: "/platform/citation-share" },
   { icon: FileCheck2, title: "Eksik Kanıtlar", body: "Yapay zekanın güvenmek için hangi bilgi, kaynak veya içerik türünü bulamadığını görün.", href: "/platform/evidence-gaps" },
-  { icon: Network, title: "Bilgi Grafiği", body: "Hizmet, konu, lokasyon, rakip ve kaynak bağlarının nerede zayıf kaldığını haritalayın.", href: "/platform/evidence-gaps" },
+  { icon: Network, title: "Marka Zekası", body: "Hizmet, konu, lokasyon, rakip ve kaynak bağlarının nerede zayıf kaldığını haritalayın.", href: "/platform/evidence-gaps" },
 ];
 
 function PlatformPage() {

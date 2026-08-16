@@ -6,7 +6,8 @@ import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
-import { getBrandOverview, getMeasurementState } from "@/lib/panel.functions";
+import { VisibilityCharts } from "@/components/app/visibility-charts";
+import { getBrandOverview, getMeasurementState, getVisibilityAnalytics } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/")({
@@ -34,6 +35,12 @@ function DashboardPage() {
   const { data: measurement } = useQuery({
     queryKey: ["measurement-state", brand?.id],
     queryFn: () => fetchState({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
+  const fetchAnalytics = useServerFn(getVisibilityAnalytics);
+  const { data: analytics } = useQuery({
+    queryKey: ["visibility-analytics", brand?.id],
+    queryFn: () => fetchAnalytics({ data: { brandId: brand!.id } }),
     enabled: Boolean(brand?.id),
   });
 
@@ -85,12 +92,15 @@ function DashboardPage() {
           </div>
 
           {data && data.runs > 0 ? (
-            <ScoreBreakdown
-              total={measurement?.score.total ?? 0}
-              components={measurement?.score.components ?? []}
-              runs={measurement?.totalRuns ?? data.runs}
-              lastRunAt={measurement?.batch?.finished_at ?? null}
-            />
+            <>
+              <ScoreBreakdown
+                total={measurement?.score.total ?? 0}
+                components={measurement?.score.components ?? []}
+                runs={measurement?.totalRuns ?? data.runs}
+                lastRunAt={measurement?.batch?.finished_at ?? null}
+              />
+              {analytics ? <VisibilityCharts data={analytics} /> : null}
+            </>
           ) : (
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 space-y-0">

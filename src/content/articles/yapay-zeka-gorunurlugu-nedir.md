@@ -155,7 +155,7 @@ Yapay zeka görünürlüğünüzü geliştirmek için ilk adım, genel tavsiyele
 
 Bu rapor tam platform analizi veya görünürlük garantisi değildir. OneCite’ın kendi açıklamasına göre ücretsiz rapor, düzenli soru, kaynak ve eksik kanıt takibinden önce bir başlangıç noktası sunar.[8] Bu sınır önemlidir: Raporu kesin bir “AI’da çıkarsınız” vaadi olarak değil, hangi alanı önce incelemeniz gerektiğini gösteren teşhis adımı olarak değerlendirmek gerekir.
 
-Rapor sonrasında düzenli takip ihtiyacı ortaya çıkarsa, [OneCite fiyatlandırma sayfasında](https://1cite.com/fiyatlandirma) ücretsiz ve ücretli çalışma alanlarını soru, marka, rakip ve bilgi kapsamına göre karşılaştırabilirsiniz. Başlangıç planı tek marka için düzenli izlemeye; Büyüme planı daha geniş soru, rakip, Bilgi Grafiği ve GSC/GA4 kapsamına; Ajans planı ise çok müşterili yönetime göre konumlanıyor.[13]
+Rapor sonrasında düzenli takip ihtiyacı ortaya çıkarsa, [OneCite fiyatlandırma sayfasında](https://1cite.com/fiyatlandirma) ücretsiz ve ücretli çalışma alanlarını soru, marka, rakip ve bilgi kapsamına göre karşılaştırabilirsiniz. Başlangıç planı tek marka için düzenli izlemeye; Büyüme planı daha geniş soru, rakip, Marka Zekası ve GSC/GA4 kapsamına; Ajans planı ise çok müşterili yönetime göre konumlanıyor.[13]
 
 > **Önerilen akış:** Önce ücretsiz raporla başlangıç çerçevenizi görün. Ardından kritik sorularınızı sabitleyin, kaynak seçimini ölçün ve eksik kanıtları düzenli izlemek için uygun çalışma alanına geçin.
 

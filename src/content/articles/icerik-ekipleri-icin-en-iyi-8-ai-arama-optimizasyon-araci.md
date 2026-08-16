@@ -48,7 +48,7 @@ Bir içerik ekibi için bu yaklaşım önemlidir; çünkü her içerik fırsatı
 
 - Ücretsiz plan tek marka ve 10 soruyla sınırlı.
 - Yerleşik uzun biçimli AI yazım editörü sunmaz.
-- Gelişmiş Bilgi Grafiği ve entegrasyonlar üst planlara bağlı.
+- Gelişmiş Marka Zekası ve entegrasyonlar üst planlara bağlı.
 
 **Fiyatlandırma:** Ücretsiz plan $0; Başlangıç $199/ay, Büyüme $299/ay ve Ajans $599/aydır; USD fiyatlar KDV hariçtir.[2]
 

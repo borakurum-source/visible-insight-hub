@@ -49,7 +49,7 @@ OneCite’ın farkı, görünürlük ölçümünü içerik önceliğine bağlama
 **Eksileri:**
 
 - Ücretsiz plan tek müşteri ve 10 soruyla sınırlı.
-- Bilgi Grafiği ve GSC/GA4 entegrasyonları üst planlara bağlı.
+- Marka Zekası ve GSC/GA4 entegrasyonları üst planlara bağlı.
 - Bağımsız ürün incelemelerinin sayısı henüz sınırlı.
 
 **Fiyatlandırma:** Ücretsiz plan $0; Başlangıç $199/ay, Büyüme $299/ay ve Ajans $599/aydır; fiyatlar USD ve KDV hariçtir.[2]

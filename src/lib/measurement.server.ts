@@ -1,10 +1,12 @@
 // Ölçüm motoru: Perplexity sonar ile gerçek web araması yapar,
 // markanın geçip geçmediğini, sıralamasını ve gerçek kaynak alan adlarını çıkarır.
+export type MeasuredSource = { url: string; domain: string; title: string };
+
 export type MeasuredAnswer = {
   answer: string;
   brandMentioned: boolean;
   position: number | null;
-  sources: string[];
+  sources: MeasuredSource[];
 };
 
 export async function measurePrompt(input: {
@@ -12,10 +14,11 @@ export async function measurePrompt(input: {
   brandDomain: string;
   competitors: string[];
   promptText: string;
+  systemPrompt?: string;
 }): Promise<MeasuredAnswer> {
-  const { perplexityJson, extractDomainsFromCitations } = await import("./perplexity.server");
+  const { perplexityJson } = await import("./perplexity.server");
 
-  const { result, citations } = await perplexityJson<{
+  const { result, sources } = await perplexityJson<{
     answer: string;
     mentionedBrands: string[];
   }>(
@@ -23,6 +26,7 @@ export async function measurePrompt(input: {
       {
         role: "system",
         content:
+          input.systemPrompt?.trim() ||
           "Sen bir yapay zekâ arama asistanısın. Kullanıcının sorusunu Türkçe, tarafsız ve kısa (en fazla 150 kelime) yanıtla; gerçekte hangi markaları önerirsen onları sırayla listele. Yanıtı şu JSON şemasında ver: {\"answer\":\"...\",\"mentionedBrands\":[\"...\"]}. mentionedBrands cevapta geçen marka adları ÖNEM SIRASIYLA.",
       },
       { role: "user", content: input.promptText },
@@ -51,7 +55,7 @@ export async function measurePrompt(input: {
     answer: String(result.answer ?? ""),
     brandMentioned: idx >= 0 || inText,
     position: idx >= 0 ? idx + 1 : null,
-    sources: extractDomainsFromCitations(citations).slice(0, 8),
+    sources: sources.slice(0, 10),
   };
 }
 
