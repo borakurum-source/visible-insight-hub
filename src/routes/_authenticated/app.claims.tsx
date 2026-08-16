@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockClaims } from "@/lib/panel-mock/claims";
 
-export const Route = createFileRoute("/app/claims")({
+export const Route = createFileRoute("/_authenticated/app/claims")({
   head: () => ({
     meta: [
       { title: "Marka İddiaları — OneCite Paneli" },

@@ -9,7 +9,7 @@ import { mockReportSummary } from "@/lib/panel-mock/report";
 import { mockClusterStats } from "@/lib/panel-mock/overview";
 import { activeBrand } from "@/lib/panel-mock/clients";
 
-export const Route = createFileRoute("/app/report")({
+export const Route = createFileRoute("/_authenticated/app/report")({
   head: () => ({
     meta: [
       { title: "Rapor — OneCite Paneli" },

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockContentDrafts, mockContentGaps } from "@/lib/panel-mock/content";
 
-export const Route = createFileRoute("/app/content")({
+export const Route = createFileRoute("/_authenticated/app/content")({
   head: () => ({
     meta: [
       { title: "İçerik Üretimi — OneCite Paneli" },

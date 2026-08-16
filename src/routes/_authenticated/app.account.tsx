@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { mockUsage } from "@/lib/panel-mock/pricing";
 
-export const Route = createFileRoute("/app/account")({
+export const Route = createFileRoute("/_authenticated/app/account")({
   head: () => ({
     meta: [
       { title: "Hesabım — OneCite Paneli" },

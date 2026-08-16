@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppRouteImport } from './routes/app'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
 import { Route as FreeAiReadinessReportRouteImport } from './routes/free-ai-readiness-report'
@@ -20,22 +20,7 @@ import { Route as MakalelerRouteImport } from './routes/makaleler'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SunumRouteImport } from './routes/sunum'
-import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppAccountRouteImport } from './routes/app.account'
-import { Route as AppAdminRouteImport } from './routes/app.admin'
-import { Route as AppCitationDiscoveryRouteImport } from './routes/app.citation-discovery'
-import { Route as AppClaimsRouteImport } from './routes/app.claims'
-import { Route as AppContentRouteImport } from './routes/app.content'
-import { Route as AppGeoTasksRouteImport } from './routes/app.geo-tasks'
-import { Route as AppGraphRouteImport } from './routes/app.graph'
-import { Route as AppIntegrationsRouteImport } from './routes/app.integrations'
-import { Route as AppKnowledgeBaseRouteImport } from './routes/app.knowledge-base'
-import { Route as AppOnboardingRouteImport } from './routes/app.onboarding'
-import { Route as AppPricingRouteImport } from './routes/app.pricing'
-import { Route as AppPromptDiscoveryRouteImport } from './routes/app.prompt-discovery'
-import { Route as AppPromptsRouteImport } from './routes/app.prompts'
-import { Route as AppReportRouteImport } from './routes/app.report'
-import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as MakalelerIndexRouteImport } from './routes/makaleler.index'
 import { Route as MakalelerSlugRouteImport } from './routes/makaleler.$slug'
 import { Route as PlatformIndexRouteImport } from './routes/platform.index'
@@ -44,6 +29,22 @@ import { Route as PlatformEvidenceGapsRouteImport } from './routes/platform.evid
 import { Route as ProofFilmfolkRouteImport } from './routes/proof.filmfolk'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as SolutionsAgenciesRouteImport } from './routes/solutions.agencies'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authenticated/app.account'
+import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
+import { Route as AuthenticatedAppCitationDiscoveryRouteImport } from './routes/_authenticated/app.citation-discovery'
+import { Route as AuthenticatedAppClaimsRouteImport } from './routes/_authenticated/app.claims'
+import { Route as AuthenticatedAppContentRouteImport } from './routes/_authenticated/app.content'
+import { Route as AuthenticatedAppGeoTasksRouteImport } from './routes/_authenticated/app.geo-tasks'
+import { Route as AuthenticatedAppGraphRouteImport } from './routes/_authenticated/app.graph'
+import { Route as AuthenticatedAppIntegrationsRouteImport } from './routes/_authenticated/app.integrations'
+import { Route as AuthenticatedAppKnowledgeBaseRouteImport } from './routes/_authenticated/app.knowledge-base'
+import { Route as AuthenticatedAppOnboardingRouteImport } from './routes/_authenticated/app.onboarding'
+import { Route as AuthenticatedAppPricingRouteImport } from './routes/_authenticated/app.pricing'
+import { Route as AuthenticatedAppPromptDiscoveryRouteImport } from './routes/_authenticated/app.prompt-discovery'
+import { Route as AuthenticatedAppPromptsRouteImport } from './routes/_authenticated/app.prompts'
+import { Route as AuthenticatedAppReportRouteImport } from './routes/_authenticated/app.report'
+import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -51,9 +52,8 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -101,85 +101,10 @@ const SunumRoute = SunumRouteImport.update({
   path: '/sunum',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAccountRoute = AppAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAdminRoute = AppAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCitationDiscoveryRoute = AppCitationDiscoveryRouteImport.update({
-  id: '/citation-discovery',
-  path: '/citation-discovery',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppClaimsRoute = AppClaimsRouteImport.update({
-  id: '/claims',
-  path: '/claims',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppContentRoute = AppContentRouteImport.update({
-  id: '/content',
-  path: '/content',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppGeoTasksRoute = AppGeoTasksRouteImport.update({
-  id: '/geo-tasks',
-  path: '/geo-tasks',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppGraphRoute = AppGraphRouteImport.update({
-  id: '/graph',
-  path: '/graph',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppIntegrationsRoute = AppIntegrationsRouteImport.update({
-  id: '/integrations',
-  path: '/integrations',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppKnowledgeBaseRoute = AppKnowledgeBaseRouteImport.update({
-  id: '/knowledge-base',
-  path: '/knowledge-base',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppOnboardingRoute = AppOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPricingRoute = AppPricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPromptDiscoveryRoute = AppPromptDiscoveryRouteImport.update({
-  id: '/prompt-discovery',
-  path: '/prompt-discovery',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPromptsRoute = AppPromptsRouteImport.update({
-  id: '/prompts',
-  path: '/prompts',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppReportRoute = AppReportRouteImport.update({
-  id: '/report',
-  path: '/report',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRoute,
+const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const MakalelerIndexRoute = MakalelerIndexRouteImport.update({
   id: '/',
@@ -221,6 +146,93 @@ const SolutionsAgenciesRoute = SolutionsAgenciesRouteImport.update({
   path: '/solutions/agencies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppAccountRoute = AuthenticatedAppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppCitationDiscoveryRoute =
+  AuthenticatedAppCitationDiscoveryRouteImport.update({
+    id: '/citation-discovery',
+    path: '/citation-discovery',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppClaimsRoute = AuthenticatedAppClaimsRouteImport.update({
+  id: '/claims',
+  path: '/claims',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppContentRoute = AuthenticatedAppContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppGeoTasksRoute =
+  AuthenticatedAppGeoTasksRouteImport.update({
+    id: '/geo-tasks',
+    path: '/geo-tasks',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppGraphRoute = AuthenticatedAppGraphRouteImport.update({
+  id: '/graph',
+  path: '/graph',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppIntegrationsRoute =
+  AuthenticatedAppIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppKnowledgeBaseRoute =
+  AuthenticatedAppKnowledgeBaseRouteImport.update({
+    id: '/knowledge-base',
+    path: '/knowledge-base',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppOnboardingRoute =
+  AuthenticatedAppOnboardingRouteImport.update({
+    id: '/onboarding',
+    path: '/onboarding',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppPricingRoute = AuthenticatedAppPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppPromptDiscoveryRoute =
+  AuthenticatedAppPromptDiscoveryRouteImport.update({
+    id: '/prompt-discovery',
+    path: '/prompt-discovery',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppPromptsRoute = AuthenticatedAppPromptsRouteImport.update({
+  id: '/prompts',
+  path: '/prompts',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppReportRoute = AuthenticatedAppReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppSettingsRoute =
+  AuthenticatedAppSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -230,7 +242,6 @@ const LovableEmailTransactionalPreviewRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
@@ -240,30 +251,31 @@ export interface FileRoutesByFullPath {
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/sunum': typeof SunumRoute
-  '/app/account': typeof AppAccountRoute
-  '/app/admin': typeof AppAdminRoute
-  '/app/citation-discovery': typeof AppCitationDiscoveryRoute
-  '/app/claims': typeof AppClaimsRoute
-  '/app/content': typeof AppContentRoute
-  '/app/geo-tasks': typeof AppGeoTasksRoute
-  '/app/graph': typeof AppGraphRoute
-  '/app/integrations': typeof AppIntegrationsRoute
-  '/app/knowledge-base': typeof AppKnowledgeBaseRoute
-  '/app/onboarding': typeof AppOnboardingRoute
-  '/app/pricing': typeof AppPricingRoute
-  '/app/prompt-discovery': typeof AppPromptDiscoveryRoute
-  '/app/prompts': typeof AppPromptsRoute
-  '/app/report': typeof AppReportRoute
-  '/app/settings': typeof AppSettingsRoute
+  '/app': typeof AuthenticatedAppRouteWithChildren
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
   '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
-  '/app/': typeof AppIndexRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/app/account': typeof AuthenticatedAppAccountRoute
+  '/app/admin': typeof AuthenticatedAppAdminRoute
+  '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
+  '/app/claims': typeof AuthenticatedAppClaimsRoute
+  '/app/content': typeof AuthenticatedAppContentRoute
+  '/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
+  '/app/graph': typeof AuthenticatedAppGraphRoute
+  '/app/integrations': typeof AuthenticatedAppIntegrationsRoute
+  '/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
+  '/app/onboarding': typeof AuthenticatedAppOnboardingRoute
+  '/app/pricing': typeof AuthenticatedAppPricingRoute
+  '/app/prompt-discovery': typeof AuthenticatedAppPromptDiscoveryRoute
+  '/app/prompts': typeof AuthenticatedAppPromptsRoute
+  '/app/report': typeof AuthenticatedAppReportRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/': typeof AuthenticatedAppIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
@@ -275,36 +287,36 @@ export interface FileRoutesByTo {
   '/kvkk': typeof KvkkRoute
   '/privacy': typeof PrivacyRoute
   '/sunum': typeof SunumRoute
-  '/app/account': typeof AppAccountRoute
-  '/app/admin': typeof AppAdminRoute
-  '/app/citation-discovery': typeof AppCitationDiscoveryRoute
-  '/app/claims': typeof AppClaimsRoute
-  '/app/content': typeof AppContentRoute
-  '/app/geo-tasks': typeof AppGeoTasksRoute
-  '/app/graph': typeof AppGraphRoute
-  '/app/integrations': typeof AppIntegrationsRoute
-  '/app/knowledge-base': typeof AppKnowledgeBaseRoute
-  '/app/onboarding': typeof AppOnboardingRoute
-  '/app/pricing': typeof AppPricingRoute
-  '/app/prompt-discovery': typeof AppPromptDiscoveryRoute
-  '/app/prompts': typeof AppPromptsRoute
-  '/app/report': typeof AppReportRoute
-  '/app/settings': typeof AppSettingsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
   '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
-  '/app': typeof AppIndexRoute
   '/makaleler': typeof MakalelerIndexRoute
   '/platform': typeof PlatformIndexRoute
+  '/app/account': typeof AuthenticatedAppAccountRoute
+  '/app/admin': typeof AuthenticatedAppAdminRoute
+  '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
+  '/app/claims': typeof AuthenticatedAppClaimsRoute
+  '/app/content': typeof AuthenticatedAppContentRoute
+  '/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
+  '/app/graph': typeof AuthenticatedAppGraphRoute
+  '/app/integrations': typeof AuthenticatedAppIntegrationsRoute
+  '/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
+  '/app/onboarding': typeof AuthenticatedAppOnboardingRoute
+  '/app/pricing': typeof AuthenticatedAppPricingRoute
+  '/app/prompt-discovery': typeof AuthenticatedAppPromptDiscoveryRoute
+  '/app/prompts': typeof AuthenticatedAppPromptsRoute
+  '/app/report': typeof AuthenticatedAppReportRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app': typeof AuthenticatedAppIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
@@ -314,37 +326,37 @@ export interface FileRoutesById {
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/sunum': typeof SunumRoute
-  '/app/account': typeof AppAccountRoute
-  '/app/admin': typeof AppAdminRoute
-  '/app/citation-discovery': typeof AppCitationDiscoveryRoute
-  '/app/claims': typeof AppClaimsRoute
-  '/app/content': typeof AppContentRoute
-  '/app/geo-tasks': typeof AppGeoTasksRoute
-  '/app/graph': typeof AppGraphRoute
-  '/app/integrations': typeof AppIntegrationsRoute
-  '/app/knowledge-base': typeof AppKnowledgeBaseRoute
-  '/app/onboarding': typeof AppOnboardingRoute
-  '/app/pricing': typeof AppPricingRoute
-  '/app/prompt-discovery': typeof AppPromptDiscoveryRoute
-  '/app/prompts': typeof AppPromptsRoute
-  '/app/report': typeof AppReportRoute
-  '/app/settings': typeof AppSettingsRoute
+  '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
   '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
-  '/app/': typeof AppIndexRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/_authenticated/app/account': typeof AuthenticatedAppAccountRoute
+  '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
+  '/_authenticated/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
+  '/_authenticated/app/claims': typeof AuthenticatedAppClaimsRoute
+  '/_authenticated/app/content': typeof AuthenticatedAppContentRoute
+  '/_authenticated/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
+  '/_authenticated/app/graph': typeof AuthenticatedAppGraphRoute
+  '/_authenticated/app/integrations': typeof AuthenticatedAppIntegrationsRoute
+  '/_authenticated/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
+  '/_authenticated/app/onboarding': typeof AuthenticatedAppOnboardingRoute
+  '/_authenticated/app/pricing': typeof AuthenticatedAppPricingRoute
+  '/_authenticated/app/prompt-discovery': typeof AuthenticatedAppPromptDiscoveryRoute
+  '/_authenticated/app/prompts': typeof AuthenticatedAppPromptsRoute
+  '/_authenticated/app/report': typeof AuthenticatedAppReportRoute
+  '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/app'
     | '/auth'
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
@@ -354,6 +366,15 @@ export interface FileRouteTypes {
     | '/platform'
     | '/privacy'
     | '/sunum'
+    | '/app'
+    | '/makaleler/$slug'
+    | '/platform/citation-share'
+    | '/platform/evidence-gaps'
+    | '/proof/filmfolk'
+    | '/r/$token'
+    | '/solutions/agencies'
+    | '/makaleler/'
+    | '/platform/'
     | '/app/account'
     | '/app/admin'
     | '/app/citation-discovery'
@@ -369,15 +390,7 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
-    | '/makaleler/$slug'
-    | '/platform/citation-share'
-    | '/platform/evidence-gaps'
-    | '/proof/filmfolk'
-    | '/r/$token'
-    | '/solutions/agencies'
     | '/app/'
-    | '/makaleler/'
-    | '/platform/'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -389,6 +402,14 @@ export interface FileRouteTypes {
     | '/kvkk'
     | '/privacy'
     | '/sunum'
+    | '/makaleler/$slug'
+    | '/platform/citation-share'
+    | '/platform/evidence-gaps'
+    | '/proof/filmfolk'
+    | '/r/$token'
+    | '/solutions/agencies'
+    | '/makaleler'
+    | '/platform'
     | '/app/account'
     | '/app/admin'
     | '/app/citation-discovery'
@@ -404,20 +425,12 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
-    | '/makaleler/$slug'
-    | '/platform/citation-share'
-    | '/platform/evidence-gaps'
-    | '/proof/filmfolk'
-    | '/r/$token'
-    | '/solutions/agencies'
     | '/app'
-    | '/makaleler'
-    | '/platform'
     | '/lovable/email/transactional/preview'
   id:
     | '__root__'
     | '/'
-    | '/app'
+    | '/_authenticated'
     | '/auth'
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
@@ -427,36 +440,37 @@ export interface FileRouteTypes {
     | '/platform'
     | '/privacy'
     | '/sunum'
-    | '/app/account'
-    | '/app/admin'
-    | '/app/citation-discovery'
-    | '/app/claims'
-    | '/app/content'
-    | '/app/geo-tasks'
-    | '/app/graph'
-    | '/app/integrations'
-    | '/app/knowledge-base'
-    | '/app/onboarding'
-    | '/app/pricing'
-    | '/app/prompt-discovery'
-    | '/app/prompts'
-    | '/app/report'
-    | '/app/settings'
+    | '/_authenticated/app'
     | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
     | '/proof/filmfolk'
     | '/r/$token'
     | '/solutions/agencies'
-    | '/app/'
     | '/makaleler/'
     | '/platform/'
+    | '/_authenticated/app/account'
+    | '/_authenticated/app/admin'
+    | '/_authenticated/app/citation-discovery'
+    | '/_authenticated/app/claims'
+    | '/_authenticated/app/content'
+    | '/_authenticated/app/geo-tasks'
+    | '/_authenticated/app/graph'
+    | '/_authenticated/app/integrations'
+    | '/_authenticated/app/knowledge-base'
+    | '/_authenticated/app/onboarding'
+    | '/_authenticated/app/pricing'
+    | '/_authenticated/app/prompt-discovery'
+    | '/_authenticated/app/prompts'
+    | '/_authenticated/app/report'
+    | '/_authenticated/app/settings'
+    | '/_authenticated/app/'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRouteWithChildren
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   FiyatlandirmaRoute: typeof FiyatlandirmaRoute
   FreeAiReadinessReportRoute: typeof FreeAiReadinessReportRoute
@@ -481,11 +495,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -551,117 +565,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SunumRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
-      path: '/'
-      fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/account': {
-      id: '/app/account'
-      path: '/account'
-      fullPath: '/app/account'
-      preLoaderRoute: typeof AppAccountRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/admin': {
-      id: '/app/admin'
-      path: '/admin'
-      fullPath: '/app/admin'
-      preLoaderRoute: typeof AppAdminRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/citation-discovery': {
-      id: '/app/citation-discovery'
-      path: '/citation-discovery'
-      fullPath: '/app/citation-discovery'
-      preLoaderRoute: typeof AppCitationDiscoveryRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/claims': {
-      id: '/app/claims'
-      path: '/claims'
-      fullPath: '/app/claims'
-      preLoaderRoute: typeof AppClaimsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/content': {
-      id: '/app/content'
-      path: '/content'
-      fullPath: '/app/content'
-      preLoaderRoute: typeof AppContentRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/geo-tasks': {
-      id: '/app/geo-tasks'
-      path: '/geo-tasks'
-      fullPath: '/app/geo-tasks'
-      preLoaderRoute: typeof AppGeoTasksRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/graph': {
-      id: '/app/graph'
-      path: '/graph'
-      fullPath: '/app/graph'
-      preLoaderRoute: typeof AppGraphRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/integrations': {
-      id: '/app/integrations'
-      path: '/integrations'
-      fullPath: '/app/integrations'
-      preLoaderRoute: typeof AppIntegrationsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/knowledge-base': {
-      id: '/app/knowledge-base'
-      path: '/knowledge-base'
-      fullPath: '/app/knowledge-base'
-      preLoaderRoute: typeof AppKnowledgeBaseRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/onboarding': {
-      id: '/app/onboarding'
-      path: '/onboarding'
-      fullPath: '/app/onboarding'
-      preLoaderRoute: typeof AppOnboardingRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/pricing': {
-      id: '/app/pricing'
-      path: '/pricing'
-      fullPath: '/app/pricing'
-      preLoaderRoute: typeof AppPricingRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/prompt-discovery': {
-      id: '/app/prompt-discovery'
-      path: '/prompt-discovery'
-      fullPath: '/app/prompt-discovery'
-      preLoaderRoute: typeof AppPromptDiscoveryRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/prompts': {
-      id: '/app/prompts'
-      path: '/prompts'
-      fullPath: '/app/prompts'
-      preLoaderRoute: typeof AppPromptsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/report': {
-      id: '/app/report'
-      path: '/report'
-      fullPath: '/app/report'
-      preLoaderRoute: typeof AppReportRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/settings': {
-      id: '/app/settings'
-      path: '/settings'
-      fullPath: '/app/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRoute
+    '/_authenticated/app': {
+      id: '/_authenticated/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AuthenticatedAppRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/makaleler/': {
       id: '/makaleler/'
@@ -719,6 +628,118 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SolutionsAgenciesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/app/': {
+      id: '/_authenticated/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/account': {
+      id: '/_authenticated/app/account'
+      path: '/account'
+      fullPath: '/app/account'
+      preLoaderRoute: typeof AuthenticatedAppAccountRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/admin': {
+      id: '/_authenticated/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/citation-discovery': {
+      id: '/_authenticated/app/citation-discovery'
+      path: '/citation-discovery'
+      fullPath: '/app/citation-discovery'
+      preLoaderRoute: typeof AuthenticatedAppCitationDiscoveryRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/claims': {
+      id: '/_authenticated/app/claims'
+      path: '/claims'
+      fullPath: '/app/claims'
+      preLoaderRoute: typeof AuthenticatedAppClaimsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/content': {
+      id: '/_authenticated/app/content'
+      path: '/content'
+      fullPath: '/app/content'
+      preLoaderRoute: typeof AuthenticatedAppContentRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/geo-tasks': {
+      id: '/_authenticated/app/geo-tasks'
+      path: '/geo-tasks'
+      fullPath: '/app/geo-tasks'
+      preLoaderRoute: typeof AuthenticatedAppGeoTasksRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/graph': {
+      id: '/_authenticated/app/graph'
+      path: '/graph'
+      fullPath: '/app/graph'
+      preLoaderRoute: typeof AuthenticatedAppGraphRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/integrations': {
+      id: '/_authenticated/app/integrations'
+      path: '/integrations'
+      fullPath: '/app/integrations'
+      preLoaderRoute: typeof AuthenticatedAppIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/knowledge-base': {
+      id: '/_authenticated/app/knowledge-base'
+      path: '/knowledge-base'
+      fullPath: '/app/knowledge-base'
+      preLoaderRoute: typeof AuthenticatedAppKnowledgeBaseRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/onboarding': {
+      id: '/_authenticated/app/onboarding'
+      path: '/onboarding'
+      fullPath: '/app/onboarding'
+      preLoaderRoute: typeof AuthenticatedAppOnboardingRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/pricing': {
+      id: '/_authenticated/app/pricing'
+      path: '/pricing'
+      fullPath: '/app/pricing'
+      preLoaderRoute: typeof AuthenticatedAppPricingRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/prompt-discovery': {
+      id: '/_authenticated/app/prompt-discovery'
+      path: '/prompt-discovery'
+      fullPath: '/app/prompt-discovery'
+      preLoaderRoute: typeof AuthenticatedAppPromptDiscoveryRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/prompts': {
+      id: '/_authenticated/app/prompts'
+      path: '/prompts'
+      fullPath: '/app/prompts'
+      preLoaderRoute: typeof AuthenticatedAppPromptsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/report': {
+      id: '/_authenticated/app/report'
+      path: '/report'
+      fullPath: '/app/report'
+      preLoaderRoute: typeof AuthenticatedAppReportRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/settings': {
+      id: '/_authenticated/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -729,45 +750,58 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AppRouteChildren {
-  AppAccountRoute: typeof AppAccountRoute
-  AppAdminRoute: typeof AppAdminRoute
-  AppCitationDiscoveryRoute: typeof AppCitationDiscoveryRoute
-  AppClaimsRoute: typeof AppClaimsRoute
-  AppContentRoute: typeof AppContentRoute
-  AppGeoTasksRoute: typeof AppGeoTasksRoute
-  AppGraphRoute: typeof AppGraphRoute
-  AppIntegrationsRoute: typeof AppIntegrationsRoute
-  AppKnowledgeBaseRoute: typeof AppKnowledgeBaseRoute
-  AppOnboardingRoute: typeof AppOnboardingRoute
-  AppPricingRoute: typeof AppPricingRoute
-  AppPromptDiscoveryRoute: typeof AppPromptDiscoveryRoute
-  AppPromptsRoute: typeof AppPromptsRoute
-  AppReportRoute: typeof AppReportRoute
-  AppSettingsRoute: typeof AppSettingsRoute
-  AppIndexRoute: typeof AppIndexRoute
+interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAccountRoute: typeof AuthenticatedAppAccountRoute
+  AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
+  AuthenticatedAppCitationDiscoveryRoute: typeof AuthenticatedAppCitationDiscoveryRoute
+  AuthenticatedAppClaimsRoute: typeof AuthenticatedAppClaimsRoute
+  AuthenticatedAppContentRoute: typeof AuthenticatedAppContentRoute
+  AuthenticatedAppGeoTasksRoute: typeof AuthenticatedAppGeoTasksRoute
+  AuthenticatedAppGraphRoute: typeof AuthenticatedAppGraphRoute
+  AuthenticatedAppIntegrationsRoute: typeof AuthenticatedAppIntegrationsRoute
+  AuthenticatedAppKnowledgeBaseRoute: typeof AuthenticatedAppKnowledgeBaseRoute
+  AuthenticatedAppOnboardingRoute: typeof AuthenticatedAppOnboardingRoute
+  AuthenticatedAppPricingRoute: typeof AuthenticatedAppPricingRoute
+  AuthenticatedAppPromptDiscoveryRoute: typeof AuthenticatedAppPromptDiscoveryRoute
+  AuthenticatedAppPromptsRoute: typeof AuthenticatedAppPromptsRoute
+  AuthenticatedAppReportRoute: typeof AuthenticatedAppReportRoute
+  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
-const AppRouteChildren: AppRouteChildren = {
-  AppAccountRoute: AppAccountRoute,
-  AppAdminRoute: AppAdminRoute,
-  AppCitationDiscoveryRoute: AppCitationDiscoveryRoute,
-  AppClaimsRoute: AppClaimsRoute,
-  AppContentRoute: AppContentRoute,
-  AppGeoTasksRoute: AppGeoTasksRoute,
-  AppGraphRoute: AppGraphRoute,
-  AppIntegrationsRoute: AppIntegrationsRoute,
-  AppKnowledgeBaseRoute: AppKnowledgeBaseRoute,
-  AppOnboardingRoute: AppOnboardingRoute,
-  AppPricingRoute: AppPricingRoute,
-  AppPromptDiscoveryRoute: AppPromptDiscoveryRoute,
-  AppPromptsRoute: AppPromptsRoute,
-  AppReportRoute: AppReportRoute,
-  AppSettingsRoute: AppSettingsRoute,
-  AppIndexRoute: AppIndexRoute,
+const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAccountRoute: AuthenticatedAppAccountRoute,
+  AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
+  AuthenticatedAppCitationDiscoveryRoute:
+    AuthenticatedAppCitationDiscoveryRoute,
+  AuthenticatedAppClaimsRoute: AuthenticatedAppClaimsRoute,
+  AuthenticatedAppContentRoute: AuthenticatedAppContentRoute,
+  AuthenticatedAppGeoTasksRoute: AuthenticatedAppGeoTasksRoute,
+  AuthenticatedAppGraphRoute: AuthenticatedAppGraphRoute,
+  AuthenticatedAppIntegrationsRoute: AuthenticatedAppIntegrationsRoute,
+  AuthenticatedAppKnowledgeBaseRoute: AuthenticatedAppKnowledgeBaseRoute,
+  AuthenticatedAppOnboardingRoute: AuthenticatedAppOnboardingRoute,
+  AuthenticatedAppPricingRoute: AuthenticatedAppPricingRoute,
+  AuthenticatedAppPromptDiscoveryRoute: AuthenticatedAppPromptDiscoveryRoute,
+  AuthenticatedAppPromptsRoute: AuthenticatedAppPromptsRoute,
+  AuthenticatedAppReportRoute: AuthenticatedAppReportRoute,
+  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
+  AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+const AuthenticatedAppRouteWithChildren =
+  AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface MakalelerRouteChildren {
   MakalelerSlugRoute: typeof MakalelerSlugRoute
@@ -801,7 +835,7 @@ const PlatformRouteWithChildren = PlatformRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRouteWithChildren,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   FiyatlandirmaRoute: FiyatlandirmaRoute,
   FreeAiReadinessReportRoute: FreeAiReadinessReportRoute,

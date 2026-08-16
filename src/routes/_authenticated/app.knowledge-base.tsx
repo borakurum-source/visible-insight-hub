@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmAction } from "@/components/app/confirm-action";
 import { mockKbSummary, mockKbSources, mockBrandFacts, type MockKbSource } from "@/lib/panel-mock/knowledge-base";
 
-export const Route = createFileRoute("/app/knowledge-base")({
+export const Route = createFileRoute("/_authenticated/app/knowledge-base")({
   head: () => ({
     meta: [
       { title: "Bilgi Bankası — OneCite Paneli" },

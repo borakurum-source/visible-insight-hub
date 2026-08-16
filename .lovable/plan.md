@@ -1,70 +1,75 @@
-# OneCite: Analiz + Panel Kurulum Akışı Planı
+# Landing Page: Perplexity-esintili tasarım dili
 
-## Bugünkü durum (kod okumasıyla doğrulandı)
+## Analiz — o tarzı ne oluşturuyor?
 
-- 21 marketing + 20 panel rotası portlandı; panel tamamen `src/lib/panel-mock/*` içindeki sahte veriyle çalışıyor.
-- `/app` altında **hiçbir giriş koruması yok** — `src/routes/app.tsx` içinde auth/redirect kodu bulunmuyor. Giriş yapmamış herkes paneli görüyor.
-- Google girişi `/auth` sayfasında çalışıyor ama oturum panelde kullanılmıyor (kullanıcı adı hâlâ mock "Elif Aydın").
-- Rol/yetki tablosu yok; `/app/admin` herkese açık.
-- Kurulum sayfası (`/app/onboarding`) sadece statik bir kontrol listesi; marka ekleme formu yok.
-- Şema Neon'da; uygulama tarafında kullanılmıyor. Karar: gerçek veri Lovable Cloud'a taşınacak.
+Perplexity'nin ürün sayfalarındaki his birkaç net karardan geliyor:
 
-## Analiz ve geliştirme önerileri
+1. **Kağıt zemin, mürekkep yazı.** Beyaz değil, hafif sıcak kırık-beyaz (#FBFAF4 tonu) + neredeyse siyah metin. Ekran değil, basılı sayfa hissi.
+2. **Tek bir sakin aksan rengi.** Petrol/teal yeşili yalnızca linklerde, küçük etiketlerde ve tek bir butonda. Gradyan yok, parlama yok.
+3. **İri, sıkı başlıklar.** 56-96px, `tracking-tight`, 2-3 satırı geçmeyen kısa cümleler. Alt metin tek satır, gri.
+4. **Kılcal çizgiler, kutu yok.** Bölümler 1px hairline ile ayrılır; gölgeli kartlar yerine çizgiyle bölünmüş ızgara.
+5. **Mono mikro-etiketler.** Bölüm başlıkları küçük, harf aralığı açık, monospace: `01 / GÖRÜNÜRLÜK`.
+6. **Ürün görseli kahraman.** Süslü illüstrasyon değil; gerçek arayüz ekranı, yumuşak köşeli, geniş boşluk içinde ortalanmış.
+7. **Bir koyu bölüm.** Sayfanın ortasında tam genişlikte koyu bir band ritmi kırar.
+8. **Kısıtlı hareket.** Sadece scroll'da yumuşak fade/rise; parallax, sayaç animasyonu, dönen orb yok.
 
-### Landing + alt sayfalar
-- Tek gerçek dönüşüm yolu net değil: "Giriş yap", "Ücretsiz rapor", "Demo" CTA'ları yarışıyor. Öneri: tek birincil CTA = "Ücretsiz AI görünürlük raporu" (domain input), ikincil = giriş.
-- `/free-ai-readiness-report` formu şu an sonuç üretmiyor; e-posta altyapısı kurulu olduğu için lead → e-posta → panel davetine bağlanmalı.
-- Alt sayfalarda (platform, solutions, makaleler) sayfa sonu CTA'ları ve iç linkleme zayıf; her sayfaya bağlama uygun tek CTA bloğu.
-- SEO: makale detayında yazar/tarih/JSON-LD (Article), platform sayfalarında FAQ şeması eksik.
-- Fiyatlandırma: plan farkları özellik bazlı değil; "kaç marka / kaç prompt / kaç tarama" gibi ölçülebilir limitler.
+Mevcut OneCite sistemi (Manrope + DM Mono + Evidence Cyan) bu dile şaşırtıcı derecede yakın; asıl fark **zemin sıcaklığı, tipografi ölçeği ve gölge/kart kullanımı**. Yani sıfırdan tema değil, kalibrasyon gerekiyor.
 
-### Panel
-- 20 ekran, 6 nav grubu — yeni kullanıcı için fazla. Öneri: kurulum tamamlanmadan yalnızca Komuta Merkezi + Kurulum görünsün, diğerleri kilitli/gri.
-- Nav sadeleştirme: "Prompt Keşfi" ve "Kaynak Keşfi" ilgili ana sayfaların sekmesi olsun; "İddialar" + "Bilgi Grafiği" Bilgi Bankası altına.
-- Boş durum ekranları yok (mock veri her yerde dolu). Her ekrana "henüz veri yok + tek aksiyon" durumu.
-- Marka seçici (workspace switcher) header'da yok; çoklu marka desteği görünmüyor.
-- Admin ekranı rol kontrolü olmadan açık — güvenlik açığı.
+## Önerim
 
-## Yapılacak iş
+Birebir kopya değil; "OneCite kanıt gazetesi" yorumu:
 
-### 1. Auth ve roller (Lovable Cloud)
-- Panel rotalarını korumalı düzene taşı; giriş yapmamış kullanıcı `/auth`'a gitsin.
-- `profiles` (kullanıcı adı/e-posta/avatar) ve ayrı `user_roles` tablosu (`admin` / `member`) + `has_role()` güvenlik fonksiyonu.
-- `bora@1cite.com` ilk girişte otomatik `admin` (e-posta eşleşmesiyle tetikleyici) — Admin menüsü sadece adminlere.
-- Header'daki kullanıcı bilgisi ve çıkış gerçek oturumdan gelsin.
+- Perplexity'nin kağıt zemini + editoryal sükûneti alınır.
+- Aksan olarak Perplexity teal'ı yerine **kendi Evidence Cyan / Signal Blue** ikilimiz korunur (marka kimliği kaybolmasın).
+- Farklılaştırıcımız: alıntı/kaynak estetiği — hairline çizgiler, dipnot numaraları, `[1]` `[2]` kaynak rozetleri, monospace domain adları. Perplexity "cevap" görünür; biz "kanıt" görünürüz.
 
-### 2. Veri modeli (Cloud'a taşınan çekirdek)
-Neon şemasının panelde gerçekten kullanılan çekirdeği: `brands`, `brand_domains`, `brand_intelligence`, `knowledge_sources`, `prompts`, `prompt_runs`, `citations`, `claims`, `geo_tasks`, `reports`. Hepsi marka üyeliğine göre RLS ile korunur.
-
-### 3. Kurulum sihirbazı — gerçek yol
-Giriş sonrası markası olmayan kullanıcı doğrudan `/app/onboarding` sihirbazına düşer. Dört adım, her adımda AI üretir + kullanıcı onaylar:
-
+### Renk (src/styles.css içinde token güncellemesi)
 ```text
-1. MARKA          domain + marka adı  → kaydet
-2. MARKA ZEKÂSI   AI: site taraması → konum, ürünler, kitle, rakipler, ton
-                  kullanıcı düzenler/onaylar
-3. BİLGİ BANKASI  AI: sitemap/öne çıkan sayfalar önerir + manuel URL/metin
-                  kullanıcı seçer → kaynak olarak kaydedilir
-4. PROMPTLAR      AI: 20-30 aday prompt (marka zekâsı + KB'den)
-                  kullanıcı toplu onay/çıkarma → ilk tarama tetiklenir
-                  → Komuta Merkezi'ne yönlendirme
+background   #FBFAF5  sıcak kağıt
+surface      #FFFFFF  yalnızca ürün görseli/kart yüzeyi
+foreground   #101211  neredeyse siyah mürekkep
+muted-fg     #6B6F6C  gri alt metin
+border       #E4E1D8  kılcal çizgi
+primary      Evidence Cyan (mevcut) — tek aksan
+dark band    #101211 zemin, üzerinde kağıt rengi yazı
+```
+Gradyan ve renkli gölge tokenları kaldırılır; `--shadow-*` tek bir çok yumuşak değere iner.
+
+### Tipografi
+- Başlıklar: Manrope 700, `tracking-[-0.03em]`, clamp(2.75rem, 6vw, 5.5rem).
+- Gövde: 17-18px, satır yüksekliği 1.6, ölçülü genişlik (65ch).
+- Mikro etiket: DM Mono, 11px, uppercase, `tracking-[0.18em]`.
+
+### Ana sayfa yeni ritmi
+```text
+1  Üst bar        şeffaf, hairline alt çizgi, tek CTA
+2  Hero           iri başlık + tek satır alt metin + domain input
+                  altında monospace "ChatGPT · Gemini · Perplexity · Copilot"
+3  Ürün görseli   tam genişliğe yakın, yumuşak köşe, gölgesiz, kağıt üzerinde
+4  Kanıt şeridi   hairline ile bölünmüş 3 metrik, kart yok
+5  Nasıl çalışır  4 adım, numaralı mono etiketler, sol hizalı, çizgiyle bölünmüş
+6  KOYU BAND      "Cevaplarda görünmüyorsan yoksun" + alıntı görselleştirmesi
+7  Kullanım       2 sütun asimetrik (60/40), metin + arayüz detayı
+8  SSS            sade accordion, hairline, ikon yok
+9  Kapanış CTA    tek cümle + tek buton, geniş boşluk
+10 Footer         mono, çok satırlı sitemap, sade
 ```
 
-Kurallar: her adım kaydedilir, sihirbaz yarıda bırakılıp devam edilebilir; ilerleme çubuğu 4 adım; teknik terim yerine sade Türkçe açıklama; "Neden soruyoruz?" mikro metinleri; hiçbir adımda kullanıcıdan boş sayfaya yazı yazması istenmez.
+### Hareket
+Yalnızca `opacity + translateY(12px)` giriş animasyonu, 400ms, stagger 60ms. `prefers-reduced-motion` desteklenir.
 
-### 4. Panelin gerçek veriye bağlanması
-Komuta Merkezi, Promptlar, Bilgi Bankası, İddialar ilk turda mock'tan çıkar; kalan ekranlar (Grafik, İçerik, Görevler, Rapor, Entegrasyonlar) mock kalmaya devam eder ve sırayla bağlanır.
+## Kapsam
+- `src/styles.css`: renk/gölge/tipografi tokenları + editoryal yardımcı sınıflar (`hairline`, `micro-label`, `editorial-h1`).
+- `src/routes/index.tsx`: yukarıdaki 10 bölümlük ritme göre yeniden düzenlenir (içerik/metin korunur, sunum değişir).
+- `src/components/site/MarketingShell.tsx`, header/footer: hairline ve mono stiline uyarlanır.
+- Alt sayfalar (platform, çözümler, fiyatlandırma, makaleler) aynı token'ları otomatik alır; ana sayfa onaylandıktan sonra tek tek geçirilir.
+- Panel teması değişmez (koyu/veri yoğun kimliği korunur).
 
-## Teknik notlar
-- Auth gate `_authenticated` düzeninde, `ssr: false`; panel rotaları oraya taşınır (URL'ler `/app/...` olarak korunur).
-- Veri erişimi `createServerFn` + `requireSupabaseAuth` ile; tablolarda RLS marka üyeliğine bağlı.
-- AI adımları (marka zekâsı, prompt üretimi) Lovable AI Gateway üzerinden, ayrı anahtar gerekmez.
-- Neon'daki tablolar bozulmadan kalır; uygulama Cloud'u kullanır.
+## Sıra
+1. Token ve tipografi kalibrasyonu
+2. Ana sayfa yeniden düzeni + koyu band
+3. Header/footer uyarlaması
+4. Onay sonrası alt sayfalara yayma
 
-## Sıralama
-1. Auth gate + roller + admin ataması
-2. Çekirdek tablolar + RLS
-3. Kurulum sihirbazı (4 adım, AI + onay)
-4. Komuta Merkezi ve ilk 3 ekranın gerçek veriye bağlanması
-5. Nav sadeleştirme, boş durumlar, marka seçici
-6. Landing/CTA ve SEO iyileştirmeleri
+## Not — devam eden iş
+Panel tarafında onaylanan plan (auth kapısı, roller, çekirdek tablolar, kurulum sihirbazı) yarım kaldı: veritabanı ve sunucu fonksiyonları hazır, kurulum sihirbazı ekranı ve gerçek veriye bağlanma kaldı. Bu tasarım işi onaylanınca hangisinden devam edeyim — önce paneli bitirip sonra landing'e mi geçelim, yoksa landing tasarımı öncelikli mi?

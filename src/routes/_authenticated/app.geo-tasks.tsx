@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GEO_TASK_COLUMNS, mockGeoTasks } from "@/lib/panel-mock/geo-tasks";
 
-export const Route = createFileRoute("/app/geo-tasks")({
+export const Route = createFileRoute("/_authenticated/app/geo-tasks")({
   head: () => ({
     meta: [
       { title: "GEO Görev Panosu — OneCite Paneli" },
