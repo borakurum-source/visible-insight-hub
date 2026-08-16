@@ -661,6 +661,35 @@ export const startMeasurement = createServerFn({ method: "POST" })
       .from("prompts").select("id").eq("brand_id", data.brandId).eq("status", "approved");
     const ids = (prompts ?? []).map((p) => p.id);
     if (!ids.length) throw new Error("Önce en az bir prompt onaylayın.");
+
+    // Yarım kalmış bir tur varsa onu sürdür: aynı turda ölçülen promptları tekrar ölçme.
+    const { data: openBatch } = await context.supabase
+      .from("measurement_batches")
+      .select("*")
+      .eq("brand_id", data.brandId)
+      .eq("status", "running")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (openBatch) {
+      const fresh = Date.now() - new Date(openBatch.created_at).getTime() < 60 * 60 * 1000;
+      if (fresh) {
+        const { data: doneRuns } = await context.supabase
+          .from("prompt_runs")
+          .select("prompt_id")
+          .eq("brand_id", data.brandId)
+          .gte("created_at", openBatch.created_at);
+        const doneSet = new Set((doneRuns ?? []).map((r) => r.prompt_id));
+        const remaining = ids.filter((id) => !doneSet.has(id));
+        return { batch: openBatch, promptIds: remaining.length ? remaining : ids };
+      }
+      await context.supabase
+        .from("measurement_batches")
+        .update({ status: "failed", error: "Tur yarıda kaldı", finished_at: new Date().toISOString() })
+        .eq("id", openBatch.id);
+    }
+
     const { data: batch, error } = await context.supabase
       .from("measurement_batches")
       .insert({ brand_id: data.brandId, status: "running", total_prompts: ids.length, completed_prompts: 0 })
