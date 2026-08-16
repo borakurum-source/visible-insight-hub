@@ -1,12 +1,12 @@
 export const mockPlans = [
-  { id: "starter", name: "Başlangıç", price: "₺1.490/ay", clients: 1, prompts: 40, highlight: false },
-  { id: "pro", name: "Pro", price: "₺3.990/ay", clients: 3, prompts: 150, highlight: true },
-  { id: "enterprise", name: "Kurumsal", price: "Özel fiyat", clients: 10, prompts: 500, highlight: false },
+  { id: "starter", name: "Başlangıç", price: "$29/ay", clients: 1, prompts: 30, highlight: false },
+  { id: "growth", name: "Büyüme", price: "$79/ay", clients: 5, prompts: 100, highlight: true },
+  { id: "agency", name: "Ajans", price: "$199/ay", clients: 999, prompts: 999, highlight: false },
 ];
 
 export const mockUsage = {
-  plan: "Pro",
-  planLabel: "Pro Plan",
-  limits: { maxClients: 3, maxPromptsPerClient: 150, maxCompetitorsPerClient: 10 },
+  plan: "Büyüme",
+  planLabel: "Büyüme Planı",
+  limits: { maxClients: 5, maxPromptsPerClient: 100, maxCompetitorsPerClient: 15 },
   usage: { clients: 2, prompts: 128, competitors: 6 },
 };

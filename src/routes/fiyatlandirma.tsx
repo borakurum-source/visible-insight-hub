@@ -5,7 +5,7 @@ import { MarketingShell } from "@/components/site/MarketingShell";
 import { MarketingCta } from "@/components/site/marketing-cta";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { pricingPlans } from "@/lib/pricingData";
+import { formatUsd, pricingPlans } from "@/lib/pricingData";
 
 const pricingFaqs = [
   {
@@ -92,7 +92,7 @@ export const Route = createFileRoute("/fiyatlandirma")({
             "@type": "Offer",
             name: plan.label,
             price: plan.monthly,
-            priceCurrency: "TRY",
+            priceCurrency: "USD",
             category: "Aylık abonelik",
             availability: "https://schema.org/InStock",
           })),
@@ -114,10 +114,6 @@ export const Route = createFileRoute("/fiyatlandirma")({
   }),
   component: PricingPage,
 });
-
-function formatTry(value: number) {
-  return `₺${value.toLocaleString("tr-TR")}`;
-}
 
 function PricingPage() {
   const [annual, setAnnual] = useState(false);
@@ -159,7 +155,7 @@ function PricingPage() {
         <div className="grid gap-4 lg:grid-cols-4">
           {pricingPlans.map((plan) => {
             const isFree = plan.monthly === 0;
-            const displayPrice = isFree ? "₺0" : annual ? formatTry(plan.annualTotal) : formatTry(plan.monthly);
+            const displayPrice = isFree ? "$0" : annual ? formatUsd(plan.annualTotal) : formatUsd(plan.monthly);
             const suffix = isFree ? "" : annual ? " /yıl" : " /ay";
             return (
               <div
@@ -177,7 +173,7 @@ function PricingPage() {
                   <span className="text-sm text-muted-foreground">{suffix}</span>
                 </p>
                 {!isFree && annual && (
-                  <p className="mt-1 text-xs text-muted-foreground">Aylık karşılığı {formatTry(Math.round(plan.annualTotal / 12))}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Aylık karşılığı {formatUsd(Math.round(plan.annualTotal / 12))}</p>
                 )}
                 <p className="mt-4 min-h-[3.5rem] text-sm leading-6 text-muted-foreground">{plan.desc}</p>
                 <ul className="mt-5 space-y-2 border-t border-border pt-5 text-sm">
@@ -204,7 +200,7 @@ function PricingPage() {
             );
           })}
         </div>
-        <p className="mt-6 text-xs text-muted-foreground">Fiyatlara KDV dahil değildir. Ajans planında ihtiyaç halinde özel limit ve white-label seçenekleri tanımlanır.</p>
+        <p className="mt-6 text-xs text-muted-foreground">Fiyatlar ABD doları (USD) cinsindendir ve vergiler hariçtir. Ajans planında ihtiyaç halinde özel limit ve white-label seçenekleri tanımlanır.</p>
       </section>
 
       <section className="border-y border-border bg-secondary px-4 py-16 md:px-6 md:py-24">
