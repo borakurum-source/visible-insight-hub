@@ -18,6 +18,7 @@ export const KNOWLEDGE_SUBNAV = [
 export const WORKSPACE_SUBNAV = [
   { to: "/app/settings", label: "Ayarlar" },
   { to: "/app/integrations", label: "Entegrasyonlar" },
+  { to: "/app/system-prompts", label: "Sistem Talimatları" },
   { to: "/app/account", label: "Hesabım" },
   { to: "/app/pricing", label: "Plan" },
 ];
