@@ -263,19 +263,18 @@ function FilmFolkOrnegi() {
   );
 }
 
-function PlanlaraBakis() {
+function KimIcin() {
   const fits = [
-    { title: "İlk kez ölçmek istiyorum", description: "Tek markanın yapay zeka görünürlüğünü görün.", action: "Ücretsiz ölçüm", href: "/free-ai-readiness-report" },
-    { title: "Tek markayı düzenli izliyorum", description: "Soru seti ve Bilgi Bankası ile ritmik takip kurun.", action: "Planları incele", href: "/fiyatlandirma" },
-    { title: "Birden fazla marka ve domain yönetiyorum", description: "Ajans veya grup şirketi ölçeğinde marka, soru ve rakip görünürlüğünü karşılaştırın.", action: "Ajans çözümünü incele", href: "/solutions/agencies" },
+    { title: "İlk kez ölçmek istiyorum", description: "Tek markanın yapay zeka görünürlüğünü ücretsiz ölçümle görün.", action: "Ücretsiz ölçüm", href: "/free-ai-readiness-report" },
+    { title: "Tek markayı düzenli izliyorum", description: "Sabit soru seti ve Bilgi Bankası ile aylık takip ritmi kurun.", action: "Platformu incele", href: "/platform" },
+    { title: "Birden fazla marka yönetiyorum", description: "Ajans veya grup şirketi ölçeğinde marka, soru ve rakip görünürlüğünü karşılaştırın.", action: "Ajans çözümünü incele", href: "/solutions/agencies" },
   ];
   return (
-    <section className="bg-secondary py-16 md:py-24" data-testid="section-plans-overview">
+    <section className="border-y border-border bg-background py-16 md:py-24" data-testid="section-audience">
       <div className="marketing-container">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.13em] text-primary">Planlar</p>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Ölçüm ritminize uygun bir başlangıç seçin.</h2>
-          <p className="mt-4 text-base leading-7 text-muted-foreground">Planları, limitleri ve ekibiniz için uygun çalışma alanını ayrı fiyatlandırma sayfasında net biçimde karşılaştırın.</p>
+          <p className="editorial-eyebrow text-primary">Kimin için?</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Nereden başladığınıza göre farklı bir giriş noktası.</h2>
         </div>
         <div className="mt-10 grid gap-3 lg:grid-cols-3">
           {fits.map((fit) => (
@@ -284,6 +283,39 @@ function PlanlaraBakis() {
               <p className="mt-2 flex-1 text-sm leading-6 text-muted-foreground">{fit.description}</p>
               <span className="mt-5 flex items-center gap-1 text-sm font-bold text-primary group-hover:text-foreground">{fit.action} <ArrowRight className="h-3.5 w-3.5" /></span>
             </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PlanlaraBakis() {
+  return (
+    <section className="bg-secondary py-16 md:py-24" data-testid="section-plans-overview">
+      <div className="marketing-container">
+        <div className="max-w-2xl">
+          <p className="editorial-eyebrow text-primary">Planlar</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Ücretsiz başlayın, ihtiyaç büyüdükçe ölçeklendirin.</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">Kurulum ücreti ve taahhüt yok. Planlar takip ettiğiniz marka, soru ve rakip sayısına göre değişir.</p>
+        </div>
+        <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          {pricingPlans.map((plan) => (
+            <div key={plan.slug} className={`flex flex-col rounded-xl border p-5 ${plan.highlight ? "border-primary bg-background" : "border-border bg-background"}`}>
+              <div className="flex items-center justify-between">
+                <p className="editorial-eyebrow text-primary">{plan.label}</p>
+                {plan.highlight && <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">Popüler</span>}
+              </div>
+              <p className="mt-4 font-mono text-2xl font-medium text-foreground">
+                {plan.monthly === 0 ? "₺0" : `₺${plan.monthly.toLocaleString("tr-TR")}`}
+                <span className="text-xs text-muted-foreground"> /ay</span>
+              </p>
+              <ul className="mt-4 flex-1 space-y-1.5 text-sm text-muted-foreground">
+                {plan.limits.map((limit) => (
+                  <li key={limit} className="flex items-start gap-2"><CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />{limit}</li>
+                ))}
+              </ul>
+            </div>
           ))}
         </div>
         <Button className="mt-8" asChild><Link to="/fiyatlandirma">Tüm planları karşılaştır <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
@@ -332,10 +364,11 @@ function Landing() {
       <Hero />
       <ProofStrip />
       <NedenOneCite />
-      <KanıtMetaforuBandı />
       <KaynakSinyalUygulama />
       <UrunAkisi />
+      <KanıtMetaforuBandı />
       <FilmFolkOrnegi />
+      <KimIcin />
       <PlanlaraBakis />
       <SSS />
       <SonCagri />
