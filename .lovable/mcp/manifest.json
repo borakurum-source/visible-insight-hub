@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.2",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://xfaxdaiarxcycqrbbzws.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "onecite",
+      "version": "0.1.0",
+      "title": "OneCite"
+    },
+    "tools": [
+      {
+        "name": "list_brands",
+        "title": "Markaları listele",
+        "description": "Giriş yapan kullanıcının OneCite'taki markalarını (ad, alan adı, kurulum durumu) döner.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_visibility",
+        "title": "Görünürlük özeti",
+        "description": "Bir markanın yapay zekâ görünürlük skorunu, ölçülen prompt sayısını ve son atıf kaynaklarını döner.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "brand_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "OneCite marka kimliği (list_brands ile alınır)."
+            }
+          },
+          "required": [
+            "brand_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_prompts",
+        "title": "Promptları listele",
+        "description": "Bir markanın izlenen yapay zekâ sorularını durum filtresiyle listeler.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "brand_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "status": {
+              "description": "Varsayılan: approved.",
+              "type": "string",
+              "enum": [
+                "approved",
+                "candidate",
+                "inactive"
+              ]
+            }
+          },
+          "required": [
+            "brand_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_knowledge",
+        "title": "Bilgi bankasında ara",
+        "description": "Markanın bilgi bankasında anlamsal (vektör) arama yapar ve en ilgili kanıt parçalarını döner.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "brand_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "query": {
+              "type": "string",
+              "minLength": 2,
+              "description": "Aranacak soru veya konu."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            }
+          },
+          "required": [
+            "brand_id",
+            "query"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_knowledge_source",
+        "title": "Bilgi kaynağı ekle",
+        "description": "Markanın bilgi bankasına yeni bir URL kaynağı ekler. İndeksleme panelden veya index_source ile başlatılır.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "brand_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "brand_id",
+            "url"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
