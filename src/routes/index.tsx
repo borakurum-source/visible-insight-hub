@@ -66,7 +66,7 @@ function Hero() {
         <Reveal className="relative" delay={0.06}>
           <div className="visual-panel-shadow relative overflow-hidden rounded-[28px] border border-white/15 bg-[#101211]" data-testid="hero-visual-panel">
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#101211]/45 via-transparent to-transparent" aria-hidden="true" />
-            <div className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/15 bg-[#101211]/70 px-3 py-1.5 backdrop-blur"><span className="h-1.5 w-1.5 rounded-full bg-[#3FBFB2] shadow-[0_0_12px_#3FBFB2]" /><span className="visual-source-label text-slate-300">SOURCE SIGNAL · 01</span></div>
+            <div className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/15 bg-[#101211]/70 px-3 py-1.5 backdrop-blur"><span className="h-1.5 w-1.5 rounded-full bg-[#3FBFB2]" /><span className="visual-source-label text-slate-300">SOURCE SIGNAL · 01</span></div>
             <img src={heroCitationOrb} alt="Karanlık bir yüzey üzerinde, üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre" className="block h-auto w-full" width="2560" height="1440" fetchPriority="high" />
             <div className="absolute bottom-5 left-5 right-5 z-20 flex items-end justify-between gap-4">
               <div><p className="visual-source-label text-[#3FBFB2]">EVIDENCE LAYER</p><p className="mt-1 text-sm font-semibold text-white">Görünmek ile kaynak olarak seçilmek aynı şey değil.</p></div>
@@ -116,7 +116,7 @@ function NedenOneCite() {
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           {items.map(({ icon: Icon, title, body }, index) => (
-            <Reveal key={title} delay={index * 0.06} className="rounded-2xl border border-[#E3E0D5] bg-white p-5 shadow-[0_12px_28px_rgba(11,16,32,0.035)]">
+            <Reveal key={title} delay={index * 0.06} className="rounded-2xl border border-[#E3E0D5] bg-white p-5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EDEFE9] text-[#1B7F86]"><Icon className="h-5 w-5" /></div>
               <h3 className="mt-5 text-sm font-bold text-[#101211]">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-[#6B6A61]">{body}</p>
@@ -207,7 +207,7 @@ function UrunAkisi() {
                 <h3 className="mt-5 text-2xl font-extrabold tracking-[-0.03em] text-[#101211] md:text-3xl">{row.title}</h3>
                 <p className="mt-4 max-w-xl text-base leading-7 text-[#6B6A61]">{row.body}</p>
               </div>
-              <div className="overflow-hidden rounded-2xl border border-[#E3E0D5] bg-[#F5F3EC] shadow-[0_18px_45px_rgba(11,16,32,0.08)]"><img src={row.img} alt={row.alt} className="h-auto w-full" /></div>
+              <div className="overflow-hidden rounded-2xl border border-[#E3E0D5] bg-[#F5F3EC]"><img src={row.img} alt={row.alt} className="h-auto w-full" /></div>
             </Reveal>
           ))}
         </div>

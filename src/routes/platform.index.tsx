@@ -71,7 +71,7 @@ function PlatformPage() {
             <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-4xl">Skorun arkasındaki soruyu, kaynak seçimini ve değişimi görün.</h2>
             <p className="mt-5 text-base leading-7 text-[#6B6A61]">Bir metrik tek başına karar verdirmez. OneCite, skoru etkileyen soruları, kaynak tiplerini ve rakip bağlamını birlikte sunar.</p>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-[#E3E0D5] bg-[#F5F3EC] shadow-[0_18px_45px_rgba(11,16,32,0.08)]">
+          <div className="overflow-hidden rounded-2xl border border-[#E3E0D5] bg-[#F5F3EC]">
             <img src={shotMetrics} alt="OneCite atıf payı ve kaynak trendi paneli" className="h-auto w-full" />
           </div>
         </div>

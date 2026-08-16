@@ -94,7 +94,7 @@ function ArticleCard({ article, featured = false }: { article: Article; featured
       <Link
         to="/makaleler/$slug"
         params={{ slug: article.slug }}
-        className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B7F86] focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-[#EDEFE9] shadow-[0_18px_42px_rgba(53,106,255,0.09)]" : "border-[#E3E0D5] bg-white hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
+        className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B7F86] focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-[#EDEFE9]" : "border-[#E3E0D5] bg-white hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
       >
         <div className="flex items-center justify-between gap-3">
           <Badge variant="outline" className="border-[#E3E0D5] bg-white text-[#1B7F86]">{article.category}</Badge>

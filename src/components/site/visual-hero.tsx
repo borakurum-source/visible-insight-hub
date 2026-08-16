@@ -58,7 +58,7 @@ export function VisualHero({
         <Reveal className="relative" delay={0.06}>
           <div className="visual-panel-shadow relative overflow-hidden rounded-[28px] border border-white/15 bg-[#101211]">
             <div className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/15 bg-[#101211]/70 px-3 py-1.5 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#3FBFB2] shadow-[0_0_12px_#3FBFB2]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#3FBFB2]" />
               <span className="visual-source-label text-slate-300">{visualLabel}</span>
             </div>
             <img src={image} alt={imageAlt} className="block h-auto w-full" width="2560" height="1440" loading="eager" />
