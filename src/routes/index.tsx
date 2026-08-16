@@ -55,6 +55,12 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
+const HERO_PROOF = [
+  { value: 28.1, suffix: " puan", label: "6 ayda ağırlıklı atıf payı artışı" },
+  { value: 41, suffix: "", label: "Satın alma niyetli soru" },
+  { value: 286, suffix: "", label: "Ölçüm tekrarı" },
+];
+
 function Hero() {
   return (
     <section id="olcum" className="visual-hero-surface relative isolate overflow-hidden border-b border-[#26302E] scroll-mt-16" data-testid="section-hero">
@@ -85,7 +91,6 @@ function Hero() {
               <div key={item.label} className="bg-ink/70 px-4 py-4">
                 <dt className="font-mono text-xl font-medium text-white md:text-2xl">
                   <MetricRise value={item.value} suffix={item.suffix} />
-                  {item.prefix ? null : null}
                 </dt>
                 <dd className="mt-1 text-[11px] leading-4 text-slate-400">{item.label}</dd>
               </div>
