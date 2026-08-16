@@ -14,7 +14,7 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ brand_id, query, limit }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
-    const { embedOne } = await import("../embeddings.server");
+    const { embedOne } = await import("@/lib/embeddings.server");
     const vector = await embedOne(query);
     if (!vector) return { content: [{ type: "text", text: "Sorgu vektöre çevrilemedi" }], isError: true };
     const supabase = supabaseForUser(ctx);
