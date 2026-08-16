@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, CircleDotDashed, ExternalLink, Network, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MarketingShell } from "@/components/site/MarketingShell";
+import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
 import BrandLogo from "@/components/site/BrandLogo";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
@@ -86,11 +87,10 @@ function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-muted px-4 py-16 text-center md:px-6 md:py-24">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Başlangıç</p>
-        <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-5xl">Markanızın AI cevaplarında nerede durduğunu birlikte görün.</h2>
-        <Button asChild size="lg" className="mt-8"><Link to="/free-ai-readiness-report">Ücretsiz ölçüm başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
-      </section>
+      <MarketingCta
+        title="Markanızın yapay zeka cevaplarında nerede durduğunu birlikte görün."
+        description="Ölçüm, kanıt ve uygulama zincirini ilk ücretsiz raporla başlatın."
+      />
     </MarketingShell>
   );
 }

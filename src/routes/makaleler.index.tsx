@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarketingShell } from "@/components/site/MarketingShell";
+import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
 import { Reveal, MotionPress } from "@/components/site/marketing-motion";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
@@ -166,15 +167,10 @@ function ArticlesPage() {
         </div>
       </section>
 
-      <section className="bg-muted px-4 py-16 md:px-6">
-        <div className="marketing-container flex flex-col items-start justify-between gap-6 rounded-2xl border border-border bg-background p-7 md:flex-row md:items-center">
-          <div>
-            <h2 className="text-2xl font-extrabold text-foreground">Okuduklarınızı kendi markanızla test edin.</h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">Ücretsiz hazırlık raporu, ilk kaynak ve kanıt çerçevenizi verir.</p>
-          </div>
-          <Button asChild><Link to="/free-ai-readiness-report">Ücretsiz ölçüm başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
-        </div>
-      </section>
+      <MarketingCta
+        title="Okuduklarınızı kendi markanızla test edin."
+        description="Ücretsiz hazırlık raporu, ilk kaynak ve kanıt çerçevenizi verir."
+      />
     </MarketingShell>
   );
 }

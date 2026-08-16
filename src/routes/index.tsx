@@ -55,6 +55,12 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
+const HERO_PROOF = [
+  { value: 28.1, suffix: " puan", label: "6 ayda ağırlıklı atıf payı artışı" },
+  { value: 41, suffix: "", label: "Satın alma niyetli soru" },
+  { value: 286, suffix: "", label: "Ölçüm tekrarı" },
+];
+
 function Hero() {
   return (
     <section id="olcum" className="visual-hero-surface relative isolate overflow-hidden border-b border-[#26302E] scroll-mt-16" data-testid="section-hero">
@@ -65,9 +71,11 @@ function Hero() {
           <div className="flex items-center gap-3"><span className="visual-source-label text-cyan">AI CITATION INTELLIGENCE</span><span className="h-px w-10 bg-cyan/70" /></div>
           <div className="space-y-5">
             <h1 className="max-w-2xl text-4xl font-extrabold leading-[1.03] tracking-[-0.05em] text-white md:text-5xl lg:text-[60px]" data-testid="text-hero-headline">
-              Yapay zeka cevaplarında markanız <span className="text-cyan">kaynak</span> olarak seçiliyor mu?
+              ChatGPT, Perplexity ve Gemini cevaplarında markanızın <span className="text-cyan">atıf payını</span> ölçün ve artırın.
             </h1>
-            <p className="max-w-xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">Atıf payınızı ölçün, eksik kanıtı görün ve yapay zekanın güvenebileceği bir sonraki içeriği önce üretin.</p>
+            <p className="max-w-xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">
+              OneCite, satın alma niyetli sorularda hangi markanın kaynak olarak seçildiğini ölçer, eksik kanıtı gösterir ve önce hangi içeriği üretmeniz gerektiğini söyler.
+            </p>
           </div>
           <div className="max-w-xl rounded-xl border border-white/15 bg-background/[0.08] p-4 backdrop-blur-md md:p-5" data-testid="hero-report-cta">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white"><Target className="h-4 w-4 text-cyan" /> İlk ölçümü başlatın</div>
@@ -75,9 +83,20 @@ function Hero() {
             <p className="mt-3 text-xs leading-5 text-slate-400">Kredi kartı gerekmez. İlk ölçüm herkese açık web verileriyle başlar.</p>
           </div>
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
-            <span>Ölçülen yüzeyler:</span>
+            <span>Kredi kartı yok · 2 dakikada rapor · Ölçülen yüzeyler:</span>
             <EngineRotator className="font-mono text-cyan" />
           </p>
+          <dl className="grid max-w-xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/15 bg-white/10" data-testid="hero-proof-strip">
+            {HERO_PROOF.map((item) => (
+              <div key={item.label} className="bg-ink/70 px-4 py-4">
+                <dt className="font-mono text-xl font-medium text-white md:text-2xl">
+                  <MetricRise value={item.value} suffix={item.suffix} />
+                </dt>
+                <dd className="mt-1 text-[11px] leading-4 text-slate-400">{item.label}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="text-[11px] text-slate-500">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
         </div>
         <Reveal className="relative" delay={0.06}>
           <div className="visual-panel-shadow relative overflow-hidden rounded-[28px] border border-white/15 bg-ink" data-testid="hero-visual-panel">
@@ -90,32 +109,6 @@ function Hero() {
             </div>
           </div>
         </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function ProofStrip() {
-  const items = [
-    { value: 41, suffix: "", label: "Sabit satın alma niyetli soru" },
-    { value: 286, suffix: "", label: "Ölçüm tekrarı" },
-    { value: 28.1, suffix: " puan", label: "Ağırlıklı atıf payı artışı" },
-  ];
-  return (
-    <section className="border-b border-border bg-background" data-testid="section-proof-strip">
-      <div className="marketing-container grid gap-0 px-4 py-5 md:grid-cols-[1.1fr_repeat(3,.72fr)] md:px-6 md:py-0">
-        <div className="flex items-center py-5 md:pr-8">
-          <div>
-            <p className="editorial-eyebrow text-primary">Gerçek bir ölçümden</p>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">FilmFolk markası için altı aylık takip sonuçları.</p>
-          </div>
-        </div>
-        {items.map((item) => (
-          <div key={item.label} className="border-t border-border py-5 md:border-l md:border-t-0 md:px-7">
-            <p className="font-mono text-2xl font-medium text-foreground"><MetricRise value={item.value} suffix={item.suffix} /></p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.label}</p>
-          </div>
-        ))}
       </div>
     </section>
   );
@@ -338,7 +331,6 @@ function Landing() {
   return (
     <MarketingShell>
       <Hero />
-      <ProofStrip />
       <Problem />
       <NasilCalisir />
       <FilmFolkOrnegi />
