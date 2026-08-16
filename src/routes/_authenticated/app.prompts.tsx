@@ -23,6 +23,7 @@ import {
   setPromptActionDone,
   setPromptStatus,
 } from "@/lib/panel.functions";
+import { toPlainText } from "@/lib/plain-text";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/prompts")({
@@ -301,7 +302,7 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
             <span>{new Date(data.run.createdAt).toLocaleString("tr-TR")} · {data.run.engine}</span>
           </div>
           <div className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-md bg-background p-3 text-xs leading-relaxed text-muted-foreground">
-            {data.run.answer}
+            {toPlainText(data.run.answer)}
           </div>
         </>
       ) : (

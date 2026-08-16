@@ -15,6 +15,7 @@ import { QuerySkeleton } from "@/components/app/panel-query-states";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
 import { getMeasurementState, listRunCitations } from "@/lib/panel.functions";
 import { useMeasurementRun } from "@/lib/use-measurement-run";
+import { toPlainText } from "@/lib/plain-text";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/measurement")({
@@ -147,7 +148,7 @@ function MeasurementPage() {
                       <AccordionContent className="space-y-3">
                         {run.answer ? (
                           <div className="max-h-96 overflow-y-auto whitespace-pre-wrap rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">
-                            {run.answer}
+                            {toPlainText(run.answer)}
                           </div>
                         ) : null}
                         {!run.brandMentioned ? (
