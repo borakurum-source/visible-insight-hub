@@ -46,6 +46,7 @@ const FILTERS = [
 
 function PromptsPage() {
   const { brand } = useActiveBrand();
+  const { prompt: promptFromSearch } = Route.useSearch();
   const queryClient = useQueryClient();
   const fetchPrompts = useServerFn(listPrompts);
   const updateStatus = useServerFn(setPromptStatus);
@@ -55,6 +56,7 @@ function PromptsPage() {
   const [filter, setFilter] = useState<string>("approved");
   const [draft, setDraft] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [openPrompt, setOpenPrompt] = useState<string | null>(promptFromSearch ?? null);
 
   const key = ["prompts", brand?.id];
   const { data = [], isLoading } = useQuery({
@@ -195,13 +197,25 @@ function PromptsPage() {
           ) : (
             <ul className="divide-y divide-border">
               {visible.map((prompt) => (
-                <li key={prompt.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
+                <li key={prompt.id} className="p-3 text-sm">
+                  <div className="flex flex-wrap items-center gap-3">
                   <Checkbox
                     aria-label="Promptu seç"
                     checked={Boolean(checked[prompt.id])}
                     onCheckedChange={(value) => setChecked({ ...checked, [prompt.id]: value === true })}
                   />
-                  <span className="min-w-0 flex-1">{prompt.text}</span>
+                  <button
+                    type="button"
+                    className="min-w-0 flex-1 text-left hover:text-primary"
+                    onClick={() => setOpenPrompt(openPrompt === prompt.id ? null : prompt.id)}
+                    aria-expanded={openPrompt === prompt.id}
+                  >
+                    {prompt.text}
+                    <ChevronDown
+                      className={`ml-1.5 inline h-3.5 w-3.5 transition-transform ${openPrompt === prompt.id ? "rotate-180" : ""}`}
+                      aria-hidden="true"
+                    />
+                  </button>
                   {prompt.intent ? <Badge variant="secondary" className="text-[10px]">{prompt.intent}</Badge> : null}
                   <Badge variant="outline" className="text-[10px]">{prompt.category}</Badge>
                   {prompt.status !== "approved" ? (
@@ -214,6 +228,8 @@ function PromptsPage() {
                   <Button size="icon" variant="ghost" aria-label="Promptu sil" onClick={() => deleteMutation.mutate(prompt.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
+                  </div>
+                  {openPrompt === prompt.id ? <PromptDetail brandId={brand.id} promptId={prompt.id} /> : null}
                 </li>
               ))}
             </ul>
@@ -221,5 +237,97 @@ function PromptsPage() {
         </CardContent>
       </Card>
     </>
+  );
+}
+
+function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string }) {
+  const fetchInsight = useServerFn(getPromptInsight);
+  const addTask = useServerFn(createGeoTask);
+  const { data, isLoading } = useQuery({
+    queryKey: ["prompt-insight", promptId],
+    queryFn: () => fetchInsight({ data: { brandId, promptId } }),
+  });
+
+  const taskMutation = useMutation({
+    mutationFn: (input: { title: string; description: string; priority: string }) =>
+      addTask({ data: { brandId, ...input } }),
+    onSuccess: () => toast.success("Görev, Görevler listenize eklendi."),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  if (isLoading) {
+    return (
+      <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Son ölçüm yükleniyor…
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-3 space-y-3 rounded-lg border border-border bg-muted/20 p-3">
+      {data?.run ? (
+        <>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            {data.run.brandMentioned ? (
+              <Badge variant="outline" className="border-success/40 text-success">
+                {data.run.position ? `${data.run.position}. sırada` : "Yanıtta geçiyor"}
+              </Badge>
+            ) : (
+              <Badge variant="secondary">Yanıtta geçmiyor</Badge>
+            )}
+            <span>{new Date(data.run.createdAt).toLocaleString("tr-TR")} · {data.run.engine}</span>
+          </div>
+          <div className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-md bg-background p-3 text-xs leading-relaxed text-muted-foreground">
+            {data.run.answer}
+          </div>
+        </>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Bu soru henüz ölçülmedi. <Link to="/app/measurement" className="underline">Ölçüm başlatın</Link>.
+        </p>
+      )}
+
+      {data?.sources?.length ? (
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Kullanılan kaynaklar</p>
+          {data.sources.map((source) => (
+            <a
+              key={source.url}
+              href={source.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="flex items-center justify-between gap-3 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs hover:text-primary"
+            >
+              <span className="min-w-0 flex-1 truncate">{source.title}</span>
+              <span className="font-mono text-[10px] text-muted-foreground">{source.domain}</span>
+              <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+      ) : null}
+
+      {data?.actions?.length ? (
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Bu soruda görünmek için</p>
+          {data.actions.map((action) => (
+            <div key={action.title} className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium">{action.title}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">{action.description}</p>
+              </div>
+              <div className="flex gap-1.5">
+                <Button size="sm" variant="outline" disabled={taskMutation.isPending}
+                  onClick={() => taskMutation.mutate(action)}>
+                  <ListTodo className="mr-1.5 h-3.5 w-3.5" /> Göreve ekle
+                </Button>
+                <Button size="sm" variant="ghost" asChild>
+                  <Link to="/app/content">İçerik üret</Link>
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
