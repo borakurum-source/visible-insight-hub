@@ -117,7 +117,7 @@ function ArticlesPage() {
   const [selectedCategory, setSelectedCategory] = useState("Tümü");
   const categories = useMemo(() => ["Tümü", ...articles.map((article) => article.category)], []);
   const visibleArticles = selectedCategory === "Tümü" ? articles : articles.filter((article) => article.category === selectedCategory);
-  const featured = articles[0];
+  const featured = articles[0]!;
 
   return (
     <MarketingShell>
