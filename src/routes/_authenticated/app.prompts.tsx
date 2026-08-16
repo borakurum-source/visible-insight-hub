@@ -308,11 +308,32 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
 
       {data?.actions?.length ? (
         <div className="space-y-1.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Bu soruda görünmek için</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Bu soruda görünmek için</p>
+            <Hint title="Kontrol listesi">
+              <p>Bu adımları tamamladıkça kutucukları işaretleyin; işaretleriniz kaydedilir.</p>
+              <p><strong>Göreve ekle</strong> ile adımı Görevler listenize taşıyıp ekibinizle takip edebilirsiniz.</p>
+            </Hint>
+            <span className="ml-auto font-mono text-[11px] text-muted-foreground">
+              {doneCount} / {data.actions.length} tamam
+            </span>
+          </div>
           {data.actions.map((action) => (
-            <div key={action.title} className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5">
+            <div key={action.key} className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5">
+              <Checkbox
+                id={`action-${promptId}-${action.key}`}
+                className="mt-0.5"
+                checked={action.done}
+                disabled={toggleMutation.isPending}
+                onCheckedChange={(checked) => toggleMutation.mutate({ action, done: checked === true })}
+              />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium">{action.title}</p>
+                <label
+                  htmlFor={`action-${promptId}-${action.key}`}
+                  className={`cursor-pointer text-xs font-medium ${action.done ? "text-muted-foreground line-through" : ""}`}
+                >
+                  {action.title}
+                </label>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">{action.description}</p>
               </div>
               <div className="flex gap-1.5">
