@@ -5,28 +5,14 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * 1cite design system — "AI visibility console".
- * Dark ink base, signal-teal primary, citation-amber accent.
- */
-
-/*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * OneCite (1cite) design system.
+ * Brand palette: Citation Ink / Evidence Cyan / Signal Blue / Cloud / Paper / Line / Slate
  */
 
 @theme inline {
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: Manrope, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: Manrope, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, Menlo, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -50,6 +36,10 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -67,68 +57,90 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --color-surface: var(--surface);
-  --color-surface-foreground: var(--surface-foreground);
-  --color-signal: var(--signal);
-  --color-signal-foreground: var(--signal-foreground);
+  --color-ink: var(--ink);
+  --color-cyan: var(--evidence-cyan);
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.16 0.02 240);
-  --foreground: oklch(0.96 0.005 240);
-  --surface: oklch(0.21 0.022 242);
-  --surface-foreground: oklch(0.96 0.005 240);
-  --card: oklch(0.2 0.021 242);
-  --card-foreground: oklch(0.96 0.005 240);
-  --popover: oklch(0.2 0.021 242);
-  --popover-foreground: oklch(0.96 0.005 240);
-  --primary: oklch(0.78 0.13 183);
-  --primary-foreground: oklch(0.18 0.03 210);
-  --secondary: oklch(0.27 0.025 243);
-  --secondary-foreground: oklch(0.94 0.006 240);
-  --muted: oklch(0.25 0.022 243);
-  --muted-foreground: oklch(0.71 0.02 244);
-  --accent: oklch(0.82 0.14 79);
-  --accent-foreground: oklch(0.2 0.04 60);
-  --signal: oklch(0.78 0.13 183);
-  --signal-foreground: oklch(0.18 0.03 210);
-  --destructive: oklch(0.62 0.2 22);
-  --destructive-foreground: oklch(0.97 0.005 240);
-  --border: oklch(0.3 0.024 243);
-  --input: oklch(0.31 0.024 243);
-  --ring: oklch(0.78 0.13 183);
-  --chart-1: oklch(0.78 0.13 183);
-  --chart-2: oklch(0.82 0.14 79);
-  --chart-3: oklch(0.66 0.12 250);
-  --chart-4: oklch(0.72 0.13 145);
-  --chart-5: oklch(0.68 0.16 20);
-  --sidebar: oklch(0.185 0.02 241);
-  --sidebar-foreground: oklch(0.9 0.008 240);
-  --sidebar-primary: oklch(0.78 0.13 183);
-  --sidebar-primary-foreground: oklch(0.18 0.03 210);
-  --sidebar-accent: oklch(0.25 0.022 243);
-  --sidebar-accent-foreground: oklch(0.95 0.005 240);
-  --sidebar-border: oklch(0.29 0.024 243);
-  --sidebar-ring: oklch(0.78 0.13 183);
-
-  --gradient-hero: radial-gradient(
-      120% 90% at 15% 0%,
-      oklch(0.34 0.08 195 / 0.55) 0%,
-      transparent 60%
-    ),
-    radial-gradient(90% 80% at 100% 10%, oklch(0.4 0.1 79 / 0.28) 0%, transparent 55%);
-  --gradient-surface: linear-gradient(
-    160deg,
-    oklch(0.24 0.024 242) 0%,
-    oklch(0.19 0.02 242) 100%
-  );
-  --shadow-glow: 0 0 0 1px oklch(0.78 0.13 183 / 0.18), 0 18px 60px -20px oklch(0.78 0.13 183 / 0.35);
-  --shadow-panel: 0 24px 70px -30px oklch(0.05 0.02 240 / 0.9);
+  --radius: 0.6rem;
+  --background: hsl(216 45% 98%);
+  --foreground: hsl(226 49% 8%);
+  --border: hsl(220 32% 93%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(226 49% 8%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(226 49% 8%);
+  --primary: hsl(224 100% 60%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(220 32% 93%);
+  --secondary-foreground: hsl(226 49% 8%);
+  --muted: hsl(216 30% 95%);
+  --muted-foreground: hsl(221 13% 46%);
+  --accent: hsl(189 90% 94%);
+  --accent-foreground: hsl(226 49% 8%);
+  --destructive: hsl(4 76% 40%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --success: hsl(155 90% 24%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(22 92% 37%);
+  --warning-foreground: hsl(0 0% 100%);
+  --input: hsl(220 28% 85%);
+  --ring: hsl(224 100% 60%);
+  --chart-1: hsl(224 100% 60%);
+  --chart-2: hsl(189 100% 60%);
+  --chart-3: hsl(221 13% 46%);
+  --chart-4: hsl(155 90% 24%);
+  --chart-5: hsl(22 92% 37%);
+  --sidebar: hsl(216 45% 98%);
+  --sidebar-foreground: hsl(226 49% 8%);
+  --sidebar-primary: hsl(224 100% 60%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(220 32% 93%);
+  --sidebar-accent-foreground: hsl(226 49% 8%);
+  --sidebar-border: hsl(220 32% 93%);
+  --sidebar-ring: hsl(224 100% 60%);
+  --ink: hsl(226 49% 8%);
+  --evidence-cyan: hsl(189 100% 60%);
 }
 
 .dark {
   color-scheme: dark;
+  --background: hsl(226 49% 8%);
+  --foreground: hsl(216 45% 98%);
+  --border: hsl(226 30% 18%);
+  --card: hsl(226 40% 11%);
+  --card-foreground: hsl(216 45% 98%);
+  --popover: hsl(226 40% 11%);
+  --popover-foreground: hsl(216 45% 98%);
+  --primary: hsl(224 100% 65%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(226 30% 16%);
+  --secondary-foreground: hsl(216 45% 98%);
+  --muted: hsl(226 25% 15%);
+  --muted-foreground: hsl(220 15% 65%);
+  --accent: hsl(189 90% 20%);
+  --accent-foreground: hsl(189 100% 75%);
+  --destructive: hsl(4 70% 50%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --success: hsl(155 70% 45%);
+  --success-foreground: hsl(226 49% 8%);
+  --warning: hsl(22 85% 55%);
+  --warning-foreground: hsl(226 49% 8%);
+  --input: hsl(226 25% 22%);
+  --ring: hsl(224 100% 65%);
+  --chart-1: hsl(224 100% 65%);
+  --chart-2: hsl(189 100% 60%);
+  --chart-3: hsl(220 15% 60%);
+  --chart-4: hsl(155 70% 45%);
+  --chart-5: hsl(22 85% 55%);
+  --sidebar: hsl(226 55% 6%);
+  --sidebar-foreground: hsl(216 45% 98%);
+  --sidebar-primary: hsl(224 100% 65%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(226 30% 16%);
+  --sidebar-accent-foreground: hsl(216 45% 98%);
+  --sidebar-border: hsl(226 30% 16%);
+  --sidebar-ring: hsl(224 100% 65%);
 }
 
 @layer base {
@@ -152,15 +164,48 @@
   }
 }
 
-@utility hero-glow {
-  background-image: var(--gradient-hero);
+@utility marketing-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1180px;
+  padding-inline: 1.25rem;
 }
 
-@utility surface-panel {
-  background-image: var(--gradient-surface);
-  box-shadow: var(--shadow-panel);
+@utility marketing-copy {
+  max-width: 660px;
 }
 
-@utility glow-ring {
-  box-shadow: var(--shadow-glow);
+@utility panel-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1rem;
+  padding-block: 2rem;
+}
+
+@utility visual-hero-surface {
+  background:
+    radial-gradient(circle at 82% 22%, rgb(53 106 255 / 0.2), transparent 34%),
+    radial-gradient(circle at 16% 8%, rgb(53 225 255 / 0.12), transparent 32%),
+    #0b1020;
+}
+
+@utility visual-hero-grid {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+
+@utility visual-panel-shadow {
+  box-shadow:
+    0 32px 90px rgb(11 16 32 / 0.28),
+    0 0 0 1px rgb(255 255 255 / 0.08) inset;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visual-hero-grid {
+    mask-image: none;
+  }
 }

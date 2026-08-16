@@ -1,84 +1,124 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PanelHeader } from "@/components/app/PanelHeader";
+import { LayoutDashboard, RefreshCw, UserPlus } from "lucide-react";
+import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { KpiCard } from "@/components/app/panel-shared";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { mockOverview, mockTrend, mockKbHealth, mockClusterStats, mockPriorityTasks } from "@/lib/panel-mock/overview";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
     meta: [
-      { title: "Panel — 1cite" },
-      { name: "description", content: "1cite AI görünürlük paneli genel bakış ekranı." },
+      { title: "Komuta Merkezi — OneCite Paneli" },
+      { name: "description", content: "Seçili domainin AI görünürlüğünü, kanıt durumunu ve öncelikli işleri tek yerde izleyin." },
+      { property: "og:title", content: "Komuta Merkezi — OneCite Paneli" },
+      { property: "og:description", content: "AI görünürlüğü, kanıt gücü ve öncelikli işler tek ekranda." },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: Dashboard,
 });
 
-const stats = [
-  { label: "Alıntı Payı", value: "%18,4", delta: "+2,1 pt" },
-  { label: "Takip Edilen Sorgu", value: "128", delta: "+12" },
-  { label: "Alıntılanan Sayfa", value: "37", delta: "+5" },
-  { label: "Ortalama Sıra", value: "2,6", delta: "-0,4" },
-];
-
-const rows = [
-  { q: "en iyi ai görünürlük aracı", model: "ChatGPT", cited: true, source: "1cite.com/urun" },
-  { q: "geo nedir", model: "Perplexity", cited: true, source: "1cite.com/blog/geo" },
-  { q: "rag signal nasıl ölçülür", model: "Gemini", cited: false, source: "—" },
-  { q: "ai arama optimizasyonu ajansı", model: "ChatGPT", cited: false, source: "—" },
-];
-
 function Dashboard() {
   return (
     <>
-      <PanelHeader title="Genel Bakış" />
-      <main className="flex-1 space-y-8 p-8">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="surface-panel rounded-2xl border border-border p-5">
-              <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                {s.label}
-              </p>
-              <p className="mt-3 font-display text-3xl">{s.value}</p>
-              <p className="mt-1 text-xs text-primary">{s.delta} son 30 gün</p>
-            </div>
-          ))}
-        </div>
+      <PanelPageHeading
+        meta={{
+          title: "Komuta Merkezi",
+          description: "Seçili domainin AI görünürlüğünü, kanıt durumunu ve öncelikli işleri tek yerde izleyin.",
+          icon: LayoutDashboard,
+        }}
+        action={
+          <>
+            <Button variant="outline" size="sm"><UserPlus className="mr-2 h-3.5 w-3.5" /> Yeni Marka</Button>
+            <Button size="sm"><RefreshCw className="mr-2 h-3.5 w-3.5" /> Tümünü Güncelle</Button>
+          </>
+        }
+      />
 
-        <section className="surface-panel overflow-hidden rounded-2xl border border-border">
-          <div className="border-b border-border px-6 py-4">
-            <h2 className="text-sm font-semibold">Son tarama sonuçları</h2>
-          </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard icon={<LayoutDashboard className="h-4 w-4" />} label="Görünürlük Skoru" value={String(mockOverview.visibilityScore)} sub={mockOverview.visibilityLabel} hint="Marka bahsi + alıntı oranından hesaplanan bileşik skor." />
+        <KpiCard icon={<LayoutDashboard className="h-4 w-4" />} label="Bahsedilme Oranı" value={`%${Math.round(mockOverview.mentionRate * 100)}`} sub={`${mockOverview.totalRuns} çalıştırma`} />
+        <KpiCard icon={<LayoutDashboard className="h-4 w-4" />} label="Alıntılanma Oranı" value={`%${Math.round(mockOverview.citedRate * 100)}`} sub={`${mockOverview.promptsWithRuns}/${mockOverview.totalPrompts} prompt ölçüldü`} />
+        <KpiCard icon={<LayoutDashboard className="h-4 w-4" />} label="Son Ölçüm" value={mockOverview.lastRunAt} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader><CardTitle className="text-sm">Görünürlük trendi</CardTitle></CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-6 gap-2">
+              {mockTrend.map((point) => (
+                <div key={point.date} className="flex flex-col items-center gap-1">
+                  <div className="flex h-24 w-full items-end rounded bg-muted">
+                    <div className="w-full rounded bg-primary" style={{ height: `${point.mentionRate * 100}%` }} />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">{point.date}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Rakip liderlik tablosu</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {mockOverview.competitorLeaderboard.map((c) => (
+              <div key={c.name} className="flex items-center justify-between text-sm">
+                <span>{c.name}</span>
+                <Badge variant="outline">{c.count} anılma</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Bilgi bankası sağlığı</CardTitle></CardHeader>
+          <CardContent className="grid grid-cols-2 gap-3 text-sm">
+            <div><p className="text-muted-foreground">Sağlık skoru</p><p className="text-lg font-semibold">{mockKbHealth.score}/100</p></div>
+            <div><p className="text-muted-foreground">Kaynak sayısı</p><p className="text-lg font-semibold">{mockKbHealth.sourceCount}</p></div>
+            <div><p className="text-muted-foreground">Parça sayısı</p><p className="text-lg font-semibold">{mockKbHealth.chunkCount}</p></div>
+            <div><p className="text-muted-foreground">Eski kaynaklar</p><p className="text-lg font-semibold text-destructive">{mockKbHealth.staleSourceCount}</p></div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Öncelikli işler</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {mockPriorityTasks.map((task) => (
+              <div key={task.id} className="flex items-start gap-2 text-sm">
+                <Badge variant="outline" className={task.severity === "yuksek" ? "border-destructive text-destructive" : ""}>
+                  {task.severity === "yuksek" ? "Yüksek" : task.severity === "orta" ? "Orta" : "Düşük"}
+                </Badge>
+                <span className="text-muted-foreground">{task.title}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-sm">Cluster bazlı performans</CardTitle></CardHeader>
+        <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-6 py-3 font-medium">Sorgu</th>
-                <th className="px-6 py-3 font-medium">Model</th>
-                <th className="px-6 py-3 font-medium">Durum</th>
-                <th className="px-6 py-3 font-medium">Kaynak</th>
-              </tr>
+              <tr><th className="py-2 pr-4">Cluster</th><th className="py-2 pr-4">Toplam</th><th className="py-2 pr-4">Ölçülen</th><th className="py-2 pr-4">Bahsedilme</th><th className="py-2 pr-4">Alıntılanma</th></tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.q} className="border-t border-border/70">
-                  <td className="px-6 py-4">{r.q}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{r.model}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs ${
-                        r.cited
-                          ? "bg-primary/15 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {r.cited ? "Alıntılandı" : "Alıntılanmadı"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{r.source}</td>
+              {mockClusterStats.map((c) => (
+                <tr key={c.cluster} className="border-t border-border/70">
+                  <td className="py-2 pr-4">{c.cluster}</td>
+                  <td className="py-2 pr-4">{c.total}</td>
+                  <td className="py-2 pr-4">{c.measured}</td>
+                  <td className="py-2 pr-4">%{Math.round(c.mentionRate * 100)}</td>
+                  <td className="py-2 pr-4">%{Math.round(c.citedRate * 100)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </section>
-      </main>
+        </CardContent>
+      </Card>
     </>
   );
 }

@@ -12,12 +12,37 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
-import { Route as UrunRouteImport } from './routes/urun'
+import { Route as FreeAiReadinessReportRouteImport } from './routes/free-ai-readiness-report'
+import { Route as HakkimizdaRouteImport } from './routes/hakkimizda'
+import { Route as KvkkRouteImport } from './routes/kvkk'
+import { Route as MakalelerRouteImport } from './routes/makaleler'
+import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SunumRouteImport } from './routes/sunum'
 import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppAyarlarRouteImport } from './routes/app.ayarlar'
-import { Route as AppRakiplerRouteImport } from './routes/app.rakipler'
-import { Route as AppRaporlarRouteImport } from './routes/app.raporlar'
-import { Route as AppSorgularRouteImport } from './routes/app.sorgular'
+import { Route as AppAccountRouteImport } from './routes/app.account'
+import { Route as AppAdminRouteImport } from './routes/app.admin'
+import { Route as AppCitationDiscoveryRouteImport } from './routes/app.citation-discovery'
+import { Route as AppClaimsRouteImport } from './routes/app.claims'
+import { Route as AppContentRouteImport } from './routes/app.content'
+import { Route as AppGeoTasksRouteImport } from './routes/app.geo-tasks'
+import { Route as AppGraphRouteImport } from './routes/app.graph'
+import { Route as AppIntegrationsRouteImport } from './routes/app.integrations'
+import { Route as AppKnowledgeBaseRouteImport } from './routes/app.knowledge-base'
+import { Route as AppOnboardingRouteImport } from './routes/app.onboarding'
+import { Route as AppPricingRouteImport } from './routes/app.pricing'
+import { Route as AppPromptDiscoveryRouteImport } from './routes/app.prompt-discovery'
+import { Route as AppPromptsRouteImport } from './routes/app.prompts'
+import { Route as AppReportRouteImport } from './routes/app.report'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as MakalelerIndexRouteImport } from './routes/makaleler.index'
+import { Route as MakalelerSlugRouteImport } from './routes/makaleler.$slug'
+import { Route as PlatformIndexRouteImport } from './routes/platform.index'
+import { Route as PlatformCitationShareRouteImport } from './routes/platform.citation-share'
+import { Route as PlatformEvidenceGapsRouteImport } from './routes/platform.evidence-gaps'
+import { Route as ProofFilmfolkRouteImport } from './routes/proof.filmfolk'
+import { Route as RTokenRouteImport } from './routes/r.$token'
+import { Route as SolutionsAgenciesRouteImport } from './routes/solutions.agencies'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,9 +59,39 @@ const FiyatlandirmaRoute = FiyatlandirmaRouteImport.update({
   path: '/fiyatlandirma',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UrunRoute = UrunRouteImport.update({
-  id: '/urun',
-  path: '/urun',
+const FreeAiReadinessReportRoute = FreeAiReadinessReportRouteImport.update({
+  id: '/free-ai-readiness-report',
+  path: '/free-ai-readiness-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HakkimizdaRoute = HakkimizdaRouteImport.update({
+  id: '/hakkimizda',
+  path: '/hakkimizda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KvkkRoute = KvkkRouteImport.update({
+  id: '/kvkk',
+  path: '/kvkk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MakalelerRoute = MakalelerRouteImport.update({
+  id: '/makaleler',
+  path: '/makaleler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRoute = PlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SunumRoute = SunumRouteImport.update({
+  id: '/sunum',
+  path: '/sunum',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -44,59 +99,227 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAyarlarRoute = AppAyarlarRouteImport.update({
-  id: '/ayarlar',
-  path: '/ayarlar',
+const AppAccountRoute = AppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => AppRoute,
 } as any)
-const AppRakiplerRoute = AppRakiplerRouteImport.update({
-  id: '/rakipler',
-  path: '/rakipler',
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
-const AppRaporlarRoute = AppRaporlarRouteImport.update({
-  id: '/raporlar',
-  path: '/raporlar',
+const AppCitationDiscoveryRoute = AppCitationDiscoveryRouteImport.update({
+  id: '/citation-discovery',
+  path: '/citation-discovery',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSorgularRoute = AppSorgularRouteImport.update({
-  id: '/sorgular',
-  path: '/sorgular',
+const AppClaimsRoute = AppClaimsRouteImport.update({
+  id: '/claims',
+  path: '/claims',
   getParentRoute: () => AppRoute,
+} as any)
+const AppContentRoute = AppContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGeoTasksRoute = AppGeoTasksRouteImport.update({
+  id: '/geo-tasks',
+  path: '/geo-tasks',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGraphRoute = AppGraphRouteImport.update({
+  id: '/graph',
+  path: '/graph',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIntegrationsRoute = AppIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppKnowledgeBaseRoute = AppKnowledgeBaseRouteImport.update({
+  id: '/knowledge-base',
+  path: '/knowledge-base',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOnboardingRoute = AppOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPricingRoute = AppPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPromptDiscoveryRoute = AppPromptDiscoveryRouteImport.update({
+  id: '/prompt-discovery',
+  path: '/prompt-discovery',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPromptsRoute = AppPromptsRouteImport.update({
+  id: '/prompts',
+  path: '/prompts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportRoute = AppReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const MakalelerIndexRoute = MakalelerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MakalelerRoute,
+} as any)
+const MakalelerSlugRoute = MakalelerSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => MakalelerRoute,
+} as any)
+const PlatformIndexRoute = PlatformIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PlatformRoute,
+} as any)
+const PlatformCitationShareRoute = PlatformCitationShareRouteImport.update({
+  id: '/citation-share',
+  path: '/citation-share',
+  getParentRoute: () => PlatformRoute,
+} as any)
+const PlatformEvidenceGapsRoute = PlatformEvidenceGapsRouteImport.update({
+  id: '/evidence-gaps',
+  path: '/evidence-gaps',
+  getParentRoute: () => PlatformRoute,
+} as any)
+const ProofFilmfolkRoute = ProofFilmfolkRouteImport.update({
+  id: '/proof/filmfolk',
+  path: '/proof/filmfolk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SolutionsAgenciesRoute = SolutionsAgenciesRouteImport.update({
+  id: '/solutions/agencies',
+  path: '/solutions/agencies',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/fiyatlandirma': typeof FiyatlandirmaRoute
-  '/urun': typeof UrunRoute
-  '/app/ayarlar': typeof AppAyarlarRoute
-  '/app/rakipler': typeof AppRakiplerRoute
-  '/app/raporlar': typeof AppRaporlarRoute
-  '/app/sorgular': typeof AppSorgularRoute
+  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
+  '/hakkimizda': typeof HakkimizdaRoute
+  '/kvkk': typeof KvkkRoute
+  '/makaleler': typeof MakalelerRouteWithChildren
+  '/platform': typeof PlatformRouteWithChildren
+  '/privacy': typeof PrivacyRoute
+  '/sunum': typeof SunumRoute
+  '/app/account': typeof AppAccountRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/citation-discovery': typeof AppCitationDiscoveryRoute
+  '/app/claims': typeof AppClaimsRoute
+  '/app/content': typeof AppContentRoute
+  '/app/geo-tasks': typeof AppGeoTasksRoute
+  '/app/graph': typeof AppGraphRoute
+  '/app/integrations': typeof AppIntegrationsRoute
+  '/app/knowledge-base': typeof AppKnowledgeBaseRoute
+  '/app/onboarding': typeof AppOnboardingRoute
+  '/app/pricing': typeof AppPricingRoute
+  '/app/prompt-discovery': typeof AppPromptDiscoveryRoute
+  '/app/prompts': typeof AppPromptsRoute
+  '/app/report': typeof AppReportRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/makaleler/$slug': typeof MakalelerSlugRoute
+  '/platform/citation-share': typeof PlatformCitationShareRoute
+  '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
+  '/proof/filmfolk': typeof ProofFilmfolkRoute
+  '/r/$token': typeof RTokenRoute
+  '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/app/': typeof AppIndexRoute
+  '/makaleler/': typeof MakalelerIndexRoute
+  '/platform/': typeof PlatformIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
-  '/urun': typeof UrunRoute
-  '/app/ayarlar': typeof AppAyarlarRoute
-  '/app/rakipler': typeof AppRakiplerRoute
-  '/app/raporlar': typeof AppRaporlarRoute
-  '/app/sorgular': typeof AppSorgularRoute
+  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
+  '/hakkimizda': typeof HakkimizdaRoute
+  '/kvkk': typeof KvkkRoute
+  '/privacy': typeof PrivacyRoute
+  '/sunum': typeof SunumRoute
+  '/app/account': typeof AppAccountRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/citation-discovery': typeof AppCitationDiscoveryRoute
+  '/app/claims': typeof AppClaimsRoute
+  '/app/content': typeof AppContentRoute
+  '/app/geo-tasks': typeof AppGeoTasksRoute
+  '/app/graph': typeof AppGraphRoute
+  '/app/integrations': typeof AppIntegrationsRoute
+  '/app/knowledge-base': typeof AppKnowledgeBaseRoute
+  '/app/onboarding': typeof AppOnboardingRoute
+  '/app/pricing': typeof AppPricingRoute
+  '/app/prompt-discovery': typeof AppPromptDiscoveryRoute
+  '/app/prompts': typeof AppPromptsRoute
+  '/app/report': typeof AppReportRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/makaleler/$slug': typeof MakalelerSlugRoute
+  '/platform/citation-share': typeof PlatformCitationShareRoute
+  '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
+  '/proof/filmfolk': typeof ProofFilmfolkRoute
+  '/r/$token': typeof RTokenRoute
+  '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/app': typeof AppIndexRoute
+  '/makaleler': typeof MakalelerIndexRoute
+  '/platform': typeof PlatformIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/fiyatlandirma': typeof FiyatlandirmaRoute
-  '/urun': typeof UrunRoute
-  '/app/ayarlar': typeof AppAyarlarRoute
-  '/app/rakipler': typeof AppRakiplerRoute
-  '/app/raporlar': typeof AppRaporlarRoute
-  '/app/sorgular': typeof AppSorgularRoute
+  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
+  '/hakkimizda': typeof HakkimizdaRoute
+  '/kvkk': typeof KvkkRoute
+  '/makaleler': typeof MakalelerRouteWithChildren
+  '/platform': typeof PlatformRouteWithChildren
+  '/privacy': typeof PrivacyRoute
+  '/sunum': typeof SunumRoute
+  '/app/account': typeof AppAccountRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/citation-discovery': typeof AppCitationDiscoveryRoute
+  '/app/claims': typeof AppClaimsRoute
+  '/app/content': typeof AppContentRoute
+  '/app/geo-tasks': typeof AppGeoTasksRoute
+  '/app/graph': typeof AppGraphRoute
+  '/app/integrations': typeof AppIntegrationsRoute
+  '/app/knowledge-base': typeof AppKnowledgeBaseRoute
+  '/app/onboarding': typeof AppOnboardingRoute
+  '/app/pricing': typeof AppPricingRoute
+  '/app/prompt-discovery': typeof AppPromptDiscoveryRoute
+  '/app/prompts': typeof AppPromptsRoute
+  '/app/report': typeof AppReportRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/makaleler/$slug': typeof MakalelerSlugRoute
+  '/platform/citation-share': typeof PlatformCitationShareRoute
+  '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
+  '/proof/filmfolk': typeof ProofFilmfolkRoute
+  '/r/$token': typeof RTokenRoute
+  '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/app/': typeof AppIndexRoute
+  '/makaleler/': typeof MakalelerIndexRoute
+  '/platform/': typeof PlatformIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -104,40 +327,122 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/fiyatlandirma'
-    | '/urun'
-    | '/app/ayarlar'
-    | '/app/rakipler'
-    | '/app/raporlar'
-    | '/app/sorgular'
+    | '/free-ai-readiness-report'
+    | '/hakkimizda'
+    | '/kvkk'
+    | '/makaleler'
+    | '/platform'
+    | '/privacy'
+    | '/sunum'
+    | '/app/account'
+    | '/app/admin'
+    | '/app/citation-discovery'
+    | '/app/claims'
+    | '/app/content'
+    | '/app/geo-tasks'
+    | '/app/graph'
+    | '/app/integrations'
+    | '/app/knowledge-base'
+    | '/app/onboarding'
+    | '/app/pricing'
+    | '/app/prompt-discovery'
+    | '/app/prompts'
+    | '/app/report'
+    | '/app/settings'
+    | '/makaleler/$slug'
+    | '/platform/citation-share'
+    | '/platform/evidence-gaps'
+    | '/proof/filmfolk'
+    | '/r/$token'
+    | '/solutions/agencies'
     | '/app/'
+    | '/makaleler/'
+    | '/platform/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/fiyatlandirma'
-    | '/urun'
-    | '/app/ayarlar'
-    | '/app/rakipler'
-    | '/app/raporlar'
-    | '/app/sorgular'
+    | '/free-ai-readiness-report'
+    | '/hakkimizda'
+    | '/kvkk'
+    | '/privacy'
+    | '/sunum'
+    | '/app/account'
+    | '/app/admin'
+    | '/app/citation-discovery'
+    | '/app/claims'
+    | '/app/content'
+    | '/app/geo-tasks'
+    | '/app/graph'
+    | '/app/integrations'
+    | '/app/knowledge-base'
+    | '/app/onboarding'
+    | '/app/pricing'
+    | '/app/prompt-discovery'
+    | '/app/prompts'
+    | '/app/report'
+    | '/app/settings'
+    | '/makaleler/$slug'
+    | '/platform/citation-share'
+    | '/platform/evidence-gaps'
+    | '/proof/filmfolk'
+    | '/r/$token'
+    | '/solutions/agencies'
     | '/app'
+    | '/makaleler'
+    | '/platform'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/fiyatlandirma'
-    | '/urun'
-    | '/app/ayarlar'
-    | '/app/rakipler'
-    | '/app/raporlar'
-    | '/app/sorgular'
+    | '/free-ai-readiness-report'
+    | '/hakkimizda'
+    | '/kvkk'
+    | '/makaleler'
+    | '/platform'
+    | '/privacy'
+    | '/sunum'
+    | '/app/account'
+    | '/app/admin'
+    | '/app/citation-discovery'
+    | '/app/claims'
+    | '/app/content'
+    | '/app/geo-tasks'
+    | '/app/graph'
+    | '/app/integrations'
+    | '/app/knowledge-base'
+    | '/app/onboarding'
+    | '/app/pricing'
+    | '/app/prompt-discovery'
+    | '/app/prompts'
+    | '/app/report'
+    | '/app/settings'
+    | '/makaleler/$slug'
+    | '/platform/citation-share'
+    | '/platform/evidence-gaps'
+    | '/proof/filmfolk'
+    | '/r/$token'
+    | '/solutions/agencies'
     | '/app/'
+    | '/makaleler/'
+    | '/platform/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   FiyatlandirmaRoute: typeof FiyatlandirmaRoute
-  UrunRoute: typeof UrunRoute
+  FreeAiReadinessReportRoute: typeof FreeAiReadinessReportRoute
+  HakkimizdaRoute: typeof HakkimizdaRoute
+  KvkkRoute: typeof KvkkRoute
+  MakalelerRoute: typeof MakalelerRouteWithChildren
+  PlatformRoute: typeof PlatformRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
+  SunumRoute: typeof SunumRoute
+  ProofFilmfolkRoute: typeof ProofFilmfolkRoute
+  RTokenRoute: typeof RTokenRoute
+  SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -163,11 +468,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FiyatlandirmaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/urun': {
-      id: '/urun'
-      path: '/urun'
-      fullPath: '/urun'
-      preLoaderRoute: typeof UrunRouteImport
+    '/free-ai-readiness-report': {
+      id: '/free-ai-readiness-report'
+      path: '/free-ai-readiness-report'
+      fullPath: '/free-ai-readiness-report'
+      preLoaderRoute: typeof FreeAiReadinessReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hakkimizda': {
+      id: '/hakkimizda'
+      path: '/hakkimizda'
+      fullPath: '/hakkimizda'
+      preLoaderRoute: typeof HakkimizdaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kvkk': {
+      id: '/kvkk'
+      path: '/kvkk'
+      fullPath: '/kvkk'
+      preLoaderRoute: typeof KvkkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/makaleler': {
+      id: '/makaleler'
+      path: '/makaleler'
+      fullPath: '/makaleler'
+      preLoaderRoute: typeof MakalelerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform': {
+      id: '/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sunum': {
+      id: '/sunum'
+      path: '/sunum'
+      fullPath: '/sunum'
+      preLoaderRoute: typeof SunumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -177,60 +524,254 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/ayarlar': {
-      id: '/app/ayarlar'
-      path: '/ayarlar'
-      fullPath: '/app/ayarlar'
-      preLoaderRoute: typeof AppAyarlarRouteImport
+    '/app/account': {
+      id: '/app/account'
+      path: '/account'
+      fullPath: '/app/account'
+      preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/rakipler': {
-      id: '/app/rakipler'
-      path: '/rakipler'
-      fullPath: '/app/rakipler'
-      preLoaderRoute: typeof AppRakiplerRouteImport
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/raporlar': {
-      id: '/app/raporlar'
-      path: '/raporlar'
-      fullPath: '/app/raporlar'
-      preLoaderRoute: typeof AppRaporlarRouteImport
+    '/app/citation-discovery': {
+      id: '/app/citation-discovery'
+      path: '/citation-discovery'
+      fullPath: '/app/citation-discovery'
+      preLoaderRoute: typeof AppCitationDiscoveryRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/sorgular': {
-      id: '/app/sorgular'
-      path: '/sorgular'
-      fullPath: '/app/sorgular'
-      preLoaderRoute: typeof AppSorgularRouteImport
+    '/app/claims': {
+      id: '/app/claims'
+      path: '/claims'
+      fullPath: '/app/claims'
+      preLoaderRoute: typeof AppClaimsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/app/content': {
+      id: '/app/content'
+      path: '/content'
+      fullPath: '/app/content'
+      preLoaderRoute: typeof AppContentRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/geo-tasks': {
+      id: '/app/geo-tasks'
+      path: '/geo-tasks'
+      fullPath: '/app/geo-tasks'
+      preLoaderRoute: typeof AppGeoTasksRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/graph': {
+      id: '/app/graph'
+      path: '/graph'
+      fullPath: '/app/graph'
+      preLoaderRoute: typeof AppGraphRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/integrations': {
+      id: '/app/integrations'
+      path: '/integrations'
+      fullPath: '/app/integrations'
+      preLoaderRoute: typeof AppIntegrationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/knowledge-base': {
+      id: '/app/knowledge-base'
+      path: '/knowledge-base'
+      fullPath: '/app/knowledge-base'
+      preLoaderRoute: typeof AppKnowledgeBaseRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/onboarding': {
+      id: '/app/onboarding'
+      path: '/onboarding'
+      fullPath: '/app/onboarding'
+      preLoaderRoute: typeof AppOnboardingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pricing': {
+      id: '/app/pricing'
+      path: '/pricing'
+      fullPath: '/app/pricing'
+      preLoaderRoute: typeof AppPricingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/prompt-discovery': {
+      id: '/app/prompt-discovery'
+      path: '/prompt-discovery'
+      fullPath: '/app/prompt-discovery'
+      preLoaderRoute: typeof AppPromptDiscoveryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/prompts': {
+      id: '/app/prompts'
+      path: '/prompts'
+      fullPath: '/app/prompts'
+      preLoaderRoute: typeof AppPromptsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/report': {
+      id: '/app/report'
+      path: '/report'
+      fullPath: '/app/report'
+      preLoaderRoute: typeof AppReportRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/makaleler/': {
+      id: '/makaleler/'
+      path: '/'
+      fullPath: '/makaleler/'
+      preLoaderRoute: typeof MakalelerIndexRouteImport
+      parentRoute: typeof MakalelerRoute
+    }
+    '/makaleler/$slug': {
+      id: '/makaleler/$slug'
+      path: '/$slug'
+      fullPath: '/makaleler/$slug'
+      preLoaderRoute: typeof MakalelerSlugRouteImport
+      parentRoute: typeof MakalelerRoute
+    }
+    '/platform/': {
+      id: '/platform/'
+      path: '/'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof PlatformIndexRouteImport
+      parentRoute: typeof PlatformRoute
+    }
+    '/platform/citation-share': {
+      id: '/platform/citation-share'
+      path: '/citation-share'
+      fullPath: '/platform/citation-share'
+      preLoaderRoute: typeof PlatformCitationShareRouteImport
+      parentRoute: typeof PlatformRoute
+    }
+    '/platform/evidence-gaps': {
+      id: '/platform/evidence-gaps'
+      path: '/evidence-gaps'
+      fullPath: '/platform/evidence-gaps'
+      preLoaderRoute: typeof PlatformEvidenceGapsRouteImport
+      parentRoute: typeof PlatformRoute
+    }
+    '/proof/filmfolk': {
+      id: '/proof/filmfolk'
+      path: '/proof/filmfolk'
+      fullPath: '/proof/filmfolk'
+      preLoaderRoute: typeof ProofFilmfolkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$token': {
+      id: '/r/$token'
+      path: '/r/$token'
+      fullPath: '/r/$token'
+      preLoaderRoute: typeof RTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/solutions/agencies': {
+      id: '/solutions/agencies'
+      path: '/solutions/agencies'
+      fullPath: '/solutions/agencies'
+      preLoaderRoute: typeof SolutionsAgenciesRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
 interface AppRouteChildren {
-  AppAyarlarRoute: typeof AppAyarlarRoute
-  AppRakiplerRoute: typeof AppRakiplerRoute
-  AppRaporlarRoute: typeof AppRaporlarRoute
-  AppSorgularRoute: typeof AppSorgularRoute
+  AppAccountRoute: typeof AppAccountRoute
+  AppAdminRoute: typeof AppAdminRoute
+  AppCitationDiscoveryRoute: typeof AppCitationDiscoveryRoute
+  AppClaimsRoute: typeof AppClaimsRoute
+  AppContentRoute: typeof AppContentRoute
+  AppGeoTasksRoute: typeof AppGeoTasksRoute
+  AppGraphRoute: typeof AppGraphRoute
+  AppIntegrationsRoute: typeof AppIntegrationsRoute
+  AppKnowledgeBaseRoute: typeof AppKnowledgeBaseRoute
+  AppOnboardingRoute: typeof AppOnboardingRoute
+  AppPricingRoute: typeof AppPricingRoute
+  AppPromptDiscoveryRoute: typeof AppPromptDiscoveryRoute
+  AppPromptsRoute: typeof AppPromptsRoute
+  AppReportRoute: typeof AppReportRoute
+  AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAyarlarRoute: AppAyarlarRoute,
-  AppRakiplerRoute: AppRakiplerRoute,
-  AppRaporlarRoute: AppRaporlarRoute,
-  AppSorgularRoute: AppSorgularRoute,
+  AppAccountRoute: AppAccountRoute,
+  AppAdminRoute: AppAdminRoute,
+  AppCitationDiscoveryRoute: AppCitationDiscoveryRoute,
+  AppClaimsRoute: AppClaimsRoute,
+  AppContentRoute: AppContentRoute,
+  AppGeoTasksRoute: AppGeoTasksRoute,
+  AppGraphRoute: AppGraphRoute,
+  AppIntegrationsRoute: AppIntegrationsRoute,
+  AppKnowledgeBaseRoute: AppKnowledgeBaseRoute,
+  AppOnboardingRoute: AppOnboardingRoute,
+  AppPricingRoute: AppPricingRoute,
+  AppPromptDiscoveryRoute: AppPromptDiscoveryRoute,
+  AppPromptsRoute: AppPromptsRoute,
+  AppReportRoute: AppReportRoute,
+  AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface MakalelerRouteChildren {
+  MakalelerSlugRoute: typeof MakalelerSlugRoute
+  MakalelerIndexRoute: typeof MakalelerIndexRoute
+}
+
+const MakalelerRouteChildren: MakalelerRouteChildren = {
+  MakalelerSlugRoute: MakalelerSlugRoute,
+  MakalelerIndexRoute: MakalelerIndexRoute,
+}
+
+const MakalelerRouteWithChildren = MakalelerRoute._addFileChildren(
+  MakalelerRouteChildren,
+)
+
+interface PlatformRouteChildren {
+  PlatformCitationShareRoute: typeof PlatformCitationShareRoute
+  PlatformEvidenceGapsRoute: typeof PlatformEvidenceGapsRoute
+  PlatformIndexRoute: typeof PlatformIndexRoute
+}
+
+const PlatformRouteChildren: PlatformRouteChildren = {
+  PlatformCitationShareRoute: PlatformCitationShareRoute,
+  PlatformEvidenceGapsRoute: PlatformEvidenceGapsRoute,
+  PlatformIndexRoute: PlatformIndexRoute,
+}
+
+const PlatformRouteWithChildren = PlatformRoute._addFileChildren(
+  PlatformRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   FiyatlandirmaRoute: FiyatlandirmaRoute,
-  UrunRoute: UrunRoute,
+  FreeAiReadinessReportRoute: FreeAiReadinessReportRoute,
+  HakkimizdaRoute: HakkimizdaRoute,
+  KvkkRoute: KvkkRoute,
+  MakalelerRoute: MakalelerRouteWithChildren,
+  PlatformRoute: PlatformRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
+  SunumRoute: SunumRoute,
+  ProofFilmfolkRoute: ProofFilmfolkRoute,
+  RTokenRoute: RTokenRoute,
+  SolutionsAgenciesRoute: SolutionsAgenciesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
