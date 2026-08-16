@@ -339,7 +339,7 @@ export const listRunCitations = createServerFn({ method: "POST" })
     const limit = Math.min(Math.max(data.limit ?? 25, 1), 60);
     const { data: runs } = await context.supabase
       .from("prompt_runs")
-      .select("id, prompt_id, brand_mentioned, position, answer_summary, created_at, prompts(text)")
+      .select("id, prompt_id, brand_mentioned, position, answer_summary, raw_answer, created_at, prompts(text)")
       .eq("brand_id", data.brandId)
       .order("created_at", { ascending: false })
       .limit(limit);
@@ -366,10 +366,12 @@ export const listRunCitations = createServerFn({ method: "POST" })
 
     return (runs ?? []).map((run) => ({
       id: run.id,
+      promptId: run.prompt_id,
       promptText: (run as unknown as { prompts?: { text?: string } }).prompts?.text ?? "",
       brandMentioned: run.brand_mentioned,
       position: run.position,
       answerSummary: run.answer_summary ?? "",
+      answer: run.raw_answer ?? run.answer_summary ?? "",
       createdAt: run.created_at,
       sources: byRun.get(run.id) ?? [],
     }));
