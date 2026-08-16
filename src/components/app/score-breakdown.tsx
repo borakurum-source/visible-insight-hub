@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import type { ScoreComponent } from "@/lib/score-model";
 
 function grade(total: number) {
-  if (total >= 75) return { label: "Güçlü", tone: "text-[hsl(var(--chart-2))]" };
+  if (total >= 75) return { label: "Güçlü", tone: "text-chart-2" };
   if (total >= 45) return { label: "Gelişmekte", tone: "text-foreground" };
   return { label: "Zayıf", tone: "text-destructive" };
 }

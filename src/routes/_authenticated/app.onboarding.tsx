@@ -18,6 +18,7 @@ import {
   createBrand,
   generateBrandIntelligence,
   generatePromptCandidates,
+  listPrompts,
   getBrandIntelligence,
   saveBrandIntelligence,
   setPromptStatus,
@@ -225,37 +226,41 @@ function StepProfile({ brandId, onDone, onBack }: { brandId: string; onDone: () 
   const [manualUrl, setManualUrl] = useState("");
   const [showDetails, setShowDetails] = useState(false);
 
+  const applyRow = (row: Awaited<ReturnType<typeof load>>) => {
+    if (!row) return;
+    setIntel({
+      summary: row.summary ?? "", positioning: row.positioning ?? "", tone: row.tone ?? "",
+      products: toList(row.products), audiences: toList(row.audiences),
+      competitors: toList(row.competitors), keywords: toList(row.keywords),
+    });
+  };
+
+  // Sadece kayıtlı veriyi okur. Yapay zekâ çağrıları butonla tetiklenir.
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      let row = await load({ data: { brandId } });
-      if (!row || !row.summary) row = await generate({ data: { brandId } });
-      if (cancelled || !row) { setLoading(false); return; }
-      setIntel({
-        summary: row.summary ?? "", positioning: row.positioning ?? "", tone: row.tone ?? "",
-        products: toList(row.products), audiences: toList(row.audiences),
-        competitors: toList(row.competitors), keywords: toList(row.keywords),
-      });
-      setLoading(false);
-      const suggested = await suggest({ data: { brandId } }).catch(() => []);
-      if (cancelled) return;
-      setSources(suggested);
-      setPicked(Object.fromEntries(suggested.map((s) => [s.url, true])));
-    })().catch(() => setLoading(false));
+    setLoading(true);
+    load({ data: { brandId } })
+      .then((row) => {
+        if (cancelled) return;
+        applyRow(row);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
     return () => { cancelled = true; };
   }, [brandId]);
 
-  const regenerate = useMutation({
-    mutationFn: () => generate({ data: { brandId } }),
-    onSuccess: (row) => {
-      if (!row) return;
-      setIntel({
-        summary: row.summary ?? "", positioning: row.positioning ?? "", tone: row.tone ?? "",
-        products: toList(row.products), audiences: toList(row.audiences),
-        competitors: toList(row.competitors), keywords: toList(row.keywords),
-      });
+  const analyze = useMutation({
+    mutationFn: async () => {
+      const row = await generate({ data: { brandId } });
+      const suggested = await suggest({ data: { brandId } }).catch(() => []);
+      return { row, suggested };
     },
+    onSuccess: ({ row, suggested }) => {
+      applyRow(row);
+      setSources(suggested);
+      setPicked(Object.fromEntries(suggested.map((s) => [s.url, true])));
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const approve = useMutation({
@@ -269,6 +274,35 @@ function StepProfile({ brandId, onDone, onBack }: { brandId: string; onDone: () 
   });
 
   if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center gap-3 py-10 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Kayıtlı marka bilgileri yükleniyor…
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!intel.summary && !analyze.isPending) {
+    return (
+      <StepFrame
+        step={STEPS[1]}
+        footer={
+          <>
+            <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+            <Button onClick={() => analyze.mutate()}>Siteyi analiz et <ArrowRight className="ml-1.5 h-4 w-4" /></Button>
+          </>
+        }
+      >
+        <p className="text-sm text-muted-foreground">
+          Hazır olduğunuzda sitenizi okuyup marka özeti, ürünler, hedef kitle ve rakip listesini çıkaralım.
+          Bu adım yapay zekâ kullanır ve yalnızca siz başlattığınızda çalışır.
+        </p>
+      </StepFrame>
+    );
+  }
+
+  if (analyze.isPending && !intel.summary) {
     return (
       <Card>
         <CardContent className="flex items-center gap-3 py-10 text-sm text-muted-foreground">
@@ -286,8 +320,9 @@ function StepProfile({ brandId, onDone, onBack }: { brandId: string; onDone: () 
       footer={
         <>
           <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
-          <Button variant="outline" onClick={() => regenerate.mutate()} disabled={regenerate.isPending}>
-            {regenerate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Yeniden çıkar
+          <Button variant="outline" onClick={() => analyze.mutate()} disabled={analyze.isPending}>
+            {analyze.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {intel.summary ? "Yeniden çıkar" : "Siteyi analiz et"}
           </Button>
           <Button onClick={() => approve.mutate()} disabled={approve.isPending}>
             {approve.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -372,21 +407,29 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
   const complete = useServerFn(completeOnboarding);
   const [prompts, setPrompts] = useState<Array<{ id: string; text: string; category: string }>>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const listAll = useServerFn(listPrompts);
   const [loading, setLoading] = useState(true);
 
+  const applyRows = (rows: Array<{ id: string; text: string; category: string }>) => {
+    const list = rows.map((r) => ({ id: r.id, text: r.text, category: r.category }));
+    setPrompts(list);
+    setSelected(Object.fromEntries(list.map((r) => [r.id, true])));
+  };
+
+  // Kayıtlı adayları okur; yeni üretim yalnızca butonla tetiklenir.
   useEffect(() => {
     let cancelled = false;
-    generate({ data: { brandId } })
-      .then((rows) => {
-        if (cancelled) return;
-        const list = rows.map((r) => ({ id: r.id, text: r.text, category: r.category }));
-        setPrompts(list);
-        setSelected(Object.fromEntries(list.map((r) => [r.id, true])));
-        setLoading(false);
-      })
+    listAll({ data: { brandId } })
+      .then((rows) => { if (!cancelled) { applyRows(rows); setLoading(false); } })
       .catch(() => setLoading(false));
     return () => { cancelled = true; };
   }, [brandId]);
+
+  const produce = useMutation({
+    mutationFn: () => generate({ data: { brandId } }),
+    onSuccess: (rows) => applyRows(rows),
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const finish = useMutation({
     mutationFn: async () => {
@@ -408,6 +451,10 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
       footer={
         <>
           <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+          <Button variant="outline" onClick={() => produce.mutate()} disabled={produce.isPending}>
+            {produce.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {prompts.length ? "Yeniden üret" : "Soruları üret"}
+          </Button>
           <Button onClick={() => finish.mutate()} disabled={count === 0 || finish.isPending}>
             {finish.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {count} promptu onayla ve kurulumu bitir <Check className="ml-1.5 h-4 w-4" />
@@ -415,9 +462,9 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
         </>
       }
     >
-      {loading ? (
+      {loading || produce.isPending ? (
         <p className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Markanız için sorular hazırlanıyor…
+          <Loader2 className="h-4 w-4 animate-spin" /> Sorular hazırlanıyor…
         </p>
       ) : (
         <>
@@ -436,7 +483,7 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
                 <Badge variant="outline" className="shrink-0 text-[10px]">{prompt.category}</Badge>
               </label>
             ))}
-            {prompts.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Prompt üretilemedi, tekrar deneyin.</p> : null}
+            {prompts.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Henüz soru yok — “Soruları üret” ile markanıza özel soruları oluşturun.</p> : null}
           </div>
         </>
       )}

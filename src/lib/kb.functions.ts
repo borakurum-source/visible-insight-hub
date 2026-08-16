@@ -6,68 +6,70 @@ export const indexKnowledgeSource = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; sourceId: string; force?: boolean }) => input)
   .handler(async ({ data, context }) => {
-    const { chunkText, embedTexts, fetchPageText, hashText, SOURCE_WEIGHTS } = await import("./embeddings.server");
-    const { supabase } = context;
-
-    const { data: source } = await supabase
-      .from("knowledge_sources")
-      .select("id, brand_id, title, url, content, source_type, content_hash")
-      .eq("id", data.sourceId)
-      .single();
-    if (!source) throw new Error("Kaynak bulunamadı");
-
-    const text = (source.content?.trim() || (source.url ? await fetchPageText(source.url) : "")).trim();
-    if (!text) {
-      await supabase.from("knowledge_sources").update({ index_status: "hata", indexed_at: new Date().toISOString() }).eq("id", source.id);
-      return { ok: false, chunks: 0, reason: "İçerik alınamadı" };
-    }
-
-    const hash = hashText(text);
-    if (!data.force && source.content_hash === hash) {
-      return { ok: true, chunks: 0, reason: "İçerik değişmemiş" };
-    }
-
-    await supabase.from("knowledge_sources").update({ index_status: "isleniyor" }).eq("id", source.id);
-
-    const pieces = chunkText(text);
-    const vectors = await embedTexts(pieces);
-    if (vectors.length !== pieces.length) throw new Error("Embedding sayısı parça sayısıyla eşleşmedi");
-
-    await supabase.from("kb_chunks").delete().eq("source_id", source.id);
-    const weight = SOURCE_WEIGHTS[source.source_type] ?? 1.0;
-    const rows = pieces.map((content, index) => ({
-      brand_id: source.brand_id,
-      source_id: source.id,
-      content,
-      embedding: JSON.stringify(vectors[index]) as unknown as string,
-      source_type: source.source_type,
-      source_weight: weight,
-      content_hash: hash,
-      chunk_index: index,
-    }));
-    const { error } = await supabase.from("kb_chunks").insert(rows);
-    if (error) throw new Error(error.message);
-
-    await supabase
-      .from("knowledge_sources")
-      .update({ content_hash: hash, index_status: "hazir", chunk_count: rows.length, indexed_at: new Date().toISOString() })
-      .eq("id", source.id);
-
-    return { ok: true, chunks: rows.length };
+    const { indexSource } = await import("./kb.server");
+    return indexSource(context.supabase, data.sourceId, data.force ?? false);
   });
 
-// Marka için işlenmemiş tüm kaynakları sırayla indeksler.
+// Marka için indekslenmemiş tüm kaynakları sırayla işler.
 export const indexPendingSources = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; limit?: number }) => input)
   .handler(async ({ data, context }) => {
+    const { indexSource } = await import("./kb.server");
     const { data: sources } = await context.supabase
       .from("knowledge_sources")
       .select("id")
       .eq("brand_id", data.brandId)
       .neq("index_status", "hazir")
-      .limit(data.limit ?? 3);
-    return { pending: (sources ?? []).map((s) => s.id) };
+      .limit(data.limit ?? 5);
+
+    let indexed = 0;
+    let failed = 0;
+    let chunks = 0;
+    for (const source of sources ?? []) {
+      try {
+        const result = await indexSource(context.supabase, source.id);
+        if (result.ok) { indexed += 1; chunks += result.chunks; } else { failed += 1; }
+      } catch (error) {
+        console.error("İndeksleme hatası", error);
+        failed += 1;
+      }
+    }
+    return { indexed, failed, chunks, remaining: Math.max(0, (sources ?? []).length - indexed - failed) };
+  });
+
+// RAG geri getirme testi: soruyu embed eder, en yakın bilgi parçalarını döner.
+export const searchKnowledge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; query: string }) => input)
+  .handler(async ({ data, context }) => {
+    const query = data.query.trim();
+    if (!query) return [];
+    const { embedOne } = await import("./embeddings.server");
+    const vector = await embedOne(query);
+    if (!vector) throw new Error("Sorgu vektöre çevrilemedi");
+
+    const { data: matches, error } = await context.supabase.rpc("match_kb_chunks", {
+      _brand_id: data.brandId,
+      query_embedding: JSON.stringify(vector) as unknown as string,
+      match_count: 6,
+    });
+    if (error) throw new Error(error.message);
+
+    const rows = (matches ?? []) as Array<{ id: string; content: string; source_id: string | null; similarity: number }>;
+    const sourceIds = Array.from(new Set(rows.map((r) => r.source_id).filter(Boolean) as string[]));
+    const { data: sources } = sourceIds.length
+      ? await context.supabase.from("knowledge_sources").select("id, title, url").in("id", sourceIds)
+      : { data: [] as Array<{ id: string; title: string; url: string | null }> };
+    const byId = new Map((sources ?? []).map((s) => [s.id, s]));
+
+    return rows.map((row) => ({
+      id: row.id,
+      content: row.content.slice(0, 400),
+      similarity: Math.round(row.similarity * 100),
+      sourceTitle: row.source_id ? (byId.get(row.source_id)?.title ?? "Kaynak") : "Manuel not",
+      sourceUrl: row.source_id ? (byId.get(row.source_id)?.url ?? null) : null,
+    }));
   });
 
 // Kaydedilmiş vektörleri 3B koordinata indirger.

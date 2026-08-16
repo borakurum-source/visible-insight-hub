@@ -52,7 +52,7 @@ export function KpiCard({
 
 export function StatusBadge({ ok, label }: { ok: boolean; label: string }) {
   return ok ? (
-    <Badge variant="outline" className="gap-1 border-[hsl(var(--chart-2))] text-[hsl(var(--chart-2))]">
+    <Badge variant="outline" className="gap-1 border-chart-2 text-chart-2">
       <CheckCircle2 className="h-3 w-3" /> {label}
     </Badge>
   ) : (
@@ -64,9 +64,9 @@ export function StatusBadge({ ok, label }: { ok: boolean; label: string }) {
 
 const ACTION_STATUS_MAP: Record<string, { label: string; className: string }> = {
   draft: { label: "Taslak", className: "text-muted-foreground" },
-  queued_computer: { label: "Computer'da Kuyrukta", className: "text-[hsl(var(--chart-5))] border-[hsl(var(--chart-5))]" },
-  done_manual: { label: "Manuel Tamamlandı", className: "text-[hsl(var(--chart-2))] border-[hsl(var(--chart-2))]" },
-  done_computer: { label: "Computer Tamamladı", className: "text-[hsl(var(--chart-2))] border-[hsl(var(--chart-2))]" },
+  queued_computer: { label: "Computer'da Kuyrukta", className: "text-chart-5 border-chart-5" },
+  done_manual: { label: "Manuel Tamamlandı", className: "text-chart-2 border-chart-2" },
+  done_computer: { label: "Computer Tamamladı", className: "text-chart-2 border-chart-2" },
 };
 
 export function ActionStatusBadge({ status }: { status: string | null }) {
@@ -76,9 +76,9 @@ export function ActionStatusBadge({ status }: { status: string | null }) {
 }
 
 const FUNNEL_STAGE_MAP: Record<string, { label: string; className: string }> = {
-  tofu: { label: "TOFU · Farkındalık", className: "text-[hsl(var(--chart-5))] border-[hsl(var(--chart-5))]" },
-  mofu: { label: "MOFU · Değerlendirme", className: "text-[hsl(var(--chart-1))] border-[hsl(var(--chart-1))]" },
-  bofu: { label: "BOFU · Karar", className: "text-[hsl(var(--chart-2))] border-[hsl(var(--chart-2))]" },
+  tofu: { label: "TOFU · Farkındalık", className: "text-chart-5 border-chart-5" },
+  mofu: { label: "MOFU · Değerlendirme", className: "text-chart-1 border-chart-1" },
+  bofu: { label: "BOFU · Karar", className: "text-chart-2 border-chart-2" },
 };
 
 export function FunnelStageBadge({ stage }: { stage: string | null | undefined }) {
@@ -88,7 +88,7 @@ export function FunnelStageBadge({ stage }: { stage: string | null | undefined }
 }
 
 const SENTIMENT_MAP: Record<string, { label: string; className: string }> = {
-  positive: { label: "Olumlu", className: "text-[hsl(var(--chart-2))] border-[hsl(var(--chart-2))]" },
+  positive: { label: "Olumlu", className: "text-chart-2 border-chart-2" },
   neutral: { label: "Nötr", className: "text-muted-foreground border-border" },
   negative: { label: "Olumsuz", className: "text-destructive border-destructive/40" },
 };

@@ -18,10 +18,13 @@ import { Route as HakkimizdaRouteImport } from './routes/hakkimizda'
 import { Route as KvkkRouteImport } from './routes/kvkk'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MakalelerRouteImport } from './routes/makaleler'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SunumRouteImport } from './routes/sunum'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as MakalelerIndexRouteImport } from './routes/makaleler.index'
 import { Route as MakalelerSlugRouteImport } from './routes/makaleler.$slug'
@@ -31,6 +34,8 @@ import { Route as PlatformEvidenceGapsRouteImport } from './routes/platform.evid
 import { Route as ProofFilmfolkRouteImport } from './routes/proof.filmfolk'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as SolutionsAgenciesRouteImport } from './routes/solutions.agencies'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authenticated/app.account'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
@@ -94,6 +99,11 @@ const MakalelerRoute = MakalelerRouteImport.update({
   path: '/makaleler',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlatformRoute = PlatformRouteImport.update({
   id: '/platform',
   path: '/platform',
@@ -114,6 +124,18 @@ const SunumRoute = SunumRouteImport.update({
   path: '/sunum',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -159,6 +181,17 @@ const SolutionsAgenciesRoute = SolutionsAgenciesRouteImport.update({
   path: '/solutions/agencies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -268,10 +301,13 @@ export interface FileRoutesByFullPath {
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/makaleler': typeof MakalelerRouteWithChildren
+  '/mcp': typeof McpRoute
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
@@ -281,6 +317,8 @@ export interface FileRoutesByFullPath {
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/account': typeof AuthenticatedAppAccountRoute
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
@@ -308,9 +346,12 @@ export interface FileRoutesByTo {
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
@@ -319,6 +360,8 @@ export interface FileRoutesByTo {
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/makaleler': typeof MakalelerIndexRoute
   '/platform': typeof PlatformIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/account': typeof AuthenticatedAppAccountRoute
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
@@ -349,10 +392,13 @@ export interface FileRoutesById {
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/makaleler': typeof MakalelerRouteWithChildren
+  '/mcp': typeof McpRoute
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
@@ -362,6 +408,8 @@ export interface FileRoutesById {
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/app/account': typeof AuthenticatedAppAccountRoute
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
@@ -392,10 +440,13 @@ export interface FileRouteTypes {
     | '/kvkk'
     | '/llms.txt'
     | '/makaleler'
+    | '/mcp'
     | '/platform'
     | '/privacy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/app'
     | '/makaleler/$slug'
     | '/platform/citation-share'
@@ -405,6 +456,8 @@ export interface FileRouteTypes {
     | '/solutions/agencies'
     | '/makaleler/'
     | '/platform/'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/app/account'
     | '/app/admin'
     | '/app/citation-discovery'
@@ -432,9 +485,12 @@ export interface FileRouteTypes {
     | '/hakkimizda'
     | '/kvkk'
     | '/llms.txt'
+    | '/mcp'
     | '/privacy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
@@ -443,6 +499,8 @@ export interface FileRouteTypes {
     | '/solutions/agencies'
     | '/makaleler'
     | '/platform'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/app/account'
     | '/app/admin'
     | '/app/citation-discovery'
@@ -472,10 +530,13 @@ export interface FileRouteTypes {
     | '/kvkk'
     | '/llms.txt'
     | '/makaleler'
+    | '/mcp'
     | '/platform'
     | '/privacy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/app'
     | '/makaleler/$slug'
     | '/platform/citation-share'
@@ -485,6 +546,8 @@ export interface FileRouteTypes {
     | '/solutions/agencies'
     | '/makaleler/'
     | '/platform/'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/app/account'
     | '/_authenticated/app/admin'
     | '/_authenticated/app/citation-discovery'
@@ -515,13 +578,18 @@ export interface RootRouteChildren {
   KvkkRoute: typeof KvkkRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   MakalelerRoute: typeof MakalelerRouteWithChildren
+  McpRoute: typeof McpRoute
   PlatformRoute: typeof PlatformRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SunumRoute: typeof SunumRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ProofFilmfolkRoute: typeof ProofFilmfolkRoute
   RTokenRoute: typeof RTokenRoute
   SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
@@ -590,6 +658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MakalelerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform': {
       id: '/platform'
       path: '/platform'
@@ -616,6 +691,20 @@ declare module '@tanstack/react-router' {
       path: '/sunum'
       fullPath: '/sunum'
       preLoaderRoute: typeof SunumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
@@ -679,6 +768,20 @@ declare module '@tanstack/react-router' {
       path: '/solutions/agencies'
       fullPath: '/solutions/agencies'
       preLoaderRoute: typeof SolutionsAgenciesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/': {
@@ -905,13 +1008,19 @@ const rootRouteChildren: RootRouteChildren = {
   KvkkRoute: KvkkRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   MakalelerRoute: MakalelerRouteWithChildren,
+  McpRoute: McpRoute,
   PlatformRoute: PlatformRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SunumRoute: SunumRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ProofFilmfolkRoute: ProofFilmfolkRoute,
   RTokenRoute: RTokenRoute,
   SolutionsAgenciesRoute: SolutionsAgenciesRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport

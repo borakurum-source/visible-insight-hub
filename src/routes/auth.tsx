@@ -7,8 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import BrandLogo from "@/components/site/BrandLogo";
 
+// Aynı origin'de göreli bir yol mu? OAuth onay akışı buraya geri döner.
+function safeNext(value: unknown): string | undefined {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : undefined;
+}
+
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
+  validateSearch: (search: Record<string, unknown>): { next?: string } => {
+    const next = safeNext(search['next']);
+    return next ? { next } : {};
+  },
   head: () => ({
     meta: [
       { title: "OneCite'a Giriş Yap | Yapay Zeka Görünürlük Paneli" },
@@ -31,6 +40,11 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const goNext = () => {
+    if (next) window.location.href = next;
+    else void navigate({ to: "/app" });
+  };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -41,19 +55,19 @@ function AuthPage() {
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) void navigate({ to: "/app" });
+      if (session) goNext();
     });
     void supabase.auth.getSession().then(({ data: s }) => {
-      if (s.session) void navigate({ to: "/app" });
+      if (s.session) goNext();
     });
     return () => data.subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, next]);
 
   const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/auth`,
+      redirect_uri: `${window.location.origin}/auth${next ? `?next=${encodeURIComponent(next)}` : ""}`,
     });
     if (result.error) {
       setError("Google ile giriş yapılamadı. Lütfen tekrar deneyin.");
@@ -88,7 +102,7 @@ function AuthPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth` },
+      options: { emailRedirectTo: `${window.location.origin}/auth${next ? `?next=${encodeURIComponent(next)}` : ""}` },
     });
     if (signUpError) {
       setError(signUpError.message);

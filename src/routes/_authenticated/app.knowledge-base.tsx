@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { addKnowledgeSources, deleteKnowledgeSource, listKnowledgeSources } from "@/lib/panel.functions";
-import { indexKnowledgeSource, rebuildGraphEntities, rebuildVectorMap } from "@/lib/kb.functions";
+import { indexKnowledgeSource, indexPendingSources, rebuildGraphEntities, rebuildVectorMap } from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/knowledge-base")({
@@ -34,6 +34,7 @@ function KnowledgeBasePage() {
   const addSources = useServerFn(addKnowledgeSources);
   const removeSource = useServerFn(deleteKnowledgeSource);
   const indexSource = useServerFn(indexKnowledgeSource);
+  const indexPending = useServerFn(indexPendingSources);
   const reproject = useServerFn(rebuildVectorMap);
   const rebuildEntities = useServerFn(rebuildGraphEntities);
   const [title, setTitle] = useState("");
@@ -53,9 +54,13 @@ function KnowledgeBasePage() {
   };
 
   const indexMutation = useMutation({
-    mutationFn: async (ids: string[]) => {
-      for (const id of ids) {
-        await indexSource({ data: { brandId: brand!.id, sourceId: id } });
+    mutationFn: async (ids: string[] | "pending") => {
+      if (ids === "pending") {
+        await indexPending({ data: { brandId: brand!.id, limit: 8 } });
+      } else {
+        for (const id of ids) {
+          await indexSource({ data: { brandId: brand!.id, sourceId: id, force: true } });
+        }
       }
       await reproject({ data: { brandId: brand!.id } });
       await rebuildEntities({ data: { brandId: brand!.id } });
@@ -103,7 +108,7 @@ function KnowledgeBasePage() {
             size="sm"
             variant="outline"
             disabled={indexMutation.isPending || data.length === 0}
-            onClick={() => indexMutation.mutate(data.filter((s) => s.index_status !== "hazir").map((s) => s.id))}
+            onClick={() => indexMutation.mutate("pending")}
           >
             {indexMutation.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
             Bekleyenleri indeksle

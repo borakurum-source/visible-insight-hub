@@ -38,8 +38,8 @@ function PricingPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <ul className="space-y-1.5 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-[hsl(var(--chart-2))]" /> {plan.clients} marka</li>
-                <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-[hsl(var(--chart-2))]" /> Marka başına {plan.prompts} prompt</li>
+                <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> {plan.clients} marka</li>
+                <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-chart-2" /> Marka başına {plan.prompts} prompt</li>
               </ul>
               <Button className="w-full" variant={plan.highlight ? "default" : "outline"}>Planı seç</Button>
             </CardContent>

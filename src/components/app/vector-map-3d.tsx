@@ -38,6 +38,9 @@ export default function VectorMap3D({
   const stateRef = useRef({ yaw: 0.6, pitch: 0.25, autoRotate: true, dragging: false, lastX: 0, lastY: 0, zoom: 1 });
   const projectedRef = useRef<Array<{ point: VectorPoint; sx: number; sy: number; r: number }>>([]);
   const [hovered, setHovered] = useState<VectorPoint | null>(null);
+  const hoveredRef = useRef<string | null>(null);
+  const selectedRef = useRef<string | null>(selectedId);
+  selectedRef.current = selectedId;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -114,7 +117,7 @@ export default function VectorMap3D({
       for (const item of projected) {
         const [r, g, b] = colorFor(item.point.type);
         const alpha = Math.max(0.18, Math.min(1, item.depth * (0.35 + item.point.freshness * 0.65)));
-        const active = item.point.id === selectedId || item.point.id === hovered?.id;
+        const active = item.point.id === selectedRef.current || item.point.id === hoveredRef.current;
         const glow = ctx.createRadialGradient(item.sx, item.sy, 0, item.sx, item.sy, item.r * (active ? 6 : 4));
         glow.addColorStop(0, `rgba(${r},${g},${b},${alpha * 0.55})`);
         glow.addColorStop(1, `rgba(${r},${g},${b},0)`);
@@ -137,7 +140,7 @@ export default function VectorMap3D({
       cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [points, selectedId, hovered]);
+  }, [points]);
 
   const pick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -157,7 +160,7 @@ export default function VectorMap3D({
     <div className="relative">
       <canvas
         ref={canvasRef}
-        className="h-[440px] w-full cursor-grab rounded-lg bg-[radial-gradient(circle_at_50%_45%,hsl(var(--muted))_0%,hsl(var(--background))_70%)] active:cursor-grabbing"
+        className="h-[440px] w-full cursor-grab touch-none rounded-lg border border-border bg-muted/30 active:cursor-grabbing"
         onMouseDown={(event) => {
           const state = stateRef.current;
           state.dragging = true;
@@ -165,7 +168,7 @@ export default function VectorMap3D({
           state.lastY = event.clientY;
         }}
         onMouseUp={() => { stateRef.current.dragging = false; }}
-        onMouseLeave={() => { stateRef.current.dragging = false; setHovered(null); }}
+        onMouseLeave={() => { stateRef.current.dragging = false; hoveredRef.current = null; setHovered(null); }}
         onMouseMove={(event) => {
           const state = stateRef.current;
           if (state.dragging) {
@@ -175,7 +178,9 @@ export default function VectorMap3D({
             state.lastY = event.clientY;
             return;
           }
-          setHovered(pick(event));
+          const next = pick(event);
+          hoveredRef.current = next?.id ?? null;
+          setHovered(next);
         }}
         onClick={(event) => onSelect(pick(event))}
         onWheel={(event) => {
