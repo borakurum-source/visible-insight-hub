@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
-import { Route as FreeAiReadinessReportRouteImport } from './routes/free-ai-readiness-report'
 import { Route as HakkimizdaRouteImport } from './routes/hakkimizda'
 import { Route as KvkkRouteImport } from './routes/kvkk'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
@@ -23,6 +22,7 @@ import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SunumRouteImport } from './routes/sunum'
+import { Route as UcretsizYapayZekaGorunurlukRaporuRouteImport } from './routes/ucretsiz-yapay-zeka-gorunurluk-raporu'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
@@ -75,11 +75,6 @@ const FiyatlandirmaRoute = FiyatlandirmaRouteImport.update({
   path: '/fiyatlandirma',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FreeAiReadinessReportRoute = FreeAiReadinessReportRouteImport.update({
-  id: '/free-ai-readiness-report',
-  path: '/free-ai-readiness-report',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HakkimizdaRoute = HakkimizdaRouteImport.update({
   id: '/hakkimizda',
   path: '/hakkimizda',
@@ -125,6 +120,12 @@ const SunumRoute = SunumRouteImport.update({
   path: '/sunum',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UcretsizYapayZekaGorunurlukRaporuRoute =
+  UcretsizYapayZekaGorunurlukRaporuRouteImport.update({
+    id: '/ucretsiz-yapay-zeka-gorunurluk-raporu',
+    path: '/ucretsiz-yapay-zeka-gorunurluk-raporu',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const Char91DotmcpChar93ListToolsRoute =
   Char91DotmcpChar93ListToolsRouteImport.update({
     id: '/.mcp/list-tools',
@@ -303,7 +304,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
-  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
@@ -313,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/ucretsiz-yapay-zeka-gorunurluk-raporu': typeof UcretsizYapayZekaGorunurlukRaporuRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
@@ -350,7 +351,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
-  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
@@ -358,6 +358,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/ucretsiz-yapay-zeka-gorunurluk-raporu': typeof UcretsizYapayZekaGorunurlukRaporuRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
@@ -396,7 +397,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
-  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
@@ -406,6 +406,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/ucretsiz-yapay-zeka-gorunurluk-raporu': typeof UcretsizYapayZekaGorunurlukRaporuRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
@@ -445,7 +446,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/fiyatlandirma'
-    | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
     | '/llms.txt'
@@ -455,6 +455,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/ucretsiz-yapay-zeka-gorunurluk-raporu'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/app'
@@ -492,7 +493,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/fiyatlandirma'
-    | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
     | '/llms.txt'
@@ -500,6 +500,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/ucretsiz-yapay-zeka-gorunurluk-raporu'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/makaleler/$slug'
@@ -537,7 +538,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/fiyatlandirma'
-    | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
     | '/llms.txt'
@@ -547,6 +547,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/ucretsiz-yapay-zeka-gorunurluk-raporu'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/app'
@@ -586,7 +587,6 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   FiyatlandirmaRoute: typeof FiyatlandirmaRoute
-  FreeAiReadinessReportRoute: typeof FreeAiReadinessReportRoute
   HakkimizdaRoute: typeof HakkimizdaRoute
   KvkkRoute: typeof KvkkRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
@@ -596,6 +596,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SunumRoute: typeof SunumRoute
+  UcretsizYapayZekaGorunurlukRaporuRoute: typeof UcretsizYapayZekaGorunurlukRaporuRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ProofFilmfolkRoute: typeof ProofFilmfolkRoute
@@ -634,13 +635,6 @@ declare module '@tanstack/react-router' {
       path: '/fiyatlandirma'
       fullPath: '/fiyatlandirma'
       preLoaderRoute: typeof FiyatlandirmaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/free-ai-readiness-report': {
-      id: '/free-ai-readiness-report'
-      path: '/free-ai-readiness-report'
-      fullPath: '/free-ai-readiness-report'
-      preLoaderRoute: typeof FreeAiReadinessReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hakkimizda': {
@@ -704,6 +698,13 @@ declare module '@tanstack/react-router' {
       path: '/sunum'
       fullPath: '/sunum'
       preLoaderRoute: typeof SunumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ucretsiz-yapay-zeka-gorunurluk-raporu': {
+      id: '/ucretsiz-yapay-zeka-gorunurluk-raporu'
+      path: '/ucretsiz-yapay-zeka-gorunurluk-raporu'
+      fullPath: '/ucretsiz-yapay-zeka-gorunurluk-raporu'
+      preLoaderRoute: typeof UcretsizYapayZekaGorunurlukRaporuRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -1025,7 +1026,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   FiyatlandirmaRoute: FiyatlandirmaRoute,
-  FreeAiReadinessReportRoute: FreeAiReadinessReportRoute,
   HakkimizdaRoute: HakkimizdaRoute,
   KvkkRoute: KvkkRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
@@ -1035,6 +1035,8 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SunumRoute: SunumRoute,
+  UcretsizYapayZekaGorunurlukRaporuRoute:
+    UcretsizYapayZekaGorunurlukRaporuRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,

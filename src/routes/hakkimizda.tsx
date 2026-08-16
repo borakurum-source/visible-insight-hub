@@ -31,7 +31,7 @@ function AboutPage() {
         image={heroCitationOrb}
         imageAlt="Kaynak noktalarını birleştiren ışıklı cam küre; OneCite’ın kanıt ağı metaforu"
         visualLabel="SOURCE SIGNAL / ABOUT"
-        primaryHref="/free-ai-readiness-report"
+        primaryHref="/ucretsiz-yapay-zeka-gorunurluk-raporu"
         primaryLabel="İlk ölçümü başlat"
         secondaryHref="#neden"
         secondaryLabel="Neden kurulduğunu gör"

@@ -19,7 +19,7 @@ const footerGroups = [
       { href: "/platform", label: "Genel bakış" },
       { href: "/platform/citation-share", label: "Atıf Payı" },
       { href: "/platform/evidence-gaps", label: "Eksik Kanıtlar" },
-      { href: "/free-ai-readiness-report", label: "Ücretsiz rapor" },
+      { href: "/ucretsiz-yapay-zeka-gorunurluk-raporu", label: "Ücretsiz rapor" },
     ],
   },
   {
@@ -72,14 +72,14 @@ export function MarketingShell({ children }: { children: ReactNode }) {
               <Link to="/auth">Giriş yap</Link>
             </Button>
             <Button asChild>
-              <Link to="/free-ai-readiness-report">
+              <Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">
                 Ücretsiz ölçüm <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
           </div>
           <div className="flex items-center gap-1 md:hidden">
             <Button size="sm" asChild>
-              <Link to="/free-ai-readiness-report">Ölç</Link>
+              <Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">Ölç</Link>
             </Button>
             <button
               type="button"

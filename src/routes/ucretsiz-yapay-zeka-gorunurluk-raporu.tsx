@@ -8,7 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
 
-const PAGE_URL = "https://1cite.com/free-ai-readiness-report";
+const PAGE_URL = "https://1cite.com/ucretsiz-yapay-zeka-gorunurluk-raporu";
 const PAGE_TITLE = "Ücretsiz Yapay Zeka Görünürlük Testi | AI Hazırlık Raporu";
 const PAGE_DESCRIPTION =
   "Markanız ChatGPT, Gemini ve Perplexity cevaplarında kaynak olarak çıkıyor mu? Web sitenizi girin, ücretsiz yapay zeka görünürlük (GEO) hazırlık raporunuzu dakikalar içinde alın.";
@@ -61,7 +61,7 @@ const questionsAnswered = [
   "Görünürlüğü artırmak için önce hangi içeriği üretmeliyim?",
 ];
 
-export const Route = createFileRoute("/free-ai-readiness-report")({
+export const Route = createFileRoute("/ucretsiz-yapay-zeka-gorunurluk-raporu")({
   head: () => ({
     meta: [
       { title: PAGE_TITLE },

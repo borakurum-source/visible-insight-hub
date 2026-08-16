@@ -143,7 +143,7 @@ function ArticlesPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Rehberler</p>
             <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Kavramı anlayın, sonra ölçün.</h2>
           </div>
-          <Link to="/free-ai-readiness-report" className="text-sm font-bold text-primary hover:text-foreground">Ücretsiz raporu başlat →</Link>
+          <Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu" className="text-sm font-bold text-primary hover:text-foreground">Ücretsiz raporu başlat →</Link>
         </div>
         <div className="mt-8 flex flex-wrap gap-2" aria-label="Makale kategorileri">
           {categories.map((category) => (

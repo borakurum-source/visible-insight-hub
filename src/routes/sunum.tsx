@@ -53,7 +53,7 @@ function PresentationPage() {
           <BrandLogo variant="horizontal" tone="dark" size="sm" linkTo="/" />
           <div className="flex items-center gap-2">
             <Link to="/" className="hidden items-center gap-1 text-sm text-slate-400 transition hover:text-white md:inline-flex"><ArrowLeft className="h-4 w-4" /> 1cite.com</Link>
-            <Button asChild size="sm" className="bg-cyan text-foreground hover:bg-[#B8F4FF]"><Link to="/free-ai-readiness-report">İlk ölçümü başlat</Link></Button>
+            <Button asChild size="sm" className="bg-cyan text-foreground hover:bg-[#B8F4FF]"><Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">İlk ölçümü başlat</Link></Button>
           </div>
         </div>
       </header>
@@ -90,7 +90,7 @@ function PresentationPage() {
           <div className="flex items-center gap-2" aria-label="Sunum ilerlemesi">{slides.map((item, index) => <button key={item.label} type="button" onClick={() => setActive(index)} aria-label={`${index + 1}. slayta git`} className={`h-1.5 rounded-full transition-all ${index === active ? "w-8 bg-cyan" : "w-3 bg-background/20 hover:bg-background/40"}`} />)}</div>
           <div className="flex items-center gap-3">
             <span className="hidden items-center gap-1 text-xs text-slate-500 md:inline-flex"><Maximize2 className="h-3.5 w-3.5" /> Klavye ile gezin</span>
-            <Link to="/free-ai-readiness-report" className="inline-flex items-center gap-2 text-sm font-semibold text-cyan hover:text-white">İlk ölçümü başlat <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu" className="inline-flex items-center gap-2 text-sm font-semibold text-cyan hover:text-white">İlk ölçümü başlat <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
       </footer>

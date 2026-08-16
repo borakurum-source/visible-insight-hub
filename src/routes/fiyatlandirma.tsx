@@ -49,7 +49,7 @@ const profiles = [
     title: "İlk kez ölçüyorum",
     body: "Markanızın yapay zeka cevaplarında nerede durduğunu tek ölçümle görün.",
     plan: "Ücretsiz",
-    href: "/free-ai-readiness-report",
+    href: "/ucretsiz-yapay-zeka-gorunurluk-raporu",
     action: "Ücretsiz ölçüm başlat",
   },
   {

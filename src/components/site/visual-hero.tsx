@@ -28,7 +28,7 @@ export function VisualHero({
   image,
   imageAlt,
   visualLabel = "EVIDENCE LAYER",
-  primaryHref = "/free-ai-readiness-report",
+  primaryHref = "/ucretsiz-yapay-zeka-gorunurluk-raporu",
   primaryLabel = "Ücretsiz ölçüm başlat",
   secondaryHref,
   secondaryLabel,
