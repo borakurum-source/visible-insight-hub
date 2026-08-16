@@ -1,16 +1,13 @@
-// Google Search Console konnektör gateway istemcisi (yalnız sunucu tarafı).
-const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
+// Google Search Console istemcisi: her marka kendi Google hesabini baglar (yalniz sunucu tarafi).
+import { getBrandAccessToken } from "./google-oauth.server";
+
+const API = "https://searchconsole.googleapis.com";
 
 export type SiteEntry = { siteUrl: string; permissionLevel?: string };
 
-function headers() {
-  const lovableKey = process.env['LOVABLE_API_KEY'];
-  const connectionKey = process.env['GOOGLE_SEARCH_CONSOLE_API_KEY'];
-  if (!lovableKey || !connectionKey) throw new Error("Search Console bağlantısı yapılandırılmamış");
-  return {
-    Authorization: `Bearer ${lovableKey}`,
-    "X-Connection-Api-Key": connectionKey,
-  } as Record<string, string>;
+async function headers(brandId: string) {
+  const token = await getBrandAccessToken(brandId);
+  return { Authorization: `Bearer ${token}` } as Record<string, string>;
 }
 
 export function coversTarget(siteUrl: string, host: string) {
@@ -27,8 +24,8 @@ export function coversTarget(siteUrl: string, host: string) {
   }
 }
 
-export async function listVerifiedSites(): Promise<SiteEntry[]> {
-  const response = await fetch(`${GATEWAY}/webmasters/v3/sites`, { headers: headers() });
+export async function listVerifiedSites(brandId: string): Promise<SiteEntry[]> {
+  const response = await fetch(`${API}/webmasters/v3/sites`, { headers: await headers(brandId) });
   if (!response.ok) {
     const body = await response.text();
     throw new Error(`Search Console mülkleri okunamadı [${response.status}]: ${body}`);
@@ -37,10 +34,14 @@ export async function listVerifiedSites(): Promise<SiteEntry[]> {
   return (json.siteEntry ?? []).filter((entry) => entry.permissionLevel !== "siteUnverifiedUser");
 }
 
-export async function searchAnalyticsQuery(siteUrl: string, query: Record<string, unknown>) {
+export async function searchAnalyticsQuery(brandId: string, siteUrl: string, query: Record<string, unknown>) {
   const response = await fetch(
-    `${GATEWAY}/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
-    { method: "POST", headers: { ...headers(), "Content-Type": "application/json" }, body: JSON.stringify(query) },
+    `${API}/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
+    {
+      method: "POST",
+      headers: { ...(await headers(brandId)), "Content-Type": "application/json" },
+      body: JSON.stringify(query),
+    },
   );
   if (response.status === 403) throw new Error("Bağlı Google hesabı bu mülke erişemiyor");
   if (!response.ok) {
@@ -55,12 +56,12 @@ function isoDaysAgo(days: number) {
 }
 
 // Son 28 tam günün sorgu ve günlük kırılımını tek anlık görüntüde toplar.
-export async function buildGscSnapshot(siteUrl: string) {
+export async function buildGscSnapshot(brandId: string, siteUrl: string) {
   const startDate = isoDaysAgo(30);
   const endDate = isoDaysAgo(2);
   const [byQuery, byDate] = await Promise.all([
-    searchAnalyticsQuery(siteUrl, { startDate, endDate, dimensions: ["query"], rowLimit: 50 }),
-    searchAnalyticsQuery(siteUrl, { startDate, endDate, dimensions: ["date"], rowLimit: 60 }),
+    searchAnalyticsQuery(brandId, siteUrl, { startDate, endDate, dimensions: ["query"], rowLimit: 50 }),
+    searchAnalyticsQuery(brandId, siteUrl, { startDate, endDate, dimensions: ["date"], rowLimit: 60 }),
   ]);
 
   const queries = (byQuery.rows ?? []).map((row) => ({
