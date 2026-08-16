@@ -1,30 +1,21 @@
-// Google Analytics 4 konnektör gateway istemcisi (yalnız sunucu tarafı).
-const GATEWAY = "https://connector-gateway.lovable.dev/google_analytics";
+// Google Analytics 4 istemcisi: her marka kendi Google hesabini baglar (yalniz sunucu tarafi).
+import { getBrandAccessToken } from "./google-oauth.server";
+
+const ADMIN_API = "https://analyticsadmin.googleapis.com";
+const DATA_API = "https://analyticsdata.googleapis.com";
 
 export type Ga4Property = { propertyId: string; displayName: string; account: string };
 
-function headers() {
-  const lovableKey = process.env["LOVABLE_API_KEY"];
-  const connectionKey = process.env["GOOGLE_ANALYTICS_API_KEY"];
-  if (!lovableKey || !connectionKey) {
-    throw new Error("Google Analytics bağlantısı henüz yapılandırılmamış. Ayarlar → Entegrasyonlar üzerinden Google hesabınızı bağlayın.");
-  }
-  return {
-    Authorization: `Bearer ${lovableKey}`,
-    "X-Connection-Api-Key": connectionKey,
-  } as Record<string, string>;
-}
-
-export function isGa4Configured() {
-  return Boolean(process.env["LOVABLE_API_KEY"] && process.env["GOOGLE_ANALYTICS_API_KEY"]);
+async function headers(brandId: string) {
+  const token = await getBrandAccessToken(brandId);
+  return { Authorization: `Bearer ${token}` } as Record<string, string>;
 }
 
 // Bağlı Google hesabındaki tüm GA4 mülklerini listeler.
-export async function listGa4Properties(): Promise<Ga4Property[]> {
-  // Konnektör henüz projeye bağlı değilse hata fırlatmak yerine boş liste döndür;
-  // arayüz kullanıcıyı bağlantı akışına yönlendirir.
-  if (!isGa4Configured()) return [];
-  const response = await fetch(`${GATEWAY}/v1beta/accountSummaries?pageSize=200`, { headers: headers() });
+export async function listGa4Properties(brandId: string): Promise<Ga4Property[]> {
+  const response = await fetch(`${ADMIN_API}/v1beta/accountSummaries?pageSize=200`, {
+    headers: await headers(brandId),
+  });
   if (!response.ok) {
     throw new Error(`GA4 mülkleri okunamadı [${response.status}]: ${await response.text()}`);
   }
@@ -50,10 +41,10 @@ export async function listGa4Properties(): Promise<Ga4Property[]> {
   return out;
 }
 
-async function runReport(propertyId: string, body: Record<string, unknown>) {
-  const response = await fetch(`${GATEWAY}/v1beta/properties/${encodeURIComponent(propertyId)}:runReport`, {
+async function runReport(brandId: string, propertyId: string, body: Record<string, unknown>) {
+  const response = await fetch(`${DATA_API}/v1beta/properties/${encodeURIComponent(propertyId)}:runReport`, {
     method: "POST",
-    headers: { ...headers(), "Content-Type": "application/json" },
+    headers: { ...(await headers(brandId)), "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (response.status === 403) throw new Error("Bağlı Google hesabı bu GA4 mülküne erişemiyor");
@@ -73,16 +64,16 @@ function formatDate(raw: string) {
 }
 
 // Son 28 günün oturum / kullanıcı kırılımını ve kanal dağılımını tek anlık görüntüde toplar.
-export async function buildGa4Snapshot(propertyId: string) {
+export async function buildGa4Snapshot(brandId: string, propertyId: string) {
   const dateRanges = [{ startDate: "28daysAgo", endDate: "yesterday" }];
   const [byDate, byChannel] = await Promise.all([
-    runReport(propertyId, {
+    runReport(brandId, propertyId, {
       dateRanges,
       dimensions: [{ name: "date" }],
       metrics: [{ name: "sessions" }, { name: "totalUsers" }],
       limit: 60,
     }),
-    runReport(propertyId, {
+    runReport(brandId, propertyId, {
       dateRanges,
       dimensions: [{ name: "sessionDefaultChannelGroup" }],
       metrics: [{ name: "sessions" }, { name: "totalUsers" }],

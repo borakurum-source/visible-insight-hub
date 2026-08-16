@@ -67,7 +67,7 @@ export const listGscProperties = createServerFn({ method: "POST" })
     const { data: brand } = await context.supabase
       .from("brands").select("domain").eq("id", data.brandId).single();
     if (!brand) throw new Error("Marka bulunamadı");
-    const sites = await listVerifiedSites();
+    const sites = await listVerifiedSites(data.brandId);
     const matching = sites.filter((s) => coversTarget(s.siteUrl, brand.domain)).map((s) => s.siteUrl);
     return { domain: brand.domain, matching, all: sites.map((s) => s.siteUrl) };
   });
@@ -78,7 +78,7 @@ export const connectGscProperty = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string; siteUrl: string }) => input)
   .handler(async ({ data, context }) => {
     const { listVerifiedSites } = await import("./gsc.server");
-    const sites = await listVerifiedSites();
+    const sites = await listVerifiedSites(data.brandId);
     if (!sites.some((s) => s.siteUrl === data.siteUrl)) {
       throw new Error("Seçilen mülk doğrulanmış listede yok");
     }
@@ -114,9 +114,9 @@ export const syncGsc = createServerFn({ method: "POST" })
     if (!siteUrl) throw new Error("Önce bir Search Console mülkü seçin");
 
     try {
-      const sites = await listVerifiedSites();
+      const sites = await listVerifiedSites(data.brandId);
       if (!sites.some((s) => s.siteUrl === siteUrl)) throw new Error("Mülk artık doğrulanmış değil");
-      const payload = await buildGscSnapshot(siteUrl);
+      const payload = await buildGscSnapshot(data.brandId, siteUrl);
       await context.supabase.from("analytics_snapshots").upsert(
         {
           brand_id: data.brandId,
@@ -160,9 +160,8 @@ export const listGa4PropertyOptions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data }) => {
-    void data;
     const { listGa4Properties } = await import("./ga4.server");
-    return await listGa4Properties();
+    return await listGa4Properties(data.brandId);
   });
 
 // Seçilen GA4 mülkünü kaydeder.
@@ -171,7 +170,7 @@ export const connectGa4Property = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string; propertyId: string }) => input)
   .handler(async ({ data, context }) => {
     const { listGa4Properties } = await import("./ga4.server");
-    const properties = await listGa4Properties();
+    const properties = await listGa4Properties(data.brandId);
     if (!properties.some((p) => p.propertyId === data.propertyId)) {
       throw new Error("Seçilen GA4 mülkü hesabınızda bulunamadı");
     }
@@ -205,7 +204,7 @@ export const syncGa4 = createServerFn({ method: "POST" })
     if (!propertyId) throw new Error("Önce bir GA4 mülkü seçin");
 
     try {
-      const payload = await buildGa4Snapshot(propertyId);
+      const payload = await buildGa4Snapshot(data.brandId, propertyId);
       await context.supabase.from("analytics_snapshots").upsert(
         {
           brand_id: data.brandId,
@@ -386,4 +385,48 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         daily: aiOverviewDaily,
       },
     };
+  });
+
+// --- Musteri bazli Google hesabi baglantisi ---
+
+export const getGoogleAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: member } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).maybeSingle();
+    if (!member) throw new Error("Marka bulunamadi");
+    const { hasGoogleAccount, isGoogleOAuthConfigured } = await import("./google-oauth.server");
+    const account = await hasGoogleAccount(data.brandId);
+    return { ...account, configured: isGoogleOAuthConfigured() };
+  });
+
+// Kullanicinin kendi Google hesabini baglamasi icin izin adresini uretir.
+export const startGoogleConnect = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; origin: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: brand } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).maybeSingle();
+    if (!brand) throw new Error("Marka bulunamadi");
+    const { buildAuthorizeUrl, encodeState } = await import("./google-oauth.server");
+    const state = encodeState({ brandId: data.brandId, userId: context.userId });
+    return { url: buildAuthorizeUrl(state, data.origin) };
+  });
+
+export const disconnectGoogleAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: brand } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).maybeSingle();
+    if (!brand) throw new Error("Marka bulunamadi");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("google_oauth_accounts").delete().eq("brand_id", data.brandId);
+    await context.supabase
+      .from("integration_connections")
+      .delete()
+      .eq("brand_id", data.brandId)
+      .in("provider", ["gsc", "ga4"]);
+    return { ok: true };
   });

@@ -59,6 +59,7 @@ import { Route as AuthenticatedAppSystemPromptsRouteImport } from './routes/_aut
 import { Route as AuthenticatedAppTrafficMetricRouteImport } from './routes/_authenticated/app.traffic.$metric'
 import { Route as ApiPublicCronSyncAnalyticsRouteImport } from './routes/api/public/cron/sync-analytics'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as ApiPublicOauthGoogleCallbackRouteImport } from './routes/api/public/oauth/google/callback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -326,6 +327,12 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicOauthGoogleCallbackRoute =
+  ApiPublicOauthGoogleCallbackRouteImport.update({
+    id: '/api/public/oauth/google/callback',
+    path: '/api/public/oauth/google/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -377,6 +384,7 @@ export interface FileRoutesByFullPath {
   '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -425,6 +433,7 @@ export interface FileRoutesByTo {
   '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -478,6 +487,7 @@ export interface FileRoutesById {
   '/_authenticated/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -531,6 +541,7 @@ export interface FileRouteTypes {
     | '/app/traffic/$metric'
     | '/api/public/cron/sync-analytics'
     | '/lovable/email/transactional/preview'
+    | '/api/public/oauth/google/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -579,6 +590,7 @@ export interface FileRouteTypes {
     | '/app/traffic/$metric'
     | '/api/public/cron/sync-analytics'
     | '/lovable/email/transactional/preview'
+    | '/api/public/oauth/google/callback'
   id:
     | '__root__'
     | '/'
@@ -631,6 +643,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/traffic/$metric'
     | '/api/public/cron/sync-analytics'
     | '/lovable/email/transactional/preview'
+    | '/api/public/oauth/google/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -658,6 +671,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCronSyncAnalyticsRoute: typeof ApiPublicCronSyncAnalyticsRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  ApiPublicOauthGoogleCallbackRoute: typeof ApiPublicOauthGoogleCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1012,6 +1026,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/oauth/google/callback': {
+      id: '/api/public/oauth/google/callback'
+      path: '/api/public/oauth/google/callback'
+      fullPath: '/api/public/oauth/google/callback'
+      preLoaderRoute: typeof ApiPublicOauthGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1133,6 +1154,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCronSyncAnalyticsRoute: ApiPublicCronSyncAnalyticsRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  ApiPublicOauthGoogleCallbackRoute: ApiPublicOauthGoogleCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
