@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
 import { Route as UrunRouteImport } from './routes/urun'
+import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAyarlarRouteImport } from './routes/app.ayarlar'
 import { Route as AppRakiplerRouteImport } from './routes/app.rakipler'
 import { Route as AppRaporlarRouteImport } from './routes/app.raporlar'
@@ -37,6 +38,11 @@ const UrunRoute = UrunRouteImport.update({
   id: '/urun',
   path: '/urun',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAyarlarRoute = AppAyarlarRouteImport.update({
   id: '/ayarlar',
@@ -68,16 +74,17 @@ export interface FileRoutesByFullPath {
   '/app/rakipler': typeof AppRakiplerRoute
   '/app/raporlar': typeof AppRaporlarRoute
   '/app/sorgular': typeof AppSorgularRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteWithChildren
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/urun': typeof UrunRoute
   '/app/ayarlar': typeof AppAyarlarRoute
   '/app/rakipler': typeof AppRakiplerRoute
   '/app/raporlar': typeof AppRaporlarRoute
   '/app/sorgular': typeof AppSorgularRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +96,7 @@ export interface FileRoutesById {
   '/app/rakipler': typeof AppRakiplerRoute
   '/app/raporlar': typeof AppRaporlarRoute
   '/app/sorgular': typeof AppSorgularRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,16 +109,17 @@ export interface FileRouteTypes {
     | '/app/rakipler'
     | '/app/raporlar'
     | '/app/sorgular'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/app'
     | '/fiyatlandirma'
     | '/urun'
     | '/app/ayarlar'
     | '/app/rakipler'
     | '/app/raporlar'
     | '/app/sorgular'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/app/rakipler'
     | '/app/raporlar'
     | '/app/sorgular'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -160,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UrunRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/ayarlar': {
       id: '/app/ayarlar'
       path: '/ayarlar'
@@ -196,6 +213,7 @@ interface AppRouteChildren {
   AppRakiplerRoute: typeof AppRakiplerRoute
   AppRaporlarRoute: typeof AppRaporlarRoute
   AppSorgularRoute: typeof AppSorgularRoute
+  AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -203,6 +221,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRakiplerRoute: AppRakiplerRoute,
   AppRaporlarRoute: AppRaporlarRoute,
   AppSorgularRoute: AppSorgularRoute,
+  AppIndexRoute: AppIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
