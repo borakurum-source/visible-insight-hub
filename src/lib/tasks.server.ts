@@ -71,33 +71,3 @@ export async function createPriorityTasks(
   }
   return rows.length;
 }
-
-export const getMeasurementState = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string }) => input)
-  .handler(async ({ data, context }) => {
-    const { computeVisibilityScore } = await import("./score-model");
-    const [{ data: batch }, runs, citations, sources, claims, approved] = await Promise.all([
-      context.supabase.from("measurement_batches").select("*").eq("brand_id", data.brandId)
-        .order("created_at", { ascending: false }).limit(1).maybeSingle(),
-      context.supabase.from("prompt_runs").select("brand_mentioned, position").eq("brand_id", data.brandId),
-      context.supabase.from("citations").select("is_own_domain, domain").eq("brand_id", data.brandId),
-      context.supabase.from("knowledge_sources").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
-      context.supabase.from("claims").select("evidence_url").eq("brand_id", data.brandId),
-      context.supabase.from("prompts").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId).eq("status", "approved"),
-    ]);
-    const citationRows = citations.data ?? [];
-    const score = computeVisibilityScore({
-      runs: runs.data ?? [],
-      ownCitations: citationRows.filter((c) => c.is_own_domain).length,
-      totalCitations: citationRows.length,
-      knowledgeSources: sources.count ?? 0,
-      claimsWithEvidence: (claims.data ?? []).filter((c) => Boolean(c.evidence_url)).length,
-    });
-    return {
-      batch,
-      score,
-      approvedPrompts: approved.count ?? 0,
-      totalRuns: (runs.data ?? []).length,
-    };
-  });
