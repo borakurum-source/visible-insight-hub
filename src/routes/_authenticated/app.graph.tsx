@@ -200,7 +200,8 @@ function GraphPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="entities" className="mt-4">
+        <TabsContent value="entities" className="mt-4 space-y-4">
+          {brand ? <CompetitorFinder brandId={brand.id} /> : null}
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-base">Varlık İlişki Haritası</CardTitle></CardHeader>
             <CardContent className="space-y-4">
