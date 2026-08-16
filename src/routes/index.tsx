@@ -270,8 +270,8 @@ function PlanlarVeKimIcin() {
               </div>
               <p className="mt-3 text-xs font-semibold leading-5 text-foreground">{planFits[plan.slug] ?? plan.desc}</p>
               <p className="mt-4 font-mono text-2xl font-medium text-foreground">
-                {plan.monthly === 0 ? "$0" : formatUsd(plan.monthly)}
-                <span className="text-xs text-muted-foreground"> /ay</span>
+                {plan.monthly === null ? "Teklif" : plan.monthly === 0 ? "$0" : formatUsd(plan.monthly)}
+                {plan.monthly !== null && <span className="text-xs text-muted-foreground"> /ay</span>}
               </p>
               <ul className="mt-4 flex-1 space-y-1.5 text-sm text-muted-foreground">
                 {plan.limits.map((limit) => (
