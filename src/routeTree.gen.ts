@@ -53,6 +53,7 @@ import { Route as AuthenticatedAppPromptDiscoveryRouteImport } from './routes/_a
 import { Route as AuthenticatedAppPromptsRouteImport } from './routes/_authenticated/app.prompts'
 import { Route as AuthenticatedAppReportRouteImport } from './routes/_authenticated/app.report'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
+import { Route as AuthenticatedAppSystemPromptsRouteImport } from './routes/_authenticated/app.system-prompts'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -285,6 +286,12 @@ const AuthenticatedAppSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppSystemPromptsRoute =
+  AuthenticatedAppSystemPromptsRouteImport.update({
+    id: '/system-prompts',
+    path: '/system-prompts',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -335,6 +342,7 @@ export interface FileRoutesByFullPath {
   '/app/prompts': typeof AuthenticatedAppPromptsRoute
   '/app/report': typeof AuthenticatedAppReportRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -378,6 +386,7 @@ export interface FileRoutesByTo {
   '/app/prompts': typeof AuthenticatedAppPromptsRoute
   '/app/report': typeof AuthenticatedAppReportRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -426,6 +435,7 @@ export interface FileRoutesById {
   '/_authenticated/app/prompts': typeof AuthenticatedAppPromptsRoute
   '/_authenticated/app/report': typeof AuthenticatedAppReportRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/_authenticated/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
@@ -474,6 +484,7 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
+    | '/app/system-prompts'
     | '/app/'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
+    | '/app/system-prompts'
     | '/app'
     | '/lovable/email/transactional/preview'
   id:
@@ -564,6 +576,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/prompts'
     | '/_authenticated/app/report'
     | '/_authenticated/app/settings'
+    | '/_authenticated/app/system-prompts'
     | '/_authenticated/app/'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
@@ -903,6 +916,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/system-prompts': {
+      id: '/_authenticated/app/system-prompts'
+      path: '/system-prompts'
+      fullPath: '/app/system-prompts'
+      preLoaderRoute: typeof AuthenticatedAppSystemPromptsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -930,6 +950,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppPromptsRoute: typeof AuthenticatedAppPromptsRoute
   AuthenticatedAppReportRoute: typeof AuthenticatedAppReportRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
+  AuthenticatedAppSystemPromptsRoute: typeof AuthenticatedAppSystemPromptsRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
@@ -951,6 +972,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppPromptsRoute: AuthenticatedAppPromptsRoute,
   AuthenticatedAppReportRoute: AuthenticatedAppReportRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
+  AuthenticatedAppSystemPromptsRoute: AuthenticatedAppSystemPromptsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
