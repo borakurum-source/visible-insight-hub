@@ -22,6 +22,8 @@ export const createBrand = createServerFn({ method: "POST" })
   .inputValidator((input: { name: string; domain: string }) => input)
   .handler(async ({ data, context }) => {
     const { normalizeDomain } = await import("./ai.server");
+    const { assertBrandQuota } = await import("./plan.server");
+    await assertBrandQuota(context.supabase, context.userId);
     const domain = normalizeDomain(data.domain);
     const name = data.name.trim() || domain;
     if (!domain) throw new Error("Geçerli bir alan adı girin");
@@ -275,6 +277,8 @@ export const addDiscoveredPrompts = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string; items: Array<{ text: string; cluster: string; intent: string }> }) => input)
   .handler(async ({ data, context }) => {
     if (!data.items.length) return { inserted: 0 };
+    const { assertPromptQuota } = await import("./plan.server");
+    await assertPromptQuota(context.supabase, context.userId, data.brandId, data.items.length);
     const { error } = await context.supabase.from("prompts").insert(
       data.items.map((item) => ({
         brand_id: data.brandId,
@@ -451,6 +455,17 @@ export const setPromptStatus = createServerFn({ method: "POST" })
   .inputValidator((input: { ids: string[]; status: string }) => input)
   .handler(async ({ data, context }) => {
     if (!data.ids.length) return { ok: true };
+    if (data.status === "approved") {
+      const { assertPromptQuota } = await import("./plan.server");
+      const { data: rows } = await context.supabase
+        .from("prompts").select("id, brand_id, status").in("id", data.ids);
+      const pending = (rows ?? []).filter((r) => r.status !== "approved");
+      const byBrand = new Map<string, number>();
+      for (const r of pending) byBrand.set(r.brand_id, (byBrand.get(r.brand_id) ?? 0) + 1);
+      for (const [brandId, adding] of byBrand) {
+        await assertPromptQuota(context.supabase, context.userId, brandId, adding);
+      }
+    }
     const { error } = await context.supabase.from("prompts").update({ status: data.status }).in("id", data.ids);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -460,6 +475,8 @@ export const createPrompt = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; text: string }) => input)
   .handler(async ({ data, context }) => {
+    const { assertPromptQuota } = await import("./plan.server");
+    await assertPromptQuota(context.supabase, context.userId, data.brandId, 1);
     const { error } = await context.supabase.from("prompts").insert({
       brand_id: data.brandId, text: data.text, status: "approved", origin: "manual", category: "genel",
     });
