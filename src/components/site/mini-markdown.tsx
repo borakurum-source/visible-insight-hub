@@ -8,7 +8,7 @@ function inline(text: string, keyPrefix: string) {
     const bold = part.match(/^\*\*([^*]+)\*\*$/);
     if (bold) return <strong key={key}>{bold[1]}</strong>;
     const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-    if (link) return <a key={key} href={link[2]} className="text-[#356AFF] underline-offset-2 hover:underline">{link[1]}</a>;
+    if (link) return <a key={key} href={link[2]} className="text-primary underline-offset-2 hover:underline">{link[1]}</a>;
     return <span key={key}>{part}</span>;
   });
 }
@@ -22,13 +22,13 @@ export function MiniMarkdown({ content }: { content: string }) {
     const line = lines[i] ?? "";
     if (!line.trim()) { i++; continue; }
     if (line.startsWith("---")) { i++; continue; }
-    if (line.startsWith("# ")) { blocks.push(<h1 key={key++} className="text-3xl font-extrabold text-[#0B1020] mt-10 mb-4">{inline(line.slice(2), `h1-${key}`)}</h1>); i++; continue; }
-    if (line.startsWith("## ")) { blocks.push(<h2 key={key++} className="text-2xl font-extrabold text-[#0B1020] mt-10 mb-4">{inline(line.slice(3), `h2-${key}`)}</h2>); i++; continue; }
-    if (line.startsWith("### ")) { blocks.push(<h3 key={key++} className="text-xl font-bold text-[#0B1020] mt-8 mb-3">{inline(line.slice(4), `h3-${key}`)}</h3>); i++; continue; }
+    if (line.startsWith("# ")) { blocks.push(<h1 key={key++} className="text-3xl font-extrabold text-foreground mt-10 mb-4">{inline(line.slice(2), `h1-${key}`)}</h1>); i++; continue; }
+    if (line.startsWith("## ")) { blocks.push(<h2 key={key++} className="text-2xl font-extrabold text-foreground mt-10 mb-4">{inline(line.slice(3), `h2-${key}`)}</h2>); i++; continue; }
+    if (line.startsWith("### ")) { blocks.push(<h3 key={key++} className="text-xl font-bold text-foreground mt-8 mb-3">{inline(line.slice(4), `h3-${key}`)}</h3>); i++; continue; }
     if (line.startsWith(">")) {
       const quoteLines: string[] = [];
       while (i < lines.length && (lines[i] ?? "").startsWith(">")) { quoteLines.push((lines[i] ?? "").replace(/^>\s?/, "")); i++; }
-      blocks.push(<blockquote key={key++} className="border-l-2 border-[#35E1FF] bg-[#F2F0E8] px-4 py-3 my-5 text-[#0B1020]">{quoteLines.join(" ")}</blockquote>);
+      blocks.push(<blockquote key={key++} className="border-l-2 border-cyan bg-muted px-4 py-3 my-5 text-foreground">{quoteLines.join(" ")}</blockquote>);
       continue;
     }
     if (line.trim().startsWith("|")) {
@@ -39,8 +39,8 @@ export function MiniMarkdown({ content }: { content: string }) {
       blocks.push(
         <div key={key++} className="my-6 overflow-x-auto">
           <table className="w-full text-sm">
-            {head && <thead><tr>{head.map((c, ci) => <th key={ci} className="border-b border-[#E6EAF2] px-3 py-3 text-left font-bold text-[#0B1020]">{inline(c, `th-${ci}`)}</th>)}</tr></thead>}
-            <tbody>{body.map((r, ri) => <tr key={ri}>{r.map((c, ci) => <td key={ci} className="border-b border-[#E6EAF2] px-3 py-3 text-[#57564E]">{inline(c, `td-${ri}-${ci}`)}</td>)}</tr>)}</tbody>
+            {head && <thead><tr>{head.map((c, ci) => <th key={ci} className="border-b border-border px-3 py-3 text-left font-bold text-foreground">{inline(c, `th-${ci}`)}</th>)}</tr></thead>}
+            <tbody>{body.map((r, ri) => <tr key={ri}>{r.map((c, ci) => <td key={ci} className="border-b border-border px-3 py-3 text-muted-foreground">{inline(c, `td-${ri}-${ci}`)}</td>)}</tr>)}</tbody>
           </table>
         </div>,
       );
@@ -52,7 +52,7 @@ export function MiniMarkdown({ content }: { content: string }) {
       const ordered = /^\d+\./.test(listLines[0] ?? "");
       const Tag = ordered ? "ol" : "ul";
       blocks.push(
-        <Tag key={key++} className={`my-4 space-y-1 pl-6 text-[#57564E] ${ordered ? "list-decimal" : "list-disc"}`}>
+        <Tag key={key++} className={`my-4 space-y-1 pl-6 text-muted-foreground ${ordered ? "list-decimal" : "list-disc"}`}>
           {listLines.map((l, li) => <li key={li}>{inline(l.replace(/^(-|\d+\.)\s/, ""), `li-${li}`)}</li>)}
         </Tag>,
       );
@@ -60,7 +60,7 @@ export function MiniMarkdown({ content }: { content: string }) {
     }
     const paraLines: string[] = [];
     while (i < lines.length && (lines[i] ?? "").trim() && !/^(#|>|\||-|\d+\.)/.test((lines[i] ?? "").trim())) { paraLines.push(lines[i] ?? ""); i++; }
-    if (paraLines.length) blocks.push(<p key={key++} className="mt-5 text-base leading-8 text-[#57564E]">{inline(paraLines.join(" "), `p-${key}`)}</p>);
+    if (paraLines.length) blocks.push(<p key={key++} className="mt-5 text-base leading-8 text-muted-foreground">{inline(paraLines.join(" "), `p-${key}`)}</p>);
     else i++;
   }
   return <>{blocks}</>;

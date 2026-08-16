@@ -4,31 +4,64 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/site/BrandLogo";
 
-const marketingLinks = [
+const primaryLinks = [
   { href: "/platform", label: "Platform" },
-  { href: "/platform/evidence-gaps", label: "Eksik Kanıtlar" },
   { href: "/solutions/agencies", label: "Ajanslar" },
-  { href: "/proof/filmfolk", label: "Örnek Çalışma" },
-  { href: "/hakkimizda", label: "Hakkımızda" },
+  { href: "/proof/filmfolk", label: "Vaka" },
   { href: "/fiyatlandirma", label: "Fiyatlandırma" },
-  { href: "/sunum", label: "Sunum" },
   { href: "/makaleler", label: "Kaynaklar" },
+];
+
+const footerGroups = [
+  {
+    title: "Platform",
+    links: [
+      { href: "/platform", label: "Genel bakış" },
+      { href: "/platform/citation-share", label: "Atıf Payı" },
+      { href: "/platform/evidence-gaps", label: "Eksik Kanıtlar" },
+      { href: "/free-ai-readiness-report", label: "Ücretsiz rapor" },
+    ],
+  },
+  {
+    title: "Çözümler",
+    links: [
+      { href: "/solutions/agencies", label: "Ajanslar" },
+      { href: "/proof/filmfolk", label: "FilmFolk vakası" },
+      { href: "/fiyatlandirma", label: "Planlar" },
+      { href: "/sunum", label: "Sunum" },
+    ],
+  },
+  {
+    title: "Şirket",
+    links: [
+      { href: "/hakkimizda", label: "Hakkımızda" },
+      { href: "/makaleler", label: "Makaleler" },
+      { href: "/auth", label: "Giriş yap" },
+    ],
+  },
+  {
+    title: "Yasal",
+    links: [
+      { href: "/privacy", label: "Gizlilik" },
+      { href: "/kvkk", label: "KVKK" },
+    ],
+  },
 ];
 
 export function MarketingShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#0B1020] selection:bg-[#35E1FF]/30">
-      <header className="sticky top-0 z-50 border-b border-[#E6EAF2] bg-[#F7F9FC]/85 backdrop-blur-xl">
+    <div className="min-h-screen bg-background text-foreground selection:bg-cyan/30">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="marketing-container flex h-16 items-center justify-between">
           <BrandLogo variant="horizontal" size="sm" linkTo="/" />
-          <nav className="hidden items-center gap-6 text-[13px] font-medium tracking-[-0.01em] text-[#57564E] xl:flex" aria-label="Pazarlama navigasyonu">
-            {marketingLinks.map((link) => (
+          <nav className="hidden items-center gap-7 text-[13px] font-medium tracking-[-0.01em] text-muted-foreground lg:flex" aria-label="Pazarlama navigasyonu">
+            {primaryLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className="whitespace-nowrap transition-colors hover:text-[#0B1020] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF] focus-visible:ring-offset-2"
+                className="whitespace-nowrap transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 {link.label}
               </Link>
@@ -40,7 +73,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
             </Button>
             <Button asChild>
               <Link to="/free-ai-readiness-report">
-                Ölçümünü başlat <ArrowRight className="ml-1.5 h-4 w-4" />
+                Ücretsiz ölçüm <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -50,7 +83,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
             </Button>
             <button
               type="button"
-              className="rounded-md p-2 text-[#0B1020] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF]"
+              className="rounded-md p-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               onClick={() => setMobileOpen((open) => !open)}
               aria-label="Menüyü aç"
               aria-expanded={mobileOpen}
@@ -60,14 +93,14 @@ export function MarketingShell({ children }: { children: ReactNode }) {
           </div>
         </div>
         {mobileOpen && (
-          <nav className="border-t border-[#E6EAF2] bg-[#F7F9FC] px-4 py-4 md:hidden" aria-label="Mobil pazarlama navigasyonu">
+          <nav className="border-t border-border bg-background px-4 py-4 md:hidden" aria-label="Mobil pazarlama navigasyonu">
             <div className="space-y-1">
-              {marketingLinks.map((link) => (
+              {primaryLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[#0B1020] hover:bg-[#EEF2F9]"
+                  className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-secondary"
                 >
                   {link.label}
                 </Link>
@@ -75,7 +108,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
               <Link
                 to="/auth"
                 onClick={() => setMobileOpen(false)}
-                className="mt-2 block w-full rounded-lg border border-[#E6EAF2] px-3 py-2.5 text-left text-sm font-semibold text-[#0B1020]"
+                className="mt-2 block w-full rounded-lg border border-border px-3 py-2.5 text-left text-sm font-semibold text-foreground"
               >
                 Giriş yap
               </Link>
@@ -84,17 +117,33 @@ export function MarketingShell({ children }: { children: ReactNode }) {
         )}
       </header>
       <main>{children}</main>
-      <footer className="border-t border-[#E6EAF2] bg-[#F7F9FC]">
-        <div className="marketing-container flex flex-col items-center justify-between gap-5 py-9 text-sm text-[#667085] md:flex-row">
-          <BrandLogo variant="horizontal" size="sm" linkTo="/" />
-          <p>© 2026 OneCite. Tüm hakları saklıdır.</p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link to="/makaleler" className="hover:text-[#0B1020]">Makaleler</Link>
-            <Link to="/hakkimizda" className="hover:text-[#0B1020]">Hakkımızda</Link>
-            <Link to="/sunum" className="hover:text-[#0B1020]">Sunum</Link>
-            <Link to="/fiyatlandirma" className="hover:text-[#0B1020]">Fiyatlandırma</Link>
-            <Link to="/privacy" className="hover:text-[#0B1020]">Gizlilik</Link>
-            <Link to="/kvkk" className="hover:text-[#0B1020]">KVKK</Link>
+      <footer className="border-t border-border bg-background">
+        <div className="marketing-container py-14">
+          <div className="grid gap-10 md:grid-cols-[1.2fr_repeat(4,minmax(0,.7fr))]">
+            <div>
+              <BrandLogo variant="horizontal" size="sm" linkTo="/" />
+              <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">
+                Yapay zeka cevaplarında atıf payınızı ölçün, eksik kanıtı görün ve doğru içeriği önce üretin.
+              </p>
+            </div>
+            {footerGroups.map((group) => (
+              <div key={group.title}>
+                <p className="editorial-eyebrow text-muted-foreground">{group.title}</p>
+                <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+                  {group.links.map((link) => (
+                    <li key={link.href}>
+                      <Link to={link.href} className="transition-colors hover:text-foreground">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
+            <p>© 2026 OneCite. Tüm hakları saklıdır.</p>
+            <p className="font-mono">AI CITATION INTELLIGENCE</p>
           </div>
         </div>
       </footer>

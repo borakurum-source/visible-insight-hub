@@ -29,7 +29,7 @@ function AgenciesPage() {
     <MarketingShell>
       <VisualHero
         eyebrow="AJANSLAR · SHAREABLE EVIDENCE"
-        title={<>Müşterinize yalnızca rapor değil, <span className="text-[#35E1FF]">açıklanabilir yapay zeka görünürlüğü kanıtı</span> götürün.</>}
+        title={<>Müşterinize yalnızca rapor değil, <span className="text-cyan">açıklanabilir yapay zeka görünürlüğü kanıtı</span> götürün.</>}
         description="OneCite, soru ölçümünü kaynak analizi ve eksik kanıtlarla birleştirir. Böylece GEO öneriniz “içerik üretelim” seviyesinde kalmaz."
         image={heroCitationOrb}
         imageAlt="Citation ağı taşıyan cam küre; ajanslar için paylaşılabilir kanıt metaforu"
@@ -42,34 +42,34 @@ function AgenciesPage() {
 
       <section className="marketing-container px-4 py-16 md:px-6 md:py-24">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Ajans çalışma döngüsü</p>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-5xl">GEO hizmetini teslim çıktısı değil, ölçülebilir büyüme ritmi yapın.</h2>
-          <p className="mt-5 text-base leading-7 text-[#667085]">Her müşterinin alıcısı, kategorisi, rakibi ve eksik kanıt farklıdır. OneCite aynı iş akışını tekrar edilebilir, ancak her müşteri için bağlama duyarlı hale getirir.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Ajans çalışma döngüsü</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-5xl">GEO hizmetini teslim çıktısı değil, ölçülebilir büyüme ritmi yapın.</h2>
+          <p className="mt-5 text-base leading-7 text-muted-foreground">Her müşterinin alıcısı, kategorisi, rakibi ve eksik kanıt farklıdır. OneCite aynı iş akışını tekrar edilebilir, ancak her müşteri için bağlama duyarlı hale getirir.</p>
         </div>
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {workflow.map(({ icon: Icon, step, title, body }) => (
-            <article key={step} className="rounded-2xl border border-[#E6EAF2] bg-[#F7F9FC] p-6">
-              <span className="font-mono text-sm text-[#356AFF]">{step}</span>
-              <Icon className="mt-8 h-5 w-5 text-[#0B1020]" />
-              <h3 className="mt-5 text-xl font-extrabold text-[#0B1020]">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[#667085]">{body}</p>
+            <article key={step} className="rounded-2xl border border-border bg-background p-6">
+              <span className="font-mono text-sm text-primary">{step}</span>
+              <Icon className="mt-8 h-5 w-5 text-foreground" />
+              <h3 className="mt-5 text-xl font-extrabold text-foreground">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{body}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="border-y border-[#E6EAF2] bg-[#F7F9FC] px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-border bg-background px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Müşteri görüşmesi</p>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-4xl">“Neden görünmüyoruz?” sorusuna somut cevap verin.</h2>
-            <p className="mt-5 text-base leading-7 text-[#667085]">Marka anılması ile kaynak olarak seçilme arasındaki farkı, rakibin neden seçildiğini ve hangi varlığın eksik kaldığını aynı müşteri görüşmesinde gösterin.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Müşteri görüşmesi</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">“Neden görünmüyoruz?” sorusuna somut cevap verin.</h2>
+            <p className="mt-5 text-base leading-7 text-muted-foreground">Marka anılması ile kaynak olarak seçilme arasındaki farkı, rakibin neden seçildiğini ve hangi varlığın eksik kaldığını aynı müşteri görüşmesinde gösterin.</p>
           </div>
-          <div className="rounded-2xl bg-[#EEF2F9] p-6">
-            <div className="flex items-center gap-3"><UsersRound className="h-5 w-5 text-[#356AFF]" /><p className="font-bold text-[#0B1020]">Müşteri raporunun üç çıktısı</p></div>
+          <div className="rounded-2xl bg-secondary p-6">
+            <div className="flex items-center gap-3"><UsersRound className="h-5 w-5 text-primary" /><p className="font-bold text-foreground">Müşteri raporunun üç çıktısı</p></div>
             <div className="mt-6 space-y-3">
               {outcomes.map((outcome) => (
-                <div key={outcome} className="flex items-center gap-3 rounded-xl border border-[#E6EAF2] bg-[#F7F9FC] p-4 text-sm font-semibold text-[#0B1020]"><FileOutput className="h-4 w-4 text-[#356AFF]" />{outcome}</div>
+                <div key={outcome} className="flex items-center gap-3 rounded-xl border border-border bg-background p-4 text-sm font-semibold text-foreground"><FileOutput className="h-4 w-4 text-primary" />{outcome}</div>
               ))}
             </div>
           </div>
@@ -77,8 +77,8 @@ function AgenciesPage() {
       </section>
 
       <section className="marketing-container px-4 py-16 text-center md:px-6 md:py-24">
-        <h2 className="text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-4xl">Bir müşteri ile başlayın, kanıta dayalı GEO iş akışını görün.</h2>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#667085]">İlk ücretsiz ölçüm, gerçek müşteri verisiyle nasıl bir rapor ve uygulama sistemi kurabileceğinizi gösterir.</p>
+        <h2 className="text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Bir müşteri ile başlayın, kanıta dayalı GEO iş akışını görün.</h2>
+        <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted-foreground">İlk ücretsiz ölçüm, gerçek müşteri verisiyle nasıl bir rapor ve uygulama sistemi kurabileceğinizi gösterir.</p>
         <Button className="mt-8" asChild><Link to="/free-ai-readiness-report">Müşteri ölçümünü başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
       </section>
     </MarketingShell>
