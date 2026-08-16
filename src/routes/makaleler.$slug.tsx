@@ -65,7 +65,7 @@ function PromptComparison({ item, tone = "positive" }: { item: PromptChange; ton
         <span className="pb-0.5 font-mono text-[#A1AABC]">→</span>
         <div>
           <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Son ölçüm</span><span>{item.latest}%</span></div>
-          <AnimatedBar value={item.latest} label={`${item.prompt} son ölçüm ${item.latest} yüzde`} className={positive ? "bg-[#356AFF]" : "bg-rose-500"} />
+          <AnimatedBar value={item.latest} label={`${item.prompt} son ölçüm ${item.latest} yüzde`} className={positive ? "bg-primary" : "bg-rose-500"} />
         </div>
       </div>
     </article>
@@ -90,7 +90,7 @@ function FilmFolkCaseStudy() {
         >
           <div className="grid max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
             <div className="rounded-xl border border-white/15 bg-background/[0.06] p-3"><p className="visual-source-label text-slate-400">İLK PAY</p><p className="mt-2 font-mono text-xl text-white">30,7%</p></div>
-            <div className="rounded-xl border border-[#35E1FF]/35 bg-cyan/10 p-3"><p className="visual-source-label text-cyan">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
+            <div className="rounded-xl border border-cyan/35 bg-cyan/10 p-3"><p className="visual-source-label text-cyan">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
             <div className="rounded-xl border border-white/15 bg-background/[0.06] p-3"><p className="visual-source-label text-slate-400">DEĞİŞİM</p><p className="mt-2 font-mono text-xl text-white">+28,1</p></div>
             <div className="rounded-xl border border-white/15 bg-background/[0.06] p-3"><p className="visual-source-label text-slate-400">TEKRAR</p><p className="mt-2 font-mono text-xl text-white">286</p></div>
           </div>
@@ -211,7 +211,7 @@ function GenericArticle({ article }: { article: Article }) {
     <MarketingShell>
       <article>
         <div className="fixed inset-x-0 top-16 z-40 h-0.5 bg-transparent" aria-hidden="true">
-          <div className="h-full bg-[#356AFF] transition-[width] duration-150 motion-reduce:transition-none" style={{ width: `${progress}%` }} />
+          <div className="h-full bg-primary transition-[width] duration-150 motion-reduce:transition-none" style={{ width: `${progress}%` }} />
         </div>
         <header className="border-b border-border bg-background px-4 py-14 md:px-6 md:py-20">
           <div className="mx-auto max-w-3xl">

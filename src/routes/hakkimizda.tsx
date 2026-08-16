@@ -48,7 +48,7 @@ function AboutPage() {
           <div className="space-y-5 text-base leading-8 text-muted-foreground">
             <p>Google’da iyi sıralanan bir sayfa, bir yapay zeka cevabında otomatik olarak kaynak seçilmez. AI sistemleri sorunun bağlamını, kaynağın güven sinyallerini ve web’deki kanıt ilişkilerini birlikte yorumlar.</p>
             <p>OneCite bu belirsizliği tek bir skorla kapatmaya çalışmaz. Sabit soru seti, pazar, dil ve tekrar bağlamında gözlenen atıf sinyalini; seçilen kaynak ve eksik kanıtla birlikte okur.</p>
-            <blockquote className="border-l-2 border-[#35E1FF] pl-5 text-xl font-semibold leading-8 text-foreground">“Bir markanın AI cevaplarında nerede durduğunu tahmin etmeyin. Soruyu, kaynağı ve eksik kanıtı aynı anda görün.”</blockquote>
+            <blockquote className="border-l-2 border-cyan pl-5 text-xl font-semibold leading-8 text-foreground">“Bir markanın AI cevaplarında nerede durduğunu tahmin etmeyin. Soruyu, kaynağı ve eksik kanıtı aynı anda görün.”</blockquote>
           </div>
         </div>
       </section>

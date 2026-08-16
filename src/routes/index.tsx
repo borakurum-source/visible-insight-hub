@@ -111,7 +111,7 @@ function NedenOneCite() {
       <div className="grid gap-10 lg:grid-cols-[.88fr_1.12fr] lg:gap-16">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.13em] text-primary">Neden OneCite?</p>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Yapay zeka görünürlüğünü bir sayı değil, bir <span className="underline decoration-[#35E1FF] decoration-4 underline-offset-4">kanıt zinciri</span> olarak okuyun.</h2>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Yapay zeka görünürlüğünü bir sayı değil, bir <span className="underline decoration-cyan decoration-4 underline-offset-4">kanıt zinciri</span> olarak okuyun.</h2>
           <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">OneCite yalnızca “göründünüz” demez. Hangi soruda göründüğünüzü, hangi kaynağın seçildiğini ve daha sık atıf almak için neyin eksik olduğunu açıklar.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
@@ -231,7 +231,7 @@ function FilmFolkOrnegi() {
             <span className="inline-flex items-center rounded-full border border-[#C9C5B6] bg-background px-2.5 py-0.5 text-xs font-semibold text-primary">Örnek ölçüm · FilmFolk</span>
             <h2 className="mt-5 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Bir vaka çalışması, yalnızca sonuç değil; sonuçtaki kanıt değişimidir.</h2>
             <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">FilmFolk için 41 satın alma niyetli soru, toplam 286 tekrar üzerinden karşılaştırıldı. Ağırlıklı atıf payı ilk ölçümde %30,7 iken son ölçümde %58,9’a ulaştı; değişim +28,1 puan oldu.</p>
-            <Link to="/proof/filmfolk" className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-foreground underline decoration-[#35E1FF] decoration-2 underline-offset-4 transition-colors hover:text-primary">FilmFolk vaka çalışmasını inceleyin <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/proof/filmfolk" className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-foreground underline decoration-cyan decoration-2 underline-offset-4 transition-colors hover:text-primary">FilmFolk vaka çalışmasını inceleyin <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <div className="grid grid-cols-2 gap-3 self-start">
             {metrics.map((metric) => (

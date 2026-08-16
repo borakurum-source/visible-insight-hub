@@ -48,7 +48,7 @@ function PromptRow({ result }: { result: PromptResult }) {
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs">
         <div><div className="mb-2 flex justify-between text-muted-foreground"><span>İlk ölçüm</span><span>{result.first}%</span></div><div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-[#9CB6FF]" style={{ width: `${result.first}%` }} /></div></div>
         <span className="font-mono text-[#A1AABC]">→</span>
-        <div><div className="mb-2 flex justify-between text-muted-foreground"><span>Son ölçüm</span><span>{result.latest}%</span></div><div className="h-2 overflow-hidden rounded-full bg-[#D9F8FF]"><div className={`h-full rounded-full ${result.delta >= 0 ? "bg-[#356AFF]" : "bg-rose-500"}`} style={{ width: `${result.latest}%` }} /></div></div>
+        <div><div className="mb-2 flex justify-between text-muted-foreground"><span>Son ölçüm</span><span>{result.latest}%</span></div><div className="h-2 overflow-hidden rounded-full bg-[#D9F8FF]"><div className={`h-full rounded-full ${result.delta >= 0 ? "bg-primary" : "bg-rose-500"}`} style={{ width: `${result.latest}%` }} /></div></div>
       </div>
     </article>
   );
@@ -69,7 +69,7 @@ function FilmFolkPage() {
       >
         <div className="grid max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
           <div className="rounded-xl border border-white/15 bg-background/[0.06] p-3"><p className="visual-source-label text-slate-400">İLK PAY</p><p className="mt-2 font-mono text-xl text-white">30,7%</p></div>
-          <div className="rounded-xl border border-[#35E1FF]/35 bg-cyan/10 p-3"><p className="visual-source-label text-cyan">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
+          <div className="rounded-xl border border-cyan/35 bg-cyan/10 p-3"><p className="visual-source-label text-cyan">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
           <div className="rounded-xl border border-white/15 bg-background/[0.06] p-3"><p className="visual-source-label text-slate-400">DEĞİŞİM</p><p className="mt-2 font-mono text-xl text-white">+28,1</p></div>
           <div className="rounded-xl border border-white/15 bg-background/[0.06] p-3"><p className="visual-source-label text-slate-400">TEKRAR</p><p className="mt-2 font-mono text-xl text-white">286</p></div>
         </div>

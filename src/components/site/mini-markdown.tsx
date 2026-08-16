@@ -28,7 +28,7 @@ export function MiniMarkdown({ content }: { content: string }) {
     if (line.startsWith(">")) {
       const quoteLines: string[] = [];
       while (i < lines.length && (lines[i] ?? "").startsWith(">")) { quoteLines.push((lines[i] ?? "").replace(/^>\s?/, "")); i++; }
-      blocks.push(<blockquote key={key++} className="border-l-2 border-[#35E1FF] bg-muted px-4 py-3 my-5 text-foreground">{quoteLines.join(" ")}</blockquote>);
+      blocks.push(<blockquote key={key++} className="border-l-2 border-cyan bg-muted px-4 py-3 my-5 text-foreground">{quoteLines.join(" ")}</blockquote>);
       continue;
     }
     if (line.trim().startsWith("|")) {

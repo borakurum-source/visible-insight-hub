@@ -94,7 +94,7 @@ function ArticleCard({ article, featured = false }: { article: Article; featured
       <Link
         to="/makaleler/$slug"
         params={{ slug: article.slug }}
-        className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF] focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-muted" : "border-border bg-background hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
+        className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-muted" : "border-border bg-background hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
       >
         <div className="flex items-center justify-between gap-3">
           <Badge variant="outline" className="border-border bg-background text-primary">{article.category}</Badge>
@@ -149,7 +149,7 @@ function ArticlesPage() {
               type="button"
               aria-pressed={selectedCategory === category}
               onClick={() => setSelectedCategory(category)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] motion-reduce:transition-none ${selectedCategory === category ? "border-[#356AFF] bg-[#356AFF] text-white" : "border-border bg-background text-muted-foreground hover:border-[#C9C5B6] hover:text-foreground"}`}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] motion-reduce:transition-none ${selectedCategory === category ? "border-primary bg-primary text-white" : "border-border bg-background text-muted-foreground hover:border-[#C9C5B6] hover:text-foreground"}`}
             >
               {category}
             </button>

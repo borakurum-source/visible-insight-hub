@@ -28,7 +28,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
               <Link
                 key={link.href}
                 to={link.href}
-                className="whitespace-nowrap transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF] focus-visible:ring-offset-2"
+                className="whitespace-nowrap transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 {link.label}
               </Link>
@@ -50,7 +50,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
             </Button>
             <button
               type="button"
-              className="rounded-md p-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF]"
+              className="rounded-md p-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               onClick={() => setMobileOpen((open) => !open)}
               aria-label="Menüyü aç"
               aria-expanded={mobileOpen}
