@@ -4,7 +4,7 @@ import BrandLogo from "@/components/site/BrandLogo";
 const CONTROLLER_NAME = "OneCite adına Bora Kurum";
 const CONTROLLER_ADDRESS = "Kozyatağı Mah., Kaya Sultan Sok., Hayriye İş Merkezi No:83/3, Kadıköy, İstanbul, TR";
 const CONTACT_EMAIL = "info@ragsignal.com";
-const LAST_UPDATED = "12 Ağustos 2026";
+const LAST_UPDATED = "16 Ağustos 2026";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -63,19 +63,25 @@ function PrivacyPolicyPage() {
 
       <Section title="2. Hangi verileri topluyoruz">
         <ul className="list-disc pl-5 space-y-1">
-          <li>Hesap bilgileri: ad, e-posta adresi, organizasyon/şirket adı — Clerk üzerinden hesap oluştururken alınır.</li>
+          <li>Hesap bilgileri: ad, e-posta adresi, organizasyon/şirket adı — hesap oluştururken alınır.</li>
           <li>Müşteri/marka verisi: Hizmete eklediğiniz müşteri firmaların web sitesi adresi, sektör bilgisi ve izlemek istediğiniz sorgu (prompt) metinleri.</li>
           <li>Kullanım verisi: hangi sayfaları ziyaret ettiğiniz, hangi özellikleri kullandığınız (ürünü iyileştirmek için, reklam amaçlı değil).</li>
-          <li>Fatura/plan bilgisi: hangi plana kayıtlı olduğunuz. Kredi kartı numaranızı biz görmüyor ve saklamıyoruz — ödeme işlemleri Clerk Billing altyapısı üzerinden yürütülür.</li>
+          <li>
+            Fatura/plan bilgisi: hangi plana kayıtlı olduğunuz ve abonelik durumunuz. Kredi kartı bilgilerinizi
+            biz görmüyor ve saklamıyoruz — ödemeler, Kayıtlı Satıcımız (Merchant of Record) Paddle tarafından
+            işlenir.
+          </li>
         </ul>
       </Section>
 
       <Section title="3. Verilerinizi kimle paylaşıyoruz">
         <p>Verileriniz yalnızca hizmeti sunmak için gerekli alt yüklenicilerle paylaşılır:</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Clerk</strong> — kimlik doğrulama, oturum yönetimi ve faturalandırma altyapısı.</li>
-          <li><strong>Neon (PostgreSQL, AB/Frankfurt bölgesi)</strong> — uygulama veritabanının barındırılması.</li>
-          <li><strong>Perplexity Sonar API</strong> — izlemek istediğiniz prompt metinleri, marka bahsi/atıf ölçümü yapılması amacıyla bu API'ye gönderilir ve analiz edilir.</li>
+          <li><strong>Paddle.com Market Ltd.</strong> — Kayıtlı Satıcı (Merchant of Record): satış işlemi, abonelik yönetimi, ödeme alma, vergi uyumu ve faturalandırma. Paddle bu verileri kendi gizlilik politikası kapsamında bağımsız veri sorumlusu olarak da işler.</li>
+          <li><strong>Supabase / Lovable Cloud (PostgreSQL, AB bölgesi)</strong> — kimlik doğrulama, oturum yönetimi ve uygulama veritabanının barındırılması.</li>
+          <li><strong>Perplexity ve DeepSeek API'leri</strong> — izlemek istediğiniz prompt metinleri, marka bahsi/atıf ölçümü ve içerik üretimi amacıyla bu API'lere gönderilir ve analiz edilir.</li>
+          <li><strong>E-posta altyapısı (notify.1cite.com)</strong> — işlemsel bildirim e-postalarının gönderimi.</li>
+          <li><strong>Profesyonel danışmanlar ve yetkili kamu kurumları</strong> — hukuki/mali danışmanlık veya mevzuatın gerektirdiği hallerde.</li>
           <li><strong>Google (opsiyonel)</strong> — Search Console/Analytics entegrasyonunu kendi hesabınızla bağlarsanız, yalnızca kendi sitenize ait arama performansı verisi okunur.</li>
         </ul>
         <p>Verileriniz hiçbir şekilde reklam ağlarına satılmaz veya pazarlama amacıyla üçüncü taraflarla paylaşılmaz.</p>
@@ -83,7 +89,7 @@ function PrivacyPolicyPage() {
 
       <Section title="4. Yurt dışına veri aktarımı">
         <p>
-          Yukarıda sayılan alt yükleniciler (Clerk, Neon, Perplexity) altyapılarını Türkiye dışında (AB ve/veya ABD)
+          Yukarıda sayılan alt yükleniciler (Paddle, Supabase/Lovable Cloud, Perplexity, DeepSeek) altyapılarını Türkiye dışında (AB ve/veya ABD)
           barındırabilir. Hizmeti kullanarak verilerinizin bu kapsamda yurt dışına aktarılmasına onay verirsiniz.
           Bu aktarımlar, ilgili alt yüklenicilerin kendi veri koruma taahhütleri çerçevesinde yürütülür.
         </p>
@@ -92,7 +98,7 @@ function PrivacyPolicyPage() {
       <Section title="5. Çerezler">
         <p>Hizmet, reklam veya izleme amaçlı hiçbir üçüncü taraf çerezi (Google Analytics, Meta Pixel vb.) kullanmaz. Kullanılan tek çerezler:</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li><strong>Oturum çerezi (Clerk)</strong> — giriş yapmış olduğunuzu hatırlamak için zorunludur.</li>
+          <li><strong>Oturum çerezi</strong> — giriş yapmış olduğunuzu hatırlamak için zorunludur.</li>
           <li><strong>Arayüz tercihi çerezi</strong> — kenar çubuğunun açık/kapalı durumunu hatırlar, kişisel veri içermez.</li>
         </ul>
         <p>Bu iki çerez de hizmetin çalışması için zorunlu/işlevsel nitelikte olduğundan ayrıca onay bannerı gerektirmez.</p>
@@ -112,6 +118,11 @@ function PrivacyPolicyPage() {
           adresinden bizimle iletişime geçebilirsiniz. Detaylı haklarınız için KVKK Aydınlatma Metni'ne bakınız.
         </p>
         <p>Veri sorumlusu: {CONTROLLER_NAME} — {CONTROLLER_ADDRESS}</p>
+        <p>
+          Ayrıca{" "}
+          <Link to="/terms" className="underline hover:text-foreground">Kullanım Koşulları</Link> ve{" "}
+          <Link to="/refund-policy" className="underline hover:text-foreground">İade Politikası</Link> sayfalarımıza bakabilirsiniz.
+        </p>
       </Section>
     </LegalShell>
   );

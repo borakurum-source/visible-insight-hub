@@ -21,8 +21,10 @@ import { Route as MakalelerRouteImport } from './routes/makaleler'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SunumRouteImport } from './routes/sunum'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UcretsizYapayZekaGorunurlukRaporuRouteImport } from './routes/ucretsiz-yapay-zeka-gorunurluk-raporu'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -121,6 +123,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -129,6 +136,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SunumRoute = SunumRouteImport.update({
   id: '/sunum',
   path: '/sunum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UcretsizYapayZekaGorunurlukRaporuRoute =
@@ -353,8 +365,10 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/terms': typeof TermsRoute
   '/ucretsiz-yapay-zeka-gorunurluk-raporu': typeof UcretsizYapayZekaGorunurlukRaporuRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -404,8 +418,10 @@ export interface FileRoutesByTo {
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/terms': typeof TermsRoute
   '/ucretsiz-yapay-zeka-gorunurluk-raporu': typeof UcretsizYapayZekaGorunurlukRaporuRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -458,8 +474,10 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
+  '/terms': typeof TermsRoute
   '/ucretsiz-yapay-zeka-gorunurluk-raporu': typeof UcretsizYapayZekaGorunurlukRaporuRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -513,8 +531,10 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/platform'
     | '/privacy'
+    | '/refund-policy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/terms'
     | '/ucretsiz-yapay-zeka-gorunurluk-raporu'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -564,8 +584,10 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/mcp'
     | '/privacy'
+    | '/refund-policy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/terms'
     | '/ucretsiz-yapay-zeka-gorunurluk-raporu'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -617,8 +639,10 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/platform'
     | '/privacy'
+    | '/refund-policy'
     | '/sitemap.xml'
     | '/sunum'
+    | '/terms'
     | '/ucretsiz-yapay-zeka-gorunurluk-raporu'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -672,8 +696,10 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   PlatformRoute: typeof PlatformRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SunumRoute: typeof SunumRoute
+  TermsRoute: typeof TermsRoute
   UcretsizYapayZekaGorunurlukRaporuRoute: typeof UcretsizYapayZekaGorunurlukRaporuRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -774,6 +800,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -786,6 +819,13 @@ declare module '@tanstack/react-router' {
       path: '/sunum'
       fullPath: '/sunum'
       preLoaderRoute: typeof SunumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ucretsiz-yapay-zeka-gorunurluk-raporu': {
@@ -1161,8 +1201,10 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   PlatformRoute: PlatformRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SunumRoute: SunumRoute,
+  TermsRoute: TermsRoute,
   UcretsizYapayZekaGorunurlukRaporuRoute:
     UcretsizYapayZekaGorunurlukRaporuRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
