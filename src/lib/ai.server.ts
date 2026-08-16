@@ -6,10 +6,13 @@ export async function aiJson<T>(messages: ChatMessage[], fallback: T): Promise<T
   try {
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      headers: { "Lovable-API-Key": key, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages,
+        model: "openai/gpt-5.6-sol",
+        messages: [
+          ...messages,
+          { role: "system" as const, content: "Yanıtı yalnızca geçerli json olarak döndür." },
+        ],
         response_format: { type: "json_object" },
       }),
     });
