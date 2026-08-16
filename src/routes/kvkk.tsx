@@ -14,7 +14,9 @@ export const Route = createFileRoute("/kvkk")({
       { property: "og:title", content: "KVKK Aydınlatma Metni | OneCite" },
       { property: "og:description", content: "OneCite'ın KVKK kapsamında kişisel verilerinizi nasıl işlediğini öğrenin." },
       { name: "robots", content: "noindex" },
+      { property: "og:url", content: "https://1cite.com/kvkk" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/kvkk" }],
   }),
   component: KvkkPage,
 });

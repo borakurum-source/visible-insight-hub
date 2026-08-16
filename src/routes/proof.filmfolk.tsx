@@ -12,7 +12,9 @@ export const Route = createFileRoute("/proof/filmfolk")({
       { name: "description", content: "FilmFolk için 41 satın alma niyetli soruda, 286 ölçüm tekrarında gözlenen yapay zeka atıf payı değişimini ve Search Console bağlamını inceleyin." },
       { property: "og:title", content: "FilmFolk Vaka Çalışması | OneCite" },
       { property: "og:description", content: "41 soru, 286 tekrar: FilmFolk'ün atıf payı değişimi." },
+      { property: "og:url", content: "https://1cite.com/proof/filmfolk" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/proof/filmfolk" }],
   }),
   component: FilmFolkPage,
 });

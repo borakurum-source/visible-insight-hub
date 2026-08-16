@@ -12,7 +12,9 @@ export const Route = createFileRoute("/solutions/agencies")({
       { name: "description", content: "Ajanslar için müşteri bazlı yapay zeka atıf ölçümü, eksik kanıt analizi ve paylaşılabilir GEO raporlama iş akışı." },
       { property: "og:title", content: "Ajanslar için OneCite | Paylaşılabilir atıf zekası" },
       { property: "og:description", content: "Müşteri bazlı ölçüm, eksik kanıt ve GEO iş akışını tek platformda yönetin." },
+      { property: "og:url", content: "https://1cite.com/solutions/agencies" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/solutions/agencies" }],
   }),
   component: AgenciesPage,
 });

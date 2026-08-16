@@ -34,7 +34,9 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Yapay zeka cevaplarında markanızın atıf payını, eksik kanıtları ve öncelikli uygulamalarını görün." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://1cite.com" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com" }],
     scripts: [
       {
         type: "application/ld+json",

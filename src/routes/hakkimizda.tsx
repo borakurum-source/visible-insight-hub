@@ -13,7 +13,9 @@ export const Route = createFileRoute("/hakkimizda")({
       { name: "description", content: "OneCite’ın neden kurulduğunu, neyi ölçtüğünü ve yapay zeka cevaplarında görünürlük için nasıl bir kanıt döngüsü kurduğunu keşfedin." },
       { property: "og:title", content: "Hakkımızda | OneCite" },
       { property: "og:description", content: "OneCite’ın kuruluş nedenini ve kanıt zincirini keşfedin." },
+      { property: "og:url", content: "https://1cite.com/hakkimizda" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/hakkimizda" }],
   }),
   component: AboutPage,
 });

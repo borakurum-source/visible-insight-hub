@@ -12,7 +12,9 @@ export const Route = createFileRoute("/free-ai-readiness-report")({
       { name: "description", content: "Web siteniz için ücretsiz yapay zeka hazırlık ölçümü başlatın; kanıt, kaynak bağlamı ve öncelikli uygulamaları görün." },
       { property: "og:title", content: "Ücretsiz Yapay Zeka Hazırlık Raporu | OneCite" },
       { property: "og:description", content: "Herkese açık web sinyalleriyle ilk yapay zeka hazırlık çerçevenizi çıkarın." },
+      { property: "og:url", content: "https://1cite.com/free-ai-readiness-report" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/free-ai-readiness-report" }],
   }),
   component: FreeReportPage,
 });

@@ -83,7 +83,9 @@ export const Route = createFileRoute("/makaleler/")({
       { name: "description", content: "Yapay zeka arama, atıf payı, eksik kanıt ve GEO hakkında Türkçe OneCite rehberleri." },
       { property: "og:title", content: "Makaleler | OneCite Kaynak Merkezi" },
       { property: "og:description", content: "Atıf payı, eksik kanıt, kaynak seçimi ve GEO hakkında Türkçe rehberler." },
+      { property: "og:url", content: "https://1cite.com/makaleler" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/makaleler" }],
   }),
   component: ArticlesPage,
 });

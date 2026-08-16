@@ -78,7 +78,9 @@ export const Route = createFileRoute("/fiyatlandirma")({
       { property: "og:description", content: "Ücretsiz ölçümle başlayın; marka, soru ve rakip limitlerine göre şeffaf aylık ve yıllık planlar." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://1cite.com/fiyatlandirma" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/fiyatlandirma" }],
     scripts: [
       {
         type: "application/ld+json",
