@@ -25,6 +25,14 @@ function colorFor(type: string): [number, number, number] {
   return TYPE_COLORS[type] ?? [148, 163, 184];
 }
 
+const LEGEND: Array<{ label: string; color: string }> = [
+  { label: "Site", color: "rgb(56,189,248)" },
+  { label: "Manuel", color: "rgb(168,85,247)" },
+  { label: "SSS", color: "rgb(34,197,94)" },
+  { label: "PDF", color: "rgb(249,115,22)" },
+  { label: "Site haritası", color: "rgb(96,165,250)" },
+];
+
 export default function VectorMap3D({
   points,
   selectedId,
@@ -69,6 +77,22 @@ export default function VectorMap3D({
       const h = rect.height;
       ctx.clearRect(0, 0, w, h);
 
+      // derin uzay zemini + vinyet
+      const backdrop = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.72);
+      backdrop.addColorStop(0, "rgba(16,20,34,1)");
+      backdrop.addColorStop(0.55, "rgba(9,11,20,1)");
+      backdrop.addColorStop(1, "rgba(4,5,10,1)");
+      ctx.fillStyle = backdrop;
+      ctx.fillRect(0, 0, w, h);
+
+      for (let i = 0; i < 90; i += 1) {
+        const sx = ((i * 9301 + 49297) % 233280) / 233280;
+        const sy = ((i * 4409 + 7919) % 65536) / 65536;
+        const twinkle = 0.12 + 0.1 * Math.sin(Date.now() / 900 + i);
+        ctx.fillStyle = `rgba(190,205,255,${twinkle})`;
+        ctx.fillRect(sx * w, sy * h, 1.1, 1.1);
+      }
+
       const cx = w / 2;
       const cy = h / 2;
       const scale = (Math.min(w, h) / 260) * state.zoom;
@@ -96,17 +120,18 @@ export default function VectorMap3D({
       projectedRef.current = projected.map(({ point, sx, sy, r }) => ({ point, sx, sy, r }));
 
       // yakın komşu bağlantıları — nöral ağ hissi
-      ctx.lineWidth = 0.6;
+      ctx.lineWidth = 0.7;
       for (let i = 0; i < projected.length; i += 1) {
         const a = projected[i]!;
-        for (let j = i + 1; j < Math.min(projected.length, i + 7); j += 1) {
+        for (let j = i + 1; j < Math.min(projected.length, i + 10); j += 1) {
           const b = projected[j]!;
           const dx = a.sx - b.sx;
           const dy = a.sy - b.sy;
           const dist = Math.hypot(dx, dy);
-          if (dist > 62) continue;
+          if (dist > 96) continue;
           const [r, g, bl] = colorFor(a.point.type);
-          ctx.strokeStyle = `rgba(${r},${g},${bl},${(1 - dist / 62) * 0.16})`;
+          const fade = (1 - dist / 96) * 0.22 * Math.min(a.depth, b.depth);
+          ctx.strokeStyle = `rgba(${Math.round((r + 220) / 2)},${Math.round((g + 228) / 2)},${Math.round((bl + 255) / 2)},${fade})`;
           ctx.beginPath();
           ctx.moveTo(a.sx, a.sy);
           ctx.lineTo(b.sx, b.sy);
@@ -114,23 +139,35 @@ export default function VectorMap3D({
         }
       }
 
+      ctx.globalCompositeOperation = "lighter";
       for (const item of projected) {
         const [r, g, b] = colorFor(item.point.type);
-        const alpha = Math.max(0.18, Math.min(1, item.depth * (0.35 + item.point.freshness * 0.65)));
+        const alpha = Math.max(0.22, Math.min(1, item.depth * (0.45 + item.point.freshness * 0.55)));
         const active = item.point.id === selectedRef.current || item.point.id === hoveredRef.current;
-        const glow = ctx.createRadialGradient(item.sx, item.sy, 0, item.sx, item.sy, item.r * (active ? 6 : 4));
-        glow.addColorStop(0, `rgba(${r},${g},${b},${alpha * 0.55})`);
+        const pulse = active ? 1 : 1 + 0.06 * Math.sin(Date.now() / 700 + item.sx);
+        const glowRadius = item.r * (active ? 7 : 5) * pulse;
+        const glow = ctx.createRadialGradient(item.sx, item.sy, 0, item.sx, item.sy, glowRadius);
+        glow.addColorStop(0, `rgba(${r},${g},${b},${alpha * 0.7})`);
+        glow.addColorStop(0.45, `rgba(${r},${g},${b},${alpha * 0.22})`);
         glow.addColorStop(1, `rgba(${r},${g},${b},0)`);
         ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.arc(item.sx, item.sy, item.r * (active ? 6 : 4), 0, Math.PI * 2);
+        ctx.arc(item.sx, item.sy, glowRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = active ? "rgba(255,255,255,0.95)" : `rgba(${r},${g},${b},${alpha})`;
+        ctx.fillStyle = active ? "rgba(255,255,255,0.98)" : `rgba(${r},${g},${b},${alpha})`;
         ctx.beginPath();
-        ctx.arc(item.sx, item.sy, active ? item.r * 1.6 : item.r, 0, Math.PI * 2);
+        ctx.arc(item.sx, item.sy, active ? item.r * 1.7 : item.r * 1.15, 0, Math.PI * 2);
         ctx.fill();
+
+        if (item.depth > 0.95) {
+          ctx.fillStyle = `rgba(255,255,255,${alpha * 0.5})`;
+          ctx.beginPath();
+          ctx.arc(item.sx - item.r * 0.3, item.sy - item.r * 0.3, item.r * 0.35, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
+      ctx.globalCompositeOperation = "source-over";
 
       frame = requestAnimationFrame(render);
     };
@@ -157,10 +194,11 @@ export default function VectorMap3D({
   };
 
   return (
-    <div className="relative">
+    <div className="space-y-2">
+      <div className="relative overflow-hidden rounded-xl border border-border bg-[#05060c] shadow-[0_0_60px_-25px_rgba(80,120,255,0.6)]">
       <canvas
         ref={canvasRef}
-        className="h-[440px] w-full cursor-grab touch-none rounded-lg border border-border bg-muted/30 active:cursor-grabbing"
+        className="block h-[440px] w-full cursor-grab touch-none active:cursor-grabbing"
         onMouseDown={(event) => {
           const state = stateRef.current;
           state.dragging = true;
@@ -189,18 +227,40 @@ export default function VectorMap3D({
         }}
       />
       {hovered ? (
-        <div className="pointer-events-none absolute left-3 top-3 max-w-xs rounded-md border border-border bg-background/95 p-2 text-xs shadow-lg">
+        <div className="pointer-events-none absolute left-3 top-14 max-w-xs rounded-md border border-white/10 bg-black/80 p-2 text-xs text-white shadow-lg backdrop-blur">
           <p className="font-medium">{hovered.sourceTitle}</p>
-          <p className="line-clamp-3 text-muted-foreground">{hovered.excerpt}</p>
+          <p className="line-clamp-3 text-white/60">{hovered.excerpt}</p>
         </div>
       ) : null}
+      <div className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-3">
+        <span className="pointer-events-none inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-[rgb(248,113,113)]" aria-hidden="true" />
+          Canlı 3B Nöral Ağ
+        </span>
+        <span className="text-[11px] text-white/40">Otomatik dönüş · gerçek zamanlı</span>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white backdrop-blur">
+        {LEGEND.map((entry) => (
+          <span key={entry.label} className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: entry.color }} aria-hidden="true" />
+            {entry.label}
+          </span>
+        ))}
+      </div>
+
       <button
         type="button"
         onClick={() => { stateRef.current.autoRotate = !stateRef.current.autoRotate; }}
-        className="absolute bottom-3 right-3 rounded-full border border-border bg-background/90 px-3 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+        className="absolute bottom-3 right-3 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/70 backdrop-blur transition-colors hover:text-white"
       >
         Döndürmeyi aç/kapat
       </button>
+      </div>
+      <p className="text-center text-xs text-muted-foreground">
+        Her düğüm, yapay zekâ erişim yollarında konumlanmış bir bilgi sinyalini temsil eder.
+        <span className="text-primary"> Ağ gerçek zamanlı döner</span> — tıpkı modellerin güncellenmesi gibi.
+      </p>
     </div>
   );
 }
