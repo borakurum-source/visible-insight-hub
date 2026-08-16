@@ -31,14 +31,17 @@ const pricingFaqs = [
 ];
 
 const comparisonRows = [
-  { label: "Müşteri / marka", values: ["1", "1", "5", "Sınırsız"] },
-  { label: "Soru sayısı", values: ["10", "30", "100 / müşteri", "Sınırsız"] },
-  { label: "Rakip takibi", values: ["2", "5", "15", "Sınırsız"] },
+  { label: "Marka", values: ["1", "1", "3", "Özel"] },
+  { label: "Prompt sayısı", values: ["5", "15", "45", "Özel"] },
+  { label: "Rakip takibi", values: ["1", "2", "5", "Sınırsız"] },
+  { label: "Aylık AI atıf görünürlük içeriği", values: ["—", "3", "10", "Özel"] },
   { label: "Ölçüm & skor kırılımı", values: [true, true, true, true] },
+  { label: "4 farklı LLM üzerinde kontrol", values: [false, false, true, true] },
   { label: "Bilgi Bankası", values: [false, true, true, true] },
-  { label: "Marka Zekası", values: [false, false, true, true] },
+  { label: "Marka Zekası (RAG)", values: [false, false, true, true] },
   { label: "GSC / GA4 entegrasyonu", values: [false, false, true, true] },
-  { label: "Çoklu çalışma alanı", values: [false, false, false, true] },
+  { label: "Aksiyon listesi", values: [false, true, true, true] },
+  { label: "Çoklu çalışma alanı / white-label", values: [false, false, false, true] },
 ];
 
 const profiles = [
@@ -59,7 +62,7 @@ const profiles = [
   {
     title: "Birden fazla marka yönetiyorum",
     body: "Ajans veya grup şirketi ölçeğinde müşteri, soru ve rakip görünürlüğünü karşılaştırın.",
-    plan: "Ajans",
+    plan: "Ajans · Teklife göre",
     href: "/solutions/agencies",
     action: "Ajans çözümü",
   },
@@ -156,9 +159,16 @@ function PricingPage() {
       <section className="marketing-container px-4 py-16 md:px-6 md:py-24">
         <div className="grid gap-4 lg:grid-cols-4">
           {pricingPlans.map((plan) => {
-            const isFree = plan.monthly === 0;
-            const displayPrice = isFree ? "$0" : annual ? formatUsd(plan.annualTotal) : formatUsd(plan.monthly);
-            const suffix = isFree ? "" : annual ? " /yıl" : " /ay";
+            const isContact = plan.contactOnly || plan.monthly === null;
+            const isFree = !isContact && plan.monthly === 0;
+            const displayPrice = isContact
+              ? "Teklife göre"
+              : isFree
+                ? "$0"
+                : annual
+                  ? formatUsd(plan.annualTotal ?? 0)
+                  : formatUsd(plan.monthly ?? 0);
+            const suffix = isContact || isFree ? "" : annual ? " /yıl" : " /ay";
             return (
               <div
                 key={plan.slug}
@@ -170,13 +180,14 @@ function PricingPage() {
                     <span className="rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-white">En popüler</span>
                   )}
                 </div>
-                <p className="mt-5 font-mono text-3xl font-medium text-foreground">
+                <p className={`mt-5 font-mono font-medium text-foreground ${isContact ? "text-2xl" : "text-3xl"}`}>
                   {displayPrice}
                   <span className="text-sm text-muted-foreground">{suffix}</span>
                 </p>
-                {!isFree && annual && (
-                  <p className="mt-1 text-xs text-muted-foreground">Aylık karşılığı {formatUsd(Math.round(plan.annualTotal / 12))}</p>
+                {!isFree && !isContact && annual && (
+                  <p className="mt-1 text-xs text-muted-foreground">Aylık karşılığı {formatUsd(Math.round((plan.annualTotal ?? 0) / 12))}</p>
                 )}
+                {isContact && <p className="mt-1 text-xs text-muted-foreground">İhtiyacınıza göre limit ve fiyat belirlenir.</p>}
                 <p className="mt-4 min-h-[3.5rem] text-sm leading-6 text-muted-foreground">{plan.desc}</p>
                 <ul className="mt-5 space-y-2 border-t border-border pt-5 text-sm">
                   {plan.limits.map((limit) => (
@@ -194,9 +205,11 @@ function PricingPage() {
                 </ul>
                 <div className="mt-7 flex-1" />
                 <Button asChild className="w-full" variant={plan.highlight ? "default" : "outline"}>
-                  <Link to={isFree ? "/free-ai-readiness-report" : "/auth"}>
-                    {isFree ? "Ücretsiz başla" : plan.slug === "agency" ? "Görüşme planla" : "Planı seç"}
-                  </Link>
+                  {isContact ? (
+                    <a href="mailto:hello@1cite.com?subject=Ajans%20plan%C4%B1%20teklif%20talebi">İletişime geç</a>
+                  ) : (
+                    <Link to={isFree ? "/ucretsiz-yapay-zeka-gorunurluk-raporu" : "/auth"}>{isFree ? "Ücretsiz başla" : "Planı seç"}</Link>
+                  )}
                 </Button>
               </div>
             );
