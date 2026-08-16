@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Area, AreaChart, Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowUpRight, BarChart3, Bot, Search, Sparkles } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bot, Search, Sparkles, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { TrafficOverview } from "@/lib/integrations.functions";
@@ -65,6 +65,7 @@ function Empty({ label, cta }: { label: string; cta?: { to: string; text: string
 export function TrafficCharts({ data }: { data: TrafficOverview }) {
   const gscDaily = data.gsc.daily.map((row) => ({ ...row, label: shortDate(row.date) }));
   const referralDaily = data.aiReferral.daily.map((row) => ({ ...row, label: shortDate(row.date) }));
+  const ga4Daily = data.ga4.daily.map((row) => ({ ...row, label: shortDate(row.date) }));
   const overviewDaily = data.aiOverview.daily.map((row) => ({ ...row, label: shortDate(row.date) }));
   const period = data.gsc.startDate && data.gsc.endDate ? `${shortDate(data.gsc.startDate)} – ${shortDate(data.gsc.endDate)}` : "son 30 gün";
 
@@ -134,6 +135,36 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
           </ResponsiveContainer>
         ) : (
           <Empty label="Henüz ölçüm yapılmadı." cta={{ to: "/app/measurement", text: "Ölçümü başlat" }} />
+        )}
+      </MetricCard>
+
+      <MetricCard
+        icon={Users}
+        title="Site Trafiği (GA4)"
+        value={data.ga4.connected ? fmt(data.ga4.totals.sessions) : "—"}
+        caption={
+          data.ga4.connected
+            ? `oturum · ${fmt(data.ga4.totals.users)} kullanıcı · son 28 gün`
+            : "Google Analytics bağlı değil"
+        }
+      >
+        {data.ga4.connected && ga4Daily.length ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={ga4Daily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+              <defs>
+                <linearGradient id="ga4Fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--chart-4)" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="var(--chart-4)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
+              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "sessions" ? "Oturum" : "Kullanıcı"]} />
+              <Area type="monotone" dataKey="sessions" stroke="var(--chart-4)" strokeWidth={2} fill="url(#ga4Fill)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <Empty label="GA4 verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
         )}
       </MetricCard>
 

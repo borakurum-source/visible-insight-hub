@@ -3,6 +3,7 @@
 // it up from a pathname table, since TanStack routes are already 1:1 with
 // pages.
 import type { LucideIcon } from "lucide-react";
+import { Hint } from "@/components/app/hint";
 
 export type PanelPageMeta = {
   title: string;
@@ -10,7 +11,7 @@ export type PanelPageMeta = {
   icon: LucideIcon;
 };
 
-export function PanelPageHeading({ meta, action }: { meta: PanelPageMeta; action?: React.ReactNode }) {
+export function PanelPageHeading({ meta, action, hint }: { meta: PanelPageMeta; action?: React.ReactNode; hint?: React.ReactNode }) {
   const Icon = meta.icon;
 
   return (
@@ -23,7 +24,10 @@ export function PanelPageHeading({ meta, action }: { meta: PanelPageMeta; action
           <Icon className="h-4 w-4" aria-hidden="true" />
         </div>
         <div className="min-w-0">
-          <h1 className="text-lg font-semibold tracking-[-0.015em] text-foreground">{meta.title}</h1>
+          <h1 className="flex items-center gap-1.5 text-lg font-semibold tracking-[-0.015em] text-foreground">
+            {meta.title}
+            {hint ? <Hint title={meta.title}>{hint}</Hint> : null}
+          </h1>
           <p className="mt-0.5 max-w-2xl text-sm leading-5 text-muted-foreground">{meta.description}</p>
         </div>
       </div>

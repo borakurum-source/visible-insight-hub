@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { EntityGraph } from "@/components/app/entity-graph";
+import { CompetitorFinder } from "@/components/app/competitor-finder";
 import { getKnowledgeGraph, rebuildGraphEntities, rebuildVectorMap, searchKnowledge } from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 import type { VectorPoint } from "@/components/app/vector-map-3d";
@@ -199,7 +200,8 @@ function GraphPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="entities" className="mt-4">
+        <TabsContent value="entities" className="mt-4 space-y-4">
+          {brand ? <CompetitorFinder brandId={brand.id} /> : null}
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-base">Varlık İlişki Haritası</CardTitle></CardHeader>
             <CardContent className="space-y-4">

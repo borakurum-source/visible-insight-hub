@@ -13,10 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useActiveBrand } from "@/lib/use-panel";
 import {
+  connectGa4Property,
   connectGscProperty,
   disconnectIntegration,
   getIntegrations,
+  listGa4PropertyOptions,
   listGscProperties,
+  syncGa4,
   syncGsc,
 } from "@/lib/integrations.functions";
 
@@ -41,7 +44,11 @@ function IntegrationsPage() {
   const saveProperty = useServerFn(connectGscProperty);
   const runSync = useServerFn(syncGsc);
   const disconnect = useServerFn(disconnectIntegration);
+  const fetchGa4Properties = useServerFn(listGa4PropertyOptions);
+  const saveGa4Property = useServerFn(connectGa4Property);
+  const runGa4Sync = useServerFn(syncGa4);
   const [candidates, setCandidates] = useState<string[] | null>(null);
+  const [ga4Candidates, setGa4Candidates] = useState<Array<{ propertyId: string; displayName: string; account: string }> | null>(null);
 
   const integrations = useQuery({
     queryKey: ["integrations", brand?.id],
@@ -88,7 +95,40 @@ function IntegrationsPage() {
     onSuccess: invalidate,
   });
 
+  const loadGa4 = useMutation({
+    mutationFn: () => fetchGa4Properties({ data: { brandId: brand!.id } }),
+    onSuccess: (list) => {
+      if (!list.length) {
+        toast.error("Bağlı Google hesabında GA4 mülkü bulunamadı.");
+        return;
+      }
+      setGa4Candidates(list);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const chooseGa4 = useMutation({
+    mutationFn: (propertyId: string) => saveGa4Property({ data: { brandId: brand!.id, propertyId } }),
+    onSuccess: async () => {
+      setGa4Candidates(null);
+      await invalidate();
+      ga4Sync.mutate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const ga4Sync = useMutation({
+    mutationFn: () => runGa4Sync({ data: { brandId: brand!.id } }),
+    onSuccess: async (result) => {
+      toast.success(`GA4 verisi güncellendi (${result.sessions} oturum).`);
+      await invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const gsc = integrations.data?.connections.find((c) => c.provider === "gsc") ?? null;
+  const ga4 = integrations.data?.connections.find((c) => c.provider === "ga4") ?? null;
+  const ga4Snapshot = integrations.data?.ga4Snapshot ?? null;
   const snapshot = integrations.data?.gscSnapshot ?? null;
 
   return (
@@ -157,17 +197,66 @@ function IntegrationsPage() {
           </CardContent>
         </Card>
 
-        <Card className="opacity-70">
+        <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
-                <BarChart3 className="h-4.5 w-4.5" />
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
+                  <BarChart3 className="h-4.5 w-4.5" />
+                </div>
+                <CardTitle className="text-sm">Google Analytics 4</CardTitle>
               </div>
-              <CardTitle className="text-sm">Google Analytics 4</CardTitle>
+              {ga4?.status === "bagli" ? (
+                <Badge variant="outline" className="gap-1 border-success/40 text-success"><CheckCircle2 className="h-3 w-3" /> Bağlı</Badge>
+              ) : ga4?.status === "hata" ? (
+                <Badge variant="destructive">Hata</Badge>
+              ) : (
+                <Badge variant="secondary">Bağlı değil</Badge>
+              )}
             </div>
-            <CardDescription className="pt-1">Hazırlanıyor — Search Console bağlantısından sonra açılır.</CardDescription>
+            <CardDescription className="pt-1">
+              {ga4?.property_id ? `Mülk ${ga4.property_id}` : "Site trafiğinizi yapay zekâ görünürlüğüyle karşılaştırın."}
+            </CardDescription>
           </CardHeader>
-          <CardContent><Badge variant="secondary">Yakında</Badge></CardContent>
+          <CardContent className="space-y-2">
+            {ga4?.last_error ? <p className="text-xs text-destructive">{ga4.last_error}</p> : null}
+            {ga4?.property_id ? (
+              <>
+                <p className="text-xs text-muted-foreground">
+                  Son senkronizasyon: {ga4.last_sync_at ? new Date(ga4.last_sync_at).toLocaleString("tr-TR") : "—"}
+                  {ga4Snapshot ? ` · ${ga4Snapshot.totals.sessions} oturum / ${ga4Snapshot.totals.users} kullanıcı` : ""}
+                </p>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1" disabled={ga4Sync.isPending} onClick={() => ga4Sync.mutate()}>
+                    <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${ga4Sync.isPending ? "animate-spin" : ""}`} /> Senkronize et
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => remove.mutate("ga4")}><Unplug className="h-3.5 w-3.5" /></Button>
+                </div>
+              </>
+            ) : (
+              <Button size="sm" className="w-full" disabled={!brand || loadGa4.isPending} onClick={() => loadGa4.mutate()}>
+                {loadGa4.isPending ? "Mülkler alınıyor…" : "Bağlan"}
+              </Button>
+            )}
+            {ga4Candidates ? (
+              <div className="space-y-1.5 rounded-md border border-border p-2">
+                <p className="text-xs text-muted-foreground">Kullanılacak GA4 mülkünü seçin:</p>
+                {ga4Candidates.map((property) => (
+                  <Button
+                    key={property.propertyId}
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start text-xs"
+                    disabled={chooseGa4.isPending}
+                    onClick={() => chooseGa4.mutate(property.propertyId)}
+                  >
+                    {property.displayName}
+                    <span className="ml-auto font-mono text-[10px] text-muted-foreground">{property.propertyId}</span>
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+          </CardContent>
         </Card>
 
         <Card className="opacity-70">

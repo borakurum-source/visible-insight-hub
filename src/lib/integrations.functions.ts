@@ -14,7 +14,7 @@ export const getIntegrations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
-    const [{ data: connections }, { data: snapshot }] = await Promise.all([
+    const [{ data: connections }, { data: snapshot }, { data: ga4Snap }] = await Promise.all([
       context.supabase
         .from("integration_connections")
         .select("provider, status, property_id, last_sync_at, last_error")
@@ -27,9 +27,25 @@ export const getIntegrations = createServerFn({ method: "POST" })
         .order("snapshot_date", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      context.supabase
+        .from("analytics_snapshots")
+        .select("provider, snapshot_date, payload")
+        .eq("brand_id", data.brandId)
+        .eq("provider", "ga4")
+        .order("snapshot_date", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
     return {
       connections: (connections ?? []) as IntegrationRow[],
+      ga4Snapshot: (ga4Snap?.payload ?? null) as null | {
+        propertyId: string;
+        startDate: string;
+        endDate: string;
+        totals: { sessions: number; users: number };
+        daily: Array<{ date: string; sessions: number; users: number }>;
+        channels: Array<{ channel: string; sessions: number; users: number }>;
+      },
       gscSnapshot: (snapshot?.payload ?? null) as null | {
         siteUrl: string;
         startDate: string;
@@ -139,6 +155,83 @@ export const disconnectIntegration = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Bağlı Google hesabındaki GA4 mülklerini listeler.
+export const listGa4PropertyOptions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data }) => {
+    void data;
+    const { listGa4Properties } = await import("./ga4.server");
+    return await listGa4Properties();
+  });
+
+// Seçilen GA4 mülkünü kaydeder.
+export const connectGa4Property = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; propertyId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { listGa4Properties } = await import("./ga4.server");
+    const properties = await listGa4Properties();
+    if (!properties.some((p) => p.propertyId === data.propertyId)) {
+      throw new Error("Seçilen GA4 mülkü hesabınızda bulunamadı");
+    }
+    const { error } = await context.supabase.from("integration_connections").upsert(
+      {
+        brand_id: data.brandId,
+        provider: "ga4",
+        status: "bagli",
+        property_id: data.propertyId,
+        last_error: null,
+      },
+      { onConflict: "brand_id,provider" },
+    );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// GA4 trafik verisini tazeler ve günlük anlık görüntü olarak saklar.
+export const syncGa4 = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { buildGa4Snapshot } = await import("./ga4.server");
+    const { data: connection } = await context.supabase
+      .from("integration_connections")
+      .select("property_id")
+      .eq("brand_id", data.brandId)
+      .eq("provider", "ga4")
+      .maybeSingle();
+    const propertyId = connection?.property_id;
+    if (!propertyId) throw new Error("Önce bir GA4 mülkü seçin");
+
+    try {
+      const payload = await buildGa4Snapshot(propertyId);
+      await context.supabase.from("analytics_snapshots").upsert(
+        {
+          brand_id: data.brandId,
+          provider: "ga4",
+          snapshot_date: new Date().toISOString().slice(0, 10),
+          payload,
+        },
+        { onConflict: "brand_id,provider,snapshot_date" },
+      );
+      await context.supabase
+        .from("integration_connections")
+        .update({ status: "bagli", last_sync_at: new Date().toISOString(), last_error: null })
+        .eq("brand_id", data.brandId)
+        .eq("provider", "ga4");
+      return { ok: true, sessions: payload.totals.sessions };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await context.supabase
+        .from("integration_connections")
+        .update({ status: "hata", last_error: message })
+        .eq("brand_id", data.brandId)
+        .eq("provider", "ga4");
+      throw new Error(message);
+    }
+  });
+
 export type TrafficOverview = {
   gsc: {
     connected: boolean;
@@ -151,7 +244,14 @@ export type TrafficOverview = {
     daily: Array<{ date: string; clicks: number; impressions: number }>;
     queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
   };
-  ga4: { connected: boolean };
+  ga4: {
+    connected: boolean;
+    property: string | null;
+    lastSyncAt: string | null;
+    totals: { sessions: number; users: number };
+    daily: Array<{ date: string; sessions: number; users: number }>;
+    channels: Array<{ channel: string; sessions: number; users: number }>;
+  };
   aiReferral: {
     total: number;
     ownDomain: number;
@@ -171,7 +271,7 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }): Promise<TrafficOverview> => {
     const since = new Date(Date.now() - 30 * 86400000).toISOString();
-    const [{ data: connections }, { data: snapshot }, { data: citations }, { data: runs }] = await Promise.all([
+    const [{ data: connections }, { data: snapshot }, { data: ga4Snapshot }, { data: citations }, { data: runs }] = await Promise.all([
       context.supabase
         .from("integration_connections")
         .select("provider, status, property_id, last_sync_at")
@@ -181,6 +281,14 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         .select("payload")
         .eq("brand_id", data.brandId)
         .eq("provider", "gsc")
+        .order("snapshot_date", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      context.supabase
+        .from("analytics_snapshots")
+        .select("payload")
+        .eq("brand_id", data.brandId)
+        .eq("provider", "ga4")
         .order("snapshot_date", { ascending: false })
         .limit(1)
         .maybeSingle(),
@@ -199,6 +307,12 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
     ]);
 
     const gscConnection = (connections ?? []).find((c) => c.provider === "gsc") ?? null;
+    const ga4Connection = (connections ?? []).find((c) => c.provider === "ga4") ?? null;
+    const ga4Payload = (ga4Snapshot?.payload ?? null) as null | {
+      totals: { sessions: number; users: number };
+      daily: Array<{ date: string; sessions: number; users: number }>;
+      channels: Array<{ channel: string; sessions: number; users: number }>;
+    };
     const payload = (snapshot?.payload ?? null) as null | {
       startDate: string;
       endDate: string;
@@ -235,7 +349,14 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         daily: payload?.daily ?? [],
         queries: (payload?.queries ?? []).slice(0, 10),
       },
-      ga4: { connected: (connections ?? []).some((c) => c.provider === "ga4" && c.status === "bagli") },
+      ga4: {
+        connected: ga4Connection?.status === "bagli",
+        property: ga4Connection?.property_id ?? null,
+        lastSyncAt: ga4Connection?.last_sync_at ?? null,
+        totals: ga4Payload?.totals ?? { sessions: 0, users: 0 },
+        daily: ga4Payload?.daily ?? [],
+        channels: (ga4Payload?.channels ?? []).slice(0, 6),
+      },
       aiReferral: {
         total: citationRows.length,
         ownDomain: citationRows.filter((c) => c.is_own_domain).length,
