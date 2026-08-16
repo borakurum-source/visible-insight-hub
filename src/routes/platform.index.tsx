@@ -35,7 +35,7 @@ function PlatformPage() {
     <MarketingShell>
       <VisualHero
         eyebrow="ONECITE PLATFORMU · SOURCE → SIGNAL → ACTION"
-        title={<>Yapay zeka görünürlüğünüzü <span className="text-[#35E1FF]">yönetilebilir bir kanıt sistemine</span> dönüştürün.</>}
+        title={<>Yapay zeka görünürlüğünüzü <span className="text-[#3FBFB2]">yönetilebilir bir kanıt sistemine</span> dönüştürün.</>}
         description="OneCite, marka kaynaklarınızı, yapay zeka cevaplarındaki seçim sinyalini ve en yüksek etkili içeriği aynı çalışma döngüsünde birleştirir."
         image={heroSignalAction}
         imageAlt="Üç ışıklı yolun şeffaf bir prizma içinde tek kaynak noktasında birleşmesi"
@@ -43,35 +43,35 @@ function PlatformPage() {
         secondaryHref="/platform/citation-share"
         secondaryLabel="Atıf payını incele"
       >
-        <p className="text-sm text-slate-400">Ölçülen yüzeyler: <EngineRotator className="font-mono text-[#35E1FF]" /></p>
+        <p className="text-sm text-slate-400">Ölçülen yüzeyler: <EngineRotator className="font-mono text-[#3FBFB2]" /></p>
       </VisualHero>
 
       <section className="marketing-container px-4 py-16 md:px-6 md:py-24">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Çalışma modeli</p>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-5xl">Kaynak → Sinyal → Uygulama.</h2>
-          <p className="mt-5 text-base leading-7 text-[#667085]">OneCite; panelden daha fazlasını verir. Yapay zekanın seçebileceği kanıtı kurar, seçim davranışını ölçer ve sonucu uygulanabilir iş listesine çevirir.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Çalışma modeli</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-5xl">Kaynak → Sinyal → Uygulama.</h2>
+          <p className="mt-5 text-base leading-7 text-[#6B6A61]">OneCite; panelden daha fazlasını verir. Yapay zekanın seçebileceği kanıtı kurar, seçim davranışını ölçer ve sonucu uygulanabilir iş listesine çevirir.</p>
         </div>
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {steps.map(({ icon: Icon, number, label, title, body }) => (
-            <article key={number} className="rounded-2xl border border-[#E6EAF2] bg-white p-6">
-              <div className="flex items-center justify-between"><span className="font-mono text-sm text-[#356AFF]">{number}</span><Icon className="h-5 w-5 text-[#0B1020]" /></div>
-              <p className="mt-9 text-xs font-semibold uppercase tracking-[0.13em] text-[#667085]">{label}</p>
-              <h3 className="mt-3 text-xl font-extrabold text-[#0B1020]">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[#667085]">{body}</p>
+            <article key={number} className="rounded-2xl border border-[#E3E0D5] bg-white p-6">
+              <div className="flex items-center justify-between"><span className="font-mono text-sm text-[#1B7F86]">{number}</span><Icon className="h-5 w-5 text-[#101211]" /></div>
+              <p className="mt-9 text-xs font-semibold uppercase tracking-[0.13em] text-[#6B6A61]">{label}</p>
+              <h3 className="mt-3 text-xl font-extrabold text-[#101211]">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-[#6B6A61]">{body}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="border-y border-[#E6EAF2] bg-white px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-[#E3E0D5] bg-white px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr]">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Üründen kanıt</p>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-4xl">Skorun arkasındaki soruyu, kaynak seçimini ve değişimi görün.</h2>
-            <p className="mt-5 text-base leading-7 text-[#667085]">Bir metrik tek başına karar verdirmez. OneCite, skoru etkileyen soruları, kaynak tiplerini ve rakip bağlamını birlikte sunar.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Üründen kanıt</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-4xl">Skorun arkasındaki soruyu, kaynak seçimini ve değişimi görün.</h2>
+            <p className="mt-5 text-base leading-7 text-[#6B6A61]">Bir metrik tek başına karar verdirmez. OneCite, skoru etkileyen soruları, kaynak tiplerini ve rakip bağlamını birlikte sunar.</p>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-[#E6EAF2] bg-[#F7F9FC] shadow-[0_18px_45px_rgba(11,16,32,0.08)]">
+          <div className="overflow-hidden rounded-2xl border border-[#E3E0D5] bg-[#F5F3EC] shadow-[0_18px_45px_rgba(11,16,32,0.08)]">
             <img src={shotMetrics} alt="OneCite atıf payı ve kaynak trendi paneli" className="h-auto w-full" />
           </div>
         </div>
@@ -80,18 +80,18 @@ function PlatformPage() {
       <section className="marketing-container px-4 py-16 md:px-6 md:py-24">
         <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Platform modülleri</p>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-4xl">Her sinyalin yanında açıklanabilir bir sonraki adım.</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Platform modülleri</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-4xl">Her sinyalin yanında açıklanabilir bir sonraki adım.</h2>
           </div>
-          <Link to="/free-ai-readiness-report" className="text-sm font-bold text-[#356AFF] hover:text-[#0B1020]">Kendi markanızla deneyin →</Link>
+          <Link to="/free-ai-readiness-report" className="text-sm font-bold text-[#1B7F86] hover:text-[#101211]">Kendi markanızla deneyin →</Link>
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {modules.map(({ icon: Icon, title, body, href }) => (
-            <Link to={href} key={title} className="group rounded-2xl border border-[#E6EAF2] bg-white p-6 transition-transform hover:-translate-y-1">
-              <Icon className="h-5 w-5 text-[#356AFF]" />
-              <h3 className="mt-6 text-lg font-extrabold text-[#0B1020]">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[#667085]">{body}</p>
-              <span className="mt-6 inline-flex items-center text-sm font-bold text-[#356AFF]">Detayı görün <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+            <Link to={href} key={title} className="group rounded-2xl border border-[#E3E0D5] bg-white p-6 transition-transform hover:-translate-y-1">
+              <Icon className="h-5 w-5 text-[#1B7F86]" />
+              <h3 className="mt-6 text-lg font-extrabold text-[#101211]">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-[#6B6A61]">{body}</p>
+              <span className="mt-6 inline-flex items-center text-sm font-bold text-[#1B7F86]">Detayı görün <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
             </Link>
           ))}
         </div>

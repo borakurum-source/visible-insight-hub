@@ -40,15 +40,15 @@ function Delta({ value }: { value: number }) {
 
 function PromptRow({ result }: { result: PromptResult }) {
   return (
-    <article className="rounded-2xl border border-[#E6EAF2] bg-white p-5">
+    <article className="rounded-2xl border border-[#E3E0D5] bg-white p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <p className="max-w-2xl text-sm font-semibold leading-6 text-[#0B1020]">{result.prompt}</p>
-        <div className="shrink-0 text-right"><Delta value={result.delta} /><p className="mt-1 text-xs text-[#667085]">{result.runs} tekrar</p></div>
+        <p className="max-w-2xl text-sm font-semibold leading-6 text-[#101211]">{result.prompt}</p>
+        <div className="shrink-0 text-right"><Delta value={result.delta} /><p className="mt-1 text-xs text-[#6B6A61]">{result.runs} tekrar</p></div>
       </div>
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs">
-        <div><div className="mb-2 flex justify-between text-[#667085]"><span>İlk ölçüm</span><span>{result.first}%</span></div><div className="h-2 overflow-hidden rounded-full bg-[#EEF3FF]"><div className="h-full rounded-full bg-[#9CB6FF]" style={{ width: `${result.first}%` }} /></div></div>
+        <div><div className="mb-2 flex justify-between text-[#6B6A61]"><span>İlk ölçüm</span><span>{result.first}%</span></div><div className="h-2 overflow-hidden rounded-full bg-[#EDEFE9]"><div className="h-full rounded-full bg-[#9CB6FF]" style={{ width: `${result.first}%` }} /></div></div>
         <span className="font-mono text-[#A1AABC]">→</span>
-        <div><div className="mb-2 flex justify-between text-[#667085]"><span>Son ölçüm</span><span>{result.latest}%</span></div><div className="h-2 overflow-hidden rounded-full bg-[#D9F8FF]"><div className={`h-full rounded-full ${result.delta >= 0 ? "bg-[#356AFF]" : "bg-rose-500"}`} style={{ width: `${result.latest}%` }} /></div></div>
+        <div><div className="mb-2 flex justify-between text-[#6B6A61]"><span>Son ölçüm</span><span>{result.latest}%</span></div><div className="h-2 overflow-hidden rounded-full bg-[#D9F8FF]"><div className={`h-full rounded-full ${result.delta >= 0 ? "bg-[#1B7F86]" : "bg-rose-500"}`} style={{ width: `${result.latest}%` }} /></div></div>
       </div>
     </article>
   );
@@ -59,7 +59,7 @@ function FilmFolkPage() {
     <MarketingShell>
       <VisualHero
         eyebrow="ÖRNEK ÇALIŞMA · FILMFOLK / 41 SORU"
-        title={<>41 satın alma niyetli soruda atıf payındaki <span className="text-[#35E1FF]">değişimi</span> görün.</>}
+        title={<>41 satın alma niyetli soruda atıf payındaki <span className="text-[#3FBFB2]">değişimi</span> görün.</>}
         description="FilmFolk için ilk ve son ölçüm sonuçları, aynı soru havuzundaki 286 tekrar üzerinden karşılaştırıldı. Bu bir nedensellik veya performans garantisi değildir; gözlenen kaynak seçimi değişiminin bağlamlı bir okumasıdır."
         image={heroEvidenceGap}
         imageAlt="Eksik parçası olan ışıklı cam köprü; ölçüm ve kanıt arasındaki kopukluğu temsil eden OneCite görseli"
@@ -69,7 +69,7 @@ function FilmFolkPage() {
       >
         <div className="grid max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
           <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">İLK PAY</p><p className="mt-2 font-mono text-xl text-white">30,7%</p></div>
-          <div className="rounded-xl border border-[#35E1FF]/35 bg-[#35E1FF]/10 p-3"><p className="visual-source-label text-[#35E1FF]">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
+          <div className="rounded-xl border border-[#3FBFB2]/35 bg-[#3FBFB2]/10 p-3"><p className="visual-source-label text-[#3FBFB2]">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
           <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">DEĞİŞİM</p><p className="mt-2 font-mono text-xl text-white">+28,1</p></div>
           <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">TEKRAR</p><p className="mt-2 font-mono text-xl text-white">286</p></div>
         </div>
@@ -77,37 +77,37 @@ function FilmFolkPage() {
 
       <section id="metodoloji" className="marketing-container py-16 md:py-24">
         <div className="marketing-copy">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Metodoloji</p>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-5xl">Değişimi tekil yanıtla değil, sabit soru havuzuyla okuyun.</h2>
-          <p className="mt-5 text-base leading-7 text-[#667085]">FilmFolk’in London ve Birleşik Krallık odaklı video prodüksiyonu, etkinlik, canlı yayın, fotoğraf ve düzenleme hizmetleri için satın alma niyetine yakın sorular izlendi. Her prompt için ilk ve en güncel atıf oranı, tekrar sayısı ile birlikte kaydedildi.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Metodoloji</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-5xl">Değişimi tekil yanıtla değil, sabit soru havuzuyla okuyun.</h2>
+          <p className="mt-5 text-base leading-7 text-[#6B6A61]">FilmFolk’in London ve Birleşik Krallık odaklı video prodüksiyonu, etkinlik, canlı yayın, fotoğraf ve düzenleme hizmetleri için satın alma niyetine yakın sorular izlendi. Her prompt için ilk ve en güncel atıf oranı, tekrar sayısı ile birlikte kaydedildi.</p>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <article className="rounded-2xl border border-[#E6EAF2] bg-white p-6"><Target className="h-5 w-5 text-[#356AFF]" /><p className="mt-7 font-mono text-4xl text-[#0B1020]">41</p><h3 className="mt-2 font-bold text-[#0B1020]">Sabit soru</h3><p className="mt-2 text-sm leading-6 text-[#667085]">Satın alma niyeti taşıyan sorgu havuzu.</p></article>
-          <article className="rounded-2xl border border-[#E6EAF2] bg-white p-6"><LineChart className="h-5 w-5 text-[#356AFF]" /><p className="mt-7 font-mono text-4xl text-[#0B1020]">286</p><h3 className="mt-2 font-bold text-[#0B1020]">Ölçüm tekrarı</h3><p className="mt-2 text-sm leading-6 text-[#667085]">İlk ve son durum karşılaştırmasında kullanılan kayıt.</p></article>
-          <article className="rounded-2xl border border-[#E6EAF2] bg-white p-6"><TrendingUp className="h-5 w-5 text-emerald-700" /><p className="mt-7 font-mono text-4xl text-[#0B1020]">32 / 41</p><h3 className="mt-2 font-bold text-[#0B1020]">Yükselen soru</h3><p className="mt-2 text-sm leading-6 text-[#667085]">Son ölçümde ilk ölçüme göre daha yüksek atıf oranı.</p></article>
-          <article className="rounded-2xl border border-[#E6EAF2] bg-white p-6"><CircleDotDashed className="h-5 w-5 text-amber-600" /><p className="mt-7 font-mono text-4xl text-[#0B1020]">7 / 41</p><h3 className="mt-2 font-bold text-[#0B1020]">Gerileyen soru</h3><p className="mt-2 text-sm leading-6 text-[#667085]">Takipte kalması gereken hizmet veya niyet alanı.</p></article>
+          <article className="rounded-2xl border border-[#E3E0D5] bg-white p-6"><Target className="h-5 w-5 text-[#1B7F86]" /><p className="mt-7 font-mono text-4xl text-[#101211]">41</p><h3 className="mt-2 font-bold text-[#101211]">Sabit soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Satın alma niyeti taşıyan sorgu havuzu.</p></article>
+          <article className="rounded-2xl border border-[#E3E0D5] bg-white p-6"><LineChart className="h-5 w-5 text-[#1B7F86]" /><p className="mt-7 font-mono text-4xl text-[#101211]">286</p><h3 className="mt-2 font-bold text-[#101211]">Ölçüm tekrarı</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">İlk ve son durum karşılaştırmasında kullanılan kayıt.</p></article>
+          <article className="rounded-2xl border border-[#E3E0D5] bg-white p-6"><TrendingUp className="h-5 w-5 text-emerald-700" /><p className="mt-7 font-mono text-4xl text-[#101211]">32 / 41</p><h3 className="mt-2 font-bold text-[#101211]">Yükselen soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Son ölçümde ilk ölçüme göre daha yüksek atıf oranı.</p></article>
+          <article className="rounded-2xl border border-[#E3E0D5] bg-white p-6"><CircleDotDashed className="h-5 w-5 text-amber-600" /><p className="mt-7 font-mono text-4xl text-[#101211]">7 / 41</p><h3 className="mt-2 font-bold text-[#101211]">Gerileyen soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Takipte kalması gereken hizmet veya niyet alanı.</p></article>
         </div>
       </section>
 
-      <section className="border-y border-[#E6EAF2] bg-white px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-[#E3E0D5] bg-white px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="marketing-copy"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Prompt düzeyindeki değişim</p><h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-5xl">En güçlü artışlar, karar niyeti yüksek sorularda görüldü.</h2></div>
-            <p className="max-w-sm text-sm leading-6 text-[#667085]">Aşağıdaki değerler gönderilen ilk ve son ölçüm dosyasından alınmıştır.</p>
+            <div className="marketing-copy"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Prompt düzeyindeki değişim</p><h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-5xl">En güçlü artışlar, karar niyeti yüksek sorularda görüldü.</h2></div>
+            <p className="max-w-sm text-sm leading-6 text-[#6B6A61]">Aşağıdaki değerler gönderilen ilk ve son ölçüm dosyasından alınmıştır.</p>
           </div>
           <div className="mt-12 grid gap-4 lg:grid-cols-2">{topGains.map((result) => <PromptRow key={result.prompt} result={result} />)}</div>
           <div className="mt-10 rounded-2xl border border-amber-200 bg-amber-50 p-6">
             <div className="flex gap-3">
               <CircleDotDashed className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
               <div>
-                <h3 className="font-extrabold text-[#0B1020]">Takip edilmesi gereken gerilemeler</h3>
-                <p className="mt-2 text-sm leading-6 text-[#516078]">Vaka çalışması yalnızca yükselişleri göstermez. Düğün, gayrimenkul videosu ve kurumsal fotoğrafçılık niyetlerinde gerilemeler görülüyor; bu alanlar yeni içerik ve kaynak çalışması için ayrı izleme listesine alınmalı.</p>
+                <h3 className="font-extrabold text-[#101211]">Takip edilmesi gereken gerilemeler</h3>
+                <p className="mt-2 text-sm leading-6 text-[#57564E]">Vaka çalışması yalnızca yükselişleri göstermez. Düğün, gayrimenkul videosu ve kurumsal fotoğrafçılık niyetlerinde gerilemeler görülüyor; bu alanlar yeni içerik ve kaynak çalışması için ayrı izleme listesine alınmalı.</p>
                 <div className="mt-5 grid gap-2 md:grid-cols-3">
                   {pressurePrompts.map((result) => (
                     <div key={result.prompt} className="rounded-xl border border-amber-200/80 bg-white p-4">
-                      <p className="text-xs font-semibold leading-5 text-[#0B1020]">{result.prompt}</p>
+                      <p className="text-xs font-semibold leading-5 text-[#101211]">{result.prompt}</p>
                       <p className="mt-3"><Delta value={result.delta} /></p>
-                      <p className="mt-1 text-xs text-[#667085]">{result.first}% → {result.latest}% · {result.runs} tekrar</p>
+                      <p className="mt-1 text-xs text-[#6B6A61]">{result.first}% → {result.latest}% · {result.runs} tekrar</p>
                     </div>
                   ))}
                 </div>
@@ -120,29 +120,29 @@ function FilmFolkPage() {
       <section className="marketing-container py-16 md:py-24">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,.9fr)_minmax(360px,1.1fr)] lg:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Search Console bağlamı</p>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-4xl">Organik arama yüzeyi, prompt ölçümünün yerine geçmez; onu bağlama oturtur.</h2>
-            <p className="mt-5 text-base leading-7 text-[#667085]">Ekteki Google Search Console exportu 18 Mayıs–12 Ağustos 2026 arasındaki 87 günü ve <strong>Web</strong> arama türünü içeriyor. Bu veriyi yapay zeka atıf sonucunun kanıtı olarak değil, FilmFolk’in hangi hizmet sayfalarında görünür bir organik yüzeye sahip olduğunu anlamak için kullanıyoruz.</p>
-            <div className="mt-7 space-y-3 text-sm font-semibold text-[#0B1020]">
-              <p className="flex items-center gap-3"><FileSearch className="h-4 w-4 text-[#356AFF]" />Canlı yayın hizmeti: 3.377 gösterim</p>
-              <p className="flex items-center gap-3"><FileSearch className="h-4 w-4 text-[#356AFF]" />Serbest videograf hizmeti: 3.276 gösterim</p>
-              <p className="flex items-center gap-3"><FileSearch className="h-4 w-4 text-[#356AFF]" />Video düzenleme hizmeti: 2.276 gösterim</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Search Console bağlamı</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-4xl">Organik arama yüzeyi, prompt ölçümünün yerine geçmez; onu bağlama oturtur.</h2>
+            <p className="mt-5 text-base leading-7 text-[#6B6A61]">Ekteki Google Search Console exportu 18 Mayıs–12 Ağustos 2026 arasındaki 87 günü ve <strong>Web</strong> arama türünü içeriyor. Bu veriyi yapay zeka atıf sonucunun kanıtı olarak değil, FilmFolk’in hangi hizmet sayfalarında görünür bir organik yüzeye sahip olduğunu anlamak için kullanıyoruz.</p>
+            <div className="mt-7 space-y-3 text-sm font-semibold text-[#101211]">
+              <p className="flex items-center gap-3"><FileSearch className="h-4 w-4 text-[#1B7F86]" />Canlı yayın hizmeti: 3.377 gösterim</p>
+              <p className="flex items-center gap-3"><FileSearch className="h-4 w-4 text-[#1B7F86]" />Serbest videograf hizmeti: 3.276 gösterim</p>
+              <p className="flex items-center gap-3"><FileSearch className="h-4 w-4 text-[#1B7F86]" />Video düzenleme hizmeti: 2.276 gösterim</p>
             </div>
           </div>
           <aside className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            <div className="rounded-2xl border border-[#DDE5F4] bg-[#F4F8FF] p-5"><p className="text-xs text-[#667085]">Toplam gösterim</p><p className="mt-2 font-mono text-4xl text-[#0B1020]">44.613</p><p className="mt-1 text-xs text-[#667085]">87 günlük export</p></div>
-            <div className="rounded-2xl border border-[#DDE5F4] bg-white p-5"><p className="text-xs text-[#667085]">Birleşik Krallık payı</p><p className="mt-2 font-mono text-4xl text-[#0B1020]">89,1%</p><p className="mt-1 text-xs text-[#667085]">ülkelere göre gösterim</p></div>
-            <div className="rounded-2xl border border-[#DDE5F4] bg-white p-5"><p className="text-xs text-[#667085]">Masaüstü payı</p><p className="mt-2 font-mono text-4xl text-[#0B1020]">80,2%</p><p className="mt-1 text-xs text-[#667085]">cihazlara göre gösterim</p></div>
+            <div className="rounded-2xl border border-[#E3E0D5] bg-[#F2F0E8] p-5"><p className="text-xs text-[#6B6A61]">Toplam gösterim</p><p className="mt-2 font-mono text-4xl text-[#101211]">44.613</p><p className="mt-1 text-xs text-[#6B6A61]">87 günlük export</p></div>
+            <div className="rounded-2xl border border-[#E3E0D5] bg-white p-5"><p className="text-xs text-[#6B6A61]">Birleşik Krallık payı</p><p className="mt-2 font-mono text-4xl text-[#101211]">89,1%</p><p className="mt-1 text-xs text-[#6B6A61]">ülkelere göre gösterim</p></div>
+            <div className="rounded-2xl border border-[#E3E0D5] bg-white p-5"><p className="text-xs text-[#6B6A61]">Masaüstü payı</p><p className="mt-2 font-mono text-4xl text-[#101211]">80,2%</p><p className="mt-1 text-xs text-[#6B6A61]">cihazlara göre gösterim</p></div>
           </aside>
         </div>
       </section>
 
-      <section className="bg-[#F4F8FF] px-4 py-16 md:px-6 md:py-24">
-        <div className="marketing-container rounded-3xl bg-[#0B1020] px-7 py-12 text-center text-white md:px-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#35E1FF]">Ne anlatıyor?</p>
+      <section className="bg-[#F2F0E8] px-4 py-16 md:px-6 md:py-24">
+        <div className="marketing-container rounded-3xl bg-[#101211] px-7 py-12 text-center text-white md:px-12">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#3FBFB2]">Ne anlatıyor?</p>
           <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">Atıf payı büyüyebilir; ancak her niyette aynı anda büyümeyebilir.</h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300">FilmFolk verisi, düzenli soru takibinin hem güçlü artışları hem de kaybedilen niyet alanlarını aynı tabloda görünür kıldığını gösteriyor. Bu bir performans garantisi değildir; karar vermek için daha doğru bir ölçüm çerçevesidir.</p>
-          <Button size="lg" className="mt-8 bg-[#35E1FF] text-[#0B1020] hover:bg-[#B8F4FF]" asChild><Link to="/free-ai-readiness-report">Kendi ölçüm çerçeveni oluştur <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
+          <Button size="lg" className="mt-8 bg-[#3FBFB2] text-[#101211] hover:bg-[#B8F4FF]" asChild><Link to="/free-ai-readiness-report">Kendi ölçüm çerçeveni oluştur <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
         </div>
       </section>
     </MarketingShell>

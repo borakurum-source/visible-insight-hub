@@ -27,10 +27,10 @@ export function CitationPathTrace({ className }: { className?: string }) {
     <div className={className} aria-hidden="true">
       <svg viewBox="0 0 440 92" fill="none" className="h-auto w-full">
         <path d="M52 46H174C204 46 205 17 234 17H388" stroke="rgba(53,225,255,0.24)" strokeWidth="1.5" strokeDasharray="4 5" />
-        <path d="M52 46H174C204 46 205 17 234 17H388" stroke="#35E1FF" strokeWidth="2" strokeLinecap="round" />
+        <path d="M52 46H174C204 46 205 17 234 17H388" stroke="#3FBFB2" strokeWidth="2" strokeLinecap="round" />
         {[
-          { cx: 52, cy: 46, fill: "#35E1FF" },
-          { cx: 220, cy: 20, fill: "#356AFF" },
+          { cx: 52, cy: 46, fill: "#3FBFB2" },
+          { cx: 220, cy: 20, fill: "#1B7F86" },
           { cx: 388, cy: 17, fill: "#FFFFFF" },
         ].map((node) => (
           <circle key={node.cx} cx={node.cx} cy={node.cy} r="5" fill={node.fill} />
