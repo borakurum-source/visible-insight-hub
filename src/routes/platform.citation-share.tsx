@@ -12,7 +12,9 @@ export const Route = createFileRoute("/platform/citation-share")({
       { name: "description", content: "Yapay zeka cevaplarında markanızın ne kadar sık kaynak olarak seçildiğini soru, atıf ve rakip bağlamıyla ölçün." },
       { property: "og:title", content: "Atıf Payı | OneCite" },
       { property: "og:description", content: "Yapay zeka cevaplarında markanızın kaynak olarak seçilme oranını ölçün." },
+      { property: "og:url", content: "https://1cite.com/platform/citation-share" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/platform/citation-share" }],
   }),
   component: CitationSharePage,
 });

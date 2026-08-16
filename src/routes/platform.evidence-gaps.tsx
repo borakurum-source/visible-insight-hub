@@ -13,7 +13,9 @@ export const Route = createFileRoute("/platform/evidence-gaps")({
       { name: "description", content: "Yapay zekanın markanıza güvenmek için hangi bilgi, kaynak ve ilişkileri bulamadığını görün." },
       { property: "og:title", content: "Eksik Kanıtlar | OneCite" },
       { property: "og:description", content: "Yapay zekanın seçim kararında eksik kalan kanıtı ve önceliklendirilmiş uygulamayı görün." },
+      { property: "og:url", content: "https://1cite.com/platform/evidence-gaps" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/platform/evidence-gaps" }],
   }),
   component: EvidenceGapsPage,
 });

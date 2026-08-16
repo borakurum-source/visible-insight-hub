@@ -14,7 +14,9 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:title", content: "Gizlilik Politikası | OneCite" },
       { property: "og:description", content: "OneCite'ın kişisel verilerinizi nasıl işlediğini öğrenin." },
       { name: "robots", content: "noindex" },
+      { property: "og:url", content: "https://1cite.com/privacy" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/privacy" }],
   }),
   component: PrivacyPolicyPage,
 });

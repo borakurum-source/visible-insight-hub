@@ -90,7 +90,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "AI yanıtlarında markanızın alıntılanma performansını ölçün ve artırın.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "OneCite" },
+      { property: "og:locale", content: "tr_TR" },
       { name: "twitter:card", content: "summary_large_image" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "OneCite",
+          alternateName: "1cite",
+          url: "https://1cite.com",
+          logo: "https://1cite.com/favicon.png",
+          description:
+            "Yapay zeka asistanlarının cevaplarında marka atıf payını ölçen ve artıran yapay zeka görünürlük (GEO) platformu.",
+        }),
+      },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

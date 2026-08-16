@@ -17,7 +17,7 @@ import { EngineRotator, MetricRise } from "@/components/site/citation-motion";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { faqs } from "@/lib/faqData";
-import { pricingPlans } from "@/lib/pricingData";
+import { formatUsd, pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
 import shotKb from "@/assets/landing/shot-kb.webp";
 import shotContent from "@/assets/landing/shot-content.webp";
@@ -34,7 +34,9 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Yapay zeka cevaplarında markanızın atıf payını, eksik kanıtları ve öncelikli uygulamalarını görün." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://1cite.com" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -306,7 +308,7 @@ function PlanlaraBakis() {
                 {plan.highlight && <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">Popüler</span>}
               </div>
               <p className="mt-4 font-mono text-2xl font-medium text-foreground">
-                {plan.monthly === 0 ? "₺0" : `₺${plan.monthly.toLocaleString("tr-TR")}`}
+                {plan.monthly === 0 ? "$0" : formatUsd(plan.monthly)}
                 <span className="text-xs text-muted-foreground"> /ay</span>
               </p>
               <ul className="mt-4 flex-1 space-y-1.5 text-sm text-muted-foreground">

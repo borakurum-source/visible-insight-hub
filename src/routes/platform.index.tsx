@@ -13,7 +13,9 @@ export const Route = createFileRoute("/platform/")({
       { name: "description", content: "OneCite ile marka kanıtınızı, yapay zeka atıf sinyalini ve öncelikli GEO uygulamalarını tek platformda yönetin." },
       { property: "og:title", content: "OneCite Platformu | Kaynak, Sinyal, Uygulama" },
       { property: "og:description", content: "Marka kanıtınızı, atıf sinyalini ve öncelikli GEO uygulamalarını tek çalışma döngüsünde birleştirin." },
+      { property: "og:url", content: "https://1cite.com/platform" },
     ],
+    links: [{ rel: "canonical", href: "https://1cite.com/platform" }],
   }),
   component: PlatformPage,
 });
