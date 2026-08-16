@@ -98,17 +98,17 @@ function Hero() {
           </dl>
           <p className="text-[11px] text-slate-500">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
         </div>
-        <Reveal className="relative h-full" delay={0.06}>
-          <div className="visual-panel-shadow relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-[28px] border border-white/15 bg-ink" data-testid="hero-visual-panel">
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-ink/45 via-transparent to-transparent" aria-hidden="true" />
-            <div className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/15 bg-ink/70 px-3 py-1.5 backdrop-blur"><span className="h-1.5 w-1.5 rounded-full bg-cyan" /><span className="visual-source-label text-slate-300">SOURCE SIGNAL · 01</span></div>
-            <img src={heroCitationOrb} alt="Karanlık bir yüzey üzerinde, üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre" className="block h-full w-full flex-1 object-cover object-[72%_45%]" width="2560" height="1440" fetchPriority="high" />
-            <div className="absolute bottom-5 left-5 right-5 z-20 flex items-end justify-between gap-4">
-              <div><p className="visual-source-label text-cyan">EVIDENCE LAYER</p><p className="mt-1 text-sm font-semibold text-white">Görünmek ile kaynak olarak seçilmek aynı şey değil.</p></div>
-              <span className="font-mono text-[10px] text-slate-400">1C / 001</span>
-            </div>
-          </div>
-        </Reveal>
+        <div className="flex items-center" data-testid="hero-visual-panel">
+          <HeroVisual
+            image={heroCitationOrb}
+            imageAlt="Karanlık bir yüzey üzerinde, üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre"
+            label="EVIDENCE LAYER"
+            caption="Görünmek ile kaynak olarak seçilmek aynı şey değil."
+            meta="AI CITATION INTELLIGENCE"
+            priority
+            className="w-full"
+          />
+        </div>
       </div>
     </section>
   );
