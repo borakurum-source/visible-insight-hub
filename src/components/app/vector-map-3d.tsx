@@ -186,10 +186,11 @@ export default function VectorMap3D({
   };
 
   return (
-    <div className="relative">
+    <div className="space-y-2">
+      <div className="relative overflow-hidden rounded-xl border border-border bg-[#05060c] shadow-[0_0_60px_-25px_rgba(80,120,255,0.6)]">
       <canvas
         ref={canvasRef}
-        className="h-[440px] w-full cursor-grab touch-none rounded-lg border border-border bg-muted/30 active:cursor-grabbing"
+        className="block h-[440px] w-full cursor-grab touch-none active:cursor-grabbing"
         onMouseDown={(event) => {
           const state = stateRef.current;
           state.dragging = true;
@@ -218,18 +219,40 @@ export default function VectorMap3D({
         }}
       />
       {hovered ? (
-        <div className="pointer-events-none absolute left-3 top-3 max-w-xs rounded-md border border-border bg-background/95 p-2 text-xs shadow-lg">
+        <div className="pointer-events-none absolute left-3 top-14 max-w-xs rounded-md border border-white/10 bg-black/80 p-2 text-xs text-white shadow-lg backdrop-blur">
           <p className="font-medium">{hovered.sourceTitle}</p>
-          <p className="line-clamp-3 text-muted-foreground">{hovered.excerpt}</p>
+          <p className="line-clamp-3 text-white/60">{hovered.excerpt}</p>
         </div>
       ) : null}
+      <div className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-3">
+        <span className="pointer-events-none inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-[rgb(248,113,113)]" aria-hidden="true" />
+          Canlı 3B Nöral Ağ
+        </span>
+        <span className="text-[11px] text-white/40">Otomatik dönüş · gerçek zamanlı</span>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-3 left-3 flex flex-wrap items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white backdrop-blur">
+        {LEGEND.map((entry) => (
+          <span key={entry.label} className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: entry.color }} aria-hidden="true" />
+            {entry.label}
+          </span>
+        ))}
+      </div>
+
       <button
         type="button"
         onClick={() => { stateRef.current.autoRotate = !stateRef.current.autoRotate; }}
-        className="absolute bottom-3 right-3 rounded-full border border-border bg-background/90 px-3 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+        className="absolute bottom-3 right-3 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/70 backdrop-blur transition-colors hover:text-white"
       >
         Döndürmeyi aç/kapat
       </button>
+      </div>
+      <p className="text-center text-xs text-muted-foreground">
+        Her düğüm, yapay zekâ erişim yollarında konumlanmış bir bilgi sinyalini temsil eder.
+        <span className="text-primary"> Ağ gerçek zamanlı döner</span> — tıpkı modellerin güncellenmesi gibi.
+      </p>
     </div>
   );
 }
