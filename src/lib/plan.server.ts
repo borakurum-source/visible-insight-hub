@@ -50,3 +50,15 @@ export async function assertBrandQuota(supabase: Sb, userId: string) {
   }
   return limits;
 }
+
+// Takip edilebilecek rakip sayısı plana bağlı.
+export async function assertCompetitorQuota(supabase: Sb, userId: string, total: number) {
+  const limits = await getUserPlan(supabase, userId);
+  if (isUnlimited(limits.maxCompetitors)) return limits;
+  if (total > limits.maxCompetitors) {
+    throw new Error(
+      `${limits.label} planınızda ${limits.maxCompetitors} rakip takip edebilirsiniz. Daha fazlası için planınızı yükseltin.`,
+    );
+  }
+  return limits;
+}
