@@ -309,3 +309,93 @@ export const deleteClaim = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const listGeoTasks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: rows } = await context.supabase
+      .from("geo_tasks").select("*").eq("brand_id", data.brandId).order("created_at", { ascending: false });
+    return rows ?? [];
+  });
+
+export const createGeoTask = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; title: string; description?: string; priority?: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("geo_tasks").insert({
+      brand_id: data.brandId,
+      title: data.title,
+      description: data.description ?? null,
+      priority: data.priority ?? "medium",
+      status: "todo",
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setGeoTaskStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string; status: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("geo_tasks").update({ status: data.status }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteGeoTask = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("geo_tasks").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { fullName: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("profiles").update({ full_name: data.fullName }).eq("id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateBrand = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; name: string; domain: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { normalizeDomain } = await import("./ai.server");
+    const domain = normalizeDomain(data.domain);
+    if (!domain) throw new Error("Geçerli bir alan adı girin");
+    const { error } = await context.supabase
+      .from("brands").update({ name: data.name.trim() || domain, domain }).eq("id", data.brandId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteBrand = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("brands").delete().eq("id", data.brandId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminListBrands = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase
+      .rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Bu sayfaya erişim yetkiniz yok");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: brands }, { data: members }] = await Promise.all([
+      supabaseAdmin.from("brands").select("id, name, domain, onboarding_completed, created_at").order("created_at", { ascending: false }),
+      supabaseAdmin.from("brand_members").select("brand_id"),
+    ]);
+    const counts = new Map<string, number>();
+    for (const m of members ?? []) counts.set(m.brand_id, (counts.get(m.brand_id) ?? 0) + 1);
+    return (brands ?? []).map((b) => ({ ...b, memberCount: counts.get(b.id) ?? 0 }));
+  });

@@ -1,94 +1,133 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Building2, KanbanSquare, Zap } from "lucide-react";
+import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { CheckCircle2, ListTodo, Loader2, Plus, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { GEO_TASK_COLUMNS, mockGeoTasks } from "@/lib/panel-mock/geo-tasks";
+import { createGeoTask, deleteGeoTask, listGeoTasks, setGeoTaskStatus } from "@/lib/panel.functions";
+import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/geo-tasks")({
   head: () => ({
     meta: [
-      { title: "GEO Görev Panosu — OneCite Paneli" },
-      { name: "description", content: "AI aksiyon planlarından türeyen GEO görevlerini kanban panosunda takip edin." },
-      { property: "og:title", content: "GEO Görev Panosu — OneCite Paneli" },
-      { property: "og:description", content: "Aksiyon planı görevlerini durum bazlı kolonlarda izleyin." },
+      { title: "GEO Görevleri — OneCite Paneli" },
+      { name: "description", content: "Yapay zekâ görünürlüğünüzü artıracak somut içerik ve kanıt görevleri." },
+      { property: "og:title", content: "GEO Görevleri — OneCite Paneli" },
+      { property: "og:description", content: "Görünürlük görevlerinizi takip edin." },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: GeoTasksPage,
 });
 
-const priorityTone: Record<string, string> = {
-  yuksek: "text-destructive border-destructive/40",
-  orta: "text-amber-600 dark:text-amber-400 border-amber-500/40",
-  dusuk: "text-muted-foreground border-border",
-};
+const PRIORITY_LABEL: Record<string, string> = { high: "Yüksek", medium: "Orta", low: "Düşük" };
 
 function GeoTasksPage() {
-  const quickWinCount = mockGeoTasks.filter((t) => t.priority === "yuksek" && t.column !== "tamamlandi").length;
+  const { brand } = useActiveBrand();
+  const queryClient = useQueryClient();
+  const fetchTasks = useServerFn(listGeoTasks);
+  const addTask = useServerFn(createGeoTask);
+  const updateStatus = useServerFn(setGeoTaskStatus);
+  const removeTask = useServerFn(deleteGeoTask);
+  const [title, setTitle] = useState("");
+
+  const key = ["geo-tasks", brand?.id];
+  const { data = [], isLoading } = useQuery({
+    queryKey: key,
+    queryFn: () => fetchTasks({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
+
+  const invalidate = () => void queryClient.invalidateQueries({ queryKey: key });
+
+  const createMutation = useMutation({
+    mutationFn: () => addTask({ data: { brandId: brand!.id, title: title.trim() } }),
+    onSuccess: () => { setTitle(""); invalidate(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const statusMutation = useMutation({
+    mutationFn: (input: { id: string; status: string }) => updateStatus({ data: input }),
+    onSuccess: invalidate,
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => removeTask({ data: { id } }),
+    onSuccess: invalidate,
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  if (!brand) {
+    return (
+      <>
+        <PanelPageHeading meta={{ title: "GEO Görevleri", description: "Önce bir marka ekleyin.", icon: ListTodo }} />
+        <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
+      </>
+    );
+  }
+
+  const open = data.filter((task) => task.status !== "done");
+  const done = data.filter((task) => task.status === "done");
 
   return (
     <>
       <PanelPageHeading
-        meta={{ title: "GEO Görev Panosu", description: "Aksiyon planı üretilmiş her prompt burada bir görev kartı olarak görünür.", icon: KanbanSquare }}
+        meta={{
+          title: "GEO Görevleri",
+          description: "Görünürlüğü artıracak somut işler. Tamamladıkça alıntı ihtimaliniz yükselir.",
+          icon: ListTodo,
+        }}
       />
 
+      <div className="flex flex-wrap gap-2">
+        <Input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Yeni görev…"
+          className="max-w-md"
+          onKeyDown={(event) => { if (event.key === "Enter" && title.trim()) createMutation.mutate(); }}
+        />
+        <Button onClick={() => createMutation.mutate()} disabled={!title.trim() || createMutation.isPending}>
+          <Plus className="mr-1.5 h-4 w-4" /> Ekle
+        </Button>
+      </div>
+
       <Card>
-        <CardContent className="flex flex-col items-start gap-4 p-6 md:flex-row">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <KanbanSquare className="h-5 w-5" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">GEO Görev Panosu</p>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">Hızlı Kazanım</span> etiketi, markanın cevapta zaten
-              geçtiği ama atıf alamadığı — dolayısıyla tek bir hedefli çalışmayla kapanma ihtimali en yüksek —
-              görevleri işaretler; ölçülmüş mention/citation verisinden türetilir.
-            </p>
-          </div>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <p className="flex items-center gap-2 p-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Yükleniyor…</p>
+          ) : data.length === 0 ? (
+            <p className="p-6 text-sm text-muted-foreground">Henüz görev yok.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {[...open, ...done].map((task) => (
+                <li key={task.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
+                  <span className={`min-w-0 flex-1 ${task.status === "done" ? "text-muted-foreground line-through" : ""}`}>
+                    <span className="block font-medium">{task.title}</span>
+                    {task.description ? <span className="block text-xs text-muted-foreground">{task.description}</span> : null}
+                  </span>
+                  <Badge variant="outline" className="text-[10px]">{PRIORITY_LABEL[task.priority] ?? task.priority}</Badge>
+                  <Button
+                    size="sm"
+                    variant={task.status === "done" ? "ghost" : "outline"}
+                    onClick={() => statusMutation.mutate({ id: task.id, status: task.status === "done" ? "todo" : "done" })}
+                  >
+                    <CheckCircle2 className="mr-1.5 h-4 w-4" />
+                    {task.status === "done" ? "Geri al" : "Tamamla"}
+                  </Button>
+                  <Button size="icon" variant="ghost" aria-label="Görevi sil" onClick={() => deleteMutation.mutate(task.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
-
-      {quickWinCount > 0 && (
-        <p className="text-xs text-muted-foreground">
-          Bekleyen görevler arasında <span className="font-medium text-foreground">{quickWinCount} Hızlı Kazanım</span> fırsatı var.
-        </p>
-      )}
-
-      <div className="flex gap-3 overflow-x-auto pb-2">
-        {GEO_TASK_COLUMNS.map((col) => {
-          const tasks = mockGeoTasks.filter((t) => t.column === col.id);
-          return (
-            <div key={col.id} className="min-w-[260px] flex-1 space-y-3 rounded-lg border bg-muted/30 p-3">
-              <div className="flex items-center justify-between px-1">
-                <p className="text-sm font-semibold">{col.label}</p>
-                <Badge variant="secondary" className="text-[10px]">{tasks.length}</Badge>
-              </div>
-              <div className="min-h-[80px] space-y-2">
-                {tasks.map((t) => (
-                  <Card key={t.id}>
-                    <CardContent className="space-y-2 p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <Badge variant="outline" className={`gap-1 text-[10px] ${priorityTone[t.priority]}`}>
-                          <Zap className="h-3 w-3 shrink-0" /> {t.priority}
-                        </Badge>
-                      </div>
-                      <p className="line-clamp-2 text-sm font-medium">{t.title}</p>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Building2 className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{t.assignee}</span>
-                        <span className="opacity-50">·</span>
-                        <span>{t.dueDate}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {tasks.length === 0 && <p className="py-6 text-center text-xs text-muted-foreground">Görev yok</p>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </>
   );
 }
