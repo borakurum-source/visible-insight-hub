@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockAdminOrgs, mockAdminUsage } from "@/lib/panel-mock/admin";
 
-export const Route = createFileRoute("/app/admin")({
+export const Route = createFileRoute("/_authenticated/app/admin")({
   head: () => ({
     meta: [
       { title: "Admin — OneCite Paneli" },

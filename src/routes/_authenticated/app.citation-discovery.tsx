@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { mockCitationSources } from "@/lib/panel-mock/discovery";
 
-export const Route = createFileRoute("/app/citation-discovery")({
+export const Route = createFileRoute("/_authenticated/app/citation-discovery")({
   head: () => ({
     meta: [
       { title: "Kaynak Keşfi — OneCite Paneli" },

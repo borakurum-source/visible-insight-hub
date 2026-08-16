@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockPromptDiscovery } from "@/lib/panel-mock/discovery";
 
-export const Route = createFileRoute("/app/prompt-discovery")({
+export const Route = createFileRoute("/_authenticated/app/prompt-discovery")({
   head: () => ({
     meta: [
       { title: "Prompt Keşfi — OneCite Paneli" },

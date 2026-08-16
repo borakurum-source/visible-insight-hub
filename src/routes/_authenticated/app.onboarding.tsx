@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockOnboardingSteps } from "@/lib/panel-mock/onboarding";
 import { activeBrand } from "@/lib/panel-mock/clients";
 
-export const Route = createFileRoute("/app/onboarding")({
+export const Route = createFileRoute("/_authenticated/app/onboarding")({
   head: () => ({
     meta: [
       { title: "Kurulum — OneCite Paneli" },

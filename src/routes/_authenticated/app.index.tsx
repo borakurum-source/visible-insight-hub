@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { mockOverview, mockTrend, mockKbHealth, mockClusterStats, mockPriorityTasks } from "@/lib/panel-mock/overview";
 
-export const Route = createFileRoute("/app/")({
+export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({
     meta: [
       { title: "Komuta Merkezi — OneCite Paneli" },

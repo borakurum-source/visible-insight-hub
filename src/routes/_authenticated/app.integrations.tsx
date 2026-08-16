@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockGscQueries, mockIntegrations } from "@/lib/panel-mock/integrations";
 
-export const Route = createFileRoute("/app/integrations")({
+export const Route = createFileRoute("/_authenticated/app/integrations")({
   head: () => ({
     meta: [
       { title: "Entegrasyonlar — OneCite Paneli" },

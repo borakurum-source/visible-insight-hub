@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { activeBrand, activeDomains, demoUser } from "@/lib/panel-mock/clients";
 
-export const Route = createFileRoute("/app")({
+export const Route = createFileRoute("/_authenticated/app")({
   component: AppLayout,
 });
 

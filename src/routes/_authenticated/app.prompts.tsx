@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockPrompts } from "@/lib/panel-mock/prompts";
 
-export const Route = createFileRoute("/app/prompts")({
+export const Route = createFileRoute("/_authenticated/app/prompts")({
   head: () => ({
     meta: [
       { title: "Promptlar — OneCite Paneli" },

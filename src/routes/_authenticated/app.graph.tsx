@@ -4,7 +4,7 @@ import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockGraphEdges, mockGraphNodes, type MockGraphNode } from "@/lib/panel-mock/graph";
 
-export const Route = createFileRoute("/app/graph")({
+export const Route = createFileRoute("/_authenticated/app/graph")({
   head: () => ({
     meta: [
       { title: "Bilgi Grafiği — OneCite Paneli" },

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockPlans } from "@/lib/panel-mock/pricing";
 
-export const Route = createFileRoute("/app/pricing")({
+export const Route = createFileRoute("/_authenticated/app/pricing")({
   head: () => ({
     meta: [
       { title: "Fiyatlandırma — OneCite Paneli" },
