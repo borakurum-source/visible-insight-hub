@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, ChevronDown, ExternalLink, ListChecks, ListTodo, Loader2, Pause, Plus, Trash2 } from "lucide-react";
+import { Hint } from "@/components/app/hint";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +20,7 @@ import {
   getPlanUsage,
   getPromptInsight,
   listPrompts,
+  setPromptActionDone,
   setPromptStatus,
 } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
@@ -248,6 +250,27 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
     queryFn: () => fetchInsight({ data: { brandId, promptId } }),
   });
 
+  const toggleAction = useServerFn(setPromptActionDone);
+  const queryClient = useQueryClient();
+  const toggleMutation = useMutation({
+    mutationFn: ({ action, done }: { action: { key: string; title: string; description: string; priority: string }; done: boolean }) =>
+      toggleAction({
+        data: {
+          brandId,
+          promptId,
+          key: action.key,
+          title: action.title,
+          description: action.description,
+          priority: action.priority,
+          done,
+        },
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["prompt-insight", promptId] }),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const doneCount = data?.actions?.filter((action) => action.done).length ?? 0;
+
   const taskMutation = useMutation({
     mutationFn: (input: { title: string; description: string; priority: string }) =>
       addTask({ data: { brandId, ...input } }),
@@ -308,11 +331,32 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
 
       {data?.actions?.length ? (
         <div className="space-y-1.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Bu soruda görünmek için</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Bu soruda görünmek için</p>
+            <Hint title="Kontrol listesi">
+              <p>Bu adımları tamamladıkça kutucukları işaretleyin; işaretleriniz kaydedilir.</p>
+              <p><strong>Göreve ekle</strong> ile adımı Görevler listenize taşıyıp ekibinizle takip edebilirsiniz.</p>
+            </Hint>
+            <span className="ml-auto font-mono text-[11px] text-muted-foreground">
+              {doneCount} / {data.actions.length} tamam
+            </span>
+          </div>
           {data.actions.map((action) => (
-            <div key={action.title} className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5">
+            <div key={action.key} className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5">
+              <Checkbox
+                id={`action-${promptId}-${action.key}`}
+                className="mt-0.5"
+                checked={action.done}
+                disabled={toggleMutation.isPending}
+                onCheckedChange={(checked) => toggleMutation.mutate({ action, done: checked === true })}
+              />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium">{action.title}</p>
+                <label
+                  htmlFor={`action-${promptId}-${action.key}`}
+                  className={`cursor-pointer text-xs font-medium ${action.done ? "text-muted-foreground line-through" : ""}`}
+                >
+                  {action.title}
+                </label>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">{action.description}</p>
               </div>
               <div className="flex gap-1.5">

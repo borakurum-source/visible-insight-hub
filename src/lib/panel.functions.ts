@@ -880,21 +880,24 @@ export const getPromptInsight = createServerFn({ method: "POST" })
     const ownCited = sources.some((s) => s.type === "own");
 
     // Deterministik aksiyon önerileri — kullanıcı ne yapacağını net görsün.
-    const actions: Array<{ title: string; description: string; priority: string }> = [];
+    const actions: Array<{ key: string; title: string; description: string; priority: string }> = [];
     if (!run) {
       actions.push({
+        key: "measure",
         title: `"${(prompt?.text ?? "").slice(0, 80)}" sorusunu ölçün`,
         description: "Bu soru henüz hiç ölçülmedi. Ölçüm & Skor ekranından bir tur başlatın.",
         priority: "medium",
       });
     } else if (!run.brand_mentioned) {
       actions.push({
+        key: "evidence-content",
         title: `"${(prompt?.text ?? "").slice(0, 80)}" sorusu için kanıt içeriği yayımlayın`,
         description: `Yapay zekâ bu soruda ${brand?.name ?? "markanızı"} anmadı. Soruyu doğrudan yanıtlayan, veri ve kaynak içeren bir sayfa yayımlayın; İçerik Üretimi ekranından taslak alabilirsiniz.`,
         priority: "high",
       });
       if (sources.length) {
         actions.push({
+          key: "cited-sources",
           title: "Alıntılanan kaynaklarda yer alın",
           description: `Bu yanıtta ${sources.slice(0, 3).map((s) => s.domain).join(", ")} kaynak gösterildi. Bu sayfalarda listelenmek, karşılaştırmaya girmek veya benzer kapsamda kendi sayfanızı üretmek için çalışın.`,
           priority: "medium",
@@ -902,12 +905,14 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       }
     } else if (!ownCited) {
       actions.push({
+        key: "own-citation",
         title: "Kendi sayfanızın kaynak gösterilmesini sağlayın",
         description: "Markanız yanıtta geçiyor ama kaynak olarak kendi siteniz gösterilmiyor. İlgili sayfayı güncelleyin, net tanımlar, tarih, veri ve SSS ekleyin.",
         priority: "medium",
       });
     } else if ((run.position ?? 99) > 3) {
       actions.push({
+        key: "improve-position",
         title: "Yanıttaki sıranızı yükseltin",
         description: `Şu an ${run.position}. sıradasınız. Karşılaştırma tablosu, fiyat/teknik veri ve güncel tarih içeren kanıt sayfalarıyla öne çıkın.`,
         priority: "medium",
@@ -915,11 +920,24 @@ export const getPromptInsight = createServerFn({ method: "POST" })
     }
     if (!ownCited) {
       actions.push({
+        key: "kb-source",
         title: "Bilgi Bankası'na bu konuda kaynak ekleyin",
         description: "Konuyla ilgili teknik doküman, vaka çalışması veya SSS ekleyip indeksleyin; marka zekâsı yanıt üretiminde bu kanıtları kullanır.",
         priority: "low",
       });
     }
+
+    // Kaydedilmiş tamamlanma durumlarını adımlarla eşleştir.
+    const { data: savedItems } = await context.supabase
+      .from("prompt_action_items")
+      .select("action_key, done, done_at")
+      .eq("prompt_id", data.promptId);
+    const doneMap = new Map(
+      ((savedItems ?? []) as Array<{ action_key: string; done: boolean; done_at: string | null }>).map((row) => [
+        row.action_key,
+        { done: row.done, doneAt: row.done_at },
+      ]),
+    );
 
     return {
       prompt: prompt ?? null,
@@ -934,8 +952,123 @@ export const getPromptInsight = createServerFn({ method: "POST" })
           }
         : null,
       sources,
-      actions,
+      actions: actions.map((action) => ({
+        ...action,
+        done: doneMap.get(action.key)?.done ?? false,
+        doneAt: doneMap.get(action.key)?.doneAt ?? null,
+      })),
     };
+  });
+
+// Aksiyon adımını tamamlandı / tamamlanmadı olarak işaretler.
+export const setPromptActionDone = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: {
+      brandId: string;
+      promptId: string;
+      key: string;
+      title: string;
+      description?: string;
+      priority?: string;
+      done: boolean;
+    }) => input,
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("prompt_action_items").upsert(
+      {
+        brand_id: data.brandId,
+        prompt_id: data.promptId,
+        action_key: data.key,
+        title: data.title,
+        description: data.description ?? null,
+        priority: data.priority ?? "medium",
+        done: data.done,
+        done_at: data.done ? new Date().toISOString() : null,
+      },
+      { onConflict: "prompt_id,action_key" },
+    );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Rakip arama: alan adı + sektör bilgisinden gerçek rakip adayları bulur (Perplexity).
+export const searchCompetitors = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; query?: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { perplexityJson } = await import("./perplexity.server");
+    const [{ data: brand }, { data: intel }] = await Promise.all([
+      context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+      context.supabase.from("brand_intelligence").select("summary, competitors").eq("brand_id", data.brandId).maybeSingle(),
+    ]);
+    if (!brand) throw new Error("Marka bulunamadı");
+
+    const fallback = { competitors: [] as Array<{ name: string; domain: string; reason: string }> };
+    const { result } = await perplexityJson<typeof fallback>(
+      [
+        {
+          role: "system",
+          content:
+            "Sen bir pazar araştırmacısısın. Verilen markayla aynı işi yapan gerçek rakip firmaları bul. Uydurma. Yalnızca var olduğunu doğrulayabildiğin firmaları döndür, en fazla 8 tane. domain alanına sadece alan adını yaz (ör. ornek.com).",
+        },
+        {
+          role: "user",
+          content: `Marka: ${brand.name} (${brand.domain})
+Özet: ${intel?.summary ?? ""}
+Mevcut rakip listesi (tekrar etme): ${JSON.stringify(intel?.competitors ?? [])}
+Arama: ${data.query?.trim() || "aynı sektördeki başlıca rakipler"}`,
+        },
+      ],
+      {
+        name: "competitors",
+        schema: {
+          type: "object",
+          properties: {
+            competitors: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: { name: { type: "string" }, domain: { type: "string" }, reason: { type: "string" } },
+                required: ["name", "domain", "reason"],
+                additionalProperties: false,
+              },
+            },
+          },
+          required: ["competitors"],
+          additionalProperties: false,
+        },
+      },
+      fallback,
+    );
+
+    const existing = new Set(((intel?.competitors as string[] | null) ?? []).map((c) => String(c).toLowerCase()));
+    return result.competitors
+      .filter((c) => c.name && !existing.has(c.name.toLowerCase()))
+      .slice(0, 8);
+  });
+
+// Marka zekâsındaki rakip listesini okur / günceller.
+export const getCompetitors = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: intel } = await context.supabase
+      .from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle();
+    return ((intel?.competitors as string[] | null) ?? []).map(String);
+  });
+
+export const saveCompetitors = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; competitors: string[] }) => input)
+  .handler(async ({ data, context }) => {
+    const { assertCompetitorQuota } = await import("./plan.server");
+    await assertCompetitorQuota(context.supabase, context.userId, data.competitors.length);
+    const { error } = await context.supabase
+      .from("brand_intelligence")
+      .upsert({ brand_id: data.brandId, competitors: data.competitors }, { onConflict: "brand_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 // Ölçüm sonuçlarından öncelikli görev üretir (Görevler ekranındaki buton).

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   LayoutDashboard, Sparkles, Settings, Menu, Building2, Gauge,
   KanbanSquare, BookOpen, PenSquare, Waypoints,
-  Users, Lock, LogOut, Plus,
+  Users, Lock, LogOut, Plus, ChevronDown,
 } from "lucide-react";
 import BrandLogo from "@/components/site/BrandLogo";
 import { supabase } from "@/integrations/supabase/client";
@@ -142,6 +142,8 @@ function NavList({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   const location = useLocation();
   const { brand, isAdmin } = useActiveBrand();
   const setupDone = Boolean(brand?.onboarding_completed);
+  // Alt menüler varsayılan olarak aktif bölümde açık; kullanıcı oku ile açıp kapatabilir.
+  const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
 
   return (
     <nav className="flex-1 space-y-3 overflow-y-auto px-3 pb-2" aria-label="Ana menü">
@@ -172,20 +174,42 @@ function NavList({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
                 );
               }
 
+              const expanded = openMap[to] ?? active;
+
               return (
                 <div key={to}>
-                  <Link
-                    to={to}
-                    onClick={onNavigate}
-                    aria-current={active ? "page" : undefined}
-                    className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] transition-colors ${
-                      active ? "bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  <div
+                    className={`flex items-center gap-1 rounded-md pr-1 transition-colors ${
+                      active ? "bg-primary/10" : "hover:bg-muted"
                     }`}
                   >
-                    <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    {label}
-                  </Link>
-                  {item.children ? (
+                    <Link
+                      to={to}
+                      onClick={onNavigate}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-[13px] transition-colors ${
+                        active ? "font-medium text-primary" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {label}
+                    </Link>
+                    {item.children ? (
+                      <button
+                        type="button"
+                        onClick={() => setOpenMap((prev) => ({ ...prev, [to]: !expanded }))}
+                        aria-expanded={expanded}
+                        aria-label={`${label} alt menüsünü ${expanded ? "kapat" : "aç"}`}
+                        className="rounded p-1 text-muted-foreground/70 transition-colors hover:text-foreground"
+                      >
+                        <ChevronDown
+                          className={`h-3.5 w-3.5 transition-transform ${expanded ? "" : "-rotate-90"}`}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    ) : null}
+                  </div>
+                  {item.children && expanded ? (
                     <div className="ml-[1.4rem] mt-px space-y-px border-l border-border pl-2">
                       {item.children.map((child) => {
                         const childActive = location.pathname === child.to;
