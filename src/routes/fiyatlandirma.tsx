@@ -10,7 +10,7 @@ import { formatUsd, pricingPlans } from "@/lib/pricingData";
 const pricingFaqs = [
   {
     q: "Ücretsiz planla nereye kadar gidebilirim?",
-    a: "Tek marka, 10 soru ve 2 rakip ile ilk ölçümünüzü yapar, atıf payınızı ve eksik kanıt başlıklarını görürsünüz. Kredi kartı istenmez.",
+    a: "1 marka, 5 prompt ve 1 rakip ile ilk ölçümünüzü yapar, atıf payınızı ve eksik kanıt başlıklarını görürsünüz. Kredi kartı istenmez.",
   },
   {
     q: "Yıllık ödemede ne kazanıyorum?",
@@ -22,7 +22,11 @@ const pricingFaqs = [
   },
   {
     q: "Ajans planında müşteri limiti var mı?",
-    a: "Hayır. Ajans planında müşteri, soru ve rakip takibi sınırsızdır; her müşteri için ayrı bilgi bankası, prompt seti ve rapor yönetirsiniz.",
+    a: "Ajans planı teklife göre kurgulanır. Müşteri sayısı, prompt limiti ve içerik üretim kotası ihtiyacınıza göre belirlenir; her müşteri için ayrı bilgi bankası, prompt seti ve white-label rapor yönetirsiniz. Fiyat için iletişime geçin.",
+  },
+  {
+    q: "AI atıf görünürlük içeriği ne demek?",
+    a: "Ölçümde kanıt boşluğu çıkan sorular için, kendi bilgi bankanıza dayanarak üretilen alıntılanabilir içerik taslaklarıdır. Başlangıç planında ayda 3, Büyüme planında ayda 10 taslak üretebilirsiniz.",
   },
   {
     q: "Kurulum ücreti var mı?",
