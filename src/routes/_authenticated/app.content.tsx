@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { AlertTriangle, Loader2, PenSquare, RefreshCw, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, Copy, Download, Loader2, PenSquare, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MiniMarkdown } from "@/components/site/mini-markdown";
 import { deleteDraft, generateDraft, listContentGaps, listDrafts, setDraftStatus } from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
@@ -34,6 +35,33 @@ const impactTone: Record<string, string> = {
 const statusLabel: Record<string, string> = { taslak: "Taslak", incelemede: "İncelemede", yayinlandi: "Yayınlandı" };
 const nextStatus: Record<string, string> = { taslak: "incelemede", incelemede: "yayinlandi", yayinlandi: "taslak" };
 
+const FORMAT_OPTIONS = [
+  { value: "blog", label: "Blog yazısı" },
+  { value: "faq", label: "Soru-cevap (SSS)" },
+  { value: "comparison", label: "Karşılaştırma" },
+  { value: "landing", label: "Hizmet sayfası" },
+];
+const LENGTH_OPTIONS = [
+  { value: "kisa", label: "Kısa (~400 kelime)" },
+  { value: "orta", label: "Orta (~800 kelime)" },
+  { value: "uzun", label: "Uzun (~1400 kelime)" },
+];
+const STATUS_FILTERS = [
+  { value: "hepsi", label: "Hepsi" },
+  { value: "taslak", label: "Taslak" },
+  { value: "incelemede", label: "İncelemede" },
+  { value: "yayinlandi", label: "Yayınlandı" },
+];
+
+function slugify(value: string) {
+  return value
+    .toLocaleLowerCase("tr")
+    .replace(/[çğıöşü]/g, (c) => ({ ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u" })[c] ?? c)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60) || "taslak";
+}
+
 function ContentPage() {
   const { brand } = useActiveBrand();
   const queryClient = useQueryClient();
@@ -43,6 +71,9 @@ function ContentPage() {
   const updateStatus = useServerFn(setDraftStatus);
   const removeDraft = useServerFn(deleteDraft);
   const [openDraft, setOpenDraft] = useState<string | null>(null);
+  const [format, setFormat] = useState("blog");
+  const [length, setLength] = useState("orta");
+  const [statusFilter, setStatusFilter] = useState("hepsi");
 
   const gapsKey = ["content-gaps", brand?.id];
   const draftsKey = ["content-drafts", brand?.id];
@@ -61,7 +92,7 @@ function ContentPage() {
   });
 
   const draftMutation = useMutation({
-    mutationFn: (promptId: string) => createDraft({ data: { brandId: brand!.id, promptId } }),
+    mutationFn: (promptId: string) => createDraft({ data: { brandId: brand!.id, promptId, format, length } }),
     onSuccess: () => {
       toast.success("Taslak üretildi");
       void queryClient.invalidateQueries({ queryKey: draftsKey });
@@ -84,6 +115,28 @@ function ContentPage() {
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
+  const visibleDrafts = useMemo(
+    () => (statusFilter === "hepsi" ? drafts : drafts.filter((draft) => draft.status === statusFilter)),
+    [drafts, statusFilter],
+  );
+
+  function copyDraft(title: string, body: string) {
+    void navigator.clipboard
+      .writeText(`# ${title}\n\n${body}`)
+      .then(() => toast.success("Taslak panoya kopyalandı"))
+      .catch(() => toast.error("Kopyalanamadı"));
+  }
+
+  function downloadDraft(title: string, body: string) {
+    const blob = new Blob([`# ${title}\n\n${body}`], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${slugify(title)}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   if (!brand) {
     return (
