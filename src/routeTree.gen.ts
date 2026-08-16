@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
+import { Route as FreeAiReadinessReportRouteImport } from './routes/free-ai-readiness-report'
 import { Route as HakkimizdaRouteImport } from './routes/hakkimizda'
 import { Route as KvkkRouteImport } from './routes/kvkk'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
@@ -73,6 +74,11 @@ const AuthRoute = AuthRouteImport.update({
 const FiyatlandirmaRoute = FiyatlandirmaRouteImport.update({
   id: '/fiyatlandirma',
   path: '/fiyatlandirma',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreeAiReadinessReportRoute = FreeAiReadinessReportRouteImport.update({
+  id: '/free-ai-readiness-report',
+  path: '/free-ai-readiness-report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HakkimizdaRoute = HakkimizdaRouteImport.update({
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
+  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
@@ -351,6 +358,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
+  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
@@ -397,6 +405,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
+  '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
@@ -446,6 +455,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/fiyatlandirma'
+    | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
     | '/llms.txt'
@@ -493,6 +503,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/fiyatlandirma'
+    | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
     | '/llms.txt'
@@ -538,6 +549,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/fiyatlandirma'
+    | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
     | '/llms.txt'
@@ -587,6 +599,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   FiyatlandirmaRoute: typeof FiyatlandirmaRoute
+  FreeAiReadinessReportRoute: typeof FreeAiReadinessReportRoute
   HakkimizdaRoute: typeof HakkimizdaRoute
   KvkkRoute: typeof KvkkRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
@@ -635,6 +648,13 @@ declare module '@tanstack/react-router' {
       path: '/fiyatlandirma'
       fullPath: '/fiyatlandirma'
       preLoaderRoute: typeof FiyatlandirmaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/free-ai-readiness-report': {
+      id: '/free-ai-readiness-report'
+      path: '/free-ai-readiness-report'
+      fullPath: '/free-ai-readiness-report'
+      preLoaderRoute: typeof FreeAiReadinessReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hakkimizda': {
@@ -1026,6 +1046,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   FiyatlandirmaRoute: FiyatlandirmaRoute,
+  FreeAiReadinessReportRoute: FreeAiReadinessReportRoute,
   HakkimizdaRoute: HakkimizdaRoute,
   KvkkRoute: KvkkRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
