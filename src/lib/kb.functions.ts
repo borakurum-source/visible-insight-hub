@@ -444,7 +444,7 @@ export const listDrafts = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
       .from("content_drafts")
-      .select("id, title, body, target_prompt, status, word_count, sources, updated_at")
+      .select("id, title, body, prompt_id, target_prompt, status, word_count, sources, updated_at")
       .eq("brand_id", data.brandId)
       .order("updated_at", { ascending: false });
     return rows ?? [];
