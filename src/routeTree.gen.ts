@@ -44,6 +44,7 @@ import { Route as PlatformEvidenceGapsRouteImport } from './routes/platform.evid
 import { Route as ProofFilmfolkRouteImport } from './routes/proof.filmfolk'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as SolutionsAgenciesRouteImport } from './routes/solutions.agencies'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -220,6 +221,12 @@ const SolutionsAgenciesRoute = SolutionsAgenciesRouteImport.update({
   path: '/solutions/agencies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -257,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -291,6 +299,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/makaleler': typeof MakalelerIndexRoute
   '/platform': typeof PlatformIndexRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -329,6 +338,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/makaleler/'
     | '/platform/'
+    | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -402,6 +413,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/makaleler'
     | '/platform'
+    | '/lovable/email/transactional/preview'
   id:
     | '__root__'
     | '/'
@@ -439,6 +451,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/makaleler/'
     | '/platform/'
+    | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -456,6 +469,7 @@ export interface RootRouteChildren {
   ProofFilmfolkRoute: typeof ProofFilmfolkRoute
   RTokenRoute: typeof RTokenRoute
   SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -705,6 +719,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SolutionsAgenciesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -793,6 +814,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProofFilmfolkRoute: ProofFilmfolkRoute,
   RTokenRoute: RTokenRoute,
   SolutionsAgenciesRoute: SolutionsAgenciesRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
