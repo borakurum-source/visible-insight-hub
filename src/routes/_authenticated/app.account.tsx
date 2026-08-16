@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { LogOut, Loader2, UserRound } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { PanelSubnav } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ function AccountPage() {
 
   return (
     <>
+      <PanelSubnav items={[{ to: "/app/settings", label: "Ayarlar" }, { to: "/app/integrations", label: "Entegrasyonlar" }, { to: "/app/account", label: "Hesabım" }, { to: "/app/pricing", label: "Fiyatlandırma" }]} />
       <PanelPageHeading meta={{ title: "Hesabım", description: "Profil bilgileriniz ve oturum yönetimi.", icon: UserRound }} />
 
       <Card>

@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { LayoutDashboard, ListChecks, BookOpen, ShieldCheck, Quote, Activity, Sparkles } from "lucide-react";
+import { LayoutDashboard, ListChecks, BookOpen, ShieldCheck, Quote, Gauge, Sparkles } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getBrandOverview } from "@/lib/panel.functions";
+import { ScoreBreakdown } from "@/components/app/score-breakdown";
+import { getBrandOverview, getMeasurementState } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/")({
@@ -29,12 +30,18 @@ function DashboardPage() {
     queryFn: () => fetchOverview({ data: { brandId: brand!.id } }),
     enabled: Boolean(brand?.id),
   });
+  const fetchState = useServerFn(getMeasurementState);
+  const { data: measurement } = useQuery({
+    queryKey: ["measurement-state", brand?.id],
+    queryFn: () => fetchState({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
 
   const stats = [
     { label: "Onaylı prompt", value: data?.approvedPrompts ?? 0, icon: ListChecks, to: "/app/prompts" },
     { label: "Bilgi kaynağı", value: data?.knowledgeSources ?? 0, icon: BookOpen, to: "/app/knowledge-base" },
     { label: "Marka iddiası", value: data?.claims ?? 0, icon: ShieldCheck, to: "/app/claims" },
-    { label: "Alıntı", value: data?.citations ?? 0, icon: Quote, to: "/app/report" },
+    { label: "Alıntı", value: data?.citations ?? 0, icon: Quote, to: "/app/measurement" },
   ] as const;
 
   return (
@@ -77,31 +84,29 @@ function DashboardPage() {
             ))}
           </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center gap-2 space-y-0">
-              <Activity className="h-4 w-4 text-primary" aria-hidden="true" />
-              <CardTitle className="text-base">Görünürlük</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {data && data.runs > 0 ? (
-                <>
-                  <p className="font-display text-3xl font-semibold">%{data.mentionRate}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {data.runs} yapay zekâ yanıtının {Math.round((data.mentionRate / 100) * data.runs)} tanesinde markanız geçiyor.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-muted-foreground">
-                    Henüz tarama yapılmadı. Onaylı promptlarınız ilk tarama turunda çalıştırılacak.
-                  </p>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to="/app/prompts">Promptları gör</Link>
-                  </Button>
-                </>
-              )}
-            </CardContent>
-          </Card>
+          {data && data.runs > 0 ? (
+            <ScoreBreakdown
+              total={measurement?.score.total ?? 0}
+              components={measurement?.score.components ?? []}
+              runs={measurement?.totalRuns ?? data.runs}
+              lastRunAt={measurement?.batch?.finished_at ?? null}
+            />
+          ) : (
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2 space-y-0">
+                <Gauge className="h-4 w-4 text-primary" aria-hidden="true" />
+                <CardTitle className="text-base">İlk ölçümünüzü çalıştırın</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Onaylı promptlarınızı yapay zekâ asistanlarında çalıştırıp görünürlük skorunuzu ve kırılımını çıkarıyoruz.
+                </p>
+                <Button asChild size="sm">
+                  <Link to="/app/measurement"><Gauge className="mr-1.5 h-4 w-4" /> Ölçümü başlat</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </>

@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, ListChecks, Loader2, Pause, Plus, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { PanelSubnav } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,6 +82,7 @@ function PromptsPage() {
   if (!brand) {
     return (
       <>
+        <PanelSubnav items={[{ to: "/app/prompts", label: "Promptlar" }, { to: "/app/prompt-discovery", label: "Prompt Keşfi" }, { to: "/app/measurement", label: "Ölçüm & Skor" }, { to: "/app/citation-discovery", label: "Kaynak Keşfi" }, { to: "/app/report", label: "Rapor" }]} />
         <PanelPageHeading meta={{ title: "Promptlar", description: "Önce bir marka ekleyin.", icon: ListChecks }} />
         <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
       </>
@@ -89,6 +91,7 @@ function PromptsPage() {
 
   return (
     <>
+      <PanelSubnav items={[{ to: "/app/prompts", label: "Promptlar" }, { to: "/app/prompt-discovery", label: "Prompt Keşfi" }, { to: "/app/measurement", label: "Ölçüm & Skor" }, { to: "/app/citation-discovery", label: "Kaynak Keşfi" }, { to: "/app/report", label: "Rapor" }]} />
       <PanelPageHeading
         meta={{
           title: "Promptlar",

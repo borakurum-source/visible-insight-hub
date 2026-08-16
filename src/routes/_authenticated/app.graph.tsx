@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Waypoints } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { PanelSubnav } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockGraphEdges, mockGraphNodes, type MockGraphNode } from "@/lib/panel-mock/graph";
 
@@ -38,6 +39,7 @@ function GraphPage() {
 
   return (
     <>
+      <PanelSubnav items={[{ to: "/app/knowledge-base", label: "Bilgi Bankası" }, { to: "/app/claims", label: "Marka İddiaları" }, { to: "/app/graph", label: "Bilgi Grafiği" }]} />
       <PanelPageHeading
         meta={{ title: "Bilgi Grafiği", description: "Markanız, hizmetleriniz, rakipleriniz ve konular arasındaki ilişki haritası.", icon: Waypoints }}
       />

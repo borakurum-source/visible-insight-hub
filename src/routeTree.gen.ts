@@ -39,6 +39,7 @@ import { Route as AuthenticatedAppGeoTasksRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppGraphRouteImport } from './routes/_authenticated/app.graph'
 import { Route as AuthenticatedAppIntegrationsRouteImport } from './routes/_authenticated/app.integrations'
 import { Route as AuthenticatedAppKnowledgeBaseRouteImport } from './routes/_authenticated/app.knowledge-base'
+import { Route as AuthenticatedAppMeasurementRouteImport } from './routes/_authenticated/app.measurement'
 import { Route as AuthenticatedAppOnboardingRouteImport } from './routes/_authenticated/app.onboarding'
 import { Route as AuthenticatedAppPricingRouteImport } from './routes/_authenticated/app.pricing'
 import { Route as AuthenticatedAppPromptDiscoveryRouteImport } from './routes/_authenticated/app.prompt-discovery'
@@ -200,6 +201,12 @@ const AuthenticatedAppKnowledgeBaseRoute =
     path: '/knowledge-base',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppMeasurementRoute =
+  AuthenticatedAppMeasurementRouteImport.update({
+    id: '/measurement',
+    path: '/measurement',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppOnboardingRoute =
   AuthenticatedAppOnboardingRouteImport.update({
     id: '/onboarding',
@@ -269,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/app/graph': typeof AuthenticatedAppGraphRoute
   '/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
+  '/app/measurement': typeof AuthenticatedAppMeasurementRoute
   '/app/onboarding': typeof AuthenticatedAppOnboardingRoute
   '/app/pricing': typeof AuthenticatedAppPricingRoute
   '/app/prompt-discovery': typeof AuthenticatedAppPromptDiscoveryRoute
@@ -304,6 +312,7 @@ export interface FileRoutesByTo {
   '/app/graph': typeof AuthenticatedAppGraphRoute
   '/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
+  '/app/measurement': typeof AuthenticatedAppMeasurementRoute
   '/app/onboarding': typeof AuthenticatedAppOnboardingRoute
   '/app/pricing': typeof AuthenticatedAppPricingRoute
   '/app/prompt-discovery': typeof AuthenticatedAppPromptDiscoveryRoute
@@ -344,6 +353,7 @@ export interface FileRoutesById {
   '/_authenticated/app/graph': typeof AuthenticatedAppGraphRoute
   '/_authenticated/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/_authenticated/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
+  '/_authenticated/app/measurement': typeof AuthenticatedAppMeasurementRoute
   '/_authenticated/app/onboarding': typeof AuthenticatedAppOnboardingRoute
   '/_authenticated/app/pricing': typeof AuthenticatedAppPricingRoute
   '/_authenticated/app/prompt-discovery': typeof AuthenticatedAppPromptDiscoveryRoute
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
     | '/app/graph'
     | '/app/integrations'
     | '/app/knowledge-base'
+    | '/app/measurement'
     | '/app/onboarding'
     | '/app/pricing'
     | '/app/prompt-discovery'
@@ -419,6 +430,7 @@ export interface FileRouteTypes {
     | '/app/graph'
     | '/app/integrations'
     | '/app/knowledge-base'
+    | '/app/measurement'
     | '/app/onboarding'
     | '/app/pricing'
     | '/app/prompt-discovery'
@@ -458,6 +470,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/graph'
     | '/_authenticated/app/integrations'
     | '/_authenticated/app/knowledge-base'
+    | '/_authenticated/app/measurement'
     | '/_authenticated/app/onboarding'
     | '/_authenticated/app/pricing'
     | '/_authenticated/app/prompt-discovery'
@@ -698,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppKnowledgeBaseRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/measurement': {
+      id: '/_authenticated/app/measurement'
+      path: '/measurement'
+      fullPath: '/app/measurement'
+      preLoaderRoute: typeof AuthenticatedAppMeasurementRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/onboarding': {
       id: '/_authenticated/app/onboarding'
       path: '/onboarding'
@@ -760,6 +780,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppGraphRoute: typeof AuthenticatedAppGraphRoute
   AuthenticatedAppIntegrationsRoute: typeof AuthenticatedAppIntegrationsRoute
   AuthenticatedAppKnowledgeBaseRoute: typeof AuthenticatedAppKnowledgeBaseRoute
+  AuthenticatedAppMeasurementRoute: typeof AuthenticatedAppMeasurementRoute
   AuthenticatedAppOnboardingRoute: typeof AuthenticatedAppOnboardingRoute
   AuthenticatedAppPricingRoute: typeof AuthenticatedAppPricingRoute
   AuthenticatedAppPromptDiscoveryRoute: typeof AuthenticatedAppPromptDiscoveryRoute
@@ -780,6 +801,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppGraphRoute: AuthenticatedAppGraphRoute,
   AuthenticatedAppIntegrationsRoute: AuthenticatedAppIntegrationsRoute,
   AuthenticatedAppKnowledgeBaseRoute: AuthenticatedAppKnowledgeBaseRoute,
+  AuthenticatedAppMeasurementRoute: AuthenticatedAppMeasurementRoute,
   AuthenticatedAppOnboardingRoute: AuthenticatedAppOnboardingRoute,
   AuthenticatedAppPricingRoute: AuthenticatedAppPricingRoute,
   AuthenticatedAppPromptDiscoveryRoute: AuthenticatedAppPromptDiscoveryRoute,
