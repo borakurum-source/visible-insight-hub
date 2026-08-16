@@ -85,6 +85,7 @@ function GeoTasksPage() {
   return (
     <>
       <PanelPageHeading
+        hint={<><p>Görevler, ölçüm sonuçlarınızdaki boşluklardan otomatik üretilir.</p><p>Öncelik sırasına göre tamamlayın; her tamamlanan görev bir sonraki ölçümde OneCite Score'unuzu yükseltir.</p></>}
         meta={{
           title: "GEO Görevleri",
           description: "Görünürlüğü artıracak somut işler. Tamamladıkça alıntı ihtimaliniz yükselir.",

@@ -138,6 +138,7 @@ function KnowledgeBasePage() {
     <>
       <PanelSubnav items={KNOWLEDGE_SUBNAV} />
       <PanelPageHeading
+        hint={<><p>Buraya eklediğiniz sayfalar ve notlar, yapay zekânın markanız hakkında okuduğu <strong>kaynak dosyanızdır</strong>.</p><p>1) Site haritanızı veya önemli URL'leri ekleyin. 2) "İndeksle" deyin. 3) İçerik vektöre dönüşür ve ölçüm/üretim adımlarında kullanılır.</p></>}
         meta={{
           title: "Bilgi Bankası",
           description: "Yapay zekâ cevaplarında kaynak gösterilmesini istediğiniz sayfalar. Ne kadar net, o kadar çok alıntı.",

@@ -73,6 +73,7 @@ function ClaimsPage() {
     <>
       <PanelSubnav items={KNOWLEDGE_SUBNAV} />
       <PanelPageHeading
+        hint={<><p>İddia, yapay zekânın markanız hakkında tekrar etmesini istediğiniz tek cümlelik, kanıtlanabilir bir bilgidir.</p><p>Her iddiaya bir kaynak bağlantısı ekleyin; kanıtsız iddialar alıntılanmaz.</p></>}
         meta={{
           title: "Marka İddiaları",
           description: "Yapay zekânın markanız hakkında tekrarlamasını istediğiniz, kaynağa dayalı kısa ifadeler.",
