@@ -114,32 +114,6 @@ function Hero() {
   );
 }
 
-function ProofStrip() {
-  const items = [
-    { value: 41, suffix: "", label: "Sabit satın alma niyetli soru" },
-    { value: 286, suffix: "", label: "Ölçüm tekrarı" },
-    { value: 28.1, suffix: " puan", label: "Ağırlıklı atıf payı artışı" },
-  ];
-  return (
-    <section className="border-b border-border bg-background" data-testid="section-proof-strip">
-      <div className="marketing-container grid gap-0 px-4 py-5 md:grid-cols-[1.1fr_repeat(3,.72fr)] md:px-6 md:py-0">
-        <div className="flex items-center py-5 md:pr-8">
-          <div>
-            <p className="editorial-eyebrow text-primary">Gerçek bir ölçümden</p>
-            <p className="mt-1 text-sm leading-5 text-muted-foreground">FilmFolk markası için altı aylık takip sonuçları.</p>
-          </div>
-        </div>
-        {items.map((item) => (
-          <div key={item.label} className="border-t border-border py-5 md:border-l md:border-t-0 md:px-7">
-            <p className="font-mono text-2xl font-medium text-foreground"><MetricRise value={item.value} suffix={item.suffix} /></p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.label}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function Problem() {
   const items = [
     { icon: Search, title: "SEO görünürlüğü atıf payı değildir", body: "Google’da sıralanmanız, bir yapay zeka cevabında kaynak olarak seçileceğiniz anlamına gelmez." },
@@ -357,7 +331,6 @@ function Landing() {
   return (
     <MarketingShell>
       <Hero />
-      <ProofStrip />
       <Problem />
       <NasilCalisir />
       <FilmFolkOrnegi />
