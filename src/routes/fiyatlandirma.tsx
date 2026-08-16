@@ -86,7 +86,7 @@ function PricingPage() {
                 ))}
               </ul>
               <Button asChild variant={plan.variant} className="mt-8 w-full">
-                <Link to="/app">Başla</Link>
+                <Link to="/auth">Ücretsiz başla</Link>
               </Button>
             </div>
           ))}

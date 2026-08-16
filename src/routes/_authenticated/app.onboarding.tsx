@@ -39,10 +39,9 @@ export const Route = createFileRoute("/_authenticated/app/onboarding")({
 });
 
 const STEPS = [
-  { n: 1, title: "Marka", hint: "Hangi markayı takip edeceğiz?" },
-  { n: 2, title: "Marka zekâsı", hint: "Sitenizi okuyup markanızı özetliyoruz." },
-  { n: 3, title: "Bilgi bankası", hint: "Yapay zekânın kaynak göstereceği sayfalar." },
-  { n: 4, title: "Promptlar", hint: "Görünmeniz gereken sorular." },
+  { n: 1, title: "Marka", hint: "Hangi markayı takip edeceğiz? Tek alan yeterli." },
+  { n: 2, title: "Marka profili", hint: "Sitenizi okuduk: özeti ve kanıt sayfalarını onaylayın." },
+  { n: 3, title: "Promptlar", hint: "AI cevaplarında görünmeniz gereken sorular." },
 ] as const;
 
 type Intel = {
@@ -67,7 +66,9 @@ function OnboardingPage() {
   useEffect(() => {
     if (isLoading) return;
     if (!brand || forceNew) { setStep(1); return; }
-    setStep(brand.onboarding_completed ? 4 : Math.min(Math.max(brand.onboarding_step, 1), 4));
+    if (brand.onboarding_completed) { setStep(3); return; }
+    const dbStep = Math.min(Math.max(brand.onboarding_step, 1), 4);
+    setStep(dbStep <= 1 ? 1 : dbStep === 4 ? 3 : 2);
   }, [brand?.id, brand?.onboarding_step, brand?.onboarding_completed, isLoading, forceNew]);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["panel-session"] });
@@ -80,9 +81,9 @@ function OnboardingPage() {
           <h1 className="font-display text-2xl font-semibold">Kurulum</h1>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Dört kısa adım. Her adımda biz hazırlıyoruz, siz onaylıyorsunuz — boş bir sayfaya hiçbir şey yazmanız gerekmiyor.
+          Üç kısa adım. Her adımda biz hazırlıyoruz, siz onaylıyorsunuz — boş bir sayfaya hiçbir şey yazmanız gerekmiyor.
         </p>
-        <Progress value={(step / 4) * 100} className="h-1.5" />
+        <Progress value={(step / 3) * 100} className="h-1.5" />
         <ol className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
           {STEPS.map((s) => (
             <li key={s.n} className={`flex items-center gap-1.5 ${s.n === step ? "font-semibold text-foreground" : s.n < step ? "text-primary" : "text-muted-foreground"}`}>
@@ -106,17 +107,13 @@ function OnboardingPage() {
       ) : null}
 
       {step === 2 && brand ? (
-        <StepIntelligence brandId={brand.id} onDone={async () => { await refresh(); setStep(3); }} onBack={() => setStep(1)} />
+        <StepProfile brandId={brand.id} onDone={async () => { await refresh(); setStep(3); }} onBack={() => setStep(1)} />
       ) : null}
 
       {step === 3 && brand ? (
-        <StepKnowledge brandId={brand.id} onDone={async () => { await refresh(); setStep(4); }} onBack={() => setStep(2)} />
-      ) : null}
-
-      {step === 4 && brand ? (
         <StepPrompts
           brandId={brand.id}
-          onBack={() => setStep(3)}
+          onBack={() => setStep(2)}
           onDone={async () => { await refresh(); toast.success("Kurulum tamamlandı"); navigate({ to: "/app" }); }}
         />
       ) : null}
@@ -211,12 +208,18 @@ function ListEditor({ label, items, onChange }: { label: string; items: string[]
   );
 }
 
-function StepIntelligence({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
+function StepProfile({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
   const load = useServerFn(getBrandIntelligence);
   const generate = useServerFn(generateBrandIntelligence);
   const save = useServerFn(saveBrandIntelligence);
+  const suggest = useServerFn(suggestKnowledgeSources);
+  const addSources = useServerFn(addKnowledgeSources);
   const [intel, setIntel] = useState<Intel>(EMPTY_INTEL);
   const [loading, setLoading] = useState(true);
+  const [sources, setSources] = useState<Array<{ title: string; url: string }>>([]);
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const [manualUrl, setManualUrl] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -231,6 +234,10 @@ function StepIntelligence({ brandId, onDone, onBack }: { brandId: string; onDone
         competitors: toList(row.competitors), keywords: toList(row.keywords),
       });
       setLoading(false);
+      const suggested = await suggest({ data: { brandId } }).catch(() => []);
+      if (cancelled) return;
+      setSources(suggested);
+      setPicked(Object.fromEntries(suggested.map((s) => [s.url, true])));
     })().catch(() => setLoading(false));
     return () => { cancelled = true; };
   }, [brandId]);
@@ -248,7 +255,11 @@ function StepIntelligence({ brandId, onDone, onBack }: { brandId: string; onDone
   });
 
   const approve = useMutation({
-    mutationFn: () => save({ data: { brandId, ...intel } }),
+    mutationFn: async () => {
+      await save({ data: { brandId, ...intel } });
+      const items = sources.filter((s) => picked[s.url]).map((s) => ({ title: s.title, url: s.url }));
+      if (items.length) await addSources({ data: { brandId, items } });
+    },
     onSuccess: () => { void onDone(); },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -263,6 +274,8 @@ function StepIntelligence({ brandId, onDone, onBack }: { brandId: string; onDone
     );
   }
 
+  const pickedCount = sources.filter((s) => picked[s.url]).length;
+
   return (
     <StepFrame
       step={STEPS[1]}
@@ -273,6 +286,7 @@ function StepIntelligence({ brandId, onDone, onBack }: { brandId: string; onDone
             {regenerate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Yeniden çıkar
           </Button>
           <Button onClick={() => approve.mutate()} disabled={approve.isPending}>
+            {approve.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Onayla ve devam et <ArrowRight className="ml-1.5 h-4 w-4" />
           </Button>
         </>
@@ -281,7 +295,51 @@ function StepIntelligence({ brandId, onDone, onBack }: { brandId: string; onDone
       <div className="space-y-1.5">
         <Label htmlFor="intel-summary">Marka özeti</Label>
         <Textarea id="intel-summary" rows={3} value={intel.summary} onChange={(e) => setIntel({ ...intel, summary: e.target.value })} />
+        <p className="text-xs text-muted-foreground">Yanlış bir şey varsa doğrudan düzeltebilirsiniz — ölçüm bu özete göre kurgulanır.</p>
       </div>
+
+      <div className="space-y-4 rounded-lg border border-border p-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium">Kanıt sayfaları</p>
+            <p className="text-xs text-muted-foreground">{pickedCount} sayfa seçili — AI cevaplarında kaynak gösterilmesini istediğiniz sayfalar.</p>
+          </div>
+        </div>
+        <div className="max-h-64 divide-y divide-border overflow-auto rounded-md border border-border">
+          {sources.map((item) => (
+            <label key={item.url} className="flex cursor-pointer items-start gap-3 p-2.5 text-sm">
+              <Checkbox checked={Boolean(picked[item.url])} onCheckedChange={(value) => setPicked({ ...picked, [item.url]: value === true })} />
+              <span className="min-w-0">
+                <span className="block font-medium">{item.title}</span>
+                <span className="block truncate font-mono text-xs text-muted-foreground">{item.url}</span>
+              </span>
+            </label>
+          ))}
+          {sources.length === 0 ? <p className="p-2.5 text-sm text-muted-foreground">Öneri bulunamadı, aşağıdan elle ekleyin.</p> : null}
+        </div>
+        <div className="flex gap-2">
+          <Input value={manualUrl} onChange={(e) => setManualUrl(e.target.value)} placeholder="https://…" aria-label="Kendi sayfanızı ekleyin" />
+          <Button
+            variant="outline"
+            onClick={() => {
+              const url = manualUrl.trim();
+              if (!url) return;
+              setSources([{ title: url.replace(/^https?:\/\//, ""), url }, ...sources]);
+              setPicked({ ...picked, [url]: true });
+              setManualUrl("");
+            }}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      <Button variant="ghost" size="sm" onClick={() => setShowDetails((v) => !v)}>
+        {showDetails ? "Ayrıntıları gizle" : "Ayrıntıları düzenle (konumlandırma, kitle, rakipler)"}
+      </Button>
+
+      {showDetails ? (
+      <>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="intel-positioning">Konumlandırma</Label>
@@ -298,93 +356,8 @@ function StepIntelligence({ brandId, onDone, onBack }: { brandId: string; onDone
         <ListEditor label="Rakipler" items={intel.competitors} onChange={(competitors) => setIntel({ ...intel, competitors })} />
         <ListEditor label="Anahtar konular" items={intel.keywords} onChange={(keywords) => setIntel({ ...intel, keywords })} />
       </div>
-    </StepFrame>
-  );
-}
-
-function StepKnowledge({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
-  const suggest = useServerFn(suggestKnowledgeSources);
-  const add = useServerFn(addKnowledgeSources);
-  const [items, setItems] = useState<Array<{ title: string; url: string }>>([]);
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
-  const [loading, setLoading] = useState(true);
-  const [manualUrl, setManualUrl] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    suggest({ data: { brandId } })
-      .then((result) => {
-        if (cancelled) return;
-        setItems(result);
-        setSelected(Object.fromEntries(result.map((r) => [r.url, true])));
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-    return () => { cancelled = true; };
-  }, [brandId]);
-
-  const savePicked = useMutation({
-    mutationFn: () => add({ data: { brandId, items: items.filter((i) => selected[i.url]).map((i) => ({ title: i.title, url: i.url })) } }),
-    onSuccess: () => { void onDone(); },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const pickedCount = items.filter((i) => selected[i.url]).length;
-
-  return (
-    <StepFrame
-      step={STEPS[2]}
-      footer={
-        <>
-          <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
-          <Button onClick={() => savePicked.mutate()} disabled={pickedCount === 0 || savePicked.isPending}>
-            {savePicked.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {pickedCount} sayfayı ekle ve devam et <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Button>
-        </>
-      }
-    >
-      {loading ? (
-        <p className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Site haritanız taranıyor…
-        </p>
-      ) : (
-        <div className="divide-y divide-border rounded-lg border border-border">
-          {items.map((item) => (
-            <label key={item.url} className="flex cursor-pointer items-start gap-3 p-3 text-sm">
-              <Checkbox
-                checked={Boolean(selected[item.url])}
-                onCheckedChange={(value) => setSelected({ ...selected, [item.url]: value === true })}
-              />
-              <span className="min-w-0">
-                <span className="block font-medium">{item.title}</span>
-                <span className="block truncate font-mono text-xs text-muted-foreground">{item.url}</span>
-              </span>
-            </label>
-          ))}
-          {items.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Öneri bulunamadı, aşağıdan elle ekleyin.</p> : null}
-        </div>
-      )}
-
-      <div className="space-y-1.5">
-        <Label htmlFor="manual-url">Kendi sayfanızı ekleyin</Label>
-        <div className="flex gap-2">
-          <Input id="manual-url" value={manualUrl} onChange={(e) => setManualUrl(e.target.value)} placeholder="https://…" />
-          <Button
-            variant="outline"
-            onClick={() => {
-              const url = manualUrl.trim();
-              if (!url) return;
-              setItems([{ title: url.replace(/^https?:\/\//, ""), url }, ...items]);
-              setSelected({ ...selected, [url]: true });
-              setManualUrl("");
-            }}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground">Neden soruyoruz? Yapay zekâ cevaplarında kaynak gösterilmesini istediğiniz sayfalar bunlar.</p>
-      </div>
+      </>
+      ) : null}
     </StepFrame>
   );
 }
@@ -427,7 +400,7 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
 
   return (
     <StepFrame
-      step={STEPS[3]}
+      step={STEPS[2]}
       footer={
         <>
           <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>

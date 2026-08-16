@@ -218,6 +218,101 @@ export const listPrompts = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
+export type DiscoveredPrompt = {
+  text: string;
+  cluster: string;
+  intent: string;
+  rationale: string;
+  opportunityScore: number;
+};
+
+export const discoverPromptCandidates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }): Promise<DiscoveredPrompt[]> => {
+    const { aiJson } = await import("./ai.server");
+    const [{ data: brand }, { data: intel }, { data: existing }] = await Promise.all([
+      context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+      context.supabase.from("brand_intelligence").select("*").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase.from("prompts").select("text").eq("brand_id", data.brandId).limit(60),
+    ]);
+    if (!brand) throw new Error("Marka bulunamadı");
+
+    const result = await aiJson<{ items: DiscoveredPrompt[] }>(
+      [
+        {
+          role: "system",
+          content:
+            "Sen bir GEO (generative engine optimization) analistisin. Marka adı GEÇMEYEN, gerçek kullanıcıların ChatGPT/Perplexity gibi asistanlara soracağı 12 Türkçe fırsat sorusu üret. Yanıt json: {items:[{text, cluster, intent, rationale, opportunityScore}]}. cluster kısa tema adı; intent 'bilgi'|'karşılaştırma'|'satın alma'; rationale tek cümle, neden bu markanın kaynak gösterilebileceğini kanıta bağla; opportunityScore 0-100 arası tam sayı.",
+        },
+        {
+          role: "user",
+          content: `Marka: ${brand.name} (${brand.domain})\nÖzet: ${intel?.summary ?? ""}\nÜrünler: ${JSON.stringify(intel?.products ?? [])}\nKitle: ${JSON.stringify(intel?.audiences ?? [])}\nRakipler: ${JSON.stringify(intel?.competitors ?? [])}\nMevcut sorular (tekrar etme): ${(existing ?? []).map((p) => p.text).join(" | ")}`,
+        },
+      ],
+      { items: [] },
+    );
+
+    return (result.items ?? [])
+      .slice(0, 12)
+      .map((item) => ({
+        text: String(item.text ?? ""),
+        cluster: String(item.cluster ?? "genel"),
+        intent: String(item.intent ?? "bilgi"),
+        rationale: String(item.rationale ?? ""),
+        opportunityScore: Math.max(0, Math.min(100, Number(item.opportunityScore) || 0)),
+      }))
+      .filter((item) => item.text.length > 4)
+      .sort((a, b) => b.opportunityScore - a.opportunityScore);
+  });
+
+export const addDiscoveredPrompts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; items: Array<{ text: string; cluster: string; intent: string }> }) => input)
+  .handler(async ({ data, context }) => {
+    if (!data.items.length) return { inserted: 0 };
+    const { error } = await context.supabase.from("prompts").insert(
+      data.items.map((item) => ({
+        brand_id: data.brandId,
+        text: item.text,
+        category: item.cluster || "kategori",
+        intent: item.intent || null,
+        status: "approved",
+        origin: "discovery",
+      })),
+    );
+    if (error) throw new Error(error.message);
+    return { inserted: data.items.length };
+  });
+
+export const listCitationSources = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: rows } = await context.supabase
+      .from("citations")
+      .select("domain, url, is_own_domain, created_at")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false })
+      .limit(500);
+    const map = new Map<string, { domain: string; count: number; isOwn: boolean; lastSeen: string; sampleUrl: string }>();
+    for (const row of rows ?? []) {
+      const current = map.get(row.domain);
+      if (current) {
+        current.count += 1;
+      } else {
+        map.set(row.domain, {
+          domain: row.domain,
+          count: 1,
+          isOwn: row.is_own_domain,
+          lastSeen: row.created_at,
+          sampleUrl: row.url,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.count - a.count);
+  });
+
 export const setPromptStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { ids: string[]; status: string }) => input)
