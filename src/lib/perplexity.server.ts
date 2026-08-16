@@ -41,6 +41,21 @@ export async function perplexityJson<T>(
   schema: { name: string; schema: object },
   fallback: T,
 ): Promise<PerplexityResult<T>> {
+  const { withCache, CACHE_TTL } = await import("./cache.server");
+  return withCache<PerplexityResult<T>>(
+    "perplexity",
+    { messages, schema },
+    CACHE_TTL.perplexity,
+    () => perplexityJsonUncached(messages, schema, fallback),
+    (value) => value.result !== fallback,
+  );
+}
+
+async function perplexityJsonUncached<T>(
+  messages: ChatMessage[],
+  schema: { name: string; schema: object },
+  fallback: T,
+): Promise<PerplexityResult<T>> {
   const key = process.env["PERPLEXITY_API_KEY"];
   if (!key) {
     console.warn("PERPLEXITY_API_KEY missing");
@@ -82,6 +97,19 @@ export async function perplexityJson<T>(
 }
 
 export async function perplexitySearch(messages: ChatMessage[]): Promise<{ answer: string; citations: string[] }> {
+  const { withCache, CACHE_TTL } = await import("./cache.server");
+  return withCache(
+    "perplexity",
+    { search: messages },
+    CACHE_TTL.perplexity,
+    () => perplexitySearchUncached(messages),
+    (value) => Boolean(value.answer),
+  );
+}
+
+async function perplexitySearchUncached(
+  messages: ChatMessage[],
+): Promise<{ answer: string; citations: string[] }> {
   const key = process.env["PERPLEXITY_API_KEY"];
   if (!key) throw new Error("PERPLEXITY_API_KEY missing");
   const res = await fetch("https://api.perplexity.ai/chat/completions", {

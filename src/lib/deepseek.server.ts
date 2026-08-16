@@ -1,6 +1,17 @@
 type ChatMessage = { role: "system" | "user"; content: string };
 
 export async function deepseekJson<T>(messages: ChatMessage[], fallback: T): Promise<T> {
+  const { withCache, CACHE_TTL } = await import("./cache.server");
+  return withCache<T>(
+    "deepseek",
+    { messages },
+    CACHE_TTL.deepseek,
+    () => deepseekJsonUncached(messages, fallback),
+    (value) => value !== fallback,
+  );
+}
+
+async function deepseekJsonUncached<T>(messages: ChatMessage[], fallback: T): Promise<T> {
   const key = process.env["DEEPSEEK_API_KEY"];
   if (!key) {
     console.warn("DEEPSEEK_API_KEY missing");

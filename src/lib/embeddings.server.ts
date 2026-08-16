@@ -1,6 +1,7 @@
 // Bilgi bankası → parça → embedding hattının sunucu tarafı yardımcıları.
-const EMBEDDING_MODEL = "google/gemini-embedding-2";
-const EMBEDDING_DIMS = 3072;
+// Embedding sağlayıcısı: Perplexity Embeddings API (pplx-embed-v1-4b, 2560 boyut).
+const EMBEDDING_MODEL = "pplx-embed-v1-4b";
+const EMBEDDING_DIMS = 2560;
 
 export const SOURCE_WEIGHTS: Record<string, number> = {
   manual: 1.5,
@@ -56,31 +57,89 @@ export async function fetchPageText(url: string): Promise<string> {
   }
 }
 
-export async function embedTexts(inputs: string[]): Promise<number[][]> {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key || inputs.length === 0) return [];
-  const vectors: number[][] = [];
-  for (let i = 0; i < inputs.length; i += 50) {
-    const batch = inputs.slice(i, i + 50);
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Lovable-API-Key": key,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ model: EMBEDDING_MODEL, input: batch }),
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      console.error("Embedding error", res.status, body);
-      throw new Error(`Embedding isteği başarısız [${res.status}]: ${body.slice(0, 300)}`);
-    }
-    const json = (await res.json()) as { data?: Array<{ index: number; embedding: number[] }> };
-    const rows = (json.data ?? []).slice().sort((a, b) => a.index - b.index);
-    for (const row of rows) vectors.push(row.embedding);
+function decodeInt8Base64(b64: string): number[] {
+  const binary = atob(b64);
+  const out = new Array<number>(binary.length);
+  let norm = 0;
+  for (let i = 0; i < binary.length; i += 1) {
+    const byte = binary.charCodeAt(i);
+    const value = byte > 127 ? byte - 256 : byte;
+    out[i] = value;
+    norm += value * value;
   }
-  return vectors;
+  norm = Math.sqrt(norm);
+  if (norm > 0) for (let i = 0; i < out.length; i += 1) out[i] = out[i]! / norm;
+  return out;
+}
+
+function normalizeFloatVector(values: number[]): number[] {
+  let norm = 0;
+  for (const value of values) norm += value * value;
+  norm = Math.sqrt(norm);
+  if (!norm) return values;
+  return values.map((value) => value / norm);
+}
+
+async function requestEmbeddings(batch: string[]): Promise<number[][]> {
+  const key = process.env["PERPLEXITY_API_KEY"];
+  if (!key) throw new Error("PERPLEXITY_API_KEY tanımlı değil");
+  const res = await fetch("https://api.perplexity.ai/v1/embeddings", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: EMBEDDING_MODEL, input: batch }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    console.error("Perplexity embedding error", res.status, body);
+    if (res.status === 401 && body.includes("insufficient_quota")) {
+      throw new Error(
+        "Perplexity API kredisi tükendi. https://console.perplexity.ai adresinden kredi yükleyin.",
+      );
+    }
+    throw new Error(`Embedding isteği başarısız [${res.status}]: ${body.slice(0, 300)}`);
+  }
+  const json = (await res.json()) as {
+    data?: Array<{ index: number; embedding: string | number[] }>;
+  };
+  const rows = (json.data ?? []).slice().sort((a, b) => a.index - b.index);
+  return rows.map((row) =>
+    typeof row.embedding === "string"
+      ? decodeInt8Base64(row.embedding)
+      : normalizeFloatVector(row.embedding ?? []),
+  );
+}
+
+export async function embedTexts(inputs: string[]): Promise<number[][]> {
+  if (inputs.length === 0) return [];
+  const { hashKey, cacheGet, cacheSet, CACHE_TTL } = await import("./cache.server");
+
+  const keys = await Promise.all(
+    inputs.map((text) => hashKey("embedding", { model: EMBEDDING_MODEL, text })),
+  );
+  const vectors = new Array<number[] | null>(inputs.length).fill(null);
+  const missing: number[] = [];
+
+  await Promise.all(
+    keys.map(async (key, index) => {
+      const hit = await cacheGet<number[]>(key);
+      if (hit && hit.length === EMBEDDING_DIMS) vectors[index] = hit;
+      else missing.push(index);
+    }),
+  );
+
+  missing.sort((a, b) => a - b);
+  for (let i = 0; i < missing.length; i += 32) {
+    const slice = missing.slice(i, i + 32);
+    const produced = await requestEmbeddings(slice.map((index) => inputs[index]!));
+    for (let j = 0; j < slice.length; j += 1) {
+      const vector = produced[j];
+      if (!vector) continue;
+      vectors[slice[j]!] = vector;
+      await cacheSet(keys[slice[j]!]!, "embedding", vector, CACHE_TTL.embedding);
+    }
+  }
+
+  return vectors.filter((vector): vector is number[] => Array.isArray(vector));
 }
 
 export async function embedOne(input: string): Promise<number[] | null> {

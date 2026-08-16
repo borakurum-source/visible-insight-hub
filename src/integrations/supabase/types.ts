@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          expires_at: string
+          kind: string
+          payload: Json
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          kind: string
+          payload: Json
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          kind?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
       analytics_snapshots: {
         Row: {
           brand_id: string
