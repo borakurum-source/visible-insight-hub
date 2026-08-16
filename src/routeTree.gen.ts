@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
 import { Route as UrunRouteImport } from './routes/urun'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FiyatlandirmaRoute = FiyatlandirmaRouteImport.update({
+  id: '/fiyatlandirma',
+  path: '/fiyatlandirma',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UrunRoute = UrunRouteImport.update({
@@ -25,27 +31,31 @@ const UrunRoute = UrunRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/urun': typeof UrunRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/urun': typeof UrunRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/urun': typeof UrunRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/urun'
+  fullPaths: '/' | '/fiyatlandirma' | '/urun'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/urun'
-  id: '__root__' | '/' | '/urun'
+  to: '/' | '/fiyatlandirma' | '/urun'
+  id: '__root__' | '/' | '/fiyatlandirma' | '/urun'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FiyatlandirmaRoute: typeof FiyatlandirmaRoute
   UrunRoute: typeof UrunRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fiyatlandirma': {
+      id: '/fiyatlandirma'
+      path: '/fiyatlandirma'
+      fullPath: '/fiyatlandirma'
+      preLoaderRoute: typeof FiyatlandirmaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/urun': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FiyatlandirmaRoute: FiyatlandirmaRoute,
   UrunRoute: UrunRoute,
 }
 export const routeTree = rootRouteImport
