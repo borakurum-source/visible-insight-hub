@@ -205,8 +205,7 @@ function UrunAkisi() {
   const rows = [
     { step: "01", tag: "Kaynak zekası", title: "Önce yapay zekanın kullanabileceği marka kanıtını görün", body: "Bilgi Bankası sayfa bazında yapı, güncellik, konu varlığı ve kanıt kapsamı sinyallerini toplar. Ölçümün referans noktası budur.", img: shotKb, alt: "OneCite Bilgi Bankası" },
     { step: "02", tag: "Atıf sinyali", title: "Sonra hangi soruda, hangi kaynakla seçildiğinizi ölçün", body: "Atıf payı ve görünürlük trendi tek başına kalmaz; soru bağlamı ve seçilen kaynak ile birlikte okunur.", img: shotMetrics, alt: "OneCite atıf payı paneli" },
-    { step: "03", tag: "Kanıt bağlamı", title: "Bağlamı ve kapsamdaki eksikleri ilişki haritasında görün", body: "Hizmet, konu, rakip ve kaynak bağları hangi kanıt alanının zayıf kaldığını görünür hale getirir.", img: shotDiscovery, alt: "OneCite ilişki haritası" },
-    { step: "04", tag: "Sonraki uygulama", title: "Fırsatı doğrudan içerik uygulamasına dönüştürün", body: "En önemli eksik kanıt, önceliklendirilmiş karşılaştırma içeriği, vaka çalışması veya otorite kaynağı taslağına dönüşür.", img: shotContent, alt: "OneCite İçerik Fırsatları" },
+    { step: "03", tag: "Sonraki uygulama", title: "Fırsatı doğrudan içerik uygulamasına dönüştürün", body: "En önemli eksik kanıt, önceliklendirilmiş karşılaştırma içeriği, vaka çalışması veya otorite kaynağı taslağına dönüşür.", img: shotContent, alt: "OneCite İçerik Fırsatları" },
   ];
   return (
     <section className="border-y border-border bg-background py-16 md:py-24" data-testid="section-product-flow">
