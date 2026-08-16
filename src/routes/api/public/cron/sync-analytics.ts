@@ -7,11 +7,14 @@ export const Route = createFileRoute("/api/public/cron/sync-analytics")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const secret = process.env["CRON_SECRET"];
-        if (!secret) return new Response("Cron secret configured degil", { status: 503 });
-        if (request.headers.get("x-cron-key") !== secret) {
-          return new Response("Unauthorized", { status: 401 });
-        }
+        // pg_cron cagrisi Supabase anon anahtarini apikey basliginda gonderir.
+        const anonKey = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
+        const legacySecret = process.env["CRON_SECRET"];
+        const apiKey = request.headers.get("apikey");
+        const authorized =
+          (anonKey && apiKey === anonKey) ||
+          (legacySecret && request.headers.get("x-cron-key") === legacySecret);
+        if (!authorized) return new Response("Unauthorized", { status: 401 });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { buildGscSnapshot } = await import("@/lib/gsc.server");
