@@ -54,7 +54,7 @@ function PlatformPage() {
         </div>
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {steps.map(({ icon: Icon, number, label, title, body }) => (
-            <article key={number} className="rounded-2xl border border-[#E3E0D5] bg-white p-6">
+            <article key={number} className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-6">
               <div className="flex items-center justify-between"><span className="font-mono text-sm text-[#1B7F86]">{number}</span><Icon className="h-5 w-5 text-[#101211]" /></div>
               <p className="mt-9 text-xs font-semibold uppercase tracking-[0.13em] text-[#6B6A61]">{label}</p>
               <h3 className="mt-3 text-xl font-extrabold text-[#101211]">{title}</h3>
@@ -64,7 +64,7 @@ function PlatformPage() {
         </div>
       </section>
 
-      <section className="border-y border-[#E3E0D5] bg-white px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Üründen kanıt</p>
@@ -87,7 +87,7 @@ function PlatformPage() {
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {modules.map(({ icon: Icon, title, body, href }) => (
-            <Link to={href} key={title} className="group rounded-2xl border border-[#E3E0D5] bg-white p-6 transition-transform hover:-translate-y-1">
+            <Link to={href} key={title} className="group rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-6 transition-transform hover:-translate-y-1">
               <Icon className="h-5 w-5 text-[#1B7F86]" />
               <h3 className="mt-6 text-lg font-extrabold text-[#101211]">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-[#6B6A61]">{body}</p>

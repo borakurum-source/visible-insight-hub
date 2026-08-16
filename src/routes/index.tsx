@@ -52,7 +52,7 @@ function Hero() {
             <p className="max-w-xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">Atıf payınızı ölçün, eksik kanıtı görün ve yapay zekanın güvenebileceği bir sonraki içeriği önce üretin.</p>
           </div>
           <p className="flex items-center gap-2 text-xs font-medium text-slate-400">Ölçülen yüzeyler: <EngineRotator className="font-mono text-[#3FBFB2]" /></p>
-          <div className="max-w-xl rounded-2xl border border-white/15 bg-white/[0.08] p-4 backdrop-blur-md md:p-5" data-testid="hero-report-cta">
+          <div className="max-w-xl rounded-xl border border-white/15 bg-[#FBFAF5]/[0.08] p-4 backdrop-blur-md md:p-5" data-testid="hero-report-cta">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white"><Target className="h-4 w-4 text-[#3FBFB2]" /> İlk ölçümü başlatın</div>
             <PublicReportAnalyzer />
             <p className="mt-3 text-xs leading-5 text-slate-400">Kredi kartı gerekmez. İlk ölçüm herkese açık web verileriyle başlar.</p>
@@ -86,7 +86,7 @@ function ProofStrip() {
     { value: 286, suffix: "", label: "Ölçüm tekrarı" },
   ];
   return (
-    <section className="border-b border-[#E3E0D5] bg-white" data-testid="section-proof-strip">
+    <section className="border-b border-[#E3E0D5] bg-[#FBFAF5]" data-testid="section-proof-strip">
       <div className="marketing-container grid gap-0 px-4 py-5 md:grid-cols-[1.1fr_repeat(3,.72fr)] md:px-6 md:py-0">
         <div className="flex items-center py-5 md:pr-8"><div><p className="text-xs font-semibold uppercase tracking-[0.13em] text-[#1B7F86]">Örnek ölçüm · FilmFolk</p><p className="mt-1 text-sm leading-5 text-[#6B6A61]">41 sabit sorudaki 286 ölçüm tekrarının özeti.</p></div></div>
         {items.map((item) => (
@@ -116,7 +116,7 @@ function NedenOneCite() {
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           {items.map(({ icon: Icon, title, body }, index) => (
-            <Reveal key={title} delay={index * 0.06} className="rounded-2xl border border-[#E3E0D5] bg-white p-5">
+            <Reveal key={title} delay={index * 0.06} className="rounded-xl border border-[#E3E0D5] bg-[#FBFAF5] p-5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EDEFE9] text-[#1B7F86]"><Icon className="h-5 w-5" /></div>
               <h3 className="mt-5 text-sm font-bold text-[#101211]">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-[#6B6A61]">{body}</p>
@@ -167,7 +167,7 @@ function KaynakSinyalUygulama() {
         </div>
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {steps.map(({ number, icon: Icon, eyebrow, title, body }, index) => (
-            <Reveal key={number} delay={index * 0.07} className="relative rounded-2xl border border-[#E3E0D5] bg-white p-6 md:p-7">
+            <Reveal key={number} delay={index * 0.07} className="relative rounded-xl border border-[#E3E0D5] bg-[#FBFAF5] p-6 md:p-7">
               {index < 2 && <ArrowRight className="absolute -right-8 top-1/2 hidden h-5 w-5 text-[#1B7F86] lg:block" aria-hidden="true" />}
               <div className="flex items-center justify-between"><span className="font-mono text-sm text-[#1B7F86]">{number}</span><Icon className="h-5 w-5 text-[#57564E]" /></div>
               <p className="mt-8 text-xs font-semibold uppercase tracking-[0.12em] text-[#1B7F86]">{eyebrow}</p>
@@ -192,7 +192,7 @@ function UrunAkisi() {
     { step: "04", tag: "Sonraki uygulama", title: "Fırsatı doğrudan içerik uygulamasına dönüştürün", body: "En önemli eksik kanıt, önceliklendirilmiş karşılaştırma içeriği, vaka çalışması veya otorite kaynağı taslağına dönüşür.", img: shotContent, alt: "OneCite İçerik Fırsatları" },
   ];
   return (
-    <section className="border-y border-[#E3E0D5] bg-white py-16 md:py-24" data-testid="section-product-flow">
+    <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] py-16 md:py-24" data-testid="section-product-flow">
       <div className="marketing-container">
         <div className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.13em] text-[#1B7F86]">Ürünün içinden</p>
@@ -207,7 +207,7 @@ function UrunAkisi() {
                 <h3 className="mt-5 text-2xl font-extrabold tracking-[-0.03em] text-[#101211] md:text-3xl">{row.title}</h3>
                 <p className="mt-4 max-w-xl text-base leading-7 text-[#6B6A61]">{row.body}</p>
               </div>
-              <div className="overflow-hidden rounded-2xl border border-[#E3E0D5] bg-[#F5F3EC]"><img src={row.img} alt={row.alt} className="h-auto w-full" /></div>
+              <div className="overflow-hidden rounded-xl border border-[#E3E0D5] bg-[#F5F3EC]"><img src={row.img} alt={row.alt} className="h-auto w-full" /></div>
             </Reveal>
           ))}
         </div>
@@ -225,17 +225,17 @@ function FilmFolkOrnegi() {
   ];
   return (
     <section className="marketing-container px-4 py-16 md:px-6 md:py-24" data-testid="section-case-study">
-      <div className="overflow-hidden rounded-3xl border border-[#E3E0D5] bg-[#EDEFE9] p-7 md:p-12">
+      <div className="overflow-hidden rounded-2xl border border-[#E3E0D5] bg-[#EDEFE9] p-7 md:p-12">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-16">
           <div>
-            <span className="inline-flex items-center rounded-full border border-[#C9C5B6] bg-white px-2.5 py-0.5 text-xs font-semibold text-[#1B7F86]">Örnek ölçüm · FilmFolk</span>
+            <span className="inline-flex items-center rounded-full border border-[#C9C5B6] bg-[#FBFAF5] px-2.5 py-0.5 text-xs font-semibold text-[#1B7F86]">Örnek ölçüm · FilmFolk</span>
             <h2 className="mt-5 text-3xl font-extrabold tracking-[-0.035em] text-[#101211] md:text-4xl">Bir vaka çalışması, yalnızca sonuç değil; sonuçtaki kanıt değişimidir.</h2>
             <p className="mt-5 max-w-xl text-base leading-7 text-[#57564E]">FilmFolk için 41 satın alma niyetli soru, toplam 286 tekrar üzerinden karşılaştırıldı. Ağırlıklı atıf payı ilk ölçümde %30,7 iken son ölçümde %58,9’a ulaştı; değişim +28,1 puan oldu.</p>
             <Link to="/proof/filmfolk" className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-[#101211] underline decoration-[#3FBFB2] decoration-2 underline-offset-4 transition-colors hover:text-[#1B7F86]">FilmFolk vaka çalışmasını inceleyin <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <div className="grid grid-cols-2 gap-3 self-start">
             {metrics.map((metric) => (
-              <div key={metric.label} className="rounded-2xl border border-white bg-white p-4 md:p-5">
+              <div key={metric.label} className="rounded-xl border border-[#E3E0D5] bg-[#FBFAF5] p-4 md:p-5">
                 <p className="font-mono text-2xl font-medium text-[#101211] md:text-3xl">{metric.value}</p>
                 <p className="mt-2 text-xs leading-5 text-[#6B6A61]">{metric.label}</p>
               </div>
@@ -263,7 +263,7 @@ function PlanlaraBakis() {
         </div>
         <div className="mt-10 grid gap-3 lg:grid-cols-3">
           {fits.map((fit) => (
-            <Link to={fit.href} key={fit.title} className="group flex flex-col rounded-2xl border border-[#E3E0D5] bg-white p-5 transition-transform hover:-translate-y-1">
+            <Link to={fit.href} key={fit.title} className="group flex flex-col rounded-xl border border-[#E3E0D5] bg-[#FBFAF5] p-5 transition-transform hover:-translate-y-1">
               <p className="text-sm font-bold text-[#101211]">{fit.title}</p>
               <p className="mt-2 flex-1 text-sm leading-6 text-[#6B6A61]">{fit.description}</p>
               <span className="mt-5 flex items-center gap-1 text-sm font-bold text-[#1B7F86] group-hover:text-[#101211]">{fit.action} <ArrowRight className="h-3.5 w-3.5" /></span>
@@ -298,7 +298,7 @@ function SonCagri() {
     <section className="relative isolate overflow-hidden bg-[#101211] px-4 py-16 md:px-6 md:py-24" data-testid="section-final-cta">
       <img src={heroSignalAction} alt="Üç ışıklı yolun şeffaf bir prizma içinde tek kaynak noktasında birleşmesi" className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-45" loading="lazy" />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-[#101211]/55 via-[#101211]/60 to-[#101211]" aria-hidden="true" />
-      <div className="mx-auto max-w-3xl rounded-3xl border border-white/15 bg-[#101211]/70 px-7 py-12 text-center text-white backdrop-blur-md md:px-12">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-white/15 bg-[#101211]/70 px-7 py-12 text-center text-white backdrop-blur-md md:px-12">
         <p className="visual-source-label text-[#3FBFB2]">SIGNAL → EVIDENCE → ACTION</p>
         <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">Markanızın yapay zeka cevaplarında nerede durduğunu tahmin etmeyin.</h2>
         <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-slate-300">İlk ölçümle soru, kaynak ve eksik kanıt zincirini görün. Sonra yalnızca en yüksek etkili uygulamaya odaklanın.</p>

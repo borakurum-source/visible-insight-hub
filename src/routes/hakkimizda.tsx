@@ -33,7 +33,7 @@ function AboutPage() {
         secondaryHref="#neden"
         secondaryLabel="Neden kurulduğunu gör"
       >
-        <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.05] p-3">
+        <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#FBFAF5]/[0.05] p-3">
           <BrandLogo variant="icon" tone="dark" size="sm" />
           <div><p className="visual-source-label text-[#3FBFB2]">ONECITE / FOUNDER NOTE</p><p className="mt-1 text-sm text-slate-200">Ölçüm, kanıt ve sonraki karar aynı zincirde buluşmalı.</p></div>
         </div>
@@ -53,7 +53,7 @@ function AboutPage() {
         </div>
       </section>
 
-      <section className="border-y border-[#E3E0D5] bg-white px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#1B7F86]">Nasıl çalışıyoruz?</p>
@@ -75,7 +75,7 @@ function AboutPage() {
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">AI cevapları model, zaman, prompt, pazar, dil ve web kaynaklarına göre değişebilir. Sonuçlar sabit ölçüm seti ve bağlamı içinde yorumlanır. Bu sınır, ürünün zayıflığı değil; ölçümün dürüstlük koşuludur.</p>
             <div className="mt-7 flex items-center gap-3 text-sm text-slate-200"><ShieldCheck className="h-5 w-5 text-[#3FBFB2]" />Kaynak ve metodoloji sınırlarını görünür tutarız.</div>
           </div>
-          <div className="rounded-3xl border border-[#E3E0D5] bg-white p-7 md:p-10">
+          <div className="rounded-3xl border border-[#E3E0D5] bg-[#FBFAF5] p-7 md:p-10">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#1B7F86]">Kurucu</p>
             <h2 className="mt-4 text-3xl font-extrabold text-[#101211]">Bora Kurum</h2>
             <p className="mt-4 text-base leading-7 text-[#57564E]">OneCite, AI görünürlüğünü yalnızca bir pazarlama iddiası olarak değil, soru ve kaynak düzeyinde izlenebilir bir çalışma alanı olarak ele alma ihtiyacından doğdu.</p>

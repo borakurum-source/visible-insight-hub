@@ -48,7 +48,7 @@ function AgenciesPage() {
         </div>
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {workflow.map(({ icon: Icon, step, title, body }) => (
-            <article key={step} className="rounded-2xl border border-[#E3E0D5] bg-white p-6">
+            <article key={step} className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-6">
               <span className="font-mono text-sm text-[#1B7F86]">{step}</span>
               <Icon className="mt-8 h-5 w-5 text-[#101211]" />
               <h3 className="mt-5 text-xl font-extrabold text-[#101211]">{title}</h3>
@@ -58,7 +58,7 @@ function AgenciesPage() {
         </div>
       </section>
 
-      <section className="border-y border-[#E3E0D5] bg-white px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Müşteri görüşmesi</p>
@@ -69,7 +69,7 @@ function AgenciesPage() {
             <div className="flex items-center gap-3"><UsersRound className="h-5 w-5 text-[#1B7F86]" /><p className="font-bold text-[#101211]">Müşteri raporunun üç çıktısı</p></div>
             <div className="mt-6 space-y-3">
               {outcomes.map((outcome) => (
-                <div key={outcome} className="flex items-center gap-3 rounded-xl border border-[#E3E0D5] bg-white p-4 text-sm font-semibold text-[#101211]"><FileOutput className="h-4 w-4 text-[#1B7F86]" />{outcome}</div>
+                <div key={outcome} className="flex items-center gap-3 rounded-xl border border-[#E3E0D5] bg-[#FBFAF5] p-4 text-sm font-semibold text-[#101211]"><FileOutput className="h-4 w-4 text-[#1B7F86]" />{outcome}</div>
               ))}
             </div>
           </div>

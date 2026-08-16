@@ -47,7 +47,7 @@ function CitationSharePage() {
         </div>
         <div className="mt-12 grid gap-4 md:grid-cols-3">
           {anatomy.map(({ icon: Icon, title, body }) => (
-            <article key={title} className="rounded-2xl border border-[#E3E0D5] bg-white p-6">
+            <article key={title} className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-6">
               <Icon className="h-5 w-5 text-[#1B7F86]" />
               <h3 className="mt-6 text-lg font-extrabold text-[#101211]">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-[#6B6A61]">{body}</p>
@@ -56,7 +56,7 @@ function CitationSharePage() {
         </div>
       </section>
 
-      <section className="border-y border-[#E3E0D5] bg-white px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container grid gap-10 lg:grid-cols-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Nasıl okunur?</p>
@@ -67,8 +67,8 @@ function CitationSharePage() {
             <div className="flex items-center justify-between border-b border-[#E3E0D5] pb-4"><span className="font-mono text-xs text-[#1B7F86]">PROMPT-18</span><span className="text-xs font-bold text-emerald-700">Atıflandı</span></div>
             <p className="mt-5 font-mono text-sm leading-6 text-[#101211]">“B2B ürün lansmanı için video prodüksiyon ajansı nasıl seçilir?”</p>
             <div className="mt-5 space-y-3">
-              <div className="rounded-xl bg-white p-3 text-sm"><span className="text-[#6B6A61]">Seçilen kaynak</span><p className="mt-1 font-semibold text-[#101211]">FilmFolk — vaka çalışması</p></div>
-              <div className="rounded-xl bg-white p-3 text-sm"><span className="text-[#6B6A61]">Rakip kaynak</span><p className="mt-1 font-semibold text-[#101211]">Üçüncü taraf “en iyi ajanslar” listesi</p></div>
+              <div className="rounded-xl bg-[#FBFAF5] p-3 text-sm"><span className="text-[#6B6A61]">Seçilen kaynak</span><p className="mt-1 font-semibold text-[#101211]">FilmFolk — vaka çalışması</p></div>
+              <div className="rounded-xl bg-[#FBFAF5] p-3 text-sm"><span className="text-[#6B6A61]">Rakip kaynak</span><p className="mt-1 font-semibold text-[#101211]">Üçüncü taraf “en iyi ajanslar” listesi</p></div>
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@ function CitationSharePage() {
             </div>
             <div className="space-y-3">
               {["Soru bazında ölçüm", "Görünür atıf kanıtı", "Önceliklendirilmiş eksik kanıt"].map((item) => (
-                <div key={item} className="flex items-center gap-3 rounded-xl border border-white bg-white p-4 text-sm font-bold text-[#101211]"><CheckCircle2 className="h-5 w-5 text-[#1B7F86]" />{item}</div>
+                <div key={item} className="flex items-center gap-3 rounded-xl border border-[#E3E0D5] bg-[#FBFAF5] p-4 text-sm font-bold text-[#101211]"><CheckCircle2 className="h-5 w-5 text-[#1B7F86]" />{item}</div>
               ))}
             </div>
           </div>

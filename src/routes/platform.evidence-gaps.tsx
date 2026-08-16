@@ -54,7 +54,7 @@ function EvidenceGapsPage() {
         </div>
         <div className="mt-12 grid gap-4 md:grid-cols-3">
           {gaps.map(({ icon: Icon, title, body }) => (
-            <article key={title} className="rounded-2xl border border-[#E3E0D5] bg-white p-6">
+            <article key={title} className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-6">
               <Icon className="h-5 w-5 text-[#1B7F86]" />
               <h3 className="mt-6 text-lg font-extrabold text-[#101211]">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-[#6B6A61]">{body}</p>
@@ -63,7 +63,7 @@ function EvidenceGapsPage() {
         </div>
       </section>
 
-      <section className="border-y border-[#E3E0D5] bg-white px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container grid min-w-0 items-center gap-12 lg:grid-cols-[minmax(0,.85fr)_minmax(360px,1.15fr)]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Uygulama ekranı</p>
@@ -79,7 +79,7 @@ function EvidenceGapsPage() {
       <section className="marketing-container py-16 md:py-24">
         <div className="grid gap-4 md:grid-cols-3">
           {actions.map(({ icon: Icon, title, body }, index) => (
-            <article key={title} className="rounded-2xl border border-[#E3E0D5] bg-white p-6">
+            <article key={title} className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-6">
               <span className="font-mono text-sm text-[#1B7F86]">0{index + 1}</span>
               <Icon className="mt-7 h-5 w-5 text-[#101211]" />
               <h3 className="mt-5 text-lg font-extrabold text-[#101211]">{title}</h3>

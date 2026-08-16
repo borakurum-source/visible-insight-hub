@@ -94,10 +94,10 @@ function ArticleCard({ article, featured = false }: { article: Article; featured
       <Link
         to="/makaleler/$slug"
         params={{ slug: article.slug }}
-        className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B7F86] focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-[#EDEFE9]" : "border-[#E3E0D5] bg-white hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
+        className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1B7F86] focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-[#EDEFE9]" : "border-[#E3E0D5] bg-[#FBFAF5] hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
       >
         <div className="flex items-center justify-between gap-3">
-          <Badge variant="outline" className="border-[#E3E0D5] bg-white text-[#1B7F86]">{article.category}</Badge>
+          <Badge variant="outline" className="border-[#E3E0D5] bg-[#FBFAF5] text-[#1B7F86]">{article.category}</Badge>
           <BookOpen className="h-5 w-5 text-[#1B7F86]" />
         </div>
         <h2 className="mt-7 text-2xl font-extrabold tracking-[-0.03em] text-[#101211]">{article.title}</h2>
@@ -149,7 +149,7 @@ function ArticlesPage() {
               type="button"
               aria-pressed={selectedCategory === category}
               onClick={() => setSelectedCategory(category)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] motion-reduce:transition-none ${selectedCategory === category ? "border-[#1B7F86] bg-[#1B7F86] text-white" : "border-[#E3E0D5] bg-white text-[#6B6A61] hover:border-[#C9C5B6] hover:text-[#101211]"}`}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] motion-reduce:transition-none ${selectedCategory === category ? "border-[#1B7F86] bg-[#1B7F86] text-white" : "border-[#E3E0D5] bg-[#FBFAF5] text-[#6B6A61] hover:border-[#C9C5B6] hover:text-[#101211]"}`}
             >
               {category}
             </button>
@@ -165,7 +165,7 @@ function ArticlesPage() {
       </section>
 
       <section className="bg-[#F2F0E8] px-4 py-16 md:px-6">
-        <div className="marketing-container flex flex-col items-start justify-between gap-6 rounded-2xl border border-[#E3E0D5] bg-white p-7 md:flex-row md:items-center">
+        <div className="marketing-container flex flex-col items-start justify-between gap-6 rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-7 md:flex-row md:items-center">
           <div>
             <h2 className="text-2xl font-extrabold text-[#101211]">Okuduklarınızı kendi markanızla test edin.</h2>
             <p className="mt-2 text-sm leading-6 text-[#6B6A61]">Ücretsiz hazırlık raporu, ilk kaynak ve kanıt çerçevenizi verir.</p>

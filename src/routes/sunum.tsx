@@ -63,9 +63,9 @@ function PresentationPage() {
             <p className="font-mono text-xs font-medium tracking-[0.2em] text-[#3FBFB2]">{slide.eyebrow}</p>
             <h1 className="mt-6 max-w-4xl text-4xl font-extrabold leading-[1.03] tracking-[-0.055em] text-white md:text-7xl">{slide.accent && <span className="mb-2 block text-[#3FBFB2]">{slide.accent}</span>}{slide.title}</h1>
             <p className="mt-7 max-w-2xl text-base leading-8 text-slate-300 md:text-xl">{slide.body}</p>
-            <div className="mt-10 flex flex-wrap gap-2">{slide.points.map((point, index) => <div key={point} className={`rounded-full border px-4 py-2 font-mono text-xs ${index === 0 ? "border-[#3FBFB2]/50 bg-[#3FBFB2]/10 text-[#3FBFB2]" : "border-white/15 bg-white/[0.04] text-slate-300"}`}>{point}</div>)}</div>
+            <div className="mt-10 flex flex-wrap gap-2">{slide.points.map((point, index) => <div key={point} className={`rounded-full border px-4 py-2 font-mono text-xs ${index === 0 ? "border-[#3FBFB2]/50 bg-[#3FBFB2]/10 text-[#3FBFB2]" : "border-white/15 bg-[#FBFAF5]/[0.04] text-slate-300"}`}>{point}</div>)}</div>
           </section>
-          <aside className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.05] p-6 md:p-8">
+          <aside className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#FBFAF5]/[0.05] p-6 md:p-8">
             <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-[#3FBFB2]/10 blur-3xl" />
             <div className="relative">
               <p className="font-mono text-xs tracking-[0.2em] text-slate-500">ONECITE / PRESENTATION</p>
@@ -85,7 +85,7 @@ function PresentationPage() {
             <button type="button" onClick={() => setActive((value) => Math.min(value + 1, slides.length - 1))} disabled={active === slides.length - 1} aria-label="Sonraki slayt" className="rounded-full border border-white/15 p-2 text-slate-300 transition hover:border-[#3FBFB2] hover:text-[#3FBFB2] disabled:cursor-not-allowed disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
             <span className="ml-2 font-mono text-xs text-slate-500">{slide.label}</span>
           </div>
-          <div className="flex items-center gap-2" aria-label="Sunum ilerlemesi">{slides.map((item, index) => <button key={item.label} type="button" onClick={() => setActive(index)} aria-label={`${index + 1}. slayta git`} className={`h-1.5 rounded-full transition-all ${index === active ? "w-8 bg-[#3FBFB2]" : "w-3 bg-white/20 hover:bg-white/40"}`} />)}</div>
+          <div className="flex items-center gap-2" aria-label="Sunum ilerlemesi">{slides.map((item, index) => <button key={item.label} type="button" onClick={() => setActive(index)} aria-label={`${index + 1}. slayta git`} className={`h-1.5 rounded-full transition-all ${index === active ? "w-8 bg-[#3FBFB2]" : "w-3 bg-[#FBFAF5]/20 hover:bg-[#FBFAF5]/40"}`} />)}</div>
           <div className="flex items-center gap-3">
             <span className="hidden items-center gap-1 text-xs text-slate-500 md:inline-flex"><Maximize2 className="h-3.5 w-3.5" /> Klavye ile gezin</span>
             <Link to="/free-ai-readiness-report" className="inline-flex items-center gap-2 text-sm font-semibold text-[#3FBFB2] hover:text-white">İlk ölçümü başlat <ArrowRight className="h-4 w-4" /></Link>

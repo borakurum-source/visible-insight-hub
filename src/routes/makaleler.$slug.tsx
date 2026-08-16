@@ -52,7 +52,7 @@ function Delta({ value }: { value: number }) {
 function PromptComparison({ item, tone = "positive" }: { item: PromptChange; tone?: "positive" | "watch" }) {
   const positive = tone === "positive";
   return (
-    <article className="rounded-2xl border border-[#E3E0D5] bg-white p-5">
+    <article className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <p className="max-w-2xl text-sm font-semibold leading-6 text-[#101211]">{item.prompt}</p>
         <div className="shrink-0 text-right"><Delta value={item.delta} /><p className="mt-1 text-xs text-[#6B6A61]">{item.runs} ölçüm tekrarı</p></div>
@@ -89,10 +89,10 @@ function FilmFolkCaseStudy() {
           secondaryLabel="Kendi ölçümünü başlat"
         >
           <div className="grid max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
-            <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">İLK PAY</p><p className="mt-2 font-mono text-xl text-white">30,7%</p></div>
+            <div className="rounded-xl border border-white/15 bg-[#FBFAF5]/[0.06] p-3"><p className="visual-source-label text-slate-400">İLK PAY</p><p className="mt-2 font-mono text-xl text-white">30,7%</p></div>
             <div className="rounded-xl border border-[#3FBFB2]/35 bg-[#3FBFB2]/10 p-3"><p className="visual-source-label text-[#3FBFB2]">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
-            <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">DEĞİŞİM</p><p className="mt-2 font-mono text-xl text-white">+28,1</p></div>
-            <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">TEKRAR</p><p className="mt-2 font-mono text-xl text-white">286</p></div>
+            <div className="rounded-xl border border-white/15 bg-[#FBFAF5]/[0.06] p-3"><p className="visual-source-label text-slate-400">DEĞİŞİM</p><p className="mt-2 font-mono text-xl text-white">+28,1</p></div>
+            <div className="rounded-xl border border-white/15 bg-[#FBFAF5]/[0.06] p-3"><p className="visual-source-label text-slate-400">TEKRAR</p><p className="mt-2 font-mono text-xl text-white">286</p></div>
           </div>
         </VisualHero>
 
@@ -108,15 +108,15 @@ function FilmFolkCaseStudy() {
               </div>
             </Reveal>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Reveal delay={0.04}><div className="rounded-2xl border border-[#E3E0D5] bg-white p-5"><Target className="h-5 w-5 text-[#1B7F86]" /><p className="mt-6 font-mono text-4xl text-[#101211]">41</p><h3 className="mt-2 font-bold text-[#101211]">Sabit soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Satın alma niyetli sorgu seti.</p></div></Reveal>
-              <Reveal delay={0.08}><div className="rounded-2xl border border-[#E3E0D5] bg-white p-5"><LineChart className="h-5 w-5 text-[#1B7F86]" /><p className="mt-6 font-mono text-4xl text-[#101211]">286</p><h3 className="mt-2 font-bold text-[#101211]">Tekrar</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Ağırlıklı orana giren kayıtlar.</p></div></Reveal>
-              <Reveal delay={0.12}><div className="rounded-2xl border border-[#E3E0D5] bg-white p-5"><TrendingUp className="h-5 w-5 text-emerald-700" /><p className="mt-6 font-mono text-4xl text-[#101211]">32</p><h3 className="mt-2 font-bold text-[#101211]">Yükselen soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Son ölçümde daha yüksek oran.</p></div></Reveal>
-              <Reveal delay={0.16}><div className="rounded-2xl border border-[#E3E0D5] bg-white p-5"><TrendingDown className="h-5 w-5 text-rose-700" /><p className="mt-6 font-mono text-4xl text-[#101211]">7</p><h3 className="mt-2 font-bold text-[#101211]">Gerileyen soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Ayrı takip listesine alınan alan.</p></div></Reveal>
+              <Reveal delay={0.04}><div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5"><Target className="h-5 w-5 text-[#1B7F86]" /><p className="mt-6 font-mono text-4xl text-[#101211]">41</p><h3 className="mt-2 font-bold text-[#101211]">Sabit soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Satın alma niyetli sorgu seti.</p></div></Reveal>
+              <Reveal delay={0.08}><div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5"><LineChart className="h-5 w-5 text-[#1B7F86]" /><p className="mt-6 font-mono text-4xl text-[#101211]">286</p><h3 className="mt-2 font-bold text-[#101211]">Tekrar</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Ağırlıklı orana giren kayıtlar.</p></div></Reveal>
+              <Reveal delay={0.12}><div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5"><TrendingUp className="h-5 w-5 text-emerald-700" /><p className="mt-6 font-mono text-4xl text-[#101211]">32</p><h3 className="mt-2 font-bold text-[#101211]">Yükselen soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Son ölçümde daha yüksek oran.</p></div></Reveal>
+              <Reveal delay={0.16}><div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5"><TrendingDown className="h-5 w-5 text-rose-700" /><p className="mt-6 font-mono text-4xl text-[#101211]">7</p><h3 className="mt-2 font-bold text-[#101211]">Gerileyen soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Ayrı takip listesine alınan alan.</p></div></Reveal>
             </div>
           </div>
         </section>
 
-        <section className="border-y border-[#E3E0D5] bg-white px-4 py-16 md:px-6 md:py-24">
+        <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] px-4 py-16 md:px-6 md:py-24">
           <div className="marketing-container">
             <Reveal>
               <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -165,9 +165,9 @@ function FilmFolkCaseStudy() {
               <aside className="rounded-3xl border border-[#E3E0D5] bg-[#F2F0E8] p-6">
                 <p className="text-sm font-semibold text-[#101211]">GSC özeti</p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <div className="rounded-2xl border border-[#E3E0D5] bg-white p-4"><p className="text-xs text-[#6B6A61]">Toplam gösterim</p><p className="mt-2 font-mono text-3xl text-[#101211]">44.613</p><p className="mt-1 text-xs text-[#6B6A61]">87 gün</p></div>
-                  <div className="rounded-2xl border border-[#DDE5E4] bg-white p-4"><p className="text-xs text-[#6B6A61]">Birleşik Krallık payı</p><p className="mt-2 font-mono text-3xl text-[#101211]">89,1%</p></div>
-                  <div className="rounded-2xl border border-[#DDE5E4] bg-white p-4"><p className="text-xs text-[#6B6A61]">Masaüstü payı</p><p className="mt-2 font-mono text-3xl text-[#101211]">80,2%</p></div>
+                  <div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-4"><p className="text-xs text-[#6B6A61]">Toplam gösterim</p><p className="mt-2 font-mono text-3xl text-[#101211]">44.613</p><p className="mt-1 text-xs text-[#6B6A61]">87 gün</p></div>
+                  <div className="rounded-2xl border border-[#DDE5E4] bg-[#FBFAF5] p-4"><p className="text-xs text-[#6B6A61]">Birleşik Krallık payı</p><p className="mt-2 font-mono text-3xl text-[#101211]">89,1%</p></div>
+                  <div className="rounded-2xl border border-[#DDE5E4] bg-[#FBFAF5] p-4"><p className="text-xs text-[#6B6A61]">Masaüstü payı</p><p className="mt-2 font-mono text-3xl text-[#101211]">80,2%</p></div>
                 </div>
               </aside>
             </Reveal>
@@ -216,7 +216,7 @@ function GenericArticle({ article }: { article: Article }) {
         <header className="border-b border-[#E3E0D5] bg-[#FBFAF5] px-4 py-14 md:px-6 md:py-20">
           <div className="mx-auto max-w-3xl">
             <Link to="/makaleler" className="inline-flex items-center gap-1 text-sm font-bold text-[#1B7F86]"><ArrowLeft className="h-4 w-4" /> Tüm makaleler</Link>
-            <Badge variant="outline" className="mt-8 border-[#E3E0D5] bg-white text-[#1B7F86]">{article.category}</Badge>
+            <Badge variant="outline" className="mt-8 border-[#E3E0D5] bg-[#FBFAF5] text-[#1B7F86]">{article.category}</Badge>
             <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.045em] text-[#101211] md:text-6xl">{article.title}</h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-[#57564E]">{article.description}</p>
             <div className="mt-7 flex items-center gap-5 text-sm text-[#6B6A61]">
