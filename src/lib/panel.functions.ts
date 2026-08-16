@@ -793,3 +793,25 @@ export const getMeasurementState = createServerFn({ method: "POST" })
       totalRuns: (runs.data ?? []).length,
     };
   });
+
+export const getPlanUsage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId?: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { getUserPlan, countApprovedPrompts } = await import("./plan.server");
+    const limits = await getUserPlan(context.supabase, context.userId);
+    const [{ count: brandCount }, approvedPrompts] = await Promise.all([
+      context.supabase.from("brands").select("id", { count: "exact", head: true }).eq("created_by", context.userId),
+      data.brandId ? countApprovedPrompts(context.supabase, data.brandId) : Promise.resolve(0),
+    ]);
+    return {
+      plan: limits.slug,
+      planLabel: limits.label,
+      maxBrands: limits.maxBrands,
+      maxPrompts: limits.maxPrompts,
+      maxCompetitors: limits.maxCompetitors,
+      monthlyContent: limits.monthlyContent,
+      brands: brandCount ?? 0,
+      approvedPrompts,
+    };
+  });
