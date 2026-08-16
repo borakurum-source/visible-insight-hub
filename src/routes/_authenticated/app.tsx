@@ -8,9 +8,9 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  LayoutDashboard, Sparkles, Waypoints, Plug, Settings, CreditCard, Menu, Building2,
-  ListChecks, Compass, Radar, KanbanSquare, ShieldCheck, FileBarChart, PenSquare,
-  UserCog, Users, Quote, Lock, LogOut, Plus,
+  LayoutDashboard, Sparkles, Settings, Menu, Building2, Gauge,
+  ListChecks, KanbanSquare, ShieldCheck, PenSquare,
+  Users, Quote, Lock, LogOut, Plus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { initials, useActiveBrand } from "@/lib/use-panel";
@@ -24,48 +24,37 @@ type NavGroup = { label: string; items: NavItem[]; adminOnly?: boolean };
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Genel Bakış",
+    label: "Başla",
     items: [
       { to: "/app", label: "Komuta Merkezi", icon: LayoutDashboard, exact: true },
       { to: "/app/onboarding", label: "Kurulum", icon: Sparkles, exact: false },
     ],
   },
   {
-    label: "Keşfet",
+    label: "Görünürlük",
     items: [
       { to: "/app/prompts", label: "Promptlar", icon: ListChecks, exact: false },
-      { to: "/app/prompt-discovery", label: "Prompt Keşfi", icon: Compass, exact: false },
-      { to: "/app/citation-discovery", label: "Kaynak Keşfi", icon: Radar, exact: false },
+      { to: "/app/measurement", label: "Ölçüm & Skor", icon: Gauge, exact: false },
     ],
   },
   {
-    label: "Kanıtı Yönet",
+    label: "Kanıt",
     items: [
       { to: "/app/knowledge-base", label: "Bilgi Bankası", icon: Sparkles, exact: false },
       { to: "/app/claims", label: "Marka İddiaları", icon: ShieldCheck, exact: false },
-      { to: "/app/graph", label: "Bilgi Grafiği", icon: Waypoints, exact: false },
     ],
   },
   {
-    label: "Uygula",
+    label: "Aksiyon",
     items: [
       { to: "/app/content", label: "İçerik Üretimi", icon: PenSquare, exact: false },
-      { to: "/app/geo-tasks", label: "GEO Görev Panosu", icon: KanbanSquare, exact: false },
-    ],
-  },
-  {
-    label: "Ölç ve Paylaş",
-    items: [
-      { to: "/app/report", label: "Rapor", icon: FileBarChart, exact: false },
-      { to: "/app/integrations", label: "Entegrasyonlar", icon: Plug, exact: false },
+      { to: "/app/geo-tasks", label: "Görevler", icon: KanbanSquare, exact: false },
     ],
   },
   {
     label: "Çalışma Alanı",
     items: [
       { to: "/app/settings", label: "Ayarlar", icon: Settings, exact: false },
-      { to: "/app/account", label: "Hesabım", icon: UserCog, exact: false },
-      { to: "/app/pricing", label: "Fiyatlandırma", icon: CreditCard, exact: false },
     ],
   },
   {
