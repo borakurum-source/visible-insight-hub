@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BarChart3, CheckCircle2, Globe2, Plug, RefreshCw, Search, Unplug } from "lucide-react";
+import { BarChart3, CheckCircle2, Globe2, LogIn, Plug, RefreshCw, Search, Unplug } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, WORKSPACE_SUBNAV } from "@/components/app/panel-subnav";
 import { QueryEmpty, QuerySkeleton } from "@/components/app/panel-query-states";
@@ -15,10 +15,13 @@ import { useActiveBrand } from "@/lib/use-panel";
 import {
   connectGa4Property,
   connectGscProperty,
+  disconnectGoogleAccount,
   disconnectIntegration,
+  getGoogleAccount,
   getIntegrations,
   listGa4PropertyOptions,
   listGscProperties,
+  startGoogleConnect,
   syncGa4,
   syncGsc,
 } from "@/lib/integrations.functions";
@@ -47,6 +50,9 @@ function IntegrationsPage() {
   const fetchGa4Properties = useServerFn(listGa4PropertyOptions);
   const saveGa4Property = useServerFn(connectGa4Property);
   const runGa4Sync = useServerFn(syncGa4);
+  const fetchGoogleAccount = useServerFn(getGoogleAccount);
+  const beginGoogleConnect = useServerFn(startGoogleConnect);
+  const removeGoogleAccount = useServerFn(disconnectGoogleAccount);
   const [candidates, setCandidates] = useState<string[] | null>(null);
   const [ga4Candidates, setGa4Candidates] = useState<Array<{ propertyId: string; displayName: string; account: string }> | null>(null);
 
@@ -54,6 +60,43 @@ function IntegrationsPage() {
     queryKey: ["integrations", brand?.id],
     queryFn: () => fetchIntegrations({ data: { brandId: brand!.id } }),
     enabled: !!brand?.id,
+  });
+
+  const googleAccount = useQuery({
+    queryKey: ["google-account", brand?.id],
+    queryFn: () => fetchGoogleAccount({ data: { brandId: brand!.id } }),
+    enabled: !!brand?.id,
+  });
+
+  // Google izin ekranindan donen mesaji goster.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("google");
+    if (!status) return;
+    const message = params.get("message") ?? "";
+    if (status === "connected") toast.success(message || "Google hesabiniz baglandi");
+    else toast.error(message || "Google baglantisi tamamlanamadi");
+    window.history.replaceState({}, "", window.location.pathname);
+    void googleAccount.refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const connectGoogle = useMutation({
+    mutationFn: () => beginGoogleConnect({ data: { brandId: brand!.id, origin: window.location.origin } }),
+    onSuccess: (result) => {
+      window.location.href = result.url;
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const unlinkGoogle = useMutation({
+    mutationFn: () => removeGoogleAccount({ data: { brandId: brand!.id } }),
+    onSuccess: async () => {
+      toast.success("Google hesabi kaldirildi.");
+      await googleAccount.refetch();
+      await queryClient.invalidateQueries({ queryKey: ["integrations", brand?.id] });
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["integrations", brand?.id] });
@@ -137,6 +180,45 @@ function IntegrationsPage() {
       <PanelPageHeading
         meta={{ title: "Entegrasyonlar", description: "Google Search Console ve analiz bağlantılarınızı yönetin.", icon: Plug }}
       />
+
+      <Card className="mb-4">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
+                <LogIn className="h-4.5 w-4.5" />
+              </div>
+              <CardTitle className="text-sm">Google hesabi</CardTitle>
+            </div>
+            {googleAccount.data?.connected ? (
+              <Badge variant="outline" className="gap-1 border-success/40 text-success">
+                <CheckCircle2 className="h-3 w-3" /> {googleAccount.data.email ?? "Bagli"}
+              </Badge>
+            ) : (
+              <Badge variant="secondary">Bagli degil</Badge>
+            )}
+          </div>
+          <CardDescription className="pt-1">
+            Search Console ve Analytics verileri bu markaya baglanan Google hesabindan okunur. Her marka kendi hesabini baglar.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          {googleAccount.data?.connected ? (
+            <>
+              <Button variant="outline" size="sm" disabled={connectGoogle.isPending} onClick={() => connectGoogle.mutate()}>
+                Yeniden yetkilendir
+              </Button>
+              <Button variant="ghost" size="sm" disabled={unlinkGoogle.isPending} onClick={() => unlinkGoogle.mutate()}>
+                <Unplug className="mr-1.5 h-3.5 w-3.5" /> Baglantiyi kaldir
+              </Button>
+            </>
+          ) : (
+            <Button size="sm" disabled={!brand || connectGoogle.isPending} onClick={() => connectGoogle.mutate()}>
+              {connectGoogle.isPending ? "Yonlendiriliyor…" : "Google hesabimi bagla"}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
