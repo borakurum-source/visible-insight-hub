@@ -44,6 +44,8 @@ const footerGroups = [
     links: [
       { href: "/privacy", label: "Gizlilik" },
       { href: "/kvkk", label: "KVKK" },
+      { href: "/terms", label: "Kullanım Koşulları" },
+      { href: "/refund-policy", label: "İade Politikası" },
     ],
   },
 ];
