@@ -3,12 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ListChecks, Loader2, Plus, Trash2 } from "lucide-react";
+import { Check, ListChecks, Loader2, Pause, Plus, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createPrompt, deletePrompt, listPrompts, setPromptStatus } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
@@ -41,6 +42,7 @@ function PromptsPage() {
   const removePrompt = useServerFn(deletePrompt);
   const [filter, setFilter] = useState<string>("approved");
   const [draft, setDraft] = useState("");
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   const key = ["prompts", brand?.id];
   const { data = [], isLoading } = useQuery({
@@ -56,7 +58,7 @@ function PromptsPage() {
 
   const statusMutation = useMutation({
     mutationFn: (input: { ids: string[]; status: string }) => updateStatus({ data: input }),
-    onSuccess: invalidate,
+    onSuccess: () => { setChecked({}); invalidate(); },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -73,6 +75,8 @@ function PromptsPage() {
   });
 
   const visible = data.filter((prompt) => prompt.status === filter);
+  const selectedIds = visible.filter((prompt) => checked[prompt.id]).map((prompt) => prompt.id);
+  const candidateCount = data.filter((prompt) => prompt.status === "candidate").length;
 
   if (!brand) {
     return (
@@ -116,6 +120,37 @@ function PromptsPage() {
         </TabsList>
       </Tabs>
 
+      {filter === "candidate" && candidateCount > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          Onayladığınız sorular ölçüme girer. Emin olmadıklarınızı pasife alın — sonra her zaman geri açabilirsiniz.
+        </p>
+      ) : null}
+
+      {visible.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-2.5 text-sm">
+          <Checkbox
+            aria-label="Tümünü seç"
+            checked={selectedIds.length > 0 && selectedIds.length === visible.length}
+            onCheckedChange={(value) =>
+              setChecked(value === true ? Object.fromEntries(visible.map((p) => [p.id, true])) : {})
+            }
+          />
+          <span className="text-muted-foreground">
+            {selectedIds.length > 0 ? `${selectedIds.length} soru seçildi` : "Toplu işlem için seçin"}
+          </span>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <Button size="sm" disabled={!selectedIds.length || statusMutation.isPending}
+              onClick={() => statusMutation.mutate({ ids: selectedIds, status: "approved" })}>
+              <Check className="mr-1.5 h-3.5 w-3.5" /> Onayla
+            </Button>
+            <Button size="sm" variant="outline" disabled={!selectedIds.length || statusMutation.isPending}
+              onClick={() => statusMutation.mutate({ ids: selectedIds, status: "inactive" })}>
+              <Pause className="mr-1.5 h-3.5 w-3.5" /> Pasife al
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
@@ -126,7 +161,13 @@ function PromptsPage() {
             <ul className="divide-y divide-border">
               {visible.map((prompt) => (
                 <li key={prompt.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
+                  <Checkbox
+                    aria-label="Promptu seç"
+                    checked={Boolean(checked[prompt.id])}
+                    onCheckedChange={(value) => setChecked({ ...checked, [prompt.id]: value === true })}
+                  />
                   <span className="min-w-0 flex-1">{prompt.text}</span>
+                  {prompt.intent ? <Badge variant="secondary" className="text-[10px]">{prompt.intent}</Badge> : null}
                   <Badge variant="outline" className="text-[10px]">{prompt.category}</Badge>
                   {prompt.status !== "approved" ? (
                     <Button size="sm" variant="outline" disabled={statusMutation.isPending}
