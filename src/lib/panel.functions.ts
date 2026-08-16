@@ -517,7 +517,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { batchId: string; brandId: string; promptIds: string[] }) => input)
   .handler(async ({ data, context }) => {
-    const { measurePrompt } = await import("./measurement.server");
+    const { measurePrompt } = await import("./score-model");
     const [{ data: brand }, { data: intel }, { data: prompts }] = await Promise.all([
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
       context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
@@ -568,7 +568,7 @@ export const finishMeasurement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { batchId: string; brandId: string }) => input)
   .handler(async ({ data, context }) => {
-    const { computeVisibilityScore } = await import("./measurement.server");
+    const { computeVisibilityScore } = await import("./score-model");
     const [runs, citations, sources, claims] = await Promise.all([
       context.supabase.from("prompt_runs").select("brand_mentioned, position").eq("brand_id", data.brandId),
       context.supabase.from("citations").select("is_own_domain").eq("brand_id", data.brandId),
@@ -597,7 +597,7 @@ export const getMeasurementState = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
-    const { computeVisibilityScore } = await import("./measurement.server");
+    const { computeVisibilityScore } = await import("./score-model");
     const [{ data: batch }, runs, citations, sources, claims, approved] = await Promise.all([
       context.supabase.from("measurement_batches").select("*").eq("brand_id", data.brandId)
         .order("created_at", { ascending: false }).limit(1).maybeSingle(),

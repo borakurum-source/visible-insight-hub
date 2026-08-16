@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import type { ScoreComponent } from "@/lib/measurement.server";
+import type { ScoreComponent } from "@/lib/score-model";
 
 function grade(total: number) {
   if (total >= 75) return { label: "Güçlü", tone: "text-[hsl(var(--chart-2))]" };
