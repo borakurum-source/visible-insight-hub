@@ -14,7 +14,7 @@ export function SiteHeader() {
             <Link to="/auth">Giriş</Link>
           </Button>
           <Button asChild variant="hero" size="sm">
-            <Link to="/app">Panele git</Link>
+            <Link to="/auth">Panele git</Link>
           </Button>
         </div>
       </div>

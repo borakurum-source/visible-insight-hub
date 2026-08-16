@@ -73,7 +73,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
                 </Link>
               ))}
               <Link
-                to="/app"
+                to="/auth"
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 block w-full rounded-lg border border-[#E3E0D5] px-3 py-2.5 text-left text-sm font-semibold text-[#101211]"
               >
