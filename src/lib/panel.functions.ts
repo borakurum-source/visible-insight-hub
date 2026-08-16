@@ -494,3 +494,131 @@ export const adminListBrands = createServerFn({ method: "GET" })
     for (const m of members ?? []) counts.set(m.brand_id, (counts.get(m.brand_id) ?? 0) + 1);
     return (brands ?? []).map((b) => ({ ...b, memberCount: counts.get(b.id) ?? 0 }));
   });
+
+// ---------- Ölçüm motoru ----------
+
+export const startMeasurement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: prompts } = await context.supabase
+      .from("prompts").select("id").eq("brand_id", data.brandId).eq("status", "approved");
+    const ids = (prompts ?? []).map((p) => p.id);
+    if (!ids.length) throw new Error("Önce en az bir prompt onaylayın.");
+    const { data: batch, error } = await context.supabase
+      .from("measurement_batches")
+      .insert({ brand_id: data.brandId, status: "running", total_prompts: ids.length, completed_prompts: 0 })
+      .select("*").single();
+    if (error) throw new Error(error.message);
+    return { batch, promptIds: ids };
+  });
+
+export const runMeasurementChunk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { batchId: string; brandId: string; promptIds: string[] }) => input)
+  .handler(async ({ data, context }) => {
+    const { measurePrompt } = await import("./measurement.server");
+    const [{ data: brand }, { data: intel }, { data: prompts }] = await Promise.all([
+      context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase.from("prompts").select("id, text").in("id", data.promptIds),
+    ]);
+    if (!brand) throw new Error("Marka bulunamadı");
+
+    for (const prompt of prompts ?? []) {
+      const measured = await measurePrompt({
+        brandName: brand.name,
+        brandDomain: brand.domain,
+        competitors: (intel?.competitors as string[] | null) ?? [],
+        promptText: prompt.text,
+      });
+      const { data: run } = await context.supabase.from("prompt_runs").insert({
+        brand_id: data.brandId,
+        prompt_id: prompt.id,
+        engine: "onecite",
+        brand_mentioned: measured.brandMentioned,
+        position: measured.position,
+        raw_answer: measured.answer,
+        answer_summary: measured.answer.slice(0, 280),
+      }).select("id").single();
+
+      const unique = Array.from(new Set(measured.sources)).slice(0, 8);
+      if (unique.length) {
+        await context.supabase.from("citations").insert(
+          unique.map((domain) => ({
+            brand_id: data.brandId,
+            run_id: run?.id ?? null,
+            domain,
+            url: `https://${domain}`,
+            is_own_domain: domain.includes(brand.domain),
+          })),
+        );
+      }
+    }
+
+    const { data: current } = await context.supabase
+      .from("measurement_batches").select("completed_prompts, total_prompts").eq("id", data.batchId).single();
+    const completed = (current?.completed_prompts ?? 0) + (prompts?.length ?? 0);
+    await context.supabase.from("measurement_batches")
+      .update({ completed_prompts: completed }).eq("id", data.batchId);
+    return { completed, total: current?.total_prompts ?? 0 };
+  });
+
+export const finishMeasurement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { batchId: string; brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { computeVisibilityScore } = await import("./measurement.server");
+    const [runs, citations, sources, claims] = await Promise.all([
+      context.supabase.from("prompt_runs").select("brand_mentioned, position").eq("brand_id", data.brandId),
+      context.supabase.from("citations").select("is_own_domain").eq("brand_id", data.brandId),
+      context.supabase.from("knowledge_sources").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
+      context.supabase.from("claims").select("evidence_url").eq("brand_id", data.brandId),
+    ]);
+    const citationRows = citations.data ?? [];
+    const score = computeVisibilityScore({
+      runs: runs.data ?? [],
+      ownCitations: citationRows.filter((c) => c.is_own_domain).length,
+      totalCitations: citationRows.length,
+      knowledgeSources: sources.count ?? 0,
+      claimsWithEvidence: (claims.data ?? []).filter((c) => Boolean(c.evidence_url)).length,
+    });
+    const { error } = await context.supabase.from("measurement_batches").update({
+      status: "completed",
+      score: score.total,
+      components: score.components,
+      finished_at: new Date().toISOString(),
+    }).eq("id", data.batchId);
+    if (error) throw new Error(error.message);
+    return score;
+  });
+
+export const getMeasurementState = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { computeVisibilityScore } = await import("./measurement.server");
+    const [{ data: batch }, runs, citations, sources, claims, approved] = await Promise.all([
+      context.supabase.from("measurement_batches").select("*").eq("brand_id", data.brandId)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      context.supabase.from("prompt_runs").select("brand_mentioned, position").eq("brand_id", data.brandId),
+      context.supabase.from("citations").select("is_own_domain, domain").eq("brand_id", data.brandId),
+      context.supabase.from("knowledge_sources").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
+      context.supabase.from("claims").select("evidence_url").eq("brand_id", data.brandId),
+      context.supabase.from("prompts").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId).eq("status", "approved"),
+    ]);
+    const citationRows = citations.data ?? [];
+    const score = computeVisibilityScore({
+      runs: runs.data ?? [],
+      ownCitations: citationRows.filter((c) => c.is_own_domain).length,
+      totalCitations: citationRows.length,
+      knowledgeSources: sources.count ?? 0,
+      claimsWithEvidence: (claims.data ?? []).filter((c) => Boolean(c.evidence_url)).length,
+    });
+    return {
+      batch,
+      score,
+      approvedPrompts: approved.count ?? 0,
+      totalRuns: (runs.data ?? []).length,
+    };
+  });
