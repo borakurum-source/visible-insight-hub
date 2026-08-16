@@ -130,7 +130,7 @@ function ArticlesPage() {
         description="Atıf payı, eksik kanıt, kaynak seçimi ve GEO hakkında karar vermeyi kolaylaştıran Türkçe rehberler."
         image={heroCitationOrb}
         imageAlt="Citation ağı taşıyan cam küre; OneCite kaynak merkezi için editorial görsel"
-        visualLabel="SOURCE LIBRARY / 05"
+        visualLabel="KAYNAK KÜTÜPHANESİ"
       >
         <p className="text-sm text-slate-400">
           Öne çıkan rehber: <Link className="font-semibold text-cyan hover:text-white" to="/makaleler/$slug" params={{ slug: featured.slug }}>{featured.title}</Link>

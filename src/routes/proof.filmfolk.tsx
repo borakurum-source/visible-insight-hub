@@ -66,7 +66,7 @@ function FilmFolkPage() {
         description="FilmFolk için ilk ve son ölçüm sonuçları, aynı soru havuzundaki 286 tekrar üzerinden karşılaştırıldı. Bu bir nedensellik veya performans garantisi değildir; gözlenen kaynak seçimi değişiminin bağlamlı bir okumasıdır."
         image={heroEvidenceGap}
         imageAlt="Eksik parçası olan ışıklı cam köprü; ölçüm ve kanıt arasındaki kopukluğu temsil eden OneCite görseli"
-        visualLabel="MEASURED EVIDENCE / 06"
+        visualLabel="ÖLÇÜLEN KANIT"
         secondaryHref="#metodoloji"
         secondaryLabel="Metodolojiyi incele"
       >

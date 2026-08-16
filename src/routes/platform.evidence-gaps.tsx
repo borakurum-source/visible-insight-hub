@@ -42,7 +42,7 @@ function EvidenceGapsPage() {
         description="Eksik kanıt, bir modelin güvenle önermek için ihtiyaç duyduğu fakat sitenizde bulamadığı bilgi, kaynak veya bağlantıdır. OneCite bu eksikleri soru ve kaynak bağlamıyla görünür kılar."
         image={heroEvidenceGap}
         imageAlt="Bir parçası eksik olan ışıklı cam köprü; evidence gap kavramının görsel metaforu"
-        visualLabel="EVIDENCE GAP / 02"
+        visualLabel="KANIT BOŞLUĞU"
         secondaryHref="/platform/citation-share"
         secondaryLabel="Atıf payını incele"
       >

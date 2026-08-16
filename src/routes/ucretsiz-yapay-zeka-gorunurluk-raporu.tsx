@@ -145,7 +145,8 @@ function FreeReportPage() {
         description="Web sitenizi girin; OneCite herkese açık sinyalleri tarayıp ChatGPT, Gemini ve Perplexity gibi asistanlarda alıntılanmaya ne kadar hazır olduğunuzu gösteren ücretsiz hazırlık raporunu çıkarsın."
         image={heroSignalAction}
         imageAlt="Üç ışıklı yolun şeffaf bir prizma içinde tek kaynak noktasında birleşmesi"
-        visualLabel="READINESS / 04"
+        visualLabel="AI GÖRÜNÜRLÜK RAPORU"
+        visualCaption="Alan adınızı girin; yapay zeka görünürlüğünüz ölçülsün."
         primaryLabel="Ücretsiz raporu başlat"
       >
         <div className="max-w-xl rounded-2xl border border-white/15 bg-background/[0.08] p-4 backdrop-blur-md md:p-5">

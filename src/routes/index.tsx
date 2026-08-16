@@ -127,7 +127,7 @@ function Problem() {
         <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_.98fr] lg:gap-16">
           <Reveal className="visual-panel-shadow relative overflow-hidden rounded-[26px] border border-white/15 bg-ink">
             <img src={heroEvidenceGap} alt="Eksik bir parçaya sahip ışıklı cam köprü; OneCite evidence gap kavramının görsel metaforu" className="block h-auto w-full" width="2560" height="1440" loading="lazy" />
-            <div className="absolute inset-x-5 bottom-5 flex items-center justify-between gap-4"><span className="visual-source-label text-cyan">EVIDENCE GAP / 02</span><span className="font-mono text-[10px] text-slate-400">MISSING SOURCE</span></div>
+            <div className="absolute inset-x-5 bottom-5 flex items-center justify-between gap-4"><span className="visual-source-label text-cyan">EVIDENCE GAP</span><span className="font-mono text-[10px] text-slate-400">MISSING SOURCE</span></div>
           </Reveal>
           <div>
             <p className="editorial-eyebrow text-cyan">Görünmeyen kırılma</p>

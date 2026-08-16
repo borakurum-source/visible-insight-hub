@@ -36,7 +36,7 @@ function AgenciesPage() {
         description="OneCite, soru ölçümünü kaynak analizi ve eksik kanıtlarla birleştirir. Böylece GEO öneriniz “içerik üretelim” seviyesinde kalmaz."
         image={heroCitationOrb}
         imageAlt="Citation ağı taşıyan cam küre; ajanslar için paylaşılabilir kanıt metaforu"
-        visualLabel="AGENCY EVIDENCE / 03"
+        visualLabel="AJANS KANIT KATMANI"
         secondaryLabel="Ajans planını incele"
         secondaryHref="/fiyatlandirma"
       >
