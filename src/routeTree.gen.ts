@@ -14,7 +14,10 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
 import { Route as FreeAiReadinessReportRouteImport } from './routes/free-ai-readiness-report'
 import { Route as HakkimizdaRouteImport } from './routes/hakkimizda'
+import { Route as KvkkRouteImport } from './routes/kvkk'
+import { Route as MakalelerRouteImport } from './routes/makaleler'
 import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SunumRouteImport } from './routes/sunum'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAccountRouteImport } from './routes/app.account'
@@ -32,10 +35,13 @@ import { Route as AppPromptDiscoveryRouteImport } from './routes/app.prompt-disc
 import { Route as AppPromptsRouteImport } from './routes/app.prompts'
 import { Route as AppReportRouteImport } from './routes/app.report'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as MakalelerIndexRouteImport } from './routes/makaleler.index'
+import { Route as MakalelerSlugRouteImport } from './routes/makaleler.$slug'
 import { Route as PlatformIndexRouteImport } from './routes/platform.index'
 import { Route as PlatformCitationShareRouteImport } from './routes/platform.citation-share'
 import { Route as PlatformEvidenceGapsRouteImport } from './routes/platform.evidence-gaps'
 import { Route as ProofFilmfolkRouteImport } from './routes/proof.filmfolk'
+import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as SolutionsAgenciesRouteImport } from './routes/solutions.agencies'
 
 const IndexRoute = IndexRouteImport.update({
@@ -63,9 +69,24 @@ const HakkimizdaRoute = HakkimizdaRouteImport.update({
   path: '/hakkimizda',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KvkkRoute = KvkkRouteImport.update({
+  id: '/kvkk',
+  path: '/kvkk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MakalelerRoute = MakalelerRouteImport.update({
+  id: '/makaleler',
+  path: '/makaleler',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlatformRoute = PlatformRouteImport.update({
   id: '/platform',
   path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SunumRoute = SunumRouteImport.update({
@@ -153,6 +174,16 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const MakalelerIndexRoute = MakalelerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MakalelerRoute,
+} as any)
+const MakalelerSlugRoute = MakalelerSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => MakalelerRoute,
+} as any)
 const PlatformIndexRoute = PlatformIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -173,6 +204,11 @@ const ProofFilmfolkRoute = ProofFilmfolkRouteImport.update({
   path: '/proof/filmfolk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SolutionsAgenciesRoute = SolutionsAgenciesRouteImport.update({
   id: '/solutions/agencies',
   path: '/solutions/agencies',
@@ -185,7 +221,10 @@ export interface FileRoutesByFullPath {
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
+  '/kvkk': typeof KvkkRoute
+  '/makaleler': typeof MakalelerRouteWithChildren
   '/platform': typeof PlatformRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/sunum': typeof SunumRoute
   '/app/account': typeof AppAccountRoute
   '/app/admin': typeof AppAdminRoute
@@ -202,11 +241,14 @@ export interface FileRoutesByFullPath {
   '/app/prompts': typeof AppPromptsRoute
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
+  '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
+  '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/app/': typeof AppIndexRoute
+  '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
 }
 export interface FileRoutesByTo {
@@ -214,6 +256,8 @@ export interface FileRoutesByTo {
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
+  '/kvkk': typeof KvkkRoute
+  '/privacy': typeof PrivacyRoute
   '/sunum': typeof SunumRoute
   '/app/account': typeof AppAccountRoute
   '/app/admin': typeof AppAdminRoute
@@ -230,11 +274,14 @@ export interface FileRoutesByTo {
   '/app/prompts': typeof AppPromptsRoute
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
+  '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
+  '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/app': typeof AppIndexRoute
+  '/makaleler': typeof MakalelerIndexRoute
   '/platform': typeof PlatformIndexRoute
 }
 export interface FileRoutesById {
@@ -244,7 +291,10 @@ export interface FileRoutesById {
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
+  '/kvkk': typeof KvkkRoute
+  '/makaleler': typeof MakalelerRouteWithChildren
   '/platform': typeof PlatformRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/sunum': typeof SunumRoute
   '/app/account': typeof AppAccountRoute
   '/app/admin': typeof AppAdminRoute
@@ -261,11 +311,14 @@ export interface FileRoutesById {
   '/app/prompts': typeof AppPromptsRoute
   '/app/report': typeof AppReportRoute
   '/app/settings': typeof AppSettingsRoute
+  '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
+  '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/app/': typeof AppIndexRoute
+  '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
 }
 export interface FileRouteTypes {
@@ -276,7 +329,10 @@ export interface FileRouteTypes {
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
     | '/hakkimizda'
+    | '/kvkk'
+    | '/makaleler'
     | '/platform'
+    | '/privacy'
     | '/sunum'
     | '/app/account'
     | '/app/admin'
@@ -293,11 +349,14 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
+    | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
     | '/proof/filmfolk'
+    | '/r/$token'
     | '/solutions/agencies'
     | '/app/'
+    | '/makaleler/'
     | '/platform/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -305,6 +364,8 @@ export interface FileRouteTypes {
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
     | '/hakkimizda'
+    | '/kvkk'
+    | '/privacy'
     | '/sunum'
     | '/app/account'
     | '/app/admin'
@@ -321,11 +382,14 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
+    | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
     | '/proof/filmfolk'
+    | '/r/$token'
     | '/solutions/agencies'
     | '/app'
+    | '/makaleler'
     | '/platform'
   id:
     | '__root__'
@@ -334,7 +398,10 @@ export interface FileRouteTypes {
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
     | '/hakkimizda'
+    | '/kvkk'
+    | '/makaleler'
     | '/platform'
+    | '/privacy'
     | '/sunum'
     | '/app/account'
     | '/app/admin'
@@ -351,11 +418,14 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
+    | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
     | '/proof/filmfolk'
+    | '/r/$token'
     | '/solutions/agencies'
     | '/app/'
+    | '/makaleler/'
     | '/platform/'
   fileRoutesById: FileRoutesById
 }
@@ -365,9 +435,13 @@ export interface RootRouteChildren {
   FiyatlandirmaRoute: typeof FiyatlandirmaRoute
   FreeAiReadinessReportRoute: typeof FreeAiReadinessReportRoute
   HakkimizdaRoute: typeof HakkimizdaRoute
+  KvkkRoute: typeof KvkkRoute
+  MakalelerRoute: typeof MakalelerRouteWithChildren
   PlatformRoute: typeof PlatformRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
   SunumRoute: typeof SunumRoute
   ProofFilmfolkRoute: typeof ProofFilmfolkRoute
+  RTokenRoute: typeof RTokenRoute
   SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
 }
 
@@ -408,11 +482,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HakkimizdaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kvkk': {
+      id: '/kvkk'
+      path: '/kvkk'
+      fullPath: '/kvkk'
+      preLoaderRoute: typeof KvkkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/makaleler': {
+      id: '/makaleler'
+      path: '/makaleler'
+      fullPath: '/makaleler'
+      preLoaderRoute: typeof MakalelerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform': {
       id: '/platform'
       path: '/platform'
       fullPath: '/platform'
       preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sunum': {
@@ -534,6 +629,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/makaleler/': {
+      id: '/makaleler/'
+      path: '/'
+      fullPath: '/makaleler/'
+      preLoaderRoute: typeof MakalelerIndexRouteImport
+      parentRoute: typeof MakalelerRoute
+    }
+    '/makaleler/$slug': {
+      id: '/makaleler/$slug'
+      path: '/$slug'
+      fullPath: '/makaleler/$slug'
+      preLoaderRoute: typeof MakalelerSlugRouteImport
+      parentRoute: typeof MakalelerRoute
+    }
     '/platform/': {
       id: '/platform/'
       path: '/'
@@ -560,6 +669,13 @@ declare module '@tanstack/react-router' {
       path: '/proof/filmfolk'
       fullPath: '/proof/filmfolk'
       preLoaderRoute: typeof ProofFilmfolkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$token': {
+      id: '/r/$token'
+      path: '/r/$token'
+      fullPath: '/r/$token'
+      preLoaderRoute: typeof RTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/solutions/agencies': {
@@ -612,6 +728,20 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface MakalelerRouteChildren {
+  MakalelerSlugRoute: typeof MakalelerSlugRoute
+  MakalelerIndexRoute: typeof MakalelerIndexRoute
+}
+
+const MakalelerRouteChildren: MakalelerRouteChildren = {
+  MakalelerSlugRoute: MakalelerSlugRoute,
+  MakalelerIndexRoute: MakalelerIndexRoute,
+}
+
+const MakalelerRouteWithChildren = MakalelerRoute._addFileChildren(
+  MakalelerRouteChildren,
+)
+
 interface PlatformRouteChildren {
   PlatformCitationShareRoute: typeof PlatformCitationShareRoute
   PlatformEvidenceGapsRoute: typeof PlatformEvidenceGapsRoute
@@ -634,9 +764,13 @@ const rootRouteChildren: RootRouteChildren = {
   FiyatlandirmaRoute: FiyatlandirmaRoute,
   FreeAiReadinessReportRoute: FreeAiReadinessReportRoute,
   HakkimizdaRoute: HakkimizdaRoute,
+  KvkkRoute: KvkkRoute,
+  MakalelerRoute: MakalelerRouteWithChildren,
   PlatformRoute: PlatformRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
   SunumRoute: SunumRoute,
   ProofFilmfolkRoute: ProofFilmfolkRoute,
+  RTokenRoute: RTokenRoute,
   SolutionsAgenciesRoute: SolutionsAgenciesRoute,
 }
 export const routeTree = rootRouteImport
