@@ -65,9 +65,11 @@ function Hero() {
           <div className="flex items-center gap-3"><span className="visual-source-label text-cyan">AI CITATION INTELLIGENCE</span><span className="h-px w-10 bg-cyan/70" /></div>
           <div className="space-y-5">
             <h1 className="max-w-2xl text-4xl font-extrabold leading-[1.03] tracking-[-0.05em] text-white md:text-5xl lg:text-[60px]" data-testid="text-hero-headline">
-              Yapay zeka cevaplarında markanız <span className="text-cyan">kaynak</span> olarak seçiliyor mu?
+              ChatGPT, Perplexity ve Gemini cevaplarında markanızın <span className="text-cyan">atıf payını</span> ölçün ve artırın.
             </h1>
-            <p className="max-w-xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">Atıf payınızı ölçün, eksik kanıtı görün ve yapay zekanın güvenebileceği bir sonraki içeriği önce üretin.</p>
+            <p className="max-w-xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">
+              OneCite, satın alma niyetli sorularda hangi markanın kaynak olarak seçildiğini ölçer, eksik kanıtı gösterir ve önce hangi içeriği üretmeniz gerektiğini söyler.
+            </p>
           </div>
           <div className="max-w-xl rounded-xl border border-white/15 bg-background/[0.08] p-4 backdrop-blur-md md:p-5" data-testid="hero-report-cta">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white"><Target className="h-4 w-4 text-cyan" /> İlk ölçümü başlatın</div>
@@ -75,9 +77,21 @@ function Hero() {
             <p className="mt-3 text-xs leading-5 text-slate-400">Kredi kartı gerekmez. İlk ölçüm herkese açık web verileriyle başlar.</p>
           </div>
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
-            <span>Ölçülen yüzeyler:</span>
+            <span>Kredi kartı yok · 2 dakikada rapor · Ölçülen yüzeyler:</span>
             <EngineRotator className="font-mono text-cyan" />
           </p>
+          <dl className="grid max-w-xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/15 bg-white/10" data-testid="hero-proof-strip">
+            {HERO_PROOF.map((item) => (
+              <div key={item.label} className="bg-ink/70 px-4 py-4">
+                <dt className="font-mono text-xl font-medium text-white md:text-2xl">
+                  <MetricRise value={item.value} suffix={item.suffix} />
+                  {item.prefix ? null : null}
+                </dt>
+                <dd className="mt-1 text-[11px] leading-4 text-slate-400">{item.label}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="text-[11px] text-slate-500">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
         </div>
         <Reveal className="relative" delay={0.06}>
           <div className="visual-panel-shadow relative overflow-hidden rounded-[28px] border border-white/15 bg-ink" data-testid="hero-visual-panel">
