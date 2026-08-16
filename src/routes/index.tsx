@@ -66,11 +66,11 @@ function Hero() {
     <section id="olcum" className="visual-hero-surface relative isolate overflow-hidden border-b border-[#26302E] scroll-mt-16" data-testid="section-hero">
       <div className="visual-hero-grid pointer-events-none absolute inset-0 -z-10 opacity-40" aria-hidden="true" />
       <div className="pointer-events-none absolute -left-24 top-24 -z-10 h-64 w-64 rounded-full bg-cyan/10 blur-3xl" aria-hidden="true" />
-      <div className="marketing-container grid min-w-0 items-stretch gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,.92fr)_minmax(440px,1.08fr)] lg:gap-16 lg:py-24">
+      <div className="marketing-container grid min-w-0 items-stretch gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,1.04fr)_minmax(400px,.96fr)] lg:gap-14 lg:py-24">
         <div className="flex flex-col justify-center space-y-6 text-white md:space-y-7">
           <div className="flex items-center gap-3"><span className="visual-source-label text-cyan">AI CITATION INTELLIGENCE</span><span className="h-px w-10 bg-cyan/70" /></div>
           <div className="space-y-5">
-            <h1 className="max-w-2xl text-4xl font-extrabold leading-[1.03] tracking-[-0.05em] text-white md:text-5xl lg:text-[60px]" data-testid="text-hero-headline">
+            <h1 className="max-w-2xl text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] text-white md:text-[44px] lg:text-[52px]" data-testid="text-hero-headline">
               ChatGPT, Perplexity ve Gemini cevaplarında markanızın <span className="text-cyan">atıf payını</span> ölçün ve artırın.
             </h1>
             <p className="max-w-xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">
@@ -102,7 +102,7 @@ function Hero() {
           <div className="visual-panel-shadow relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-[28px] border border-white/15 bg-ink" data-testid="hero-visual-panel">
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-ink/45 via-transparent to-transparent" aria-hidden="true" />
             <div className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/15 bg-ink/70 px-3 py-1.5 backdrop-blur"><span className="h-1.5 w-1.5 rounded-full bg-cyan" /><span className="visual-source-label text-slate-300">SOURCE SIGNAL · 01</span></div>
-            <img src={heroCitationOrb} alt="Karanlık bir yüzey üzerinde, üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre" className="block h-full w-full flex-1 object-cover" width="2560" height="1440" fetchPriority="high" />
+            <img src={heroCitationOrb} alt="Karanlık bir yüzey üzerinde, üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre" className="block h-full w-full flex-1 object-cover object-[72%_45%]" width="2560" height="1440" fetchPriority="high" />
             <div className="absolute bottom-5 left-5 right-5 z-20 flex items-end justify-between gap-4">
               <div><p className="visual-source-label text-cyan">EVIDENCE LAYER</p><p className="mt-1 text-sm font-semibold text-white">Görünmek ile kaynak olarak seçilmek aynı şey değil.</p></div>
               <span className="font-mono text-[10px] text-slate-400">1C / 001</span>
