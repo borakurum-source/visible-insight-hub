@@ -175,6 +175,43 @@ function KnowledgeBasePage() {
         </Button>
       </div>
 
+      {candidates.length > 0 ? (
+        <Card>
+          <CardContent className="space-y-3 p-4">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Ölçümden gelen aday kaynaklar
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Yapay zekânın cevaplarında alıntıladığı, bilgi bankanızda henüz olmayan sayfalar. Ekleyince marka zekâsına dahil olur.
+            </p>
+            <ul className="divide-y divide-border">
+              {candidates.map((candidate) => (
+                <li key={candidate.url} className="flex flex-wrap items-center gap-3 py-2 text-sm">
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-medium">{candidate.title}</span>
+                    <a href={candidate.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-primary">
+                      {candidate.domain} <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </span>
+                  <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
+                    {candidate.type === "own" ? "Sizin siteniz" : candidate.type === "competitor" ? "Rakip" : "Tarafsız"} · {candidate.count} atıf
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={promoteMutation.isPending}
+                    onClick={() => promoteMutation.mutate({ url: candidate.url, title: candidate.title })}
+                  >
+                    <Plus className="mr-1.5 h-3.5 w-3.5" /> Bilgi bankasına ekle
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
