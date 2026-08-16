@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
 import { VisibilityCharts } from "@/components/app/visibility-charts";
+import { TrafficCharts } from "@/components/app/traffic-charts";
 import { getBrandOverview, getMeasurementState, getVisibilityAnalytics } from "@/lib/panel.functions";
+import { getTrafficOverview } from "@/lib/integrations.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/")({
@@ -41,6 +43,12 @@ function DashboardPage() {
   const { data: analytics } = useQuery({
     queryKey: ["visibility-analytics", brand?.id],
     queryFn: () => fetchAnalytics({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
+  const fetchTraffic = useServerFn(getTrafficOverview);
+  const { data: traffic } = useQuery({
+    queryKey: ["traffic-overview", brand?.id],
+    queryFn: () => fetchTraffic({ data: { brandId: brand!.id } }),
     enabled: Boolean(brand?.id),
   });
 
@@ -90,6 +98,31 @@ function DashboardPage() {
               </Link>
             ))}
           </div>
+
+          {traffic ? <TrafficCharts data={traffic} /> : null}
+
+          {traffic?.gsc.connected && traffic.gsc.queries.length ? (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Search Console — en çok tıklanan sorgular</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ul className="divide-y divide-border text-sm">
+                  {traffic.gsc.queries.map((row) => (
+                    <li key={row.query} className="flex items-center gap-3 px-4 py-2">
+                      <span className="min-w-0 flex-1 truncate">{row.query}</span>
+                      <span className="w-16 text-right font-mono text-xs">{row.clicks}</span>
+                      <span className="w-20 text-right font-mono text-xs text-muted-foreground">{row.impressions}</span>
+                      <span className="w-16 text-right font-mono text-xs text-muted-foreground">{row.position}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
+                  Sütunlar: sorgu · tıklama · gösterim · ortalama sıra
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
 
           {data && data.runs > 0 ? (
             <>
