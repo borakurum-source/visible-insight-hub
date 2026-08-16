@@ -3,13 +3,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BookOpen, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
+import { BookOpen, ExternalLink, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { PanelSubnav } from "@/components/app/panel-subnav";
+import { PanelSubnav, KNOWLEDGE_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { addKnowledgeSources, deleteKnowledgeSource, listKnowledgeSources } from "@/lib/panel.functions";
+import { indexKnowledgeSource, rebuildGraphEntities, rebuildVectorMap } from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/knowledge-base")({
@@ -31,6 +33,9 @@ function KnowledgeBasePage() {
   const fetchSources = useServerFn(listKnowledgeSources);
   const addSources = useServerFn(addKnowledgeSources);
   const removeSource = useServerFn(deleteKnowledgeSource);
+  const indexSource = useServerFn(indexKnowledgeSource);
+  const reproject = useServerFn(rebuildVectorMap);
+  const rebuildEntities = useServerFn(rebuildGraphEntities);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
 
@@ -44,7 +49,23 @@ function KnowledgeBasePage() {
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: key });
     void queryClient.invalidateQueries({ queryKey: ["brand-overview", brand?.id] });
+    void queryClient.invalidateQueries({ queryKey: ["knowledge-graph", brand?.id] });
   };
+
+  const indexMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      for (const id of ids) {
+        await indexSource({ data: { brandId: brand!.id, sourceId: id } });
+      }
+      await reproject({ data: { brandId: brand!.id } });
+      await rebuildEntities({ data: { brandId: brand!.id } });
+    },
+    onSuccess: () => {
+      toast.success("Kaynaklar indekslendi ve bilgi grafiği güncellendi");
+      invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const addMutation = useMutation({
     mutationFn: () => addSources({ data: { brandId: brand!.id, items: [{ title: title.trim() || url.trim(), url: url.trim() }] } }),
@@ -61,7 +82,7 @@ function KnowledgeBasePage() {
   if (!brand) {
     return (
       <>
-        <PanelSubnav items={[{ to: "/app/knowledge-base", label: "Bilgi Bankası" }, { to: "/app/claims", label: "Marka İddiaları" }, { to: "/app/graph", label: "Bilgi Grafiği" }]} />
+        <PanelSubnav items={KNOWLEDGE_SUBNAV} />
         <PanelPageHeading meta={{ title: "Bilgi Bankası", description: "Önce bir marka ekleyin.", icon: BookOpen }} />
         <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
       </>
@@ -70,13 +91,24 @@ function KnowledgeBasePage() {
 
   return (
     <>
-      <PanelSubnav items={[{ to: "/app/knowledge-base", label: "Bilgi Bankası" }, { to: "/app/claims", label: "Marka İddiaları" }, { to: "/app/graph", label: "Bilgi Grafiği" }]} />
+      <PanelSubnav items={KNOWLEDGE_SUBNAV} />
       <PanelPageHeading
         meta={{
           title: "Bilgi Bankası",
           description: "Yapay zekâ cevaplarında kaynak gösterilmesini istediğiniz sayfalar. Ne kadar net, o kadar çok alıntı.",
           icon: BookOpen,
         }}
+        action={
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={indexMutation.isPending || data.length === 0}
+            onClick={() => indexMutation.mutate(data.filter((s) => s.index_status !== "hazir").map((s) => s.id))}
+          >
+            {indexMutation.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
+            Bekleyenleri indeksle
+          </Button>
+        }
       />
 
       <div className="flex flex-wrap items-end gap-2">
@@ -105,6 +137,18 @@ function KnowledgeBasePage() {
                       </a>
                     ) : null}
                   </span>
+                  <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
+                    {source.index_status === "hazir" ? `${source.chunk_count} parça indeksli` : source.index_status === "hata" ? "İçerik alınamadı" : "İndeks bekliyor"}
+                  </Badge>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label="Kaynağı indeksle"
+                    disabled={indexMutation.isPending}
+                    onClick={() => indexMutation.mutate([source.id])}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
                   <Button size="icon" variant="ghost" aria-label="Kaynağı sil" onClick={() => deleteMutation.mutate(source.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>

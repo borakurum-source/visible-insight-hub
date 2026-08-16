@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Compass, ExternalLink, Loader2, ShieldAlert } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { PanelSubnav } from "@/components/app/panel-subnav";
+import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ function CitationDiscoveryPage() {
   if (!brand) {
     return (
       <>
-        <PanelSubnav items={[{ to: "/app/prompts", label: "Promptlar" }, { to: "/app/prompt-discovery", label: "Prompt Keşfi" }, { to: "/app/measurement", label: "Ölçüm & Skor" }, { to: "/app/citation-discovery", label: "Kaynak Keşfi" }, { to: "/app/report", label: "Rapor" }]} />
+        <PanelSubnav items={VISIBILITY_SUBNAV} />
         <PanelPageHeading meta={{ title: "Kaynak Keşfi", description: "Önce bir marka ekleyin.", icon: Compass }} />
         <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
       </>
@@ -44,7 +44,7 @@ function CitationDiscoveryPage() {
 
   return (
     <>
-      <PanelSubnav items={[{ to: "/app/prompts", label: "Promptlar" }, { to: "/app/prompt-discovery", label: "Prompt Keşfi" }, { to: "/app/measurement", label: "Ölçüm & Skor" }, { to: "/app/citation-discovery", label: "Kaynak Keşfi" }, { to: "/app/report", label: "Rapor" }]} />
+      <PanelSubnav items={VISIBILITY_SUBNAV} />
       <PanelPageHeading
         meta={{
           title: "Kaynak Keşfi",

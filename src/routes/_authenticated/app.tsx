@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   LayoutDashboard, Sparkles, Settings, Menu, Building2, Gauge,
-  ListChecks, KanbanSquare, ShieldCheck, PenSquare,
+  KanbanSquare, BookOpen, PenSquare, Waypoints,
   Users, Quote, Lock, LogOut, Plus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,33 +19,33 @@ export const Route = createFileRoute("/_authenticated/app")({
   component: AppLayout,
 });
 
-type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact: boolean };
+type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact: boolean; match?: string[] };
 type NavGroup = { label: string; items: NavItem[]; adminOnly?: boolean };
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Başla",
+    label: "İzle",
     items: [
       { to: "/app", label: "Komuta Merkezi", icon: LayoutDashboard, exact: true },
       { to: "/app/onboarding", label: "Kurulum", icon: Sparkles, exact: false },
+      {
+        to: "/app/prompts",
+        label: "Görünürlük",
+        icon: Gauge,
+        exact: false,
+        match: ["/app/prompts", "/app/prompt-discovery", "/app/measurement", "/app/citation-discovery", "/app/report"],
+      },
     ],
   },
   {
-    label: "Görünürlük",
+    label: "Anla",
     items: [
-      { to: "/app/prompts", label: "Promptlar", icon: ListChecks, exact: false },
-      { to: "/app/measurement", label: "Ölçüm & Skor", icon: Gauge, exact: false },
+      { to: "/app/graph", label: "Bilgi Grafiği", icon: Waypoints, exact: false },
+      { to: "/app/knowledge-base", label: "Bilgi Bankası", icon: BookOpen, exact: false, match: ["/app/knowledge-base", "/app/claims"] },
     ],
   },
   {
-    label: "Kanıt",
-    items: [
-      { to: "/app/knowledge-base", label: "Bilgi Bankası", icon: Sparkles, exact: false },
-      { to: "/app/claims", label: "Marka İddiaları", icon: ShieldCheck, exact: false },
-    ],
-  },
-  {
-    label: "Aksiyon",
+    label: "Harekete geç",
     items: [
       { to: "/app/content", label: "İçerik Üretimi", icon: PenSquare, exact: false },
       { to: "/app/geo-tasks", label: "Görevler", icon: KanbanSquare, exact: false },
@@ -54,7 +54,13 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Çalışma Alanı",
     items: [
-      { to: "/app/settings", label: "Ayarlar", icon: Settings, exact: false },
+      {
+        to: "/app/settings",
+        label: "Ayarlar",
+        icon: Settings,
+        exact: false,
+        match: ["/app/settings", "/app/integrations", "/app/account", "/app/pricing"],
+      },
     ],
   },
   {
@@ -117,9 +123,11 @@ function NavList({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
             {group.label}
           </p>
           <div className="space-y-0.5">
-            {group.items.map(({ to, label, icon: Icon, exact }) => {
+            {group.items.map(({ to, label, icon: Icon, exact, match }) => {
               const locked = !setupDone && !ALWAYS_OPEN.has(to);
-              const active = exact ? location.pathname === to : location.pathname.startsWith(to);
+              const active = exact
+                ? location.pathname === to
+                : (match ?? [to]).some((path) => location.pathname.startsWith(path));
               if (locked) {
                 return (
                   <div

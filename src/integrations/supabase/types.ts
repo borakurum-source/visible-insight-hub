@@ -259,6 +259,63 @@ export type Database = {
           },
         ]
       }
+      content_drafts: {
+        Row: {
+          body: string
+          brand_id: string
+          created_at: string
+          id: string
+          prompt_id: string | null
+          sources: Json
+          status: string
+          target_prompt: string | null
+          title: string
+          updated_at: string
+          word_count: number
+        }
+        Insert: {
+          body?: string
+          brand_id: string
+          created_at?: string
+          id?: string
+          prompt_id?: string | null
+          sources?: Json
+          status?: string
+          target_prompt?: string | null
+          title: string
+          updated_at?: string
+          word_count?: number
+        }
+        Update: {
+          body?: string
+          brand_id?: string
+          created_at?: string
+          id?: string
+          prompt_id?: string | null
+          sources?: Json
+          status?: string
+          target_prompt?: string | null
+          title?: string
+          updated_at?: string
+          word_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_drafts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_drafts_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geo_tasks: {
         Row: {
           brand_id: string
@@ -300,12 +357,158 @@ export type Database = {
           },
         ]
       }
+      graph_edges: {
+        Row: {
+          brand_id: string
+          created_at: string
+          id: string
+          relation: string
+          source_key: string
+          target_key: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          id?: string
+          relation?: string
+          source_key: string
+          target_key: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          id?: string
+          relation?: string
+          source_key?: string
+          target_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "graph_edges_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      graph_entities: {
+        Row: {
+          brand_id: string
+          created_at: string
+          entity_type: string
+          id: string
+          key: string
+          label: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          entity_type?: string
+          id?: string
+          key: string
+          label: string
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          entity_type?: string
+          id?: string
+          key?: string
+          label?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "graph_entities_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_chunks: {
+        Row: {
+          brand_id: string
+          chunk_index: number
+          content: string
+          content_hash: string
+          created_at: string
+          embedding: string | null
+          id: string
+          source_id: string | null
+          source_type: string
+          source_weight: number
+          updated_at: string
+          x: number | null
+          y: number | null
+          z: number | null
+        }
+        Insert: {
+          brand_id: string
+          chunk_index?: number
+          content: string
+          content_hash?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          source_id?: string | null
+          source_type?: string
+          source_weight?: number
+          updated_at?: string
+          x?: number | null
+          y?: number | null
+          z?: number | null
+        }
+        Update: {
+          brand_id?: string
+          chunk_index?: number
+          content?: string
+          content_hash?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          source_id?: string | null
+          source_type?: string
+          source_weight?: number
+          updated_at?: string
+          x?: number | null
+          y?: number | null
+          z?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_chunks_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_chunks_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_sources: {
         Row: {
           brand_id: string
+          chunk_count: number
           content: string | null
+          content_hash: string | null
           created_at: string
           id: string
+          index_status: string
+          indexed_at: string | null
           source_type: string
           status: string
           title: string
@@ -314,9 +517,13 @@ export type Database = {
         }
         Insert: {
           brand_id: string
+          chunk_count?: number
           content?: string | null
+          content_hash?: string | null
           created_at?: string
           id?: string
+          index_status?: string
+          indexed_at?: string | null
           source_type?: string
           status?: string
           title: string
@@ -325,9 +532,13 @@ export type Database = {
         }
         Update: {
           brand_id?: string
+          chunk_count?: number
           content?: string | null
+          content_hash?: string | null
           created_at?: string
           id?: string
+          index_status?: string
+          indexed_at?: string | null
           source_type?: string
           status?: string
           title?: string
@@ -593,6 +804,21 @@ export type Database = {
       is_brand_member: {
         Args: { _brand_id: string; _user_id: string }
         Returns: boolean
+      }
+      match_kb_chunks: {
+        Args: {
+          _brand_id: string
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          id: string
+          score: number
+          similarity: number
+          source_id: string
+          source_type: string
+        }[]
       }
     }
     Enums: {
