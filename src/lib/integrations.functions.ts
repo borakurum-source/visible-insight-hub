@@ -14,7 +14,7 @@ export const getIntegrations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
-    const [{ data: connections }, { data: snapshot }] = await Promise.all([
+    const [{ data: connections }, { data: snapshot }, { data: ga4Snap }] = await Promise.all([
       context.supabase
         .from("integration_connections")
         .select("provider, status, property_id, last_sync_at, last_error")
@@ -27,9 +27,25 @@ export const getIntegrations = createServerFn({ method: "POST" })
         .order("snapshot_date", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      context.supabase
+        .from("analytics_snapshots")
+        .select("provider, snapshot_date, payload")
+        .eq("brand_id", data.brandId)
+        .eq("provider", "ga4")
+        .order("snapshot_date", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
     return {
       connections: (connections ?? []) as IntegrationRow[],
+      ga4Snapshot: (ga4Snap?.payload ?? null) as null | {
+        propertyId: string;
+        startDate: string;
+        endDate: string;
+        totals: { sessions: number; users: number };
+        daily: Array<{ date: string; sessions: number; users: number }>;
+        channels: Array<{ channel: string; sessions: number; users: number }>;
+      },
       gscSnapshot: (snapshot?.payload ?? null) as null | {
         siteUrl: string;
         startDate: string;
