@@ -165,7 +165,27 @@ function ContentPage() {
 
       <Card>
         <CardContent className="space-y-3 p-6">
-          <p className="flex items-center gap-1.5 text-sm font-medium"><Sparkles className="h-4 w-4" /> Kanıt Boşlukları</p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="flex items-center gap-1.5 text-sm font-medium"><Sparkles className="h-4 w-4" /> Kanıt Boşlukları</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={format} onValueChange={setFormat}>
+                <SelectTrigger className="h-8 w-[170px] text-xs" aria-label="İçerik biçimi"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {FORMAT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs">{option.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={length} onValueChange={setLength}>
+                <SelectTrigger className="h-8 w-[180px] text-xs" aria-label="İçerik uzunluğu"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {LENGTH_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs">{option.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           {gapsLoading ? (
             <p className="flex items-center gap-2 py-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Bilgi bankası kapsamı hesaplanıyor…</p>
           ) : gaps.length === 0 ? (
@@ -212,12 +232,30 @@ function ContentPage() {
 
       <Card>
         <CardContent className="space-y-3 p-6">
-          <p className="text-sm font-medium">Taslaklar</p>
-          {drafts.length === 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-medium">Taslaklar <span className="text-xs text-muted-foreground">({drafts.length})</span></p>
+            <div className="flex flex-wrap gap-1.5">
+              {STATUS_FILTERS.map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  onClick={() => setStatusFilter(filter.value)}
+                  className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                    statusFilter === filter.value
+                      ? "border-primary bg-primary/10 font-medium text-primary"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {visibleDrafts.length === 0 ? (
             <p className="py-4 text-sm text-muted-foreground">Henüz taslak yok. Yukarıdaki bir boşluktan üretin.</p>
           ) : (
             <div className="space-y-2">
-              {drafts.map((draft) => (
+              {visibleDrafts.map((draft) => (
                 <div key={draft.id} className="rounded-md border border-border">
                   <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                     <button
@@ -231,6 +269,23 @@ function ContentPage() {
                       </p>
                     </button>
                     <div className="flex items-center gap-2">
+                      <Button size="icon" variant="ghost" aria-label="Taslağı kopyala" onClick={() => copyDraft(draft.title, draft.body)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" aria-label="Markdown indir" onClick={() => downloadDraft(draft.title, draft.body)}>
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      {draft.prompt_id ? (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          aria-label="Yeniden üret"
+                          disabled={draftMutation.isPending}
+                          onClick={() => draftMutation.mutate(draft.prompt_id as string)}
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                      ) : null}
                       <Button
                         size="sm"
                         variant="outline"
