@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/app/measurement")({
   head: () => ({
     meta: [
       { title: "Ölçüm — OneCite Paneli" },
-      { name: "description", content: "Onaylı promptlarınızı yapay zekâ asistanlarında çalıştırın ve görünürlük skorunuzu kırılımıyla görün." },
+      { name: "description", content: "Onaylı promptlarınızı yapay zeka asistanlarında çalıştırın ve görünürlük skorunuzu kırılımıyla görün." },
       { property: "og:title", content: "Ölçüm — OneCite Paneli" },
       { property: "og:description", content: "AI görünürlük ölçüm turu ve skor kırılımı." },
       { name: "robots", content: "noindex" },
@@ -70,7 +70,7 @@ function MeasurementPage() {
       <PanelPageHeading
         meta={{
           title: "Ölçüm",
-          description: "Onaylı promptlarınızı yapay zekâ asistanlarında çalıştırıp görünürlüğünüzü puanlıyoruz.",
+          description: "Onaylı promptlarınızı yapay zeka asistanlarında çalıştırıp görünürlüğünüzü puanlıyoruz.",
           icon: Gauge,
         }}
         action={
@@ -124,7 +124,7 @@ function MeasurementPage() {
                   <Quote className="h-4 w-4 text-primary" aria-hidden="true" /> Yanıtlar ve kullanılan kaynaklar
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Yapay zekâ her soruyu yanıtlarken hangi sayfaları kaynak gösterdi? Kendi sayfanız listede yoksa o soruda kanıt boşluğunuz var.
+                  Yapay zeka her soruyu yanıtlarken hangi sayfaları kaynak gösterdi? Kendi sayfanız listede yoksa o soruda kanıt boşluğunuz var.
                 </p>
               </CardHeader>
               <CardContent>

@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/app/prompts")({
   head: () => ({
     meta: [
       { title: "Promptlar — OneCite Paneli" },
-      { name: "description", content: "Yapay zekâ motorlarında takip ettiğiniz soruları yönetin ve onaylayın." },
+      { name: "description", content: "Yapay zeka motorlarında takip ettiğiniz soruları yönetin ve onaylayın." },
       { property: "og:title", content: "Promptlar — OneCite Paneli" },
       { property: "og:description", content: "Takip edilen soruları yönetin." },
       { name: "robots", content: "noindex" },
@@ -117,7 +117,7 @@ function PromptsPage() {
       <PanelPageHeading
         meta={{
           title: "Promptlar",
-          description: "Yapay zekâ motorlarında görünmek istediğiniz sorular. Adayları onaylayın, kendi sorunuzu ekleyin.",
+          description: "Yapay zeka motorlarında görünmek istediğiniz sorular. Adayları onaylayın, kendi sorunuzu ekleyin.",
           icon: ListChecks,
         }}
       />

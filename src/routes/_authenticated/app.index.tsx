@@ -138,7 +138,7 @@ function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Onaylı promptlarınızı yapay zekâ asistanlarında çalıştırıp görünürlük skorunuzu ve kırılımını çıkarıyoruz.
+                  Onaylı promptlarınızı yapay zeka asistanlarında çalıştırıp görünürlük skorunuzu ve kırılımını çıkarıyoruz.
                 </p>
                 <Button asChild size="sm">
                   <Link to="/app/measurement"><Gauge className="mr-1.5 h-4 w-4" /> Ölçümü başlat</Link>

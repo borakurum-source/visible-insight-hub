@@ -30,7 +30,7 @@ Araçları yalnızca marka mention sayısına göre sıralamadık. Prompt düzey
 
 ![OneCite homepage screenshot](/articles/onecite-homepage.webp)
 
-OneCite, markaların yapay zekâ yanıtlarında nerede kaynak gösterildiğini ölçen bir AI Citation Intelligence platformudur. Soru bazlı görünürlüğü, seçilen kaynakları, rakipleri ve eksik kanıtları aynı karar zincirinde birleştirir.[1] Ürün, yalnızca “marka geçti mi?” sorusuna değil, “hangi bağlamda, hangi kaynakla ve hangi kanıt eksiği nedeniyle seçildi veya seçilmedi?” sorusuna odaklanır.
+OneCite, markaların yapay zeka yanıtlarında nerede kaynak gösterildiğini ölçen bir AI Citation Intelligence platformudur. Soru bazlı görünürlüğü, seçilen kaynakları, rakipleri ve eksik kanıtları aynı karar zincirinde birleştirir.[1] Ürün, yalnızca “marka geçti mi?” sorusuna değil, “hangi bağlamda, hangi kaynakla ve hangi kanıt eksiği nedeniyle seçildi veya seçilmedi?” sorusuna odaklanır.
 
 OneCite’ın farkı, görünürlük ölçümünü içerik önceliğine bağlamasıdır. Bir prompt grubunda kaynak seçilmiyorsa, ekip [Citation Share ölçümü](https://1cite.com/platform/citation-share) üzerinden sorunu izleyebilir; ardından [Eksik Kanıt görünümünde](https://1cite.com/platform/evidence-gaps) hangi bilgi, ilişki veya otorite sinyalinin eksik kaldığını inceleyebilir. Çok müşterili ekipler için [ajans çalışma alanı](https://1cite.com/solutions/agencies) bu ölçüm mantığını birden fazla markaya taşır.[2]
 
@@ -284,7 +284,7 @@ SE Ranking’in avantajı, AI görünürlüğünü mevcut SEO operasyonuna bağl
 
 Writesonic, AI görünürlük takibini içerik üretimi, site denetimi ve optimizasyon aksiyonlarıyla aynı üründe birleştirmeye çalışan bir platformdur. Ürün sayfası, markanın AI tarafından nerede göz ardı edildiğini görme, citation ve teknik sorunları düzeltme, ardından lift ölçme akışını öne çıkarır.[16]
 
-Bu model, “raporu aldım, şimdi ne üreteceğim?” sorusuna hızlı cevap isteyen içerik ekipleri için kullanışlı olabilir. Buna karşılık uzun biçimli içeriklerde editoryal kontrol, marka sesi ve kaynak doğrulama süreci hâlâ insan ekip tarafından yürütülmelidir.
+Bu model, “raporu aldım, şimdi ne üreteceğim?” sorusuna hızlı cevap isteyen içerik ekipleri için kullanışlı olabilir. Buna karşılık uzun biçimli içeriklerde editoryal kontrol, marka sesi ve kaynak doğrulama süreci hala insan ekip tarafından yürütülmelidir.
 
 **Temel özellikler:**
 
@@ -320,7 +320,7 @@ Küçük ekiplerin ise fiyatı değil, takip edebileceği soru sayısını ve ra
 
 ### AI görünürlük aracı nedir?
 
-AI görünürlük aracı, markanızın yapay zekâ tarafından üretilen yanıt ve önerilerde ne kadar göründüğünü ölçer. İyi araçlar marka mention’ının yanında prompt, rakip, seçilen kaynak, citation bağlamı ve duygu sinyalini de gösterir.
+AI görünürlük aracı, markanızın yapay zeka tarafından üretilen yanıt ve önerilerde ne kadar göründüğünü ölçer. İyi araçlar marka mention’ının yanında prompt, rakip, seçilen kaynak, citation bağlamı ve duygu sinyalini de gösterir.
 
 ### AI görünürlük ile SEO arasındaki fark nedir?
 

@@ -52,7 +52,7 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
           Rakip keşfi
           <Hint title="Rakip keşfi">
             <p>Rakiplerinizi bilmiyorsanız buradan arayın: sektörünüzü yazın, gerçek firmaları listeleyelim.</p>
-            <p>Eklediğiniz rakipler, yapay zekâ yanıtlarında <strong>sizin yerinize kimin çıktığını</strong> ölçmek için kullanılır.</p>
+            <p>Eklediğiniz rakipler, yapay zeka yanıtlarında <strong>sizin yerinize kimin çıktığını</strong> ölçmek için kullanılır.</p>
           </Hint>
         </CardTitle>
       </CardHeader>

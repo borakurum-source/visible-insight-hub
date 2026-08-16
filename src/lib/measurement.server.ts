@@ -27,7 +27,7 @@ export async function measurePrompt(input: {
         role: "system",
         content:
           input.systemPrompt?.trim() ||
-          "Sen bir yapay zekâ arama asistanısın. Kullanıcının sorusunu Türkçe, tarafsız ve kısa (en fazla 150 kelime) yanıtla; gerçekte hangi markaları önerirsen onları sırayla listele. Yanıtı şu JSON şemasında ver: {\"answer\":\"...\",\"mentionedBrands\":[\"...\"]}. mentionedBrands cevapta geçen marka adları ÖNEM SIRASIYLA.",
+          "Sen bir yapay zeka arama asistanısın. Kullanıcının sorusunu Türkçe, tarafsız ve kısa (en fazla 150 kelime) yanıtla; gerçekte hangi markaları önerirsen onları sırayla listele. Yanıtı şu JSON şemasında ver: {\"answer\":\"...\",\"mentionedBrands\":[\"...\"]}. mentionedBrands cevapta geçen marka adları ÖNEM SIRASIYLA.",
       },
       { role: "user", content: input.promptText },
     ],

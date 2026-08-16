@@ -28,7 +28,7 @@ Ajans bakış açısında aradığımız ilk özellik çoklu müşteri yönetimi
 
 ![OneCite homepage screenshot](/articles/onecite-homepage.webp)
 
-OneCite, ajansların markaların yapay zekâ yanıtlarında nerede kaynak gösterildiğini ölçmesine ve bu ölçümü kanıt odaklı uygulamaya çevirmesine yardımcı olan AI Citation Intelligence platformudur. Ajans çalışma alanı, birden fazla müşterinin soru seti, rakipleri, kaynakları ve eksik kanıtlarını tek bir sistem içinde takip etmeye yöneliktir.[1]
+OneCite, ajansların markaların yapay zeka yanıtlarında nerede kaynak gösterildiğini ölçmesine ve bu ölçümü kanıt odaklı uygulamaya çevirmesine yardımcı olan AI Citation Intelligence platformudur. Ajans çalışma alanı, birden fazla müşterinin soru seti, rakipleri, kaynakları ve eksik kanıtlarını tek bir sistem içinde takip etmeye yöneliktir.[1]
 
 Ajans için önemli fark, müşteriye yalnızca “AI görünürlüğünüz yüzde X” demek yerine, bu sayının hangi sorulardan oluştuğunu anlatabilmesidir. [Citation Share ölçümü](https://1cite.com/platform/citation-share) hangi soruların kazanılıp kaybedildiğini, [Eksik Kanıt görünümü](https://1cite.com/platform/evidence-gaps) ise içerik veya otorite tarafında hangi halkanın eksik kaldığını açıklar. Bu, aylık raporu doğrudan bir uygulama öncelik listesine bağlar.[2]
 

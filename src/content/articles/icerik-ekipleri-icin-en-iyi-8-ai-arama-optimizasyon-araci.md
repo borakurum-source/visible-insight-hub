@@ -35,7 +35,7 @@ Bir içerik ekibi için bu yaklaşım önemlidir; çünkü her içerik fırsatı
 **Temel özellikler:**
 
 - **Prompt bazlı içerik önceliği:** İçerik fikirlerini gerçek soru ve satın alma niyeti bağlamında değerlendirmeye yardımcı olur.[1]
-- **Citation kaynak analizi:** Yapay zekânın markayı hangi sayfalara, alan adlarına veya kaynak türlerine dayanarak seçtiğini incelemeyi sağlar.[1]
+- **Citation kaynak analizi:** Yapay zekanın markayı hangi sayfalara, alan adlarına veya kaynak türlerine dayanarak seçtiğini incelemeyi sağlar.[1]
 - **Eksik kanıt iş akışı:** Görünürlük açığını karşılaştırma sayfası, vaka çalışması, teknik doküman veya başka bir kanıt türüyle ilişkilendirir.[2]
 
 **Artıları:**
@@ -262,7 +262,7 @@ Kurumsal içerik programları için Profound’un prompt hacmi ve AEO içgörül
 
 ### AI arama optimizasyonu nedir?
 
-AI arama optimizasyonu, markanın ChatGPT, Perplexity, Gemini, Google AI Overviews ve benzeri sistemlerin ürettiği yanıtlarda doğru bağlamla görünmesini kolaylaştırmaya yönelik ölçüm ve içerik çalışmalarının bütünüdür. SEO’nun yerine geçmez; içerik kalitesi, teknik erişilebilirlik ve otorite sinyalleri hâlâ önemlidir.
+AI arama optimizasyonu, markanın ChatGPT, Perplexity, Gemini, Google AI Overviews ve benzeri sistemlerin ürettiği yanıtlarda doğru bağlamla görünmesini kolaylaştırmaya yönelik ölçüm ve içerik çalışmalarının bütünüdür. SEO’nun yerine geçmez; içerik kalitesi, teknik erişilebilirlik ve otorite sinyalleri hala önemlidir.
 
 ### İçerik ekibi önce hangi AI görünürlük metriğini takip etmeli?
 

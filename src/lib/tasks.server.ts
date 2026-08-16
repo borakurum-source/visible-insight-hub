@@ -49,7 +49,7 @@ export async function createPriorityTasks(
   if (unindexed > 0) {
     candidates.push({
       title: `${unindexed} bilgi kaynağını indeksleyin`,
-      description: "İndekslenmemiş kaynaklar marka zekâsında kullanılamıyor; Bilgi Bankası ekranından indeksleyin.",
+      description: "İndekslenmemiş kaynaklar marka zekasında kullanılamıyor; Bilgi Bankası ekranından indeksleyin.",
       priority: "medium",
     });
   }

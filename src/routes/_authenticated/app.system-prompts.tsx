@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/app/system-prompts")({
   head: () => ({
     meta: [
       { title: "Sistem Talimatları — OneCite Paneli" },
-      { name: "description", content: "Panelin yapay zekâ davranışını yöneten sistem talimatlarını görüntüleyin ve düzenleyin." },
+      { name: "description", content: "Panelin yapay zeka davranışını yöneten sistem talimatlarını görüntüleyin ve düzenleyin." },
       { property: "og:title", content: "Sistem Talimatları — OneCite Paneli" },
       { property: "og:description", content: "AI sistem talimatları yönetimi." },
       { name: "robots", content: "noindex" },
@@ -72,7 +72,7 @@ function SystemPromptsPage() {
         meta={{
           title: "Sistem Talimatları",
           description:
-            "Marka analizi, prompt keşfi, ölçüm ve içerik üretiminde yapay zekânın uyduğu kurallar. İşin kalbi burada.",
+            "Marka analizi, prompt keşfi, ölçüm ve içerik üretiminde yapay zekanın uyduğu kurallar. İşin kalbi burada.",
           icon: Braces,
         }}
       />

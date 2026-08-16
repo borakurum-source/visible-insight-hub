@@ -197,7 +197,7 @@ export const rebuildVectorMap = createServerFn({ method: "POST" })
     return { ok: true, points: chunks.length };
   });
 
-// Marka zekâsından varlık düğümlerini ve ilişkilerini üretir.
+// Marka zekasından varlık düğümlerini ve ilişkilerini üretir.
 export const rebuildGraphEntities = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)

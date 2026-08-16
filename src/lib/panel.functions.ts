@@ -331,7 +331,7 @@ export const listCitationSources = createServerFn({ method: "POST" })
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
   });
 
-// Ölçüm ekranı: her sorunun yanıtı ve o yanıtta yapay zekânın kullandığı kaynaklar.
+// Ölçüm ekranı: her sorunun yanıtı ve o yanıtta yapay zekanın kullandığı kaynaklar.
 export const listRunCitations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; limit?: number }) => input)
@@ -892,7 +892,7 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       actions.push({
         key: "evidence-content",
         title: `"${(prompt?.text ?? "").slice(0, 80)}" sorusu için kanıt içeriği yayımlayın`,
-        description: `Yapay zekâ bu soruda ${brand?.name ?? "markanızı"} anmadı. Soruyu doğrudan yanıtlayan, veri ve kaynak içeren bir sayfa yayımlayın; İçerik Üretimi ekranından taslak alabilirsiniz.`,
+        description: `Yapay zeka bu soruda ${brand?.name ?? "markanızı"} anmadı. Soruyu doğrudan yanıtlayan, veri ve kaynak içeren bir sayfa yayımlayın; İçerik Üretimi ekranından taslak alabilirsiniz.`,
         priority: "high",
       });
       if (sources.length) {
@@ -922,7 +922,7 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       actions.push({
         key: "kb-source",
         title: "Bilgi Bankası'na bu konuda kaynak ekleyin",
-        description: "Konuyla ilgili teknik doküman, vaka çalışması veya SSS ekleyip indeksleyin; marka zekâsı yanıt üretiminde bu kanıtları kullanır.",
+        description: "Konuyla ilgili teknik doküman, vaka çalışması veya SSS ekleyip indeksleyin; marka zekası yanıt üretiminde bu kanıtları kullanır.",
         priority: "low",
       });
     }
@@ -1048,7 +1048,7 @@ Arama: ${data.query?.trim() || "aynı sektördeki başlıca rakipler"}`,
       .slice(0, 8);
   });
 
-// Marka zekâsındaki rakip listesini okur / günceller.
+// Marka zekasındaki rakip listesini okur / günceller.
 export const getCompetitors = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)

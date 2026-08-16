@@ -215,7 +215,7 @@ function IntegrationsPage() {
               )}
             </div>
             <CardDescription className="pt-1">
-              {ga4?.property_id ? `Mülk ${ga4.property_id}` : "Site trafiğinizi yapay zekâ görünürlüğüyle karşılaştırın."}
+              {ga4?.property_id ? `Mülk ${ga4.property_id}` : "Site trafiğinizi yapay zeka görünürlüğüyle karşılaştırın."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">

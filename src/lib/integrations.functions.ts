@@ -266,7 +266,7 @@ export type TrafficOverview = {
   };
 };
 
-// Komuta merkezi için GSC anlık görüntüsü + yapay zekâ atıf/görünürlük trafiği.
+// Komuta merkezi için GSC anlık görüntüsü + yapay zeka atıf/görünürlük trafiği.
 export const getTrafficOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; days?: number }) => input)

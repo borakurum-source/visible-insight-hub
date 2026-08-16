@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/app/graph")({
       { title: "Marka Zekası — OneCite Paneli" },
       { name: "description", content: "Bilgi bankanızın vektör uzayındaki 3B haritası: güçlü konu kümeleri ve kanıt boşlukları." },
       { property: "og:title", content: "Marka Zekası — OneCite Paneli" },
-      { property: "og:description", content: "Marka zekânızın vektör haritası." },
+      { property: "og:description", content: "Marka zekanızın vektör haritası." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -207,7 +207,7 @@ function GraphPage() {
             <CardContent className="space-y-4">
               {entities.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Varlıklar marka zekânızdan üretilir. "Yeniden hesapla" ile oluşturabilirsiniz.
+                  Varlıklar marka zekanızdan üretilir. "Yeniden hesapla" ile oluşturabilirsiniz.
                 </p>
               ) : (
                 <>

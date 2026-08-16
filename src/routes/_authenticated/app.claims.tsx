@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/app/claims")({
   head: () => ({
     meta: [
       { title: "Marka İddiaları — OneCite Paneli" },
-      { name: "description", content: "Yapay zekânın markanız hakkında tekrarlamasını istediğiniz kanıtlı ifadeler." },
+      { name: "description", content: "Yapay zekanın markanız hakkında tekrarlamasını istediğiniz kanıtlı ifadeler." },
       { property: "og:title", content: "Marka İddiaları — OneCite Paneli" },
       { property: "og:description", content: "Kanıtlı marka ifadelerinizi yönetin." },
       { name: "robots", content: "noindex" },
@@ -73,17 +73,17 @@ function ClaimsPage() {
     <>
       <PanelSubnav items={KNOWLEDGE_SUBNAV} />
       <PanelPageHeading
-        hint={<><p>İddia, yapay zekânın markanız hakkında tekrar etmesini istediğiniz tek cümlelik, kanıtlanabilir bir bilgidir.</p><p>Her iddiaya bir kaynak bağlantısı ekleyin; kanıtsız iddialar alıntılanmaz.</p></>}
+        hint={<><p>İddia, yapay zekanın markanız hakkında tekrar etmesini istediğiniz tek cümlelik, kanıtlanabilir bir bilgidir.</p><p>Her iddiaya bir kaynak bağlantısı ekleyin; kanıtsız iddialar alıntılanmaz.</p></>}
         meta={{
           title: "Marka İddiaları",
-          description: "Yapay zekânın markanız hakkında tekrarlamasını istediğiniz, kaynağa dayalı kısa ifadeler.",
+          description: "Yapay zekanın markanız hakkında tekrarlamasını istediğiniz, kaynağa dayalı kısa ifadeler.",
           icon: ShieldCheck,
         }}
       />
 
       <Card>
         <CardContent className="space-y-3 pt-6">
-          <Textarea value={statement} onChange={(event) => setStatement(event.target.value)} rows={2} placeholder="Örn. OneCite, Türkçe yapay zekâ cevaplarında marka alıntılarını takip eder." />
+          <Textarea value={statement} onChange={(event) => setStatement(event.target.value)} rows={2} placeholder="Örn. OneCite, Türkçe yapay zeka cevaplarında marka alıntılarını takip eder." />
           <div className="flex flex-wrap gap-2">
             <Input value={evidenceUrl} onChange={(event) => setEvidenceUrl(event.target.value)} placeholder="Kanıt bağlantısı (opsiyonel)" className="max-w-md" />
             <Button onClick={() => createMutation.mutate()} disabled={!statement.trim() || createMutation.isPending}>

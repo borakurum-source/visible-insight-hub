@@ -95,7 +95,7 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
         )}
       </ChartCard>
 
-      <ChartCard title="Atıf kaynağı dağılımı" description="Yapay zekânın gösterdiği kaynaklar kimin sitesinden geliyor?">
+      <ChartCard title="Atıf kaynağı dağılımı" description="Yapay zekanın gösterdiği kaynaklar kimin sitesinden geliyor?">
         {mixData.length ? (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

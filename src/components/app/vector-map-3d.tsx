@@ -258,7 +258,7 @@ export default function VectorMap3D({
       </button>
       </div>
       <p className="text-center text-xs text-muted-foreground">
-        Her düğüm, yapay zekâ erişim yollarında konumlanmış bir bilgi sinyalini temsil eder.
+        Her düğüm, yapay zeka erişim yollarında konumlanmış bir bilgi sinyalini temsil eder.
         <span className="text-primary"> Ağ gerçek zamanlı döner</span> — tıpkı modellerin güncellenmesi gibi.
       </p>
     </div>
