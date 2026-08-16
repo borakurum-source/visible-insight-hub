@@ -16,6 +16,8 @@ type VisualHeroProps = {
   primaryLabel?: string;
   secondaryHref?: string;
   secondaryLabel?: string;
+  proof?: { value: string; label: string }[];
+  note?: string;
   children?: ReactNode;
 };
 
@@ -30,16 +32,22 @@ export function VisualHero({
   primaryLabel = "Ücretsiz ölçüm başlat",
   secondaryHref,
   secondaryLabel,
+  proof,
+  note,
   children,
 }: VisualHeroProps) {
   return (
-    <section className="visual-hero-surface relative isolate overflow-hidden border-b border-[#26302E] text-white">
+    <section className="visual-hero-surface relative isolate overflow-hidden border-b border-white/10 text-white">
       <div className="visual-hero-grid pointer-events-none absolute inset-0 -z-10 opacity-40" aria-hidden="true" />
+      <div className="pointer-events-none absolute -left-24 top-24 -z-10 h-64 w-64 rounded-full bg-cyan/10 blur-3xl" aria-hidden="true" />
       <div className="marketing-container grid items-center gap-10 py-16 md:py-24 lg:grid-cols-[minmax(0,.95fr)_minmax(420px,1.05fr)] lg:gap-16 lg:py-24">
         <div>
           <BrandLogo variant="horizontal" tone="dark" size="sm" linkTo="/" className="mb-8 opacity-95" />
-          <p className="visual-source-label text-cyan">{eyebrow}</p>
-          <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.04] tracking-[-0.05em] md:text-6xl">{title}</h1>
+          <div className="flex items-center gap-3">
+            <span className="visual-source-label text-cyan">{eyebrow}</span>
+            <span className="h-px w-10 bg-cyan/70" />
+          </div>
+          <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.03] tracking-[-0.05em] md:text-5xl lg:text-[60px]">{title}</h1>
           <p className="mt-6 max-w-2xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">{description}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild className="bg-cyan text-foreground hover:bg-[#B8F4FF]">
@@ -53,6 +61,17 @@ export function VisualHero({
               </Button>
             ) : null}
           </div>
+          {proof?.length ? (
+            <dl className="mt-8 grid max-w-xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/15 bg-white/10">
+              {proof.map((item) => (
+                <div key={item.label} className="bg-ink/70 px-4 py-4">
+                  <dt className="font-mono text-xl font-medium text-white md:text-2xl">{item.value}</dt>
+                  <dd className="mt-1 text-[11px] leading-4 text-slate-400">{item.label}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
+          {note ? <p className="mt-4 text-[11px] text-slate-500">{note}</p> : null}
           {children ? <div className="mt-7">{children}</div> : null}
         </div>
         <Reveal className="relative" delay={0.06}>
