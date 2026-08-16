@@ -46,7 +46,7 @@ function IntegrationsPage() {
                     <CardTitle className="text-sm">{integration.name}</CardTitle>
                   </div>
                   {connected ? (
-                    <Badge variant="outline" className="gap-1 border-[hsl(var(--chart-2))] text-[hsl(var(--chart-2))]"><CheckCircle2 className="h-3 w-3" /> Bağlı</Badge>
+                    <Badge variant="outline" className="gap-1 border-success/40 text-success"><CheckCircle2 className="h-3 w-3" /> Bağlı</Badge>
                   ) : (
                     <Badge variant="secondary">Bağlı değil</Badge>
                   )}
