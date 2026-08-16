@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Reveal } from "@/components/site/marketing-motion";
+import { HeroVisual } from "@/components/site/hero-visual";
 import BrandLogo from "@/components/site/BrandLogo";
 
 type VisualHeroProps = {
@@ -12,6 +12,7 @@ type VisualHeroProps = {
   image: string;
   imageAlt: string;
   visualLabel?: string;
+  visualCaption?: string;
   primaryHref?: string;
   primaryLabel?: string;
   secondaryHref?: string;
@@ -28,6 +29,7 @@ export function VisualHero({
   image,
   imageAlt,
   visualLabel = "EVIDENCE LAYER",
+  visualCaption = "Görünmek ile kaynak olarak seçilmek aynı şey değil.",
   primaryHref = "/ucretsiz-yapay-zeka-gorunurluk-raporu",
   primaryLabel = "Ücretsiz ölçüm başlat",
   secondaryHref,
@@ -40,7 +42,7 @@ export function VisualHero({
     <section className="visual-hero-surface relative isolate overflow-hidden border-b border-white/10 text-white">
       <div className="visual-hero-grid pointer-events-none absolute inset-0 -z-10 opacity-40" aria-hidden="true" />
       <div className="pointer-events-none absolute -left-24 top-24 -z-10 h-64 w-64 rounded-full bg-cyan/10 blur-3xl" aria-hidden="true" />
-      <div className="marketing-container grid items-center gap-10 py-16 md:py-24 lg:grid-cols-[minmax(0,.95fr)_minmax(420px,1.05fr)] lg:gap-16 lg:py-24">
+      <div className="marketing-container grid min-w-0 items-center gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,1.04fr)_minmax(400px,.96fr)] lg:gap-14 lg:py-24">
         <div>
           <BrandLogo variant="horizontal" tone="dark" size="sm" linkTo="/" className="mb-8 opacity-95" />
           <div className="flex items-center gap-3">
@@ -74,19 +76,16 @@ export function VisualHero({
           {note ? <p className="mt-4 text-[11px] text-slate-500">{note}</p> : null}
           {children ? <div className="mt-7">{children}</div> : null}
         </div>
-        <Reveal className="relative" delay={0.06}>
-          <div className="visual-panel-shadow relative overflow-hidden rounded-[28px] border border-white/15 bg-ink">
-            <div className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full border border-white/15 bg-ink/70 px-3 py-1.5 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan" />
-              <span className="visual-source-label text-slate-300">{visualLabel}</span>
-            </div>
-            <img src={image} alt={imageAlt} className="block h-auto w-full" width="2560" height="1440" loading="eager" />
-            <div className="absolute inset-x-5 bottom-5 z-20 flex items-end justify-between gap-4">
-              <span className="visual-source-label text-cyan">ONECITE / VISUAL PROOF</span>
-              <span className="font-mono text-[10px] text-slate-400">AI CITATION INTELLIGENCE</span>
-            </div>
-          </div>
-        </Reveal>
+        <div className="flex items-center">
+          <HeroVisual
+            image={image}
+            imageAlt={imageAlt}
+            label={visualLabel}
+            caption={visualCaption}
+            priority
+            className="w-full"
+          />
+        </div>
       </div>
     </section>
   );
