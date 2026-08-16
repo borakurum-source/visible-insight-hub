@@ -25,6 +25,14 @@ function colorFor(type: string): [number, number, number] {
   return TYPE_COLORS[type] ?? [148, 163, 184];
 }
 
+const LEGEND: Array<{ label: string; color: string }> = [
+  { label: "Site", color: "rgb(56,189,248)" },
+  { label: "Manuel", color: "rgb(168,85,247)" },
+  { label: "SSS", color: "rgb(34,197,94)" },
+  { label: "PDF", color: "rgb(249,115,22)" },
+  { label: "Site haritası", color: "rgb(96,165,250)" },
+];
+
 export default function VectorMap3D({
   points,
   selectedId,
