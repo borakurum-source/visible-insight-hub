@@ -43,7 +43,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 ${entries
   .map(
     (entry) =>
-      `  <url><loc>${BASE_URL}${entry.path === "/" ? "" : entry.path}/</loc><lastmod>${today}</lastmod><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
+      `  <url><loc>${BASE_URL}${entry.path === "/" ? "/" : entry.path}</loc><lastmod>${today}</lastmod><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
   )
   .join("\n")}
 </urlset>`;
