@@ -23,15 +23,24 @@ export default function BrandLogo({
   linkTo,
 }: BrandLogoProps) {
   const src = variant === "horizontal" ? logoHorizontal : logoIcon;
+  const iconOnDark = (
+    <span className="inline-flex items-center justify-center rounded-full bg-white p-1">
+      <img
+        src={logoIcon}
+        alt=""
+        aria-hidden="true"
+        className={`block shrink-0 object-contain ${SIZE_CLASSES.icon[size]}`}
+      />
+    </span>
+  );
   const image =
-    tone === "dark" && variant === "horizontal" ? (
+    tone === "dark" && variant === "icon" ? (
+      <span className={`inline-flex ${className}`.trim()} aria-label="OneCite">
+        {iconOnDark}
+      </span>
+    ) : tone === "dark" && variant === "horizontal" ? (
       <span className={`inline-flex items-center gap-2 ${className}`.trim()}>
-        <img
-          src={logoIcon}
-          alt=""
-          aria-hidden="true"
-          className={`block shrink-0 object-contain ${SIZE_CLASSES.icon[size]}`}
-        />
+        {iconOnDark}
         <span
           className={`font-sans font-extrabold tracking-[-0.055em] text-white ${
             size === "sm" ? "text-[1.05rem]" : size === "md" ? "text-[1.25rem]" : "text-[1.55rem]"
