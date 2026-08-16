@@ -16,9 +16,8 @@ import { useMeasurementRun } from "@/lib/use-measurement-run";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/measurement")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    autostart: search["autostart"] === true || search["autostart"] === "1" ? true : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { autostart?: boolean } =>
+    search["autostart"] === true || search["autostart"] === "1" ? { autostart: true } : {},
   head: () => ({
     meta: [
       { title: "Ölçüm — OneCite Paneli" },
@@ -50,7 +49,7 @@ function MeasurementPage() {
     if (!autostart || autostarted.current) return;
     if (!brand?.id || isLoading) return;
     autostarted.current = true;
-    navigate({ to: "/app/measurement", search: {}, replace: true });
+    navigate({ to: "/app/measurement", search: { autostart: undefined }, replace: true });
     if ((data?.approvedPrompts ?? 0) > 0) {
       toast.info("Kurulum tamam — ilk ölçümünüz başlıyor.");
       void run();
