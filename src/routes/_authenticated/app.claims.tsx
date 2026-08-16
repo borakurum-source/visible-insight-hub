@@ -47,7 +47,7 @@ function ClaimsPage() {
   };
 
   const createMutation = useMutation({
-    mutationFn: () => addClaim({ data: { brandId: brand!.id, statement: statement.trim(), evidenceUrl: evidenceUrl.trim() || undefined } }),
+    mutationFn: () => addClaim({ data: { brandId: brand!.id, statement: statement.trim(), ...(evidenceUrl.trim() ? { evidenceUrl: evidenceUrl.trim() } : {}) } }),
     onSuccess: () => { setStatement(""); setEvidenceUrl(""); invalidate(); },
     onError: (error: Error) => toast.error(error.message),
   });
