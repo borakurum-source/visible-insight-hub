@@ -58,6 +58,7 @@ import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppSystemPromptsRouteImport } from './routes/_authenticated/app.system-prompts'
 import { Route as AuthenticatedAppTrafficMetricRouteImport } from './routes/_authenticated/app.traffic.$metric'
 import { Route as ApiPublicCronSyncAnalyticsRouteImport } from './routes/api/public/cron/sync-analytics'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicOauthGoogleCallbackRouteImport } from './routes/api/public/oauth/google/callback'
 
@@ -321,6 +322,12 @@ const ApiPublicCronSyncAnalyticsRoute =
     path: '/api/public/cron/sync-analytics',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -383,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -432,6 +440,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -486,6 +495,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -540,6 +550,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/traffic/$metric'
     | '/api/public/cron/sync-analytics'
+    | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/oauth/google/callback'
   fileRoutesByTo: FileRoutesByTo
@@ -589,6 +600,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/traffic/$metric'
     | '/api/public/cron/sync-analytics'
+    | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/oauth/google/callback'
   id:
@@ -642,6 +654,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/_authenticated/app/traffic/$metric'
     | '/api/public/cron/sync-analytics'
+    | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/oauth/google/callback'
   fileRoutesById: FileRoutesById
@@ -670,6 +683,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCronSyncAnalyticsRoute: typeof ApiPublicCronSyncAnalyticsRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicOauthGoogleCallbackRoute: typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -1019,6 +1033,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronSyncAnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -1153,6 +1174,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCronSyncAnalyticsRoute: ApiPublicCronSyncAnalyticsRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicOauthGoogleCallbackRoute: ApiPublicOauthGoogleCallbackRoute,
 }

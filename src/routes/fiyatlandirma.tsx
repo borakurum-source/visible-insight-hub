@@ -212,7 +212,7 @@ function PricingPage() {
                   {isContact ? (
                     <a href="mailto:hello@1cite.com?subject=Ajans%20plan%C4%B1%20teklif%20talebi">İletişime geç</a>
                   ) : (
-                    <Link to={isFree ? "/ucretsiz-yapay-zeka-gorunurluk-raporu" : "/auth"}>{isFree ? "Ücretsiz başla" : "Planı seç"}</Link>
+                    <Link to={isFree ? "/ucretsiz-yapay-zeka-gorunurluk-raporu" : "/app/pricing"}>{isFree ? "Ücretsiz başla" : "Planı seç"}</Link>
                   )}
                 </Button>
               </div>

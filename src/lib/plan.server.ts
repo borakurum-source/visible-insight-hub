@@ -62,3 +62,26 @@ export async function assertCompetitorQuota(supabase: Sb, userId: string, total:
   }
   return limits;
 }
+
+// Plan düşünce fazla markalar silinmez: yalnızca en eski N marka aktif kalır,
+// fazlası salt okunur olur (ölçüm/üretim çalıştırılamaz).
+export async function activeBrandIds(supabase: Sb, userId: string): Promise<string[] | null> {
+  const limits = await getUserPlan(supabase, userId);
+  if (isUnlimited(limits.maxBrands)) return null;
+  const { data } = await supabase
+    .from("brand_members")
+    .select("brand_id, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true });
+  return (data ?? []).slice(0, limits.maxBrands).map((m: { brand_id: string }) => m.brand_id);
+}
+
+export async function assertBrandActive(supabase: Sb, userId: string, brandId: string) {
+  const allowed = await activeBrandIds(supabase, userId);
+  if (!allowed || allowed.includes(brandId)) return;
+  const limits = await getUserPlan(supabase, userId);
+  throw new Error(
+    `${limits.label} planınızda aynı anda ${limits.maxBrands} marka aktif olabilir. ` +
+      `Bu marka salt okunur durumda; verileriniz korunuyor. Devam etmek için planınızı yükseltin.`,
+  );
+}
