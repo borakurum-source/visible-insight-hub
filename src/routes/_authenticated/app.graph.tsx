@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, RefreshCw, Waypoints } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { PanelSubnav } from "@/components/app/panel-subnav";
+import { PanelSubnav, KNOWLEDGE_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,12 +29,6 @@ export const Route = createFileRoute("/_authenticated/app/graph")({
   }),
   component: GraphPage,
 });
-
-const SUBNAV = [
-  { to: "/app/graph", label: "Bilgi Grafiği" },
-  { to: "/app/knowledge-base", label: "Bilgi Bankası" },
-  { to: "/app/claims", label: "Marka İddiaları" },
-];
 
 const TYPE_LABEL: Record<string, string> = {
   url: "Web sayfası",
@@ -82,7 +76,7 @@ function GraphPage() {
   if (!brand) {
     return (
       <>
-        <PanelSubnav items={SUBNAV} />
+        <PanelSubnav items={KNOWLEDGE_SUBNAV} />
         <PanelPageHeading meta={{ title: "Bilgi Grafiği", description: "Önce bir marka ekleyin.", icon: Waypoints }} />
         <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
       </>
@@ -96,7 +90,7 @@ function GraphPage() {
 
   return (
     <>
-      <PanelSubnav items={SUBNAV} />
+      <PanelSubnav items={KNOWLEDGE_SUBNAV} />
       <PanelPageHeading
         meta={{
           title: "Bilgi Grafiği",

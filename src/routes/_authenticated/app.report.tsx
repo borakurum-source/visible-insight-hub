@@ -24,14 +24,6 @@ export const Route = createFileRoute("/_authenticated/app/report")({
   component: ReportPage,
 });
 
-const SUBNAV = [
-  { to: "/app/prompts", label: "Promptlar" },
-  { to: "/app/prompt-discovery", label: "Prompt Keşfi" },
-  { to: "/app/measurement", label: "Ölçüm & Skor" },
-  { to: "/app/citation-discovery", label: "Kaynak Keşfi" },
-  { to: "/app/report", label: "Rapor" },
-];
-
 function ReportPage() {
   const { brand } = useActiveBrand();
   const fetchState = useServerFn(getMeasurementState);
