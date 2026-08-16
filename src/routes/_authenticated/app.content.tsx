@@ -1,18 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, Download, PenSquare, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { AlertTriangle, Loader2, PenSquare, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockContentDrafts, mockContentGaps } from "@/lib/panel-mock/content";
+import { MiniMarkdown } from "@/components/site/mini-markdown";
+import { deleteDraft, generateDraft, listContentGaps, listDrafts, setDraftStatus } from "@/lib/kb.functions";
+import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/content")({
   head: () => ({
     meta: [
       { title: "İçerik Üretimi — OneCite Paneli" },
-      { name: "description", content: "İçerik fırsatlarını inceleyin ve bilgi bankasına dayalı içerik taslakları üretin." },
+      { name: "description", content: "Kanıt boşluklarınızı görün ve bilgi bankanıza dayalı içerik taslakları üretin." },
       { property: "og:title", content: "İçerik Üretimi — OneCite Paneli" },
-      { property: "og:description", content: "Content gap analizi ve taslak yönetimi." },
+      { property: "og:description", content: "Kanıta dayalı içerik taslakları." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -26,65 +32,192 @@ const impactTone: Record<string, string> = {
 };
 
 const statusLabel: Record<string, string> = { taslak: "Taslak", incelemede: "İncelemede", yayinlandi: "Yayınlandı" };
+const nextStatus: Record<string, string> = { taslak: "incelemede", incelemede: "yayinlandi", yayinlandi: "taslak" };
 
 function ContentPage() {
+  const { brand } = useActiveBrand();
+  const queryClient = useQueryClient();
+  const fetchGaps = useServerFn(listContentGaps);
+  const fetchDrafts = useServerFn(listDrafts);
+  const createDraft = useServerFn(generateDraft);
+  const updateStatus = useServerFn(setDraftStatus);
+  const removeDraft = useServerFn(deleteDraft);
+  const [openDraft, setOpenDraft] = useState<string | null>(null);
+
+  const gapsKey = ["content-gaps", brand?.id];
+  const draftsKey = ["content-drafts", brand?.id];
+
+  const { data: gaps = [], isLoading: gapsLoading, refetch: refetchGaps, isFetching } = useQuery({
+    queryKey: gapsKey,
+    queryFn: () => fetchGaps({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+    staleTime: 5 * 60_000,
+  });
+
+  const { data: drafts = [] } = useQuery({
+    queryKey: draftsKey,
+    queryFn: () => fetchDrafts({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
+
+  const draftMutation = useMutation({
+    mutationFn: (promptId: string) => createDraft({ data: { brandId: brand!.id, promptId } }),
+    onSuccess: () => {
+      toast.success("Taslak üretildi");
+      void queryClient.invalidateQueries({ queryKey: draftsKey });
+      void queryClient.invalidateQueries({ queryKey: gapsKey });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: (input: { id: string; status: string }) => updateStatus({ data: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: draftsKey }),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => removeDraft({ data: { id } }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: draftsKey });
+      void queryClient.invalidateQueries({ queryKey: gapsKey });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  if (!brand) {
+    return (
+      <>
+        <PanelPageHeading meta={{ title: "İçerik Üretimi", description: "Önce bir marka ekleyin.", icon: PenSquare }} />
+        <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
+      </>
+    );
+  }
+
   return (
     <>
       <PanelPageHeading
-        meta={{ title: "İçerik Üretimi", description: "Content gap → taslak: bilgi bankanıza dayalı içerik fırsatlarını yakalayın.", icon: PenSquare }}
-        action={<Button variant="outline" size="sm"><Download className="mr-2 h-3.5 w-3.5" /> Tümünü Dışa Aktar</Button>}
+        meta={{
+          title: "İçerik Üretimi",
+          description: "Kanıt boşluğu = yapay zekânın sizi anmadığı soru + bilgi bankanızda karşılığı olmayan konu. Taslaklar yalnızca kendi kaynaklarınıza dayanır.",
+          icon: PenSquare,
+        }}
+        action={
+          <Button size="sm" variant="outline" onClick={() => void refetchGaps()} disabled={isFetching}>
+            {isFetching ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
+            Boşlukları yenile
+          </Button>
+        }
       />
 
       <Card>
-        <CardContent className="flex flex-col items-start gap-4 p-6 md:flex-row">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <PenSquare className="h-5 w-5" />
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm font-medium">İçerik Üretimi (Content Gap → Taslak)</p>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              Prompt Discovery'de tespit edilen fırsat sorgularını Bilgi Bankası'ndaki gerçek içerikle
-              karşılaştırır; kapsamı zayıf veya hiç olmayan sorguları önceliklendirir. Taslak üretimi
-              sadece Bilgi Bankası alıntılarına ve Marka Zekası'na dayanır.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
         <CardContent className="space-y-3 p-6">
-          <p className="flex items-center gap-1.5 text-sm font-medium"><Sparkles className="h-4 w-4" /> İçerik Fırsatları</p>
-          <div className="space-y-2">
-            {mockContentGaps.map((g) => (
-              <div key={g.id} className="flex items-center justify-between gap-3 rounded-md border border-border px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium">{g.gap}</p>
-                  <p className="text-xs text-muted-foreground">{g.cluster}</p>
+          <p className="flex items-center gap-1.5 text-sm font-medium"><Sparkles className="h-4 w-4" /> Kanıt Boşlukları</p>
+          {gapsLoading ? (
+            <p className="flex items-center gap-2 py-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Bilgi bankası kapsamı hesaplanıyor…</p>
+          ) : gaps.length === 0 ? (
+            <div className="space-y-3 py-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                Şu an açık bir kanıt boşluğu yok. Prompt ekleyip ölçüm çalıştırdıkça yeni fırsatlar burada belirir.
+              </p>
+              <Button asChild size="sm" variant="secondary"><Link to="/app/prompts">Promptlara git</Link></Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {gaps.map((gap) => (
+                <div key={gap.promptId} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border px-4 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">{gap.prompt}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {gap.category} · Bilgi bankası kapsamı %{gap.coverage} · {gap.measured ? `Anılma %${gap.mentionRate}` : "Henüz ölçülmedi"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={`gap-1 text-[10px] ${impactTone[gap.impact]}`}>
+                      <AlertTriangle className="h-3 w-3" /> {gap.impact}
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={draftMutation.isPending}
+                      onClick={() => draftMutation.mutate(gap.promptId)}
+                    >
+                      {draftMutation.isPending && draftMutation.variables === gap.promptId ? (
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                      )}
+                      Taslak üret
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={`gap-1 text-[10px] ${impactTone[g.impact]}`}><AlertTriangle className="h-3 w-3" /> {g.impact}</Badge>
-                  <Button size="sm" variant="secondary"><Sparkles className="mr-1.5 h-3.5 w-3.5" /> Taslak üret</Button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="space-y-3 p-6">
           <p className="text-sm font-medium">Taslaklar</p>
-          <div className="space-y-2">
-            {mockContentDrafts.map((d) => (
-              <div key={d.id} className="flex items-center justify-between gap-3 rounded-md border border-border px-4 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{d.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">Hedef: {d.targetPrompt} · {d.wordCount} kelime · {d.updatedAt}</p>
+          {drafts.length === 0 ? (
+            <p className="py-4 text-sm text-muted-foreground">Henüz taslak yok. Yukarıdaki bir boşluktan üretin.</p>
+          ) : (
+            <div className="space-y-2">
+              {drafts.map((draft) => (
+                <div key={draft.id} className="rounded-md border border-border">
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                    <button
+                      type="button"
+                      className="min-w-0 flex-1 text-left"
+                      onClick={() => setOpenDraft(openDraft === draft.id ? null : draft.id)}
+                    >
+                      <p className="truncate text-sm font-medium">{draft.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        Hedef: {draft.target_prompt ?? "—"} · {draft.word_count} kelime
+                      </p>
+                    </button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
+                        onClick={() => statusMutation.mutate({ id: draft.id, status: nextStatus[draft.status] ?? "taslak" })}
+                      >
+                        {statusLabel[draft.status] ?? draft.status}
+                      </Button>
+                      <Button size="icon" variant="ghost" aria-label="Taslağı sil" onClick={() => deleteMutation.mutate(draft.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  {openDraft === draft.id ? (
+                    <div className="space-y-3 border-t border-border px-4 py-4">
+                      <div className="prose-sm max-w-none text-sm">
+                        <MiniMarkdown content={draft.body} />
+                      </div>
+                      {Array.isArray(draft.sources) && draft.sources.length > 0 ? (
+                        <div className="border-t border-border pt-3">
+                          <p className="mb-1 text-xs font-medium">Dayandığı kaynaklar</p>
+                          <ul className="space-y-0.5">
+                            {(draft.sources as Array<{ title?: string; url?: string | null }>).map((source, index) => (
+                              <li key={index} className="text-xs text-muted-foreground">
+                                {source.url ? (
+                                  <a href={source.url} target="_blank" rel="noreferrer" className="hover:text-primary">{source.title ?? source.url}</a>
+                                ) : (
+                                  source.title
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
-                <Badge variant="outline" className="shrink-0 text-xs">{statusLabel[d.status]}</Badge>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </>
