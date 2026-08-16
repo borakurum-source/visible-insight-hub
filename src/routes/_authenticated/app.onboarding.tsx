@@ -1,41 +1,468 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Circle, Sparkles } from "lucide-react";
-import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { ArrowLeft, ArrowRight, Check, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockOnboardingSteps } from "@/lib/panel-mock/onboarding";
-import { activeBrand } from "@/lib/panel-mock/clients";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  addKnowledgeSources,
+  completeOnboarding,
+  createBrand,
+  generateBrandIntelligence,
+  generatePromptCandidates,
+  getBrandIntelligence,
+  saveBrandIntelligence,
+  setPromptStatus,
+  suggestKnowledgeSources,
+} from "@/lib/panel.functions";
+import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/onboarding")({
   head: () => ({
     meta: [
       { title: "Kurulum — OneCite Paneli" },
-      { name: "description", content: "Marka bilgilerini doğrulayın, ilk promptları oluşturun ve bilgi bankasını besleyin." },
+      { name: "description", content: "Markanızı ekleyin, marka zekâsını onaylayın, bilgi bankasını doldurun ve promptları seçin." },
       { property: "og:title", content: "Kurulum — OneCite Paneli" },
-      { property: "og:description", content: "Zero-setup marka kurulum akışı." },
+      { property: "og:description", content: "Dört adımda AI görünürlük kurulumu." },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: OnboardingPage,
 });
 
+const STEPS = [
+  { n: 1, title: "Marka", hint: "Hangi markayı takip edeceğiz?" },
+  { n: 2, title: "Marka zekâsı", hint: "Sitenizi okuyup markanızı özetliyoruz." },
+  { n: 3, title: "Bilgi bankası", hint: "Yapay zekânın kaynak göstereceği sayfalar." },
+  { n: 4, title: "Promptlar", hint: "Görünmeniz gereken sorular." },
+] as const;
+
+type Intel = {
+  summary: string; positioning: string; tone: string;
+  products: string[]; audiences: string[]; competitors: string[]; keywords: string[];
+};
+
+const EMPTY_INTEL: Intel = { summary: "", positioning: "", tone: "", products: [], audiences: [], competitors: [], keywords: [] };
+
+function toList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map((v) => String(v));
+  return [];
+}
+
 function OnboardingPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { brand, brands, isLoading, selectBrand } = useActiveBrand();
+  const [step, setStep] = useState(1);
+  const [forceNew, setForceNew] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!brand || forceNew) { setStep(1); return; }
+    setStep(brand.onboarding_completed ? 4 : Math.min(Math.max(brand.onboarding_step, 1), 4));
+  }, [brand?.id, brand?.onboarding_step, brand?.onboarding_completed, isLoading, forceNew]);
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["panel-session"] });
+
   return (
     <>
-      <PanelPageHeading meta={{ title: "Kurulum", description: `${activeBrand.name} için otomatik kurulum akışını tamamlayın.`, icon: Sparkles }} />
+      <header className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
+          <h1 className="font-display text-2xl font-semibold">Kurulum</h1>
+        </div>
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          Dört kısa adım. Her adımda biz hazırlıyoruz, siz onaylıyorsunuz — boş bir sayfaya hiçbir şey yazmanız gerekmiyor.
+        </p>
+        <Progress value={(step / 4) * 100} className="h-1.5" />
+        <ol className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+          {STEPS.map((s) => (
+            <li key={s.n} className={`flex items-center gap-1.5 ${s.n === step ? "font-semibold text-foreground" : s.n < step ? "text-primary" : "text-muted-foreground"}`}>
+              {s.n < step ? <Check className="h-3.5 w-3.5" /> : <span>{s.n}.</span>}
+              {s.title}
+            </li>
+          ))}
+        </ol>
+      </header>
 
-      <div className="space-y-4">
-        {mockOnboardingSteps.map((step) => (
-          <Card key={step.id} className={step.done ? "" : "opacity-90"}>
-            <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-              {step.done ? <CheckCircle2 className="h-5 w-5 shrink-0 text-[hsl(var(--chart-2))]" /> : <Circle className="h-5 w-5 shrink-0 text-muted-foreground/40" />}
-              <CardTitle className="text-base">{step.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{step.description}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {brands.length > 1 && step === 1 ? (
+        <p className="text-xs text-muted-foreground">
+          Kurulumdaki markayı değiştirmek için soldaki marka seçicisini kullanın.
+        </p>
+      ) : null}
+
+      {step === 1 ? (
+        <StepBrand
+          onCreated={async (id) => { selectBrand(id); setForceNew(false); await refresh(); setStep(2); }}
+        />
+      ) : null}
+
+      {step === 2 && brand ? (
+        <StepIntelligence brandId={brand.id} onDone={async () => { await refresh(); setStep(3); }} onBack={() => setStep(1)} />
+      ) : null}
+
+      {step === 3 && brand ? (
+        <StepKnowledge brandId={brand.id} onDone={async () => { await refresh(); setStep(4); }} onBack={() => setStep(2)} />
+      ) : null}
+
+      {step === 4 && brand ? (
+        <StepPrompts
+          brandId={brand.id}
+          onBack={() => setStep(3)}
+          onDone={async () => { await refresh(); toast.success("Kurulum tamamlandı"); navigate({ to: "/app" }); }}
+        />
+      ) : null}
+
+      {step > 1 && brand?.onboarding_completed ? (
+        <Button variant="ghost" size="sm" onClick={() => { setForceNew(true); setStep(1); }}>
+          <Plus className="mr-1.5 h-4 w-4" /> Başka bir marka ekle
+        </Button>
+      ) : null}
     </>
+  );
+}
+
+function StepFrame({ step, children, footer }: { step: (typeof STEPS)[number]; children: React.ReactNode; footer: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{step.n}. {step.title}</CardTitle>
+        <p className="text-sm text-muted-foreground">{step.hint}</p>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {children}
+        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">{footer}</div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StepBrand({ onCreated }: { onCreated: (id: string) => void | Promise<void> }) {
+  const create = useServerFn(createBrand);
+  const [name, setName] = useState("");
+  const [domain, setDomain] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: (input: { name: string; domain: string }) => create({ data: input }),
+    onSuccess: (brand) => { void onCreated(brand.id); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  return (
+    <StepFrame
+      step={STEPS[0]}
+      footer={
+        <Button onClick={() => mutation.mutate({ name, domain })} disabled={!domain.trim() || mutation.isPending}>
+          {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Devam et <ArrowRight className="ml-1.5 h-4 w-4" />
+        </Button>
+      }
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="brand-name">Marka adı</Label>
+          <Input id="brand-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Örn. OneCite" />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="brand-domain">Web siteniz</Label>
+          <Input id="brand-domain" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="1cite.com" />
+          <p className="text-xs text-muted-foreground">Neden soruyoruz? Siteyi okuyup markanızı sizin yerinize tanımlıyoruz.</p>
+        </div>
+      </div>
+    </StepFrame>
+  );
+}
+
+function ListEditor({ label, items, onChange }: { label: string; items: string[]; onChange: (next: string[]) => void }) {
+  const [draft, setDraft] = useState("");
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex flex-wrap gap-1.5">
+        {items.map((item, index) => (
+          <Badge key={`${item}-${index}`} variant="secondary" className="gap-1">
+            {item}
+            <button type="button" aria-label={`${item} kaldır`} onClick={() => onChange(items.filter((_, i) => i !== index))}>
+              <Trash2 className="h-3 w-3" />
+            </button>
+          </Badge>
+        ))}
+        {items.length === 0 ? <span className="text-xs text-muted-foreground">Henüz yok</span> : null}
+      </div>
+      <div className="flex gap-2">
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Ekle ve Enter'a bas"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && draft.trim()) { e.preventDefault(); onChange([...items, draft.trim()]); setDraft(""); }
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function StepIntelligence({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
+  const load = useServerFn(getBrandIntelligence);
+  const generate = useServerFn(generateBrandIntelligence);
+  const save = useServerFn(saveBrandIntelligence);
+  const [intel, setIntel] = useState<Intel>(EMPTY_INTEL);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      let row = await load({ data: { brandId } });
+      if (!row || !row.summary) row = await generate({ data: { brandId } });
+      if (cancelled || !row) { setLoading(false); return; }
+      setIntel({
+        summary: row.summary ?? "", positioning: row.positioning ?? "", tone: row.tone ?? "",
+        products: toList(row.products), audiences: toList(row.audiences),
+        competitors: toList(row.competitors), keywords: toList(row.keywords),
+      });
+      setLoading(false);
+    })().catch(() => setLoading(false));
+    return () => { cancelled = true; };
+  }, [brandId]);
+
+  const regenerate = useMutation({
+    mutationFn: () => generate({ data: { brandId } }),
+    onSuccess: (row) => {
+      if (!row) return;
+      setIntel({
+        summary: row.summary ?? "", positioning: row.positioning ?? "", tone: row.tone ?? "",
+        products: toList(row.products), audiences: toList(row.audiences),
+        competitors: toList(row.competitors), keywords: toList(row.keywords),
+      });
+    },
+  });
+
+  const approve = useMutation({
+    mutationFn: () => save({ data: { brandId, ...intel } }),
+    onSuccess: () => { void onDone(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center gap-3 py-10 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Siteniz okunuyor ve marka özeti çıkarılıyor…
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <StepFrame
+      step={STEPS[1]}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+          <Button variant="outline" onClick={() => regenerate.mutate()} disabled={regenerate.isPending}>
+            {regenerate.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Yeniden çıkar
+          </Button>
+          <Button onClick={() => approve.mutate()} disabled={approve.isPending}>
+            Onayla ve devam et <ArrowRight className="ml-1.5 h-4 w-4" />
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-1.5">
+        <Label htmlFor="intel-summary">Marka özeti</Label>
+        <Textarea id="intel-summary" rows={3} value={intel.summary} onChange={(e) => setIntel({ ...intel, summary: e.target.value })} />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="intel-positioning">Konumlandırma</Label>
+          <Textarea id="intel-positioning" rows={2} value={intel.positioning} onChange={(e) => setIntel({ ...intel, positioning: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="intel-tone">Ses tonu</Label>
+          <Textarea id="intel-tone" rows={2} value={intel.tone} onChange={(e) => setIntel({ ...intel, tone: e.target.value })} />
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <ListEditor label="Ürün / hizmetler" items={intel.products} onChange={(products) => setIntel({ ...intel, products })} />
+        <ListEditor label="Hedef kitle" items={intel.audiences} onChange={(audiences) => setIntel({ ...intel, audiences })} />
+        <ListEditor label="Rakipler" items={intel.competitors} onChange={(competitors) => setIntel({ ...intel, competitors })} />
+        <ListEditor label="Anahtar konular" items={intel.keywords} onChange={(keywords) => setIntel({ ...intel, keywords })} />
+      </div>
+    </StepFrame>
+  );
+}
+
+function StepKnowledge({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
+  const suggest = useServerFn(suggestKnowledgeSources);
+  const add = useServerFn(addKnowledgeSources);
+  const [items, setItems] = useState<Array<{ title: string; url: string }>>([]);
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+  const [manualUrl, setManualUrl] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    suggest({ data: { brandId } })
+      .then((result) => {
+        if (cancelled) return;
+        setItems(result);
+        setSelected(Object.fromEntries(result.map((r) => [r.url, true])));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+    return () => { cancelled = true; };
+  }, [brandId]);
+
+  const savePicked = useMutation({
+    mutationFn: () => add({ data: { brandId, items: items.filter((i) => selected[i.url]).map((i) => ({ title: i.title, url: i.url })) } }),
+    onSuccess: () => { void onDone(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const pickedCount = items.filter((i) => selected[i.url]).length;
+
+  return (
+    <StepFrame
+      step={STEPS[2]}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+          <Button onClick={() => savePicked.mutate()} disabled={pickedCount === 0 || savePicked.isPending}>
+            {savePicked.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {pickedCount} sayfayı ekle ve devam et <ArrowRight className="ml-1.5 h-4 w-4" />
+          </Button>
+        </>
+      }
+    >
+      {loading ? (
+        <p className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Site haritanız taranıyor…
+        </p>
+      ) : (
+        <div className="divide-y divide-border rounded-lg border border-border">
+          {items.map((item) => (
+            <label key={item.url} className="flex cursor-pointer items-start gap-3 p-3 text-sm">
+              <Checkbox
+                checked={Boolean(selected[item.url])}
+                onCheckedChange={(value) => setSelected({ ...selected, [item.url]: value === true })}
+              />
+              <span className="min-w-0">
+                <span className="block font-medium">{item.title}</span>
+                <span className="block truncate font-mono text-xs text-muted-foreground">{item.url}</span>
+              </span>
+            </label>
+          ))}
+          {items.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Öneri bulunamadı, aşağıdan elle ekleyin.</p> : null}
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <Label htmlFor="manual-url">Kendi sayfanızı ekleyin</Label>
+        <div className="flex gap-2">
+          <Input id="manual-url" value={manualUrl} onChange={(e) => setManualUrl(e.target.value)} placeholder="https://…" />
+          <Button
+            variant="outline"
+            onClick={() => {
+              const url = manualUrl.trim();
+              if (!url) return;
+              setItems([{ title: url.replace(/^https?:\/\//, ""), url }, ...items]);
+              setSelected({ ...selected, [url]: true });
+              setManualUrl("");
+            }}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">Neden soruyoruz? Yapay zekâ cevaplarında kaynak gösterilmesini istediğiniz sayfalar bunlar.</p>
+      </div>
+    </StepFrame>
+  );
+}
+
+function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
+  const generate = useServerFn(generatePromptCandidates);
+  const setStatus = useServerFn(setPromptStatus);
+  const complete = useServerFn(completeOnboarding);
+  const [prompts, setPrompts] = useState<Array<{ id: string; text: string; category: string }>>([]);
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    generate({ data: { brandId } })
+      .then((rows) => {
+        if (cancelled) return;
+        const list = rows.map((r) => ({ id: r.id, text: r.text, category: r.category }));
+        setPrompts(list);
+        setSelected(Object.fromEntries(list.map((r) => [r.id, true])));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+    return () => { cancelled = true; };
+  }, [brandId]);
+
+  const finish = useMutation({
+    mutationFn: async () => {
+      const approved = prompts.filter((p) => selected[p.id]).map((p) => p.id);
+      const rejected = prompts.filter((p) => !selected[p.id]).map((p) => p.id);
+      if (approved.length) await setStatus({ data: { ids: approved, status: "approved" } });
+      if (rejected.length) await setStatus({ data: { ids: rejected, status: "inactive" } });
+      await complete({ data: { brandId } });
+    },
+    onSuccess: () => { void onDone(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const count = prompts.filter((p) => selected[p.id]).length;
+
+  return (
+    <StepFrame
+      step={STEPS[3]}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+          <Button onClick={() => finish.mutate()} disabled={count === 0 || finish.isPending}>
+            {finish.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {count} promptu onayla ve kurulumu bitir <Check className="ml-1.5 h-4 w-4" />
+          </Button>
+        </>
+      }
+    >
+      {loading ? (
+        <p className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Markanız için sorular hazırlanıyor…
+        </p>
+      ) : (
+        <>
+          <div className="flex gap-2 text-xs">
+            <Button variant="ghost" size="sm" onClick={() => setSelected(Object.fromEntries(prompts.map((p) => [p.id, true])))}>Tümünü seç</Button>
+            <Button variant="ghost" size="sm" onClick={() => setSelected({})}>Seçimi temizle</Button>
+          </div>
+          <div className="divide-y divide-border rounded-lg border border-border">
+            {prompts.map((prompt) => (
+              <label key={prompt.id} className="flex cursor-pointer items-start gap-3 p-3 text-sm">
+                <Checkbox
+                  checked={Boolean(selected[prompt.id])}
+                  onCheckedChange={(value) => setSelected({ ...selected, [prompt.id]: value === true })}
+                />
+                <span className="min-w-0 flex-1">{prompt.text}</span>
+                <Badge variant="outline" className="shrink-0 text-[10px]">{prompt.category}</Badge>
+              </label>
+            ))}
+            {prompts.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Prompt üretilemedi, tekrar deneyin.</p> : null}
+          </div>
+        </>
+      )}
+    </StepFrame>
   );
 }
