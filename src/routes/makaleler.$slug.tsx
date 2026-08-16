@@ -52,20 +52,20 @@ function Delta({ value }: { value: number }) {
 function PromptComparison({ item, tone = "positive" }: { item: PromptChange; tone?: "positive" | "watch" }) {
   const positive = tone === "positive";
   return (
-    <article className="rounded-2xl border border-[#E6EAF2] bg-white p-5">
+    <article className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <p className="max-w-2xl text-sm font-semibold leading-6 text-[#0B1020]">{item.prompt}</p>
-        <div className="shrink-0 text-right"><Delta value={item.delta} /><p className="mt-1 text-xs text-[#667085]">{item.runs} ölçüm tekrarı</p></div>
+        <p className="max-w-2xl text-sm font-semibold leading-6 text-[#101211]">{item.prompt}</p>
+        <div className="shrink-0 text-right"><Delta value={item.delta} /><p className="mt-1 text-xs text-[#6B6A61]">{item.runs} ölçüm tekrarı</p></div>
       </div>
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-end gap-3">
         <div>
-          <div className="mb-2 flex justify-between text-xs text-[#667085]"><span>İlk ölçüm</span><span>{item.first}%</span></div>
+          <div className="mb-2 flex justify-between text-xs text-[#6B6A61]"><span>İlk ölçüm</span><span>{item.first}%</span></div>
           <AnimatedBar value={item.first} label={`${item.prompt} ilk ölçüm ${item.first} yüzde`} className="bg-[#9CB6FF]" />
         </div>
         <span className="pb-0.5 font-mono text-[#A1AABC]">→</span>
         <div>
-          <div className="mb-2 flex justify-between text-xs text-[#667085]"><span>Son ölçüm</span><span>{item.latest}%</span></div>
-          <AnimatedBar value={item.latest} label={`${item.prompt} son ölçüm ${item.latest} yüzde`} className={positive ? "bg-[#356AFF]" : "bg-rose-500"} />
+          <div className="mb-2 flex justify-between text-xs text-[#6B6A61]"><span>Son ölçüm</span><span>{item.latest}%</span></div>
+          <AnimatedBar value={item.latest} label={`${item.prompt} son ölçüm ${item.latest} yüzde`} className={positive ? "bg-[#1B7F86]" : "bg-rose-500"} />
         </div>
       </div>
     </article>
@@ -78,7 +78,7 @@ function FilmFolkCaseStudy() {
       <article>
         <VisualHero
           eyebrow="VAKA İNCELEMESİ · FILMFOLK / 41 SORU"
-          title={<>Atıf payı <span className="text-[#35E1FF]">%30,7’den %58,9’a</span> nasıl taşındı?</>}
+          title={<>Atıf payı <span className="text-[#3FBFB2]">%30,7’den %58,9’a</span> nasıl taşındı?</>}
           description="Aynı satın alma niyetli soru havuzunda yapılan ilk ve son ölçüm karşılaştırması. Bu vaka tek bir yanıtı değil; hangi niyetlerde kaynak olarak daha sık seçildiğini gösterir."
           image={heroEvidenceGap}
           imageAlt="Eksik parçası olan ışıklı cam köprü; FilmFolk vaka incelemesinde kanıt boşluğunu temsil eden OneCite görseli"
@@ -89,10 +89,10 @@ function FilmFolkCaseStudy() {
           secondaryLabel="Kendi ölçümünü başlat"
         >
           <div className="grid max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
-            <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">İLK PAY</p><p className="mt-2 font-mono text-xl text-white">30,7%</p></div>
-            <div className="rounded-xl border border-[#35E1FF]/35 bg-[#35E1FF]/10 p-3"><p className="visual-source-label text-[#35E1FF]">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
-            <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">DEĞİŞİM</p><p className="mt-2 font-mono text-xl text-white">+28,1</p></div>
-            <div className="rounded-xl border border-white/15 bg-white/[0.06] p-3"><p className="visual-source-label text-slate-400">TEKRAR</p><p className="mt-2 font-mono text-xl text-white">286</p></div>
+            <div className="rounded-xl border border-white/15 bg-[#FBFAF5]/[0.06] p-3"><p className="visual-source-label text-slate-400">İLK PAY</p><p className="mt-2 font-mono text-xl text-white">30,7%</p></div>
+            <div className="rounded-xl border border-[#3FBFB2]/35 bg-[#3FBFB2]/10 p-3"><p className="visual-source-label text-[#3FBFB2]">SON PAY</p><p className="mt-2 font-mono text-xl text-white">58,9%</p></div>
+            <div className="rounded-xl border border-white/15 bg-[#FBFAF5]/[0.06] p-3"><p className="visual-source-label text-slate-400">DEĞİŞİM</p><p className="mt-2 font-mono text-xl text-white">+28,1</p></div>
+            <div className="rounded-xl border border-white/15 bg-[#FBFAF5]/[0.06] p-3"><p className="visual-source-label text-slate-400">TEKRAR</p><p className="mt-2 font-mono text-xl text-white">286</p></div>
           </div>
         </VisualHero>
 
@@ -100,31 +100,31 @@ function FilmFolkCaseStudy() {
           <div className="grid gap-10 lg:grid-cols-[minmax(0,.88fr)_minmax(380px,1.12fr)]">
             <Reveal>
               <div>
-                <Link to="/makaleler" className="inline-flex items-center gap-1 text-sm font-bold text-[#356AFF]"><ArrowLeft className="h-4 w-4" /> Tüm makaleler</Link>
-                <p className="mt-9 text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Ölçüm çerçevesi</p>
-                <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-5xl">Sabit soru seti, tekrar edilmiş ölçüm ve açık sınırlar.</h2>
-                <p className="mt-5 text-base leading-7 text-[#667085]">Londra ve Birleşik Krallık odaklı video prodüksiyonu, etkinlik, canlı yayın, fotoğraf ve düzenleme hizmetlerinde satın alma niyeti taşıyan sorular takip edildi. Aynı soru havuzu, ilk ve son gözlemde tekrar kullanıldı.</p>
-                <p className="mt-4 text-base leading-7 text-[#667085]">Bu çalışma gözlenen bir değişimi raporlar; değişimi tek bir içerik veya tek bir müdahaleye bağlayan nedensellik iddiası taşımaz.</p>
+                <Link to="/makaleler" className="inline-flex items-center gap-1 text-sm font-bold text-[#1B7F86]"><ArrowLeft className="h-4 w-4" /> Tüm makaleler</Link>
+                <p className="mt-9 text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Ölçüm çerçevesi</p>
+                <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-5xl">Sabit soru seti, tekrar edilmiş ölçüm ve açık sınırlar.</h2>
+                <p className="mt-5 text-base leading-7 text-[#6B6A61]">Londra ve Birleşik Krallık odaklı video prodüksiyonu, etkinlik, canlı yayın, fotoğraf ve düzenleme hizmetlerinde satın alma niyeti taşıyan sorular takip edildi. Aynı soru havuzu, ilk ve son gözlemde tekrar kullanıldı.</p>
+                <p className="mt-4 text-base leading-7 text-[#6B6A61]">Bu çalışma gözlenen bir değişimi raporlar; değişimi tek bir içerik veya tek bir müdahaleye bağlayan nedensellik iddiası taşımaz.</p>
               </div>
             </Reveal>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Reveal delay={0.04}><div className="rounded-2xl border border-[#E6EAF2] bg-white p-5"><Target className="h-5 w-5 text-[#356AFF]" /><p className="mt-6 font-mono text-4xl text-[#0B1020]">41</p><h3 className="mt-2 font-bold text-[#0B1020]">Sabit soru</h3><p className="mt-2 text-sm leading-6 text-[#667085]">Satın alma niyetli sorgu seti.</p></div></Reveal>
-              <Reveal delay={0.08}><div className="rounded-2xl border border-[#E6EAF2] bg-white p-5"><LineChart className="h-5 w-5 text-[#356AFF]" /><p className="mt-6 font-mono text-4xl text-[#0B1020]">286</p><h3 className="mt-2 font-bold text-[#0B1020]">Tekrar</h3><p className="mt-2 text-sm leading-6 text-[#667085]">Ağırlıklı orana giren kayıtlar.</p></div></Reveal>
-              <Reveal delay={0.12}><div className="rounded-2xl border border-[#E6EAF2] bg-white p-5"><TrendingUp className="h-5 w-5 text-emerald-700" /><p className="mt-6 font-mono text-4xl text-[#0B1020]">32</p><h3 className="mt-2 font-bold text-[#0B1020]">Yükselen soru</h3><p className="mt-2 text-sm leading-6 text-[#667085]">Son ölçümde daha yüksek oran.</p></div></Reveal>
-              <Reveal delay={0.16}><div className="rounded-2xl border border-[#E6EAF2] bg-white p-5"><TrendingDown className="h-5 w-5 text-rose-700" /><p className="mt-6 font-mono text-4xl text-[#0B1020]">7</p><h3 className="mt-2 font-bold text-[#0B1020]">Gerileyen soru</h3><p className="mt-2 text-sm leading-6 text-[#667085]">Ayrı takip listesine alınan alan.</p></div></Reveal>
+              <Reveal delay={0.04}><div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5"><Target className="h-5 w-5 text-[#1B7F86]" /><p className="mt-6 font-mono text-4xl text-[#101211]">41</p><h3 className="mt-2 font-bold text-[#101211]">Sabit soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Satın alma niyetli sorgu seti.</p></div></Reveal>
+              <Reveal delay={0.08}><div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5"><LineChart className="h-5 w-5 text-[#1B7F86]" /><p className="mt-6 font-mono text-4xl text-[#101211]">286</p><h3 className="mt-2 font-bold text-[#101211]">Tekrar</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Ağırlıklı orana giren kayıtlar.</p></div></Reveal>
+              <Reveal delay={0.12}><div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5"><TrendingUp className="h-5 w-5 text-emerald-700" /><p className="mt-6 font-mono text-4xl text-[#101211]">32</p><h3 className="mt-2 font-bold text-[#101211]">Yükselen soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Son ölçümde daha yüksek oran.</p></div></Reveal>
+              <Reveal delay={0.16}><div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-5"><TrendingDown className="h-5 w-5 text-rose-700" /><p className="mt-6 font-mono text-4xl text-[#101211]">7</p><h3 className="mt-2 font-bold text-[#101211]">Gerileyen soru</h3><p className="mt-2 text-sm leading-6 text-[#6B6A61]">Ayrı takip listesine alınan alan.</p></div></Reveal>
             </div>
           </div>
         </section>
 
-        <section className="border-y border-[#E6EAF2] bg-white px-4 py-16 md:px-6 md:py-24">
+        <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] px-4 py-16 md:px-6 md:py-24">
           <div className="marketing-container">
             <Reveal>
               <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Niyet düzeyindeki değişim</p>
-                  <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-5xl">Kazanan niyetleri görün, kaybedilenleri saklamayın.</h2>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Niyet düzeyindeki değişim</p>
+                  <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-5xl">Kazanan niyetleri görün, kaybedilenleri saklamayın.</h2>
                 </div>
-                <p className="max-w-sm text-sm leading-6 text-[#667085]">Her satır, ilk ve son ölçüm oranını aynı prompt için karşılaştırır.</p>
+                <p className="max-w-sm text-sm leading-6 text-[#6B6A61]">Her satır, ilk ve son ölçüm oranını aynı prompt için karşılaştırır.</p>
               </div>
             </Reveal>
             <div className="mt-12 grid gap-4 lg:grid-cols-2">
@@ -135,8 +135,8 @@ function FilmFolkCaseStudy() {
                 <div className="flex gap-3">
                   <CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
                   <div>
-                    <h3 className="font-extrabold text-[#0B1020]">İzleme listesi: gerileyen niyetler</h3>
-                    <p className="mt-2 text-sm leading-6 text-[#516078]">Düğün, gayrimenkul videosu ve kurumsal fotoğrafçılık niyetleri son ölçümde geriledi. Bu alanlar bir sonraki kanıt ve içerik çalışmasının izleme listesinde kalmalı.</p>
+                    <h3 className="font-extrabold text-[#101211]">İzleme listesi: gerileyen niyetler</h3>
+                    <p className="mt-2 text-sm leading-6 text-[#57564E]">Düğün, gayrimenkul videosu ve kurumsal fotoğrafçılık niyetleri son ölçümde geriledi. Bu alanlar bir sonraki kanıt ve içerik çalışmasının izleme listesinde kalmalı.</p>
                     <div className="mt-5 grid gap-3 md:grid-cols-3">
                       {watchlist.map((item) => <PromptComparison key={item.prompt} item={item} tone="watch" />)}
                     </div>
@@ -151,38 +151,38 @@ function FilmFolkCaseStudy() {
           <div className="grid gap-10 lg:grid-cols-[minmax(0,.95fr)_minmax(360px,1.05fr)] lg:items-center">
             <Reveal>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Arama görünürlüğü bağlamı</p>
-                <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-4xl">Search Console, atıf sonucunu kanıtlamaz; bağlamı zenginleştirir.</h2>
-                <p className="mt-5 text-base leading-7 text-[#667085]">18 Mayıs–12 Ağustos 2026 tarihleri arasındaki 87 günlük Google Search Console exportu yalnızca <strong>Web</strong> arama türünü kapsar. Bu veri yapay zeka atıf payının nedeni veya sonucu değildir.</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Arama görünürlüğü bağlamı</p>
+                <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-4xl">Search Console, atıf sonucunu kanıtlamaz; bağlamı zenginleştirir.</h2>
+                <p className="mt-5 text-base leading-7 text-[#6B6A61]">18 Mayıs–12 Ağustos 2026 tarihleri arasındaki 87 günlük Google Search Console exportu yalnızca <strong>Web</strong> arama türünü kapsar. Bu veri yapay zeka atıf payının nedeni veya sonucu değildir.</p>
                 <div className="mt-7 grid gap-3 text-sm">
-                  <p className="flex items-center gap-3 font-semibold text-[#0B1020]"><FileSearch className="h-4 w-4 text-[#356AFF]" />Canlı yayın hizmeti: 3.377 gösterim</p>
-                  <p className="flex items-center gap-3 font-semibold text-[#0B1020]"><FileSearch className="h-4 w-4 text-[#356AFF]" />Serbest videograf hizmeti: 3.276 gösterim</p>
-                  <p className="flex items-center gap-3 font-semibold text-[#0B1020]"><FileSearch className="h-4 w-4 text-[#356AFF]" />Video düzenleme hizmeti: 2.276 gösterim</p>
+                  <p className="flex items-center gap-3 font-semibold text-[#101211]"><FileSearch className="h-4 w-4 text-[#1B7F86]" />Canlı yayın hizmeti: 3.377 gösterim</p>
+                  <p className="flex items-center gap-3 font-semibold text-[#101211]"><FileSearch className="h-4 w-4 text-[#1B7F86]" />Serbest videograf hizmeti: 3.276 gösterim</p>
+                  <p className="flex items-center gap-3 font-semibold text-[#101211]"><FileSearch className="h-4 w-4 text-[#1B7F86]" />Video düzenleme hizmeti: 2.276 gösterim</p>
                 </div>
               </div>
             </Reveal>
             <Reveal delay={0.08}>
-              <aside className="rounded-3xl border border-[#DDE5F4] bg-[#F4F8FF] p-6">
-                <p className="text-sm font-semibold text-[#0B1020]">GSC özeti</p>
+              <aside className="rounded-3xl border border-[#E3E0D5] bg-[#F2F0E8] p-6">
+                <p className="text-sm font-semibold text-[#101211]">GSC özeti</p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <div className="rounded-2xl border border-[#DDE5F4] bg-white p-4"><p className="text-xs text-[#667085]">Toplam gösterim</p><p className="mt-2 font-mono text-3xl text-[#0B1020]">44.613</p><p className="mt-1 text-xs text-[#667085]">87 gün</p></div>
-                  <div className="rounded-2xl border border-[#DDE5E4] bg-white p-4"><p className="text-xs text-[#667085]">Birleşik Krallık payı</p><p className="mt-2 font-mono text-3xl text-[#0B1020]">89,1%</p></div>
-                  <div className="rounded-2xl border border-[#DDE5E4] bg-white p-4"><p className="text-xs text-[#667085]">Masaüstü payı</p><p className="mt-2 font-mono text-3xl text-[#0B1020]">80,2%</p></div>
+                  <div className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-4"><p className="text-xs text-[#6B6A61]">Toplam gösterim</p><p className="mt-2 font-mono text-3xl text-[#101211]">44.613</p><p className="mt-1 text-xs text-[#6B6A61]">87 gün</p></div>
+                  <div className="rounded-2xl border border-[#DDE5E4] bg-[#FBFAF5] p-4"><p className="text-xs text-[#6B6A61]">Birleşik Krallık payı</p><p className="mt-2 font-mono text-3xl text-[#101211]">89,1%</p></div>
+                  <div className="rounded-2xl border border-[#DDE5E4] bg-[#FBFAF5] p-4"><p className="text-xs text-[#6B6A61]">Masaüstü payı</p><p className="mt-2 font-mono text-3xl text-[#101211]">80,2%</p></div>
                 </div>
               </aside>
             </Reveal>
           </div>
         </section>
 
-        <section className="bg-[#F4F8FF] px-4 py-16 md:px-6 md:py-24">
+        <section className="bg-[#F2F0E8] px-4 py-16 md:px-6 md:py-24">
           <Reveal className="marketing-container">
-            <div className="rounded-3xl bg-[#0B1020] px-7 py-12 text-center text-white md:px-12">
-              <ListChecks className="mx-auto h-6 w-6 text-[#35E1FF]" />
-              <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-[#35E1FF]">Vakanın çıkarımı</p>
+            <div className="rounded-3xl bg-[#101211] px-7 py-12 text-center text-white md:px-12">
+              <ListChecks className="mx-auto h-6 w-6 text-[#3FBFB2]" />
+              <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-[#3FBFB2]">Vakanın çıkarımı</p>
               <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">Atıf payı artabilir; her satın alma niyetinde aynı anda artmayabilir.</h2>
               <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300">Düzenli soru takibi, güçlü artışları ve kaybedilen niyet alanlarını aynı ölçüm çerçevesinde görünür kılar. Amaç garanti vermek değil, bir sonraki kanıt üretim kararını daha doğru almaktır.</p>
               <MotionPress className="mt-8 inline-block">
-                <Button size="lg" className="bg-[#35E1FF] text-[#0B1020] hover:bg-[#B8F4FF]" asChild>
+                <Button size="lg" className="bg-[#3FBFB2] text-[#101211] hover:bg-[#B8F4FF]" asChild>
                   <Link to="/free-ai-readiness-report">Kendi ölçüm çerçeveni oluştur <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
                 </Button>
               </MotionPress>
@@ -211,15 +211,15 @@ function GenericArticle({ article }: { article: Article }) {
     <MarketingShell>
       <article>
         <div className="fixed inset-x-0 top-16 z-40 h-0.5 bg-transparent" aria-hidden="true">
-          <div className="h-full bg-[#356AFF] transition-[width] duration-150 motion-reduce:transition-none" style={{ width: `${progress}%` }} />
+          <div className="h-full bg-[#1B7F86] transition-[width] duration-150 motion-reduce:transition-none" style={{ width: `${progress}%` }} />
         </div>
-        <header className="border-b border-[#E6EAF2] bg-[#F8FAFC] px-4 py-14 md:px-6 md:py-20">
+        <header className="border-b border-[#E3E0D5] bg-[#FBFAF5] px-4 py-14 md:px-6 md:py-20">
           <div className="mx-auto max-w-3xl">
-            <Link to="/makaleler" className="inline-flex items-center gap-1 text-sm font-bold text-[#356AFF]"><ArrowLeft className="h-4 w-4" /> Tüm makaleler</Link>
-            <Badge variant="outline" className="mt-8 border-[#DDE5F4] bg-white text-[#356AFF]">{article.category}</Badge>
-            <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.045em] text-[#0B1020] md:text-6xl">{article.title}</h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#516078]">{article.description}</p>
-            <div className="mt-7 flex items-center gap-5 text-sm text-[#667085]">
+            <Link to="/makaleler" className="inline-flex items-center gap-1 text-sm font-bold text-[#1B7F86]"><ArrowLeft className="h-4 w-4" /> Tüm makaleler</Link>
+            <Badge variant="outline" className="mt-8 border-[#E3E0D5] bg-[#FBFAF5] text-[#1B7F86]">{article.category}</Badge>
+            <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.045em] text-[#101211] md:text-6xl">{article.title}</h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#57564E]">{article.description}</p>
+            <div className="mt-7 flex items-center gap-5 text-sm text-[#6B6A61]">
               <span className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4" />{article.date}</span>
               <span className="flex items-center gap-1.5"><Clock3 className="h-4 w-4" />{article.readingTime}</span>
             </div>
@@ -232,18 +232,18 @@ function GenericArticle({ article }: { article: Article }) {
             ) : (
               article.sections.map((section) => (
                 <section key={section.heading}>
-                  <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-[#0B1020] md:text-3xl">{section.heading}</h2>
-                  {section.paragraphs.map((paragraph) => <p key={paragraph} className="mt-5 text-base leading-8 text-[#516078]">{paragraph}</p>)}
+                  <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-[#101211] md:text-3xl">{section.heading}</h2>
+                  {section.paragraphs.map((paragraph) => <p key={paragraph} className="mt-5 text-base leading-8 text-[#57564E]">{paragraph}</p>)}
                 </section>
               ))
             )}
           </div>
-          <aside className="h-fit rounded-2xl border border-[#DDE5F4] bg-[#F4F8FF] p-5">
-            <FileText className="h-5 w-5 text-[#356AFF]" />
-            <h2 className="mt-4 text-lg font-extrabold text-[#0B1020]">Bu kavramı markanızda görün.</h2>
-            <p className="mt-3 text-sm leading-6 text-[#667085]">Ücretsiz raporla ilk kaynak ve kanıt çerçevenizi çıkarın.</p>
+          <aside className="h-fit rounded-2xl border border-[#E3E0D5] bg-[#F2F0E8] p-5">
+            <FileText className="h-5 w-5 text-[#1B7F86]" />
+            <h2 className="mt-4 text-lg font-extrabold text-[#101211]">Bu kavramı markanızda görün.</h2>
+            <p className="mt-3 text-sm leading-6 text-[#6B6A61]">Ücretsiz raporla ilk kaynak ve kanıt çerçevenizi çıkarın.</p>
             <Button className="mt-5 w-full" asChild><Link to="/free-ai-readiness-report">Ücretsiz ölçüm</Link></Button>
-            <Link to="/platform" className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#356AFF]">Platformu inceleyin <SearchCheck className="h-4 w-4" /></Link>
+            <Link to="/platform" className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#1B7F86]">Platformu inceleyin <SearchCheck className="h-4 w-4" /></Link>
           </aside>
         </div>
       </article>
@@ -255,8 +255,8 @@ function ArticleNotFound() {
   return (
     <MarketingShell>
       <section className="marketing-container px-4 py-24 text-center md:px-6">
-        <h1 className="text-3xl font-extrabold text-[#0B1020]">Makale bulunamadı</h1>
-        <p className="mt-4 text-base text-[#667085]">Aradığınız makale kaldırılmış ya da hiç var olmamış olabilir.</p>
+        <h1 className="text-3xl font-extrabold text-[#101211]">Makale bulunamadı</h1>
+        <p className="mt-4 text-base text-[#6B6A61]">Aradığınız makale kaldırılmış ya da hiç var olmamış olabilir.</p>
         <Button asChild className="mt-8"><Link to="/makaleler">Tüm makaleleri gör</Link></Button>
       </section>
     </MarketingShell>
