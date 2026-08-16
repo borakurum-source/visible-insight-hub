@@ -19,7 +19,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { faqs } from "@/lib/faqData";
 import { pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
-import shotDiscovery from "@/assets/landing/shot-discovery.webp";
 import shotKb from "@/assets/landing/shot-kb.webp";
 import shotContent from "@/assets/landing/shot-content.webp";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
