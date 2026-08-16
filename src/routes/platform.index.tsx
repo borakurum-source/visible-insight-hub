@@ -42,7 +42,7 @@ function PlatformPage() {
         description="OneCite, marka kaynaklarınızı, yapay zeka cevaplarındaki seçim sinyalini ve en yüksek etkili içeriği aynı çalışma döngüsünde birleştirir."
         image={heroSignalAction}
         imageAlt="Üç ışıklı yolun şeffaf bir prizma içinde tek kaynak noktasında birleşmesi"
-        visualLabel="SOURCE / SIGNAL / ACTION"
+        visualLabel="SİNYAL → KANIT → AKSİYON"
         secondaryHref="/platform/citation-share"
         secondaryLabel="Atıf payını incele"
       >

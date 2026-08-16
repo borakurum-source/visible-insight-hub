@@ -117,7 +117,7 @@ function FilmFolkCaseStudy() {
           description="Aynı satın alma niyetli soru havuzunda yapılan ilk ve son ölçüm karşılaştırması. Bu vaka tek bir yanıtı değil; hangi niyetlerde kaynak olarak daha sık seçildiğini gösterir."
           image={heroEvidenceGap}
           imageAlt="Eksik parçası olan ışıklı cam köprü; FilmFolk vaka incelemesinde kanıt boşluğunu temsil eden OneCite görseli"
-          visualLabel="CASE STUDY / FILMFOLK"
+          visualLabel="VAKA ÇALIŞMASI"
           primaryHref="#metodoloji"
           primaryLabel="Metodolojiyi incele"
           secondaryHref="/ucretsiz-yapay-zeka-gorunurluk-raporu"

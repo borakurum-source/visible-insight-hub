@@ -30,7 +30,7 @@ function AboutPage() {
         description="OneCite, markaların yalnızca görünür olup olmadığını değil; hangi soruda, hangi kaynakla ve hangi eksik kanıt yüzünden seçilip seçilmediğini anlamak için kuruldu."
         image={heroCitationOrb}
         imageAlt="Kaynak noktalarını birleştiren ışıklı cam küre; OneCite’ın kanıt ağı metaforu"
-        visualLabel="SOURCE SIGNAL / ABOUT"
+        visualLabel="MARKA HİKÂYESİ"
         primaryHref="/ucretsiz-yapay-zeka-gorunurluk-raporu"
         primaryLabel="İlk ölçümü başlat"
         secondaryHref="#neden"
