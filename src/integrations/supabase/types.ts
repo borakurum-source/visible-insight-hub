@@ -1116,6 +1116,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      expire_subscription_plans: { Args: never; Returns: undefined }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
