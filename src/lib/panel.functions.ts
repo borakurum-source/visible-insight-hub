@@ -657,6 +657,9 @@ export const startMeasurement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
+    const { assertBrandActive } = await import("./plan.server");
+    await assertBrandActive(context.supabase, context.userId, data.brandId);
+
     const { data: prompts } = await context.supabase
       .from("prompts").select("id").eq("brand_id", data.brandId).eq("status", "approved");
     const ids = (prompts ?? []).map((p) => p.id);
