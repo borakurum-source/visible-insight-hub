@@ -3,6 +3,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import BrandLogo from "@/components/site/BrandLogo";
 
 export const Route = createFileRoute("/auth")({
@@ -31,6 +33,11 @@ function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [emailLoading, setEmailLoading] = useState(false);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -46,7 +53,7 @@ function AuthPage() {
     setLoading(true);
     setError(null);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: `${window.location.origin}/auth`,
     });
     if (result.error) {
       setError("Google ile giriş yapılamadı. Lütfen tekrar deneyin.");
@@ -57,13 +64,52 @@ function AuthPage() {
     void navigate({ to: "/app" });
   };
 
+  const submitEmail = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setEmailLoading(true);
+    setError(null);
+    setNotice(null);
+
+    if (mode === "signin") {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setError(
+          signInError.message.toLowerCase().includes("invalid")
+            ? "E-posta veya şifre hatalı."
+            : signInError.message,
+        );
+        setEmailLoading(false);
+        return;
+      }
+      void navigate({ to: "/app" });
+      return;
+    }
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/auth` },
+    });
+    if (signUpError) {
+      setError(signUpError.message);
+      setEmailLoading(false);
+      return;
+    }
+    if (data.session) {
+      void navigate({ to: "/app" });
+      return;
+    }
+    setNotice("Hesabını doğrulamak için e-postana gönderdiğimiz bağlantıya tıkla.");
+    setEmailLoading(false);
+  };
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-16">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card/60 p-8 shadow-sm">
         <BrandLogo variant="horizontal" size="sm" linkTo="/" />
         <h1 className="mt-6 font-display text-2xl font-semibold text-foreground">Panele giriş yap</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Google hesabınla saniyeler içinde OneCite paneline eriş.
+          E-posta veya Google hesabınla OneCite paneline eriş.
         </p>
 
         <Button
@@ -82,6 +128,65 @@ function AuthPage() {
           </svg>
           {loading ? "Yönlendiriliyor..." : "Google ile devam et"}
         </Button>
+
+        <div className="my-6 flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" />
+          <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">veya</span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <form className="space-y-4" onSubmit={submitEmail}>
+          <div className="space-y-2">
+            <Label htmlFor="email">E-posta</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ornek@sirket.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Şifre</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
+          <Button type="submit" size="lg" className="w-full" disabled={emailLoading}>
+            {emailLoading
+              ? "Gönderiliyor..."
+              : mode === "signin"
+                ? "E-posta ile giriş yap"
+                : "Hesap oluştur"}
+          </Button>
+        </form>
+
+        <button
+          type="button"
+          className="mt-4 w-full text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          onClick={() => {
+            setMode(mode === "signin" ? "signup" : "signin");
+            setError(null);
+            setNotice(null);
+          }}
+        >
+          {mode === "signin" ? "Hesabın yok mu? Kayıt ol" : "Zaten hesabın var mı? Giriş yap"}
+        </button>
+
+        {notice ? (
+          <p className="mt-4 text-sm text-muted-foreground" role="status">
+            {notice}
+          </p>
+        ) : null}
 
         {error ? (
           <p className="mt-4 text-sm text-destructive" role="alert">
