@@ -34,6 +34,7 @@ import { Route as PlatformEvidenceGapsRouteImport } from './routes/platform.evid
 import { Route as ProofFilmfolkRouteImport } from './routes/proof.filmfolk'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as SolutionsAgenciesRouteImport } from './routes/solutions.agencies'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authenticated/app.account'
@@ -180,6 +181,11 @@ const SolutionsAgenciesRoute = SolutionsAgenciesRouteImport.update({
   path: '/solutions/agencies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/account': typeof AuthenticatedAppAccountRoute
   '/app/admin': typeof AuthenticatedAppAdminRoute
@@ -353,6 +360,7 @@ export interface FileRoutesByTo {
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/makaleler': typeof MakalelerIndexRoute
   '/platform': typeof PlatformIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/account': typeof AuthenticatedAppAccountRoute
   '/app/admin': typeof AuthenticatedAppAdminRoute
@@ -400,6 +408,7 @@ export interface FileRoutesById {
   '/solutions/agencies': typeof SolutionsAgenciesRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/app/account': typeof AuthenticatedAppAccountRoute
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
@@ -447,6 +456,7 @@ export interface FileRouteTypes {
     | '/solutions/agencies'
     | '/makaleler/'
     | '/platform/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/app/account'
     | '/app/admin'
@@ -489,6 +499,7 @@ export interface FileRouteTypes {
     | '/solutions/agencies'
     | '/makaleler'
     | '/platform'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/app/account'
     | '/app/admin'
@@ -535,6 +546,7 @@ export interface FileRouteTypes {
     | '/solutions/agencies'
     | '/makaleler/'
     | '/platform/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/app/account'
     | '/_authenticated/app/admin'
@@ -576,6 +588,7 @@ export interface RootRouteChildren {
   ProofFilmfolkRoute: typeof ProofFilmfolkRoute
   RTokenRoute: typeof RTokenRoute
   SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
@@ -755,6 +768,13 @@ declare module '@tanstack/react-router' {
       path: '/solutions/agencies'
       fullPath: '/solutions/agencies'
       preLoaderRoute: typeof SolutionsAgenciesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
@@ -999,6 +1019,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProofFilmfolkRoute: ProofFilmfolkRoute,
   RTokenRoute: RTokenRoute,
   SolutionsAgenciesRoute: SolutionsAgenciesRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
