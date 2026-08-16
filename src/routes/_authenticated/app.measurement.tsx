@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Activity, Play, Gauge, ListChecks } from "lucide-react";
 import { toast } from "sonner";
@@ -11,12 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { QuerySkeleton } from "@/components/app/panel-query-states";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
-import {
-  getMeasurementState, startMeasurement, runMeasurementChunk, finishMeasurement,
-} from "@/lib/panel.functions";
+import { getMeasurementState } from "@/lib/panel.functions";
+import { useMeasurementRun } from "@/lib/use-measurement-run";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/measurement")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    autostart: search["autostart"] === true || search["autostart"] === "1" ? true : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Ölçüm — OneCite Paneli" },
@@ -29,18 +31,12 @@ export const Route = createFileRoute("/_authenticated/app/measurement")({
   component: MeasurementPage,
 });
 
-const CHUNK = 3;
-
 function MeasurementPage() {
   const { brand } = useActiveBrand();
-  const queryClient = useQueryClient();
+  const { autostart } = Route.useSearch();
+  const navigate = useNavigate();
   const fetchState = useServerFn(getMeasurementState);
-  const start = useServerFn(startMeasurement);
-  const runChunk = useServerFn(runMeasurementChunk);
-  const finish = useServerFn(finishMeasurement);
-
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
-  const running = progress !== null;
+  const { run, progress, running } = useMeasurementRun(brand?.id);
 
   const { data, isLoading } = useQuery({
     queryKey: ["measurement-state", brand?.id],
@@ -48,26 +44,18 @@ function MeasurementPage() {
     enabled: Boolean(brand?.id),
   });
 
-  async function handleRun() {
-    if (!brand) return;
-    try {
-      const { batch, promptIds } = await start({ data: { brandId: brand.id } });
-      setProgress({ done: 0, total: promptIds.length });
-      for (let i = 0; i < promptIds.length; i += CHUNK) {
-        const slice = promptIds.slice(i, i + CHUNK);
-        await runChunk({ data: { batchId: batch.id, brandId: brand.id, promptIds: slice } });
-        setProgress({ done: Math.min(i + CHUNK, promptIds.length), total: promptIds.length });
-      }
-      await finish({ data: { batchId: batch.id, brandId: brand.id } });
-      toast.success("Ölçüm tamamlandı, skorunuz güncellendi.");
-      await queryClient.invalidateQueries({ queryKey: ["measurement-state", brand.id] });
-      await queryClient.invalidateQueries({ queryKey: ["brand-overview", brand.id] });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Ölçüm başarısız oldu.");
-    } finally {
-      setProgress(null);
+  // Kurulum bitiminde /app/measurement?autostart=1 ile gelindiğinde ilk ölçümü kendiliğinden başlat.
+  const autostarted = useRef(false);
+  useEffect(() => {
+    if (!autostart || autostarted.current) return;
+    if (!brand?.id || isLoading) return;
+    autostarted.current = true;
+    navigate({ to: "/app/measurement", search: {}, replace: true });
+    if ((data?.approvedPrompts ?? 0) > 0) {
+      toast.info("Kurulum tamam — ilk ölçümünüz başlıyor.");
+      void run();
     }
-  }
+  }, [autostart, brand?.id, isLoading, data?.approvedPrompts, navigate, run]);
 
   return (
     <>
@@ -79,7 +67,7 @@ function MeasurementPage() {
           icon: Gauge,
         }}
         action={
-          <Button size="sm" onClick={handleRun} disabled={!brand || running || (data?.approvedPrompts ?? 0) === 0}>
+          <Button size="sm" onClick={() => void run()} disabled={!brand || running || (data?.approvedPrompts ?? 0) === 0}>
             <Play className="mr-2 h-3.5 w-3.5" /> {running ? "Ölçülüyor…" : "Ölçümü başlat"}
           </Button>
         }
