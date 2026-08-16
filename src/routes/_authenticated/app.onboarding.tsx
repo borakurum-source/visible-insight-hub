@@ -22,6 +22,7 @@ import {
   getBrandIntelligence,
   saveBrandIntelligence,
   setPromptStatus,
+  getPlanUsage,
   suggestKnowledgeSources,
 } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
