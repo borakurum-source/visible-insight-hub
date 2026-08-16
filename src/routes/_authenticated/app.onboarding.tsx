@@ -409,11 +409,21 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const listAll = useServerFn(listPrompts);
   const [loading, setLoading] = useState(true);
+  const planUsage = useServerFn(getPlanUsage);
+  const [plan, setPlan] = useState<{ planLabel: string; maxPrompts: number; approvedPrompts: number } | null>(null);
+
+  useEffect(() => {
+    planUsage({ data: { brandId } })
+      .then((usage) => setPlan(usage))
+      .catch(() => undefined);
+  }, [brandId]);
+
+  const quota = plan && plan.maxPrompts > 0 ? Math.max(0, plan.maxPrompts - plan.approvedPrompts) : Infinity;
 
   const applyRows = (rows: Array<{ id: string; text: string; category: string }>) => {
     const list = rows.map((r) => ({ id: r.id, text: r.text, category: r.category }));
     setPrompts(list);
-    setSelected(Object.fromEntries(list.map((r) => [r.id, true])));
+    setSelected(Object.fromEntries(list.map((r, index) => [r.id, index < quota])));
   };
 
   // Kayıtlı adayları okur; yeni üretim yalnızca butonla tetiklenir.
@@ -444,6 +454,17 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
   });
 
   const count = prompts.filter((p) => selected[p.id]).length;
+  const overQuota = count > quota;
+
+  const toggle = (id: string, value: boolean) => {
+    if (value && count >= quota) {
+      toast.error(
+        `${plan?.planLabel ?? "Mevcut"} planınızda en fazla ${plan?.maxPrompts} prompt izlenebilir. Planınızı yükselterek daha fazla soru ekleyebilirsiniz.`,
+      );
+      return;
+    }
+    setSelected({ ...selected, [id]: value });
+  };
 
   return (
     <StepFrame
@@ -455,7 +476,7 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
             {produce.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {prompts.length ? "Yeniden üret" : "Soruları üret"}
           </Button>
-          <Button onClick={() => finish.mutate()} disabled={count === 0 || finish.isPending}>
+          <Button onClick={() => finish.mutate()} disabled={count === 0 || overQuota || finish.isPending}>
             {finish.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {count} promptu onayla ve kurulumu bitir <Check className="ml-1.5 h-4 w-4" />
           </Button>
@@ -468,8 +489,27 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
         </p>
       ) : (
         <>
+          {plan ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">
+                <strong className="text-foreground">{plan.planLabel}</strong> planı ·{" "}
+                {plan.maxPrompts > 0 ? `${plan.maxPrompts} prompt hakkı` : "sınırsız prompt"}
+                {plan.approvedPrompts > 0 ? ` · ${plan.approvedPrompts} onaylı` : ""}
+              </span>
+              <span className={overQuota ? "text-destructive" : "text-muted-foreground"}>
+                Seçili: {count}
+                {plan.maxPrompts > 0 ? ` / ${quota}` : ""}
+              </span>
+            </div>
+          ) : null}
           <div className="flex gap-2 text-xs">
-            <Button variant="ghost" size="sm" onClick={() => setSelected(Object.fromEntries(prompts.map((p) => [p.id, true])))}>Tümünü seç</Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelected(Object.fromEntries(prompts.map((p, index) => [p.id, index < quota])))}
+            >
+              {quota === Infinity ? "Tümünü seç" : `İlk ${Math.min(quota, prompts.length)} tanesini seç`}
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => setSelected({})}>Seçimi temizle</Button>
           </div>
           <div className="divide-y divide-border rounded-lg border border-border">
@@ -477,7 +517,7 @@ function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () 
               <label key={prompt.id} className="flex cursor-pointer items-start gap-3 p-3 text-sm">
                 <Checkbox
                   checked={Boolean(selected[prompt.id])}
-                  onCheckedChange={(value) => setSelected({ ...selected, [prompt.id]: value === true })}
+                  onCheckedChange={(value) => toggle(prompt.id, value === true)}
                 />
                 <span className="min-w-0 flex-1">{prompt.text}</span>
                 <Badge variant="outline" className="shrink-0 text-[10px]">{prompt.category}</Badge>
