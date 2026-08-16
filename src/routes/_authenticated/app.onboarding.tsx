@@ -114,7 +114,11 @@ function OnboardingPage() {
         <StepPrompts
           brandId={brand.id}
           onBack={() => setStep(2)}
-          onDone={async () => { await refresh(); toast.success("Kurulum tamamlandı"); navigate({ to: "/app" }); }}
+          onDone={async () => {
+            await refresh();
+            toast.success("Kurulum tamamlandı — ilk ölçüm başlatılıyor");
+            navigate({ to: "/app/measurement", search: { autostart: true } });
+          }}
         />
       ) : null}
 
