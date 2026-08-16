@@ -19,11 +19,11 @@ export function MarketingShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#FBFAF5] text-[#101211]">
-      <header className="sticky top-0 z-50 border-b border-[#E3E0D5] bg-white/95 backdrop-blur">
+    <div className="min-h-screen bg-[#FBFAF5] text-[#101211] selection:bg-[#3FBFB2]/30">
+      <header className="sticky top-0 z-50 border-b border-[#E3E0D5] bg-[#FBFAF5]/85 backdrop-blur-xl">
         <div className="marketing-container flex h-16 items-center justify-between">
           <BrandLogo variant="horizontal" size="sm" linkTo="/" />
-          <nav className="hidden items-center gap-4 text-[13px] font-semibold text-[#6B6A61] xl:flex" aria-label="Pazarlama navigasyonu">
+          <nav className="hidden items-center gap-6 text-[13px] font-medium tracking-[-0.01em] text-[#57564E] xl:flex" aria-label="Pazarlama navigasyonu">
             {marketingLinks.map((link) => (
               <Link
                 key={link.href}
@@ -60,7 +60,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
           </div>
         </div>
         {mobileOpen && (
-          <nav className="border-t border-[#E3E0D5] bg-white px-4 py-4 md:hidden" aria-label="Mobil pazarlama navigasyonu">
+          <nav className="border-t border-[#E3E0D5] bg-[#FBFAF5] px-4 py-4 md:hidden" aria-label="Mobil pazarlama navigasyonu">
             <div className="space-y-1">
               {marketingLinks.map((link) => (
                 <Link
@@ -84,7 +84,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
         )}
       </header>
       <main>{children}</main>
-      <footer className="border-t border-[#E3E0D5] bg-white">
+      <footer className="border-t border-[#E3E0D5] bg-[#FBFAF5]">
         <div className="marketing-container flex flex-col items-center justify-between gap-5 py-9 text-sm text-[#6B6A61] md:flex-row">
           <BrandLogo variant="horizontal" size="sm" linkTo="/" />
           <p>© 2026 OneCite. Tüm hakları saklıdır.</p>
