@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BookOpen, ExternalLink, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { BookOpen, ExternalLink, Loader2, Plus, RefreshCw, Sparkles, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, KNOWLEDGE_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { addKnowledgeSources, deleteKnowledgeSource, listKnowledgeSources } from "@/lib/panel.functions";
-import { indexKnowledgeSource, indexPendingSources, rebuildGraphEntities, rebuildVectorMap } from "@/lib/kb.functions";
+import {
+  indexKnowledgeSource,
+  indexPendingSources,
+  listCitationCandidates,
+  promoteCitationToSource,
+  rebuildGraphEntities,
+  rebuildVectorMap,
+  refreshStaleSources,
+} from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/knowledge-base")({
@@ -37,6 +45,9 @@ function KnowledgeBasePage() {
   const indexPending = useServerFn(indexPendingSources);
   const reproject = useServerFn(rebuildVectorMap);
   const rebuildEntities = useServerFn(rebuildGraphEntities);
+  const refreshStale = useServerFn(refreshStaleSources);
+  const fetchCandidates = useServerFn(listCitationCandidates);
+  const promoteCandidate = useServerFn(promoteCitationToSource);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
 
@@ -47,11 +58,40 @@ function KnowledgeBasePage() {
     enabled: Boolean(brand?.id),
   });
 
+  const candidateKey = ["citation-candidates", brand?.id];
+  const { data: candidates = [] } = useQuery({
+    queryKey: candidateKey,
+    queryFn: () => fetchCandidates({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
+
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: key });
     void queryClient.invalidateQueries({ queryKey: ["brand-overview", brand?.id] });
     void queryClient.invalidateQueries({ queryKey: ["knowledge-graph", brand?.id] });
+    void queryClient.invalidateQueries({ queryKey: candidateKey });
   };
+
+  const refreshMutation = useMutation({
+    mutationFn: async () => {
+      const result = await refreshStale({ data: { brandId: brand!.id } });
+      if (result.updated > 0) {
+        await reproject({ data: { brandId: brand!.id } });
+      }
+      return result;
+    },
+    onSuccess: (result) => {
+      toast.success(`${result.checked} kaynak kontrol edildi · ${result.updated} güncellendi · ${result.unchanged} değişmemiş`);
+      invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const promoteMutation = useMutation({
+    mutationFn: (input: { url: string; title: string }) => promoteCandidate({ data: { brandId: brand!.id, ...input } }),
+    onSuccess: () => { toast.success("Kaynak bilgi bankasına eklendi ve indekslendi"); invalidate(); },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const indexMutation = useMutation({
     mutationFn: async (ids: string[] | "pending") => {
@@ -104,6 +144,16 @@ function KnowledgeBasePage() {
           icon: BookOpen,
         }}
         action={
+          <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={refreshMutation.isPending || data.length === 0}
+            onClick={() => refreshMutation.mutate()}
+          >
+            {refreshMutation.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
+            Değişenleri tazele
+          </Button>
           <Button
             size="sm"
             variant="outline"
@@ -113,6 +163,7 @@ function KnowledgeBasePage() {
             {indexMutation.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
             Bekleyenleri indeksle
           </Button>
+          </div>
         }
       />
 
