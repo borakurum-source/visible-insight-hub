@@ -19,16 +19,16 @@ export function MarketingShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#0B1020] selection:bg-[#35E1FF]/30">
-      <header className="sticky top-0 z-50 border-b border-[#E6EAF2] bg-[#F7F9FC]/85 backdrop-blur-xl">
+    <div className="min-h-screen bg-background text-foreground selection:bg-cyan/30">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="marketing-container flex h-16 items-center justify-between">
           <BrandLogo variant="horizontal" size="sm" linkTo="/" />
-          <nav className="hidden items-center gap-6 text-[13px] font-medium tracking-[-0.01em] text-[#57564E] xl:flex" aria-label="Pazarlama navigasyonu">
+          <nav className="hidden items-center gap-6 text-[13px] font-medium tracking-[-0.01em] text-muted-foreground xl:flex" aria-label="Pazarlama navigasyonu">
             {marketingLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className="whitespace-nowrap transition-colors hover:text-[#0B1020] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF] focus-visible:ring-offset-2"
+                className="whitespace-nowrap transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF] focus-visible:ring-offset-2"
               >
                 {link.label}
               </Link>
@@ -50,7 +50,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
             </Button>
             <button
               type="button"
-              className="rounded-md p-2 text-[#0B1020] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF]"
+              className="rounded-md p-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF]"
               onClick={() => setMobileOpen((open) => !open)}
               aria-label="Menüyü aç"
               aria-expanded={mobileOpen}
@@ -60,14 +60,14 @@ export function MarketingShell({ children }: { children: ReactNode }) {
           </div>
         </div>
         {mobileOpen && (
-          <nav className="border-t border-[#E6EAF2] bg-[#F7F9FC] px-4 py-4 md:hidden" aria-label="Mobil pazarlama navigasyonu">
+          <nav className="border-t border-border bg-background px-4 py-4 md:hidden" aria-label="Mobil pazarlama navigasyonu">
             <div className="space-y-1">
               {marketingLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[#0B1020] hover:bg-[#EEF2F9]"
+                  className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-secondary"
                 >
                   {link.label}
                 </Link>
@@ -75,7 +75,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
               <Link
                 to="/auth"
                 onClick={() => setMobileOpen(false)}
-                className="mt-2 block w-full rounded-lg border border-[#E6EAF2] px-3 py-2.5 text-left text-sm font-semibold text-[#0B1020]"
+                className="mt-2 block w-full rounded-lg border border-border px-3 py-2.5 text-left text-sm font-semibold text-foreground"
               >
                 Giriş yap
               </Link>
@@ -84,17 +84,17 @@ export function MarketingShell({ children }: { children: ReactNode }) {
         )}
       </header>
       <main>{children}</main>
-      <footer className="border-t border-[#E6EAF2] bg-[#F7F9FC]">
-        <div className="marketing-container flex flex-col items-center justify-between gap-5 py-9 text-sm text-[#667085] md:flex-row">
+      <footer className="border-t border-border bg-background">
+        <div className="marketing-container flex flex-col items-center justify-between gap-5 py-9 text-sm text-muted-foreground md:flex-row">
           <BrandLogo variant="horizontal" size="sm" linkTo="/" />
           <p>© 2026 OneCite. Tüm hakları saklıdır.</p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link to="/makaleler" className="hover:text-[#0B1020]">Makaleler</Link>
-            <Link to="/hakkimizda" className="hover:text-[#0B1020]">Hakkımızda</Link>
-            <Link to="/sunum" className="hover:text-[#0B1020]">Sunum</Link>
-            <Link to="/fiyatlandirma" className="hover:text-[#0B1020]">Fiyatlandırma</Link>
-            <Link to="/privacy" className="hover:text-[#0B1020]">Gizlilik</Link>
-            <Link to="/kvkk" className="hover:text-[#0B1020]">KVKK</Link>
+            <Link to="/makaleler" className="hover:text-foreground">Makaleler</Link>
+            <Link to="/hakkimizda" className="hover:text-foreground">Hakkımızda</Link>
+            <Link to="/sunum" className="hover:text-foreground">Sunum</Link>
+            <Link to="/fiyatlandirma" className="hover:text-foreground">Fiyatlandırma</Link>
+            <Link to="/privacy" className="hover:text-foreground">Gizlilik</Link>
+            <Link to="/kvkk" className="hover:text-foreground">KVKK</Link>
           </div>
         </div>
       </footer>

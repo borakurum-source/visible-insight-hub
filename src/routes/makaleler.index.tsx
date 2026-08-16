@@ -94,17 +94,17 @@ function ArticleCard({ article, featured = false }: { article: Article; featured
       <Link
         to="/makaleler/$slug"
         params={{ slug: article.slug }}
-        className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF] focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-[#EDEFE9]" : "border-[#E6EAF2] bg-[#F7F9FC] hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
+        className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#356AFF] focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-muted" : "border-border bg-background hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
       >
         <div className="flex items-center justify-between gap-3">
-          <Badge variant="outline" className="border-[#E6EAF2] bg-[#F7F9FC] text-[#356AFF]">{article.category}</Badge>
-          <BookOpen className="h-5 w-5 text-[#356AFF]" />
+          <Badge variant="outline" className="border-border bg-background text-primary">{article.category}</Badge>
+          <BookOpen className="h-5 w-5 text-primary" />
         </div>
-        <h2 className="mt-7 text-2xl font-extrabold tracking-[-0.03em] text-[#0B1020]">{article.title}</h2>
-        <p className="mt-4 flex-1 text-sm leading-7 text-[#667085]">{article.description}</p>
-        <div className="mt-7 flex items-center justify-between border-t border-[#E6EAF2] pt-4 text-xs text-[#667085]">
+        <h2 className="mt-7 text-2xl font-extrabold tracking-[-0.03em] text-foreground">{article.title}</h2>
+        <p className="mt-4 flex-1 text-sm leading-7 text-muted-foreground">{article.description}</p>
+        <div className="mt-7 flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" />{article.readingTime}</span>
-          <span className="flex items-center gap-1 font-semibold text-[#356AFF]">
+          <span className="flex items-center gap-1 font-semibold text-primary">
             {article.category === "Vaka incelemesi" ? "Vaka incelemesini aç" : "Makaleyi aç"} <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" />
           </span>
         </div>
@@ -123,24 +123,24 @@ function ArticlesPage() {
     <MarketingShell>
       <VisualHero
         eyebrow="SOURCE LIBRARY · ONECITE INSIGHTS"
-        title={<>Yapay zeka arama için <span className="text-[#35E1FF]">ölçülebilir bilgi.</span></>}
+        title={<>Yapay zeka arama için <span className="text-cyan">ölçülebilir bilgi.</span></>}
         description="Atıf payı, eksik kanıt, kaynak seçimi ve GEO hakkında karar vermeyi kolaylaştıran Türkçe rehberler."
         image={heroCitationOrb}
         imageAlt="Citation ağı taşıyan cam küre; OneCite kaynak merkezi için editorial görsel"
         visualLabel="SOURCE LIBRARY / 05"
       >
         <p className="text-sm text-slate-400">
-          Öne çıkan rehber: <Link className="font-semibold text-[#35E1FF] hover:text-white" to="/makaleler/$slug" params={{ slug: featured.slug }}>{featured.title}</Link>
+          Öne çıkan rehber: <Link className="font-semibold text-cyan hover:text-white" to="/makaleler/$slug" params={{ slug: featured.slug }}>{featured.title}</Link>
         </p>
       </VisualHero>
 
       <section className="marketing-container px-4 py-16 md:px-6 md:py-24">
         <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Rehberler</p>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-4xl">Kavramı anlayın, sonra ölçün.</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Rehberler</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Kavramı anlayın, sonra ölçün.</h2>
           </div>
-          <Link to="/free-ai-readiness-report" className="text-sm font-bold text-[#356AFF] hover:text-[#0B1020]">Ücretsiz raporu başlat →</Link>
+          <Link to="/free-ai-readiness-report" className="text-sm font-bold text-primary hover:text-foreground">Ücretsiz raporu başlat →</Link>
         </div>
         <div className="mt-8 flex flex-wrap gap-2" aria-label="Makale kategorileri">
           {categories.map((category) => (
@@ -149,7 +149,7 @@ function ArticlesPage() {
               type="button"
               aria-pressed={selectedCategory === category}
               onClick={() => setSelectedCategory(category)}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] motion-reduce:transition-none ${selectedCategory === category ? "border-[#356AFF] bg-[#356AFF] text-white" : "border-[#E6EAF2] bg-[#F7F9FC] text-[#667085] hover:border-[#C9C5B6] hover:text-[#0B1020]"}`}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] motion-reduce:transition-none ${selectedCategory === category ? "border-[#356AFF] bg-[#356AFF] text-white" : "border-border bg-background text-muted-foreground hover:border-[#C9C5B6] hover:text-foreground"}`}
             >
               {category}
             </button>
@@ -164,11 +164,11 @@ function ArticlesPage() {
         </div>
       </section>
 
-      <section className="bg-[#F2F0E8] px-4 py-16 md:px-6">
-        <div className="marketing-container flex flex-col items-start justify-between gap-6 rounded-2xl border border-[#E6EAF2] bg-[#F7F9FC] p-7 md:flex-row md:items-center">
+      <section className="bg-muted px-4 py-16 md:px-6">
+        <div className="marketing-container flex flex-col items-start justify-between gap-6 rounded-2xl border border-border bg-background p-7 md:flex-row md:items-center">
           <div>
-            <h2 className="text-2xl font-extrabold text-[#0B1020]">Okuduklarınızı kendi markanızla test edin.</h2>
-            <p className="mt-2 text-sm leading-6 text-[#667085]">Ücretsiz hazırlık raporu, ilk kaynak ve kanıt çerçevenizi verir.</p>
+            <h2 className="text-2xl font-extrabold text-foreground">Okuduklarınızı kendi markanızla test edin.</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">Ücretsiz hazırlık raporu, ilk kaynak ve kanıt çerçevenizi verir.</p>
           </div>
           <Button asChild><Link to="/free-ai-readiness-report">Ücretsiz ölçüm başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
         </div>
