@@ -14,7 +14,10 @@ function safeNext(value: unknown): string | undefined {
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
-  validateSearch: (search: Record<string, unknown>) => ({ next: safeNext(search['next']) }),
+  validateSearch: (search: Record<string, unknown>): { next?: string } => {
+    const next = safeNext(search['next']);
+    return next ? { next } : {};
+  },
   head: () => ({
     meta: [
       { title: "OneCite'a Giriş Yap | Yapay Zeka Görünürlük Paneli" },
