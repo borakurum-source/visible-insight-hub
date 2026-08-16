@@ -38,7 +38,6 @@ export const indexPendingSources = createServerFn({ method: "POST" })
     return { indexed, failed, chunks, remaining: Math.max(0, (sources ?? []).length - indexed - failed) };
   });
 
-// RAG geri getirme testi: soruyu embed eder, en yakın bilgi parçalarını döner.
 // İçeriği değişmiş olabilecek kaynakları yeniden indeksler (hash aynıysa atlanır).
 export const refreshStaleSources = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -123,8 +122,7 @@ export const promoteCitationToSource = createServerFn({ method: "POST" })
         brand_id: data.brandId,
         title: data.title.slice(0, 180),
         url: data.url,
-        source_type: "web",
-        status: "aktif",
+        source_type: "url",
       })
       .select("id")
       .single();
@@ -137,6 +135,7 @@ export const promoteCitationToSource = createServerFn({ method: "POST" })
     return { id: source.id };
   });
 
+// RAG geri getirme testi: soruyu embed eder, en yakın bilgi parçalarını döner.
 export const searchKnowledge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; query: string }) => input)
