@@ -16,9 +16,11 @@ import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
 import { Route as FreeAiReadinessReportRouteImport } from './routes/free-ai-readiness-report'
 import { Route as HakkimizdaRouteImport } from './routes/hakkimizda'
 import { Route as KvkkRouteImport } from './routes/kvkk'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MakalelerRouteImport } from './routes/makaleler'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SunumRouteImport } from './routes/sunum'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as MakalelerIndexRouteImport } from './routes/makaleler.index'
@@ -82,6 +84,11 @@ const KvkkRoute = KvkkRouteImport.update({
   path: '/kvkk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MakalelerRoute = MakalelerRouteImport.update({
   id: '/makaleler',
   path: '/makaleler',
@@ -95,6 +102,11 @@ const PlatformRoute = PlatformRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SunumRoute = SunumRouteImport.update({
@@ -254,9 +266,11 @@ export interface FileRoutesByFullPath {
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/makaleler': typeof MakalelerRouteWithChildren
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/makaleler/$slug': typeof MakalelerSlugRoute
@@ -293,7 +307,9 @@ export interface FileRoutesByTo {
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
@@ -331,9 +347,11 @@ export interface FileRoutesById {
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
   '/kvkk': typeof KvkkRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/makaleler': typeof MakalelerRouteWithChildren
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sunum': typeof SunumRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/makaleler/$slug': typeof MakalelerSlugRoute
@@ -372,9 +390,11 @@ export interface FileRouteTypes {
     | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
+    | '/llms.txt'
     | '/makaleler'
     | '/platform'
     | '/privacy'
+    | '/sitemap.xml'
     | '/sunum'
     | '/app'
     | '/makaleler/$slug'
@@ -411,7 +431,9 @@ export interface FileRouteTypes {
     | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
+    | '/llms.txt'
     | '/privacy'
+    | '/sitemap.xml'
     | '/sunum'
     | '/makaleler/$slug'
     | '/platform/citation-share'
@@ -448,9 +470,11 @@ export interface FileRouteTypes {
     | '/free-ai-readiness-report'
     | '/hakkimizda'
     | '/kvkk'
+    | '/llms.txt'
     | '/makaleler'
     | '/platform'
     | '/privacy'
+    | '/sitemap.xml'
     | '/sunum'
     | '/_authenticated/app'
     | '/makaleler/$slug'
@@ -489,9 +513,11 @@ export interface RootRouteChildren {
   FreeAiReadinessReportRoute: typeof FreeAiReadinessReportRoute
   HakkimizdaRoute: typeof HakkimizdaRoute
   KvkkRoute: typeof KvkkRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   MakalelerRoute: typeof MakalelerRouteWithChildren
   PlatformRoute: typeof PlatformRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SunumRoute: typeof SunumRoute
   ProofFilmfolkRoute: typeof ProofFilmfolkRoute
   RTokenRoute: typeof RTokenRoute
@@ -550,6 +576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KvkkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/makaleler': {
       id: '/makaleler'
       path: '/makaleler'
@@ -569,6 +602,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sunum': {
@@ -863,9 +903,11 @@ const rootRouteChildren: RootRouteChildren = {
   FreeAiReadinessReportRoute: FreeAiReadinessReportRoute,
   HakkimizdaRoute: HakkimizdaRoute,
   KvkkRoute: KvkkRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   MakalelerRoute: MakalelerRouteWithChildren,
   PlatformRoute: PlatformRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SunumRoute: SunumRoute,
   ProofFilmfolkRoute: ProofFilmfolkRoute,
   RTokenRoute: RTokenRoute,
