@@ -35,7 +35,7 @@ function EvidenceGapsPage() {
     <MarketingShell>
       <VisualHero
         eyebrow="EVIDENCE GAP · MISSING SOURCE"
-        title={<>Yapay zekanın sizi güvenle önermesi için <span className="text-[#3FBFB2]">hangi kanıtların eksik olduğunu</span> görün.</>}
+        title={<>Yapay zekanın sizi güvenle önermesi için <span className="text-[#35E1FF]">hangi kanıtların eksik olduğunu</span> görün.</>}
         description="Eksik kanıt, bir modelin güvenle önermek için ihtiyaç duyduğu fakat sitenizde bulamadığı bilgi, kaynak veya bağlantıdır. OneCite bu eksikleri soru ve kaynak bağlamıyla görünür kılar."
         image={heroEvidenceGap}
         imageAlt="Bir parçası eksik olan ışıklı cam köprü; evidence gap kavramının görsel metaforu"
@@ -48,29 +48,29 @@ function EvidenceGapsPage() {
 
       <section className="marketing-container py-16 md:py-24">
         <div className="marketing-copy">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Neyi arıyoruz?</p>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-5xl">Bir içerik listesi değil, seçim kararındaki eksik halka.</h2>
-          <p className="mt-5 text-base leading-7 text-[#6B6A61]">OneCite her fırsatı aynı önemde ele almaz. Yapay zekanın seçim sürecini değiştirebilecek kanıtı, mevcut kaynaklar ve rakip bağlamıyla ilişkilendirir.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Neyi arıyoruz?</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-5xl">Bir içerik listesi değil, seçim kararındaki eksik halka.</h2>
+          <p className="mt-5 text-base leading-7 text-[#667085]">OneCite her fırsatı aynı önemde ele almaz. Yapay zekanın seçim sürecini değiştirebilecek kanıtı, mevcut kaynaklar ve rakip bağlamıyla ilişkilendirir.</p>
         </div>
         <div className="mt-12 grid gap-4 md:grid-cols-3">
           {gaps.map(({ icon: Icon, title, body }) => (
-            <article key={title} className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-6">
-              <Icon className="h-5 w-5 text-[#1B7F86]" />
-              <h3 className="mt-6 text-lg font-extrabold text-[#101211]">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[#6B6A61]">{body}</p>
+            <article key={title} className="rounded-2xl border border-[#E6EAF2] bg-[#F7F9FC] p-6">
+              <Icon className="h-5 w-5 text-[#356AFF]" />
+              <h3 className="mt-6 text-lg font-extrabold text-[#0B1020]">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-[#667085]">{body}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="border-y border-[#E3E0D5] bg-[#FBFAF5] px-4 py-16 md:px-6 md:py-24">
+      <section className="border-y border-[#E6EAF2] bg-[#F7F9FC] px-4 py-16 md:px-6 md:py-24">
         <div className="marketing-container grid min-w-0 items-center gap-12 lg:grid-cols-[minmax(0,.85fr)_minmax(360px,1.15fr)]">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1B7F86]">Uygulama ekranı</p>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#101211] md:text-4xl">Eksik kanıtı kısa bir iş listesine değil, ölçülebilir bir değişime çevirin.</h2>
-            <p className="mt-5 text-base leading-7 text-[#6B6A61]">Öneri; hangi soru, hangi kaynak ve hangi eksik bağlamdan geldiğini kaybetmeden içerik fırsatı olarak izlenir.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#356AFF]">Uygulama ekranı</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020] md:text-4xl">Eksik kanıtı kısa bir iş listesine değil, ölçülebilir bir değişime çevirin.</h2>
+            <p className="mt-5 text-base leading-7 text-[#667085]">Öneri; hangi soru, hangi kaynak ve hangi eksik bağlamdan geldiğini kaybetmeden içerik fırsatı olarak izlenir.</p>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-[#E3E0D5] bg-[#F5F3EC]">
+          <div className="overflow-hidden rounded-2xl border border-[#E6EAF2] bg-[#EEF2F9]">
             <img src={shotContent} alt="OneCite içerik fırsatları ve eksik kanıt uygulamaları" className="h-auto w-full" />
           </div>
         </div>
@@ -79,16 +79,16 @@ function EvidenceGapsPage() {
       <section className="marketing-container py-16 md:py-24">
         <div className="grid gap-4 md:grid-cols-3">
           {actions.map(({ icon: Icon, title, body }, index) => (
-            <article key={title} className="rounded-2xl border border-[#E3E0D5] bg-[#FBFAF5] p-6">
-              <span className="font-mono text-sm text-[#1B7F86]">0{index + 1}</span>
-              <Icon className="mt-7 h-5 w-5 text-[#101211]" />
-              <h3 className="mt-5 text-lg font-extrabold text-[#101211]">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[#6B6A61]">{body}</p>
+            <article key={title} className="rounded-2xl border border-[#E6EAF2] bg-[#F7F9FC] p-6">
+              <span className="font-mono text-sm text-[#356AFF]">0{index + 1}</span>
+              <Icon className="mt-7 h-5 w-5 text-[#0B1020]" />
+              <h3 className="mt-5 text-lg font-extrabold text-[#0B1020]">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-[#667085]">{body}</p>
             </article>
           ))}
         </div>
         <div className="mt-12 rounded-3xl bg-[#EDEFE9] p-8 text-center md:p-12">
-          <h2 className="text-3xl font-extrabold tracking-[-0.04em] text-[#101211]">Önce hangi kanıtın eksik olduğunu görün.</h2>
+          <h2 className="text-3xl font-extrabold tracking-[-0.04em] text-[#0B1020]">Önce hangi kanıtın eksik olduğunu görün.</h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#57564E]">Ücretsiz ölçüm, herkese açık site verisiyle ilk atıf ve eksik kanıt çerçevenizi oluşturur.</p>
           <Button className="mt-7" asChild><Link to="/free-ai-readiness-report">Ücretsiz ölçüm başlat <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
         </div>
