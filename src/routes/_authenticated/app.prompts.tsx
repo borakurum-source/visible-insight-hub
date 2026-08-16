@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, ListChecks, Loader2, Pause, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronDown, ExternalLink, ListChecks, ListTodo, Loader2, Pause, Plus, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,10 +12,20 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createPrompt, deletePrompt, getPlanUsage, listPrompts, setPromptStatus } from "@/lib/panel.functions";
+import {
+  createGeoTask,
+  createPrompt,
+  deletePrompt,
+  getPlanUsage,
+  getPromptInsight,
+  listPrompts,
+  setPromptStatus,
+} from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/prompts")({
+  validateSearch: (search: Record<string, unknown>): { prompt?: string } =>
+    typeof search["prompt"] === "string" ? { prompt: search["prompt"] } : {},
   head: () => ({
     meta: [
       { title: "Promptlar — OneCite Paneli" },
