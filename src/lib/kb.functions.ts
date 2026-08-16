@@ -39,6 +39,104 @@ export const indexPendingSources = createServerFn({ method: "POST" })
   });
 
 // RAG geri getirme testi: soruyu embed eder, en yakın bilgi parçalarını döner.
+// İçeriği değişmiş olabilecek kaynakları yeniden indeksler (hash aynıysa atlanır).
+export const refreshStaleSources = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; maxAgeDays?: number; limit?: number }) => input)
+  .handler(async ({ data, context }) => {
+    const { indexSource } = await import("./kb.server");
+    const cutoff = new Date(Date.now() - (data.maxAgeDays ?? 7) * 86400000).toISOString();
+    const { data: sources } = await context.supabase
+      .from("knowledge_sources")
+      .select("id, indexed_at")
+      .eq("brand_id", data.brandId)
+      .not("url", "is", null)
+      .or(`indexed_at.is.null,indexed_at.lt.${cutoff}`)
+      .limit(data.limit ?? 8);
+
+    let updated = 0;
+    let unchanged = 0;
+    let failed = 0;
+    for (const source of sources ?? []) {
+      try {
+        const result = await indexSource(context.supabase, source.id);
+        if (!result.ok) failed += 1;
+        else if (result.chunks > 0) updated += 1;
+        else unchanged += 1;
+      } catch (error) {
+        console.error("Yeniden indeksleme hatası", error);
+        failed += 1;
+      }
+    }
+    return { checked: (sources ?? []).length, updated, unchanged, failed };
+  });
+
+// Ölçümde çıkan atıf kaynaklarından bilgi bankasına aday olanlar.
+export const listCitationCandidates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const [{ data: citations }, { data: sources }] = await Promise.all([
+      context.supabase
+        .from("citations")
+        .select("url, domain, title, citation_type, created_at")
+        .eq("brand_id", data.brandId)
+        .order("created_at", { ascending: false })
+        .limit(400),
+      context.supabase.from("knowledge_sources").select("url").eq("brand_id", data.brandId),
+    ]);
+
+    const existing = new Set((sources ?? []).map((s) => (s.url ?? "").replace(/\/+$/, "")));
+    const map = new Map<string, { url: string; domain: string; title: string; type: string; count: number; firstSeen: string }>();
+    for (const c of citations ?? []) {
+      const url = (c.url ?? "").replace(/\/+$/, "");
+      if (!url || existing.has(url)) continue;
+      const entry = map.get(url);
+      if (entry) {
+        entry.count += 1;
+        if (c.created_at < entry.firstSeen) entry.firstSeen = c.created_at;
+      } else {
+        map.set(url, {
+          url,
+          domain: c.domain,
+          title: c.title || c.domain,
+          type: c.citation_type,
+          count: 1,
+          firstSeen: c.created_at,
+        });
+      }
+    }
+    return Array.from(map.values())
+      .sort((a, b) => (a.type === "own" && b.type !== "own" ? -1 : b.type === "own" && a.type !== "own" ? 1 : b.count - a.count))
+      .slice(0, 20);
+  });
+
+// Aday atıf kaynağını bilgi bankasına ekler ve hemen indeksler.
+export const promoteCitationToSource = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; url: string; title: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { indexSource } = await import("./kb.server");
+    const { data: source, error } = await context.supabase
+      .from("knowledge_sources")
+      .insert({
+        brand_id: data.brandId,
+        title: data.title.slice(0, 180),
+        url: data.url,
+        source_type: "web",
+        status: "aktif",
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    try {
+      await indexSource(context.supabase, source.id);
+    } catch (indexError) {
+      console.error("Aday kaynak indekslenemedi", indexError);
+    }
+    return { id: source.id };
+  });
+
 export const searchKnowledge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; query: string }) => input)
