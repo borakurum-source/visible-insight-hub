@@ -36,7 +36,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="hidden items-center gap-2 md:flex">
             <Button variant="ghost" asChild>
-              <Link to="/app">Giriş yap</Link>
+              <Link to="/auth">Giriş yap</Link>
             </Button>
             <Button asChild>
               <Link to="/free-ai-readiness-report">

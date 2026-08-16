@@ -11,7 +11,7 @@ export function SiteHeader() {
         <BrandLogo variant="horizontal" size="sm" linkTo="/" />
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/app">Giriş</Link>
+            <Link to="/auth">Giriş</Link>
           </Button>
           <Button asChild variant="hero" size="sm">
             <Link to="/app">Panele git</Link>
