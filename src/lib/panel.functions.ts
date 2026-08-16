@@ -846,3 +846,106 @@ export const getPlanUsage = createServerFn({ method: "POST" })
       approvedPrompts,
     };
   });
+
+// Prompt detayında: o soruya ait son ölçüm yanıtı, kaynakları ve önerilen aksiyonlar.
+export const getPromptInsight = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; promptId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const [{ data: prompt }, { data: run }, { data: brand }] = await Promise.all([
+      context.supabase.from("prompts").select("id, text, category").eq("id", data.promptId).single(),
+      context.supabase
+        .from("prompt_runs")
+        .select("id, brand_mentioned, position, raw_answer, answer_summary, engine, created_at")
+        .eq("prompt_id", data.promptId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+    ]);
+
+    const { data: citations } = run
+      ? await context.supabase
+          .from("citations")
+          .select("url, domain, title, citation_type, is_own_domain")
+          .eq("run_id", run.id)
+      : { data: [] as Array<{ url: string; domain: string; title: string | null; citation_type: string; is_own_domain: boolean }> };
+
+    const sources = (citations ?? []).map((c) => ({
+      url: c.url,
+      domain: c.domain,
+      title: c.title ?? c.domain,
+      type: c.citation_type ?? (c.is_own_domain ? "own" : "neutral"),
+    }));
+    const ownCited = sources.some((s) => s.type === "own");
+
+    // Deterministik aksiyon önerileri — kullanıcı ne yapacağını net görsün.
+    const actions: Array<{ title: string; description: string; priority: string }> = [];
+    if (!run) {
+      actions.push({
+        title: `"${(prompt?.text ?? "").slice(0, 80)}" sorusunu ölçün`,
+        description: "Bu soru henüz hiç ölçülmedi. Ölçüm & Skor ekranından bir tur başlatın.",
+        priority: "medium",
+      });
+    } else if (!run.brand_mentioned) {
+      actions.push({
+        title: `"${(prompt?.text ?? "").slice(0, 80)}" sorusu için kanıt içeriği yayımlayın`,
+        description: `Yapay zekâ bu soruda ${brand?.name ?? "markanızı"} anmadı. Soruyu doğrudan yanıtlayan, veri ve kaynak içeren bir sayfa yayımlayın; İçerik Üretimi ekranından taslak alabilirsiniz.`,
+        priority: "high",
+      });
+      if (sources.length) {
+        actions.push({
+          title: "Alıntılanan kaynaklarda yer alın",
+          description: `Bu yanıtta ${sources.slice(0, 3).map((s) => s.domain).join(", ")} kaynak gösterildi. Bu sayfalarda listelenmek, karşılaştırmaya girmek veya benzer kapsamda kendi sayfanızı üretmek için çalışın.`,
+          priority: "medium",
+        });
+      }
+    } else if (!ownCited) {
+      actions.push({
+        title: "Kendi sayfanızın kaynak gösterilmesini sağlayın",
+        description: "Markanız yanıtta geçiyor ama kaynak olarak kendi siteniz gösterilmiyor. İlgili sayfayı güncelleyin, net tanımlar, tarih, veri ve SSS ekleyin.",
+        priority: "medium",
+      });
+    } else if ((run.position ?? 99) > 3) {
+      actions.push({
+        title: "Yanıttaki sıranızı yükseltin",
+        description: `Şu an ${run.position}. sıradasınız. Karşılaştırma tablosu, fiyat/teknik veri ve güncel tarih içeren kanıt sayfalarıyla öne çıkın.`,
+        priority: "medium",
+      });
+    }
+    if (!ownCited) {
+      actions.push({
+        title: "Bilgi Bankası'na bu konuda kaynak ekleyin",
+        description: "Konuyla ilgili teknik doküman, vaka çalışması veya SSS ekleyip indeksleyin; marka zekâsı yanıt üretiminde bu kanıtları kullanır.",
+        priority: "low",
+      });
+    }
+
+    return {
+      prompt: prompt ?? null,
+      run: run
+        ? {
+            id: run.id,
+            brandMentioned: run.brand_mentioned,
+            position: run.position,
+            answer: run.raw_answer ?? run.answer_summary ?? "",
+            engine: run.engine,
+            createdAt: run.created_at,
+          }
+        : null,
+      sources,
+      actions,
+    };
+  });
+
+// Ölçüm sonuçlarından öncelikli görev üretir (Görevler ekranındaki buton).
+export const suggestGeoTasks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { createPriorityTasks } = await import("./tasks.server");
+    const { data: citations } = await context.supabase
+      .from("citations").select("is_own_domain").eq("brand_id", data.brandId).limit(500);
+    const created = await createPriorityTasks(context.supabase, data.brandId, citations ?? []);
+    return { created };
+  });
