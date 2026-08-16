@@ -344,6 +344,56 @@ export type Database = {
           },
         ]
       }
+      measurement_batches: {
+        Row: {
+          brand_id: string
+          completed_prompts: number
+          components: Json
+          created_at: string
+          engine: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          score: number | null
+          status: string
+          total_prompts: number
+        }
+        Insert: {
+          brand_id: string
+          completed_prompts?: number
+          components?: Json
+          created_at?: string
+          engine?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          total_prompts?: number
+        }
+        Update: {
+          brand_id?: string
+          completed_prompts?: number
+          components?: Json
+          created_at?: string
+          engine?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          total_prompts?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "measurement_batches_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
