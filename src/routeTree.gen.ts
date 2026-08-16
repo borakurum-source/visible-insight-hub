@@ -10,33 +10,134 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
+import { Route as UrunRouteImport } from './routes/urun'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAyarlarRouteImport } from './routes/app.ayarlar'
+import { Route as AppRakiplerRouteImport } from './routes/app.rakipler'
+import { Route as AppRaporlarRouteImport } from './routes/app.raporlar'
+import { Route as AppSorgularRouteImport } from './routes/app.sorgular'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FiyatlandirmaRoute = FiyatlandirmaRouteImport.update({
+  id: '/fiyatlandirma',
+  path: '/fiyatlandirma',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UrunRoute = UrunRouteImport.update({
+  id: '/urun',
+  path: '/urun',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAyarlarRoute = AppAyarlarRouteImport.update({
+  id: '/ayarlar',
+  path: '/ayarlar',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRakiplerRoute = AppRakiplerRouteImport.update({
+  id: '/rakipler',
+  path: '/rakipler',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRaporlarRoute = AppRaporlarRouteImport.update({
+  id: '/raporlar',
+  path: '/raporlar',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSorgularRoute = AppSorgularRouteImport.update({
+  id: '/sorgular',
+  path: '/sorgular',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/fiyatlandirma': typeof FiyatlandirmaRoute
+  '/urun': typeof UrunRoute
+  '/app/ayarlar': typeof AppAyarlarRoute
+  '/app/rakipler': typeof AppRakiplerRoute
+  '/app/raporlar': typeof AppRaporlarRoute
+  '/app/sorgular': typeof AppSorgularRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/fiyatlandirma': typeof FiyatlandirmaRoute
+  '/urun': typeof UrunRoute
+  '/app/ayarlar': typeof AppAyarlarRoute
+  '/app/rakipler': typeof AppRakiplerRoute
+  '/app/raporlar': typeof AppRaporlarRoute
+  '/app/sorgular': typeof AppSorgularRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/fiyatlandirma': typeof FiyatlandirmaRoute
+  '/urun': typeof UrunRoute
+  '/app/ayarlar': typeof AppAyarlarRoute
+  '/app/rakipler': typeof AppRakiplerRoute
+  '/app/raporlar': typeof AppRaporlarRoute
+  '/app/sorgular': typeof AppSorgularRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/fiyatlandirma'
+    | '/urun'
+    | '/app/ayarlar'
+    | '/app/rakipler'
+    | '/app/raporlar'
+    | '/app/sorgular'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/fiyatlandirma'
+    | '/urun'
+    | '/app/ayarlar'
+    | '/app/rakipler'
+    | '/app/raporlar'
+    | '/app/sorgular'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/fiyatlandirma'
+    | '/urun'
+    | '/app/ayarlar'
+    | '/app/rakipler'
+    | '/app/raporlar'
+    | '/app/sorgular'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  FiyatlandirmaRoute: typeof FiyatlandirmaRoute
+  UrunRoute: typeof UrunRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +149,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fiyatlandirma': {
+      id: '/fiyatlandirma'
+      path: '/fiyatlandirma'
+      fullPath: '/fiyatlandirma'
+      preLoaderRoute: typeof FiyatlandirmaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/urun': {
+      id: '/urun'
+      path: '/urun'
+      fullPath: '/urun'
+      preLoaderRoute: typeof UrunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/ayarlar': {
+      id: '/app/ayarlar'
+      path: '/ayarlar'
+      fullPath: '/app/ayarlar'
+      preLoaderRoute: typeof AppAyarlarRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/rakipler': {
+      id: '/app/rakipler'
+      path: '/rakipler'
+      fullPath: '/app/rakipler'
+      preLoaderRoute: typeof AppRakiplerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/raporlar': {
+      id: '/app/raporlar'
+      path: '/raporlar'
+      fullPath: '/app/raporlar'
+      preLoaderRoute: typeof AppRaporlarRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/sorgular': {
+      id: '/app/sorgular'
+      path: '/sorgular'
+      fullPath: '/app/sorgular'
+      preLoaderRoute: typeof AppSorgularRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAyarlarRoute: typeof AppAyarlarRoute
+  AppRakiplerRoute: typeof AppRakiplerRoute
+  AppRaporlarRoute: typeof AppRaporlarRoute
+  AppSorgularRoute: typeof AppSorgularRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAyarlarRoute: AppAyarlarRoute,
+  AppRakiplerRoute: AppRakiplerRoute,
+  AppRaporlarRoute: AppRaporlarRoute,
+  AppSorgularRoute: AppSorgularRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  FiyatlandirmaRoute: FiyatlandirmaRoute,
+  UrunRoute: UrunRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
