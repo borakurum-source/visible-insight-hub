@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BarChart3, CheckCircle2, Globe2, Plug, RefreshCw, Search, Unplug } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { PanelSubnav } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ const iconMap: Record<string, typeof Search> = { gsc: Search, ga4: BarChart3, we
 function IntegrationsPage() {
   return (
     <>
+      <PanelSubnav items={[{ to: "/app/settings", label: "Ayarlar" }, { to: "/app/integrations", label: "Entegrasyonlar" }, { to: "/app/account", label: "Hesabım" }, { to: "/app/pricing", label: "Fiyatlandırma" }]} />
       <PanelPageHeading
         meta={{ title: "Entegrasyonlar", description: "Google Search Console, GA4 ve webhook bağlantılarınızı yönetin.", icon: Plug }}
       />

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FileBarChart, Printer } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { PanelSubnav } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/app/report")({
 function ReportPage() {
   return (
     <>
+      <PanelSubnav items={[{ to: "/app/prompts", label: "Promptlar" }, { to: "/app/prompt-discovery", label: "Prompt Keşfi" }, { to: "/app/measurement", label: "Ölçüm & Skor" }, { to: "/app/citation-discovery", label: "Kaynak Keşfi" }, { to: "/app/report", label: "Rapor" }]} />
       <PanelPageHeading
         meta={{ title: "Rapor", description: "Mevcut ölçüm verilerinden deterministik olarak üretilen yazdırılabilir rapor.", icon: FileBarChart }}
         action={<Button size="sm" onClick={() => window.print()}><Printer className="mr-2 h-3.5 w-3.5" /> Yazdır / PDF olarak kaydet</Button>}

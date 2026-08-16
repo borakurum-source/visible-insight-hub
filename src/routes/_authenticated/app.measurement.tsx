@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Activity, Play, Gauge, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { PanelSubnav } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -70,6 +71,7 @@ function MeasurementPage() {
 
   return (
     <>
+      <PanelSubnav items={[{ to: "/app/prompts", label: "Promptlar" }, { to: "/app/prompt-discovery", label: "Prompt Keşfi" }, { to: "/app/measurement", label: "Ölçüm & Skor" }, { to: "/app/citation-discovery", label: "Kaynak Keşfi" }, { to: "/app/report", label: "Rapor" }]} />
       <PanelPageHeading
         meta={{
           title: "Ölçüm",

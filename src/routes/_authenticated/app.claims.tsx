@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
+import { PanelSubnav } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,6 +62,7 @@ function ClaimsPage() {
   if (!brand) {
     return (
       <>
+        <PanelSubnav items={[{ to: "/app/knowledge-base", label: "Bilgi Bankası" }, { to: "/app/claims", label: "Marka İddiaları" }, { to: "/app/graph", label: "Bilgi Grafiği" }]} />
         <PanelPageHeading meta={{ title: "Marka İddiaları", description: "Önce bir marka ekleyin.", icon: ShieldCheck }} />
         <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
       </>
@@ -69,6 +71,7 @@ function ClaimsPage() {
 
   return (
     <>
+      <PanelSubnav items={[{ to: "/app/knowledge-base", label: "Bilgi Bankası" }, { to: "/app/claims", label: "Marka İddiaları" }, { to: "/app/graph", label: "Bilgi Grafiği" }]} />
       <PanelPageHeading
         meta={{
           title: "Marka İddiaları",
