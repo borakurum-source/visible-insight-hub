@@ -232,10 +232,27 @@ function KnowledgeBasePage() {
                     ) : null}
                   </span>
                   <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
-                    {source.index_status === "hazir" ? `${source.chunk_count} parça indeksli` : source.index_status === "hata" ? "İçerik alınamadı" : "İndeks bekliyor"}
+                    {source.index_status === "hazir"
+                      ? `${source.chunk_count} parça indeksli`
+                      : source.index_status === "hata"
+                        ? (source as { extract_method?: string }).extract_method === "js-required"
+                          ? "JavaScript ile yükleniyor"
+                          : "İçerik alınamadı"
+                        : "İndeks bekliyor"}
                   </Badge>
                   {source.index_status === "hazir" ? (
                     <>
+                      <Badge
+                        variant="outline"
+                        title="İçeriğin nasıl alındığı: statik sayfa indirmesi ya da JavaScript render servisi."
+                        className="shrink-0 text-[10px] font-normal text-muted-foreground"
+                      >
+                        {(source as { extract_method?: string }).extract_method === "render"
+                          ? "JS render"
+                          : (source as { extract_method?: string }).extract_method === "manual"
+                            ? "Elle girildi"
+                            : "Statik"}
+                      </Badge>
                       <Badge
                         variant="outline"
                         title="Parçaların ortalama kanıt değeri: sayı, tarih, fiyat gibi doğrulanabilir sinyaller puanı yükseltir."
