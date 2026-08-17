@@ -14,7 +14,8 @@ import { MarketingShell } from "@/components/site/MarketingShell";
 import { Reveal } from "@/components/site/marketing-motion";
 import { HeroVisual } from "@/components/site/hero-visual";
 import { PublicReportAnalyzer } from "@/components/site/public-report-analyzer";
-import { EngineRotator, MetricRise } from "@/components/site/citation-motion";
+import { MetricRise } from "@/components/site/citation-motion";
+import { ProductTabs, type ProductTab } from "@/components/site/product-tabs";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { faqs } from "@/lib/faqData";
@@ -22,6 +23,9 @@ import { formatUsd, pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
 import shotKb from "@/assets/landing/shot-kb.webp";
 import shotContent from "@/assets/landing/shot-content.webp";
+import shotDashboard from "@/assets/features/dashboard.webp.asset.json";
+import shotCompetitors from "@/assets/features/competitors.webp.asset.json";
+import shotTasks from "@/assets/features/tasks.webp.asset.json";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 import heroEvidenceGap from "@/assets/landing/hero-evidence-gap.webp";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
@@ -60,6 +64,38 @@ const HERO_PROOF = [
   { value: 28.1, suffix: " puan", label: "6 ayda ağırlıklı atıf payı artışı" },
   { value: 41, suffix: "", label: "Satın alma niyetli soru" },
   { value: 286, suffix: "", label: "Ölçüm tekrarı" },
+];
+
+const MEASURED_ENGINES = ["ChatGPT", "Perplexity", "Gemini", "Copilot", "Claude"];
+
+const PRODUCT_TABS: ProductTab[] = [
+  {
+    id: "skor",
+    label: "OneCite Score",
+    headline: "Tek skorda: yapay zeka cevaplarında neredesiniz?",
+    body: "Bahsedilme, alıntı payı, sıralama kalitesi, kanıt kapsamı ve iddia kanıtı olarak beş bileşene bölünür. Zayıf bileşenin yanında ne yapmanız gerektiği yazar.",
+    highlight: "Atıf payı %58,9",
+    shot: shotDashboard.url,
+    alt: "OneCite komuta merkezi ekranı: OneCite Score ve görünürlük kırılımı",
+  },
+  {
+    id: "rakip",
+    label: "Rakip trendi",
+    headline: "Aynı sorularda rakibiniz seçiliyorsa bunu görürsünüz",
+    body: "Takip ettiğiniz her soruda hangi alan adının kaynak olarak seçildiğini sayar, karşılaştırmalı trend çizgisiyle kaybettiğiniz payı gösteririz.",
+    highlight: "3 rakip, tek grafik",
+    shot: shotCompetitors.url,
+    alt: "OneCite rakip takibi ekranı: karşılaştırmalı görünürlük trendi",
+  },
+  {
+    id: "gorevler",
+    label: "Görev listesi",
+    headline: "Ölçüm biter bitmez sıradaki iş listeniz hazır",
+    body: "Görünmediğiniz her soru; içerik, kanıt veya teknik iyileştirme görevine dönüşür. Tamamladıkça skorun nasıl değiştiğini izlersiniz.",
+    highlight: "Bu hafta 3 öncelik",
+    shot: shotTasks.url,
+    alt: "OneCite görev listesi ekranı: öncelikli aksiyonlar",
+  },
 ];
 
 function Hero() {
