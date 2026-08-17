@@ -1,3 +1,5 @@
+import { competitorMatches, type CompetitorEntry } from "./competitors";
+
 export type CompetitorRunRow = { created_at: string; brand_mentioned: boolean; raw_answer: string | null };
 
 export type CompetitorTrendPoint = { date: string } & Record<string, number | string>;
@@ -7,21 +9,6 @@ export type CompetitorTrendResult = {
   series: Array<{ key: string; name: string; isOwn: boolean; current: number; change: number; mentions: number }>;
   totalRuns: number;
 };
-
-function normalize(value: string) {
-  return value
-    .toLocaleLowerCase("tr")
-    .replace(/[çğıöşü]/g, (c) => ({ ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u" })[c] ?? c)
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function mentions(answer: string, name: string) {
-  const a = normalize(answer);
-  const n = normalize(name);
-  if (n.length < 3) return false;
-  return a.includes(n) || a.includes(n.replace(/\s+/g, ""));
-}
 
 /** Buckets prompt runs into weekly (or daily for short ranges) visibility rates per brand + competitors. */
 export function buildCompetitorTrend(
