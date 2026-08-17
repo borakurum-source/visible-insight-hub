@@ -17,7 +17,7 @@ const ACTIONS: Action[] = [
   { icon: Italic, label: "İtalik", before: "*", after: "*" },
   { icon: List, label: "Madde listesi", before: "- ", block: true },
   { icon: ListOrdered, label: "Numaralı liste", before: "1. ", block: true },
-  { icon: Quote, label: "Kaynak gösterimi", before: "> ", block: true },
+  { icon: Quote, label: "Alıntı", before: "> ", block: true },
   { icon: Link2, label: "Bağlantı", before: "[", after: "](https://)" },
   { icon: Code, label: "Kod", before: "`", after: "`" },
 ];
