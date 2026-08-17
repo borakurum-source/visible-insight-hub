@@ -13,7 +13,6 @@ import {
 import { MarketingShell } from "@/components/site/MarketingShell";
 import { Reveal } from "@/components/site/marketing-motion";
 import { PublicReportAnalyzer } from "@/components/site/public-report-analyzer";
-import { MetricRise } from "@/components/site/citation-motion";
 import { ProductTabs, type ProductTab } from "@/components/site/product-tabs";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
