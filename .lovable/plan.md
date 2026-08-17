@@ -21,8 +21,27 @@ Seçilen yön: **Centered balance lockup** — sağdaki büyük görsel paneli k
    - Ambient glow mobilde ekranı daraltmasın; `max-w` ve `overflow-hidden` ile sınırla.
 6. Gerekirse `src/styles.css` içinde yeni utility veya token ekle (örn. `.glow-ambient`), ancak mevcut cyan/primary tokenlerini kullan.
 
+## Alt sayfalar: aynı formata geçiş
+
+Tüm pazarlama alt sayfaları `src/components/site/visual-hero.tsx` içindeki paylaşılan `VisualHero` bileşenini kullanıyor. Bu bileşeni bir kez merkezi düzene çevirince tüm sayfalar aynı formata gelir.
+
+7. `VisualHero` bileşenini iki sütunlu grid'den tek sütunlu, ortalanmış lockup'a çevir.
+   - Sağdaki `HeroVisual` paneli kaldır; yerine ana sayfadakiyle aynı ambient glow arka planı kullan.
+   - Logo, eyebrow, başlık, açıklama, CTA butonları, kanıt sayıları ve not sırasıyla ortalanmış akışta kalsın.
+   - Kanıt sayıları alt çizgiyle ayrılmış 3 sütunlu blok olarak, ana sayfayla aynı stilde.
+   - `children` slotu (sayfaya özel ek içerik) ortalanmış konteynerin içinde kalmaya devam etsin.
+8. `image` / `imageAlt` / `visualLabel` / `visualCaption` proplarını opsiyonel yap.
+   - Görsel artık render edilmediği için çağrı yerlerinde tip hatası çıkmasın; proplar geriye dönük uyumlu kalsın.
+   - İleride görsel gerekirse tek bir merkezi opsiyon olarak eklenebilecek şekilde bırak.
+9. Etkilenen sayfaları kontrol et ve düzeni doğrula:
+   `/ozellikler`, `/ucretsiz-yapay-zeka-gorunurluk-raporu`, `/makaleler`, `/makaleler/$slug`,
+   `/solutions/agencies`, `/proof/filmfolk`, `/platform/citation-share`,
+   `/platform/evidence-gaps`, `/hakkimizda`.
+   - Her sayfada başlık uzunluğu ortalanmış düzende dengeli görünsün.
+   - Artık kullanılmayan hero görsel importlarını temizle.
+
 ## Çıktı
 
-- Ana sayfa hero bölümü ortalanmış, daha dengeli ve az boşluklu görünecek.
+- Ana sayfa ve tüm pazarlama alt sayfalarının hero bölümü ortalanmış, dengeli ve tutarlı olacak.
 - Mevcut metin, CTA ve sosyal kanıt içeriği korunacak.
 - Sağdaki yaltaşan görsel panel kalkacak; yerine ince, atmosferik bir arka plan vurgusu gelecek.
