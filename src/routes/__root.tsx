@@ -130,6 +130,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { CookieBanner } from "@/components/site/cookie-banner";
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -154,6 +155,7 @@ function RootComponent() {
         <PaymentTestModeBanner />
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <CookieBanner />
       </TooltipProvider>
     </QueryClientProvider>
   );
