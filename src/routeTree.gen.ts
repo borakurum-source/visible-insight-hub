@@ -33,7 +33,9 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
+import { Route as AdminSubscriptionsRouteImport } from './routes/admin/subscriptions'
 import { Route as MakalelerIndexRouteImport } from './routes/makaleler.index'
 import { Route as MakalelerSlugRouteImport } from './routes/makaleler.$slug'
 import { Route as PlatformIndexRouteImport } from './routes/platform.index'
@@ -192,9 +194,19 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminApiRoute = AdminApiRouteImport.update({
+  id: '/api',
+  path: '/api',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSubscriptionsRoute = AdminSubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const MakalelerIndexRoute = MakalelerIndexRouteImport.update({
@@ -412,7 +424,9 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/admin/api': typeof AdminApiRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
@@ -469,7 +483,9 @@ export interface FileRoutesByTo {
   '/ucretsiz-yapay-zeka-gorunurluk-raporu': typeof UcretsizYapayZekaGorunurlukRaporuRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/api': typeof AdminApiRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
@@ -532,7 +548,9 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/admin/api': typeof AdminApiRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
@@ -595,7 +613,9 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/app'
+    | '/admin/api'
     | '/admin/customers'
+    | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
@@ -652,7 +672,9 @@ export interface FileRouteTypes {
     | '/ucretsiz-yapay-zeka-gorunurluk-raporu'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/api'
     | '/admin/customers'
+    | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
@@ -714,7 +736,9 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/app'
+    | '/admin/api'
     | '/admin/customers'
+    | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
@@ -957,11 +981,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/api': {
+      id: '/admin/api'
+      path: '/api'
+      fullPath: '/admin/api'
+      preLoaderRoute: typeof AdminApiRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/customers': {
       id: '/admin/customers'
       path: '/customers'
       fullPath: '/admin/customers'
       preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/subscriptions': {
+      id: '/admin/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/admin/subscriptions'
+      preLoaderRoute: typeof AdminSubscriptionsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/makaleler/': {
@@ -1276,12 +1314,16 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface AdminRouteRouteChildren {
+  AdminApiRoute: typeof AdminApiRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminSubscriptionsRoute: typeof AdminSubscriptionsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminApiRoute: AdminApiRoute,
   AdminCustomersRoute: AdminCustomersRoute,
+  AdminSubscriptionsRoute: AdminSubscriptionsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
