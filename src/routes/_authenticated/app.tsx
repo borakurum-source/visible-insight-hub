@@ -103,6 +103,10 @@ const NAV_GROUPS: NavGroup[] = [
     adminOnly: true,
     items: [{ to: "/app/admin", label: "Admin", icon: Users, exact: false }],
   },
+  {
+    label: "Yardım",
+    items: [{ to: "/app/help", label: "Yardım & Rehber", icon: LifeBuoy, exact: false }],
+  },
 ];
 
 const ALWAYS_OPEN = new Set(["/app", "/app/onboarding", "/app/account", "/app/pricing", "/app/help"]);
