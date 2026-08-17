@@ -11,6 +11,7 @@ import {
   Quote,
   Search,
   ShieldCheck,
+  Target,
   Users,
 } from "lucide-react";
 import { MarketingShell } from "@/components/site/MarketingShell";
