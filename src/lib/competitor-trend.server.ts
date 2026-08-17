@@ -18,7 +18,7 @@ export function buildCompetitorTrend(
   days: number,
 ): CompetitorTrendResult {
   const brands = [
-    { key: "own", name: ownName || "Markanız", isOwn: true, match: { name: ownName, domain: "" } },
+    { key: "own", name: ownName || "Markanız", isOwn: true, match: { name: ownName, domain: "", type: "direct" as const } },
     ...competitors.slice(0, 6).map((entry, index) => ({ key: `c${index}`, name: entry.name, isOwn: false, match: entry })),
   ];
 

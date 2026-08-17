@@ -62,8 +62,10 @@ export const generateBrandIntelligence = createServerFn({ method: "POST" })
     const siteText = await fetchSiteText(brand.domain);
     const systemPrompt = await resolveSystemPrompt(context.supabase, "brand_intelligence");
     const result = await aiJson<{
-      summary: string; positioning: string; tone: string;
-      products: string[]; audiences: string[]; competitors: string[]; keywords: string[];
+      summary: string; detailedDescription?: string; industry?: string; language?: string; location?: string;
+      positioning: string; tone: string;
+      products: string[]; audiences: string[]; keyFeatures?: string[];
+      competitors: unknown; keywords: string[];
     }>(
       [
         { role: "system", content: systemPrompt },
@@ -72,14 +74,20 @@ export const generateBrandIntelligence = createServerFn({ method: "POST" })
       { summary: "", positioning: "", tone: "", products: [], audiences: [], competitors: [], keywords: [] },
     );
 
+    const { normalizeCompetitors } = await import("./competitors");
     const payload = {
       brand_id: brand.id,
       summary: result.summary,
+      detailed_description: result.detailedDescription ?? null,
+      industry: result.industry ?? null,
+      language: result.language ?? "Türkçe",
+      location: result.location ?? null,
+      key_features: result.keyFeatures ?? [],
       positioning: result.positioning,
       tone: result.tone,
       products: result.products,
       audiences: result.audiences,
-      competitors: result.competitors,
+      competitors: normalizeCompetitors(result.competitors),
       keywords: result.keywords,
       approved: false,
     };
@@ -93,7 +101,9 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: {
     brandId: string; summary: string; positioning: string; tone: string;
-    products: string[]; audiences: string[]; competitors: string[]; keywords: string[];
+    products: string[]; audiences: string[]; competitors?: Array<{ name: string; domain?: string; type?: string }>; keywords: string[];
+    industry?: string; language?: string; location?: string; detailedDescription?: string; keyFeatures?: string[];
+    brandName?: string;
   }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("brand_intelligence").upsert({
@@ -103,11 +113,19 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
       tone: data.tone,
       products: data.products,
       audiences: data.audiences,
-      competitors: data.competitors,
+      ...(data.competitors ? { competitors: JSON.parse(JSON.stringify(data.competitors)) } : {}),
       keywords: data.keywords,
+      industry: data.industry ?? null,
+      language: data.language ?? null,
+      location: data.location ?? null,
+      detailed_description: data.detailedDescription ?? null,
+      key_features: data.keyFeatures ?? [],
       approved: true,
     }, { onConflict: "brand_id" });
     if (error) throw new Error(error.message);
+    if (data.brandName && data.brandName.trim()) {
+      await context.supabase.from("brands").update({ name: data.brandName.trim() }).eq("id", data.brandId);
+    }
     await context.supabase.from("brands").update({ onboarding_step: 3 }).eq("id", data.brandId);
     return { ok: true };
   });
@@ -189,7 +207,7 @@ export const generatePromptCandidates = createServerFn({ method: "POST" })
     if (!brand) throw new Error("Marka bulunamadı");
 
     const { resolveSystemPrompt } = await import("./system-prompts.server");
-    const result = await aiJson<{ items: Array<{ text: string; category: string; intent: string }> }>(
+    const result = await aiJson<{ items: Array<{ text: string; category: string; intent: string; funnel?: string }> }>(
       [
         { role: "system", content: await resolveSystemPrompt(context.supabase, "prompt_generation") },
         { role: "user", content: `Marka: ${brand.name} (${brand.domain})\nÖzet: ${intel?.summary ?? ""}\nÜrünler: ${JSON.stringify(intel?.products ?? [])}\nKitle: ${JSON.stringify(intel?.audiences ?? [])}\nRakipler: ${JSON.stringify(intel?.competitors ?? [])}\nBilgi bankası: ${(sources ?? []).map((s) => s.title).join(", ")}` },
@@ -202,6 +220,7 @@ export const generatePromptCandidates = createServerFn({ method: "POST" })
       text: item.text,
       category: item.category || "genel",
       intent: item.intent || null,
+      funnel_stage: ["top", "middle", "bottom"].includes(String(item.funnel)) ? String(item.funnel) : "middle",
       status: "candidate",
       origin: "ai",
     }));
@@ -504,6 +523,45 @@ export const completeOnboarding = createServerFn({ method: "POST" })
       .from("brands").update({ onboarding_completed: true, onboarding_step: 4 }).eq("id", data.brandId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+// Kurulum sihirbazında prompt metni ve huni aşamasını günceller.
+export const updatePrompts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { items: Array<{ id: string; text: string; funnelStage: string }> }) => input)
+  .handler(async ({ data, context }) => {
+    for (const item of data.items) {
+      const stage = ["top", "middle", "bottom"].includes(item.funnelStage) ? item.funnelStage : "middle";
+      await context.supabase
+        .from("prompts")
+        .update({ text: item.text, funnel_stage: stage })
+        .eq("id", item.id);
+    }
+    return { ok: true };
+  });
+
+// Kurulumda seçilen yapay zeka motorlarını saklar.
+export const setBrandEngines = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; engines: string[] }) => input)
+  .handler(async ({ data, context }) => {
+    const allowed = ["perplexity", "deepseek"];
+    const engines = data.engines.filter((e) => allowed.includes(e));
+    const { error } = await context.supabase
+      .from("brands")
+      .update({ engines: engines.length ? engines : ["perplexity"] })
+      .eq("id", data.brandId);
+    if (error) throw new Error(error.message);
+    return { ok: true, engines };
+  });
+
+export const getBrandEngines = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: row } = await context.supabase
+      .from("brands").select("engines").eq("id", data.brandId).maybeSingle();
+    return { engines: (row?.engines as string[] | null) ?? ["perplexity", "deepseek"] };
   });
 
 export const getBrandOverview = createServerFn({ method: "POST" })
@@ -1128,7 +1186,7 @@ export const getCompetitors = createServerFn({ method: "POST" })
 
 export const saveCompetitors = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; competitors: Array<{ name: string; domain?: string }> }) => input)
+  .inputValidator((input: { brandId: string; competitors: Array<{ name: string; domain?: string; type?: string }> }) => input)
   .handler(async ({ data, context }) => {
     const { normalizeCompetitors } = await import("./competitors");
     const { data: current } = await context.supabase

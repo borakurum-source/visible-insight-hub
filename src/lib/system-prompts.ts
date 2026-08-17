@@ -39,8 +39,8 @@ YÖNTEM
 
 ${SHARED_RULES}
 
-ÇIKTI JSON: {"summary": "3-4 cümle", "positioning": "tek cümle", "tone": "3-5 kelime", "products": [], "audiences": [], "competitors": [], "keywords": []}
-Diziler 3-6 kısa madde içersin.`,
+ÇIKTI JSON: {"summary": "2-3 cümle kısa açıklama", "detailedDescription": "4-6 cümle detaylı açıklama", "industry": "sektör", "language": "Türkçe|English|…", "location": "ana lokasyon (şehir/ülke)", "positioning": "tek cümle", "tone": "3-5 kelime", "products": [], "audiences": [], "keyFeatures": [], "keywords": [], "competitors": [{"name":"marka","domain":"alanadi.com","type":"direct|indirect"}]}
+Diziler 3-6 kısa madde içersin. Rakiplerde aynı işi yapanlar "direct", ikame çözüm sunanlar "indirect" olsun.`,
   },
   {
     key: "knowledge_source_pick",
@@ -83,7 +83,8 @@ KURALLAR
 
 ${SHARED_RULES}
 
-ÇIKTI JSON: {"items":[{"text":"soru","category":"marka|kategori|rakip|problem","intent":"bilgi|karşılaştırma|satın alma"}]}`,
+ÇIKTI JSON: {"items":[{"text":"soru","category":"marka|kategori|rakip|problem","intent":"bilgi|karşılaştırma|satın alma","funnel":"top|middle|bottom"}]}
+Huni dağılımı: yaklaşık üçte biri top (farkındalık), üçte biri middle (değerlendirme), üçte biri bottom (satın alma niyeti).`,
   },
   {
     key: "prompt_discovery",

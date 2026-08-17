@@ -2,7 +2,17 @@
 // brand_intelligence.competitors jsonb'si eskiden düz metin dizisiydi (["Hipaş Plastik"]).
 // Artık {name, domain} nesneleri tutuyoruz; okuma tarafında eski kayıtlar normalize ediliyor.
 
-export type CompetitorEntry = { name: string; domain: string };
+export type CompetitorType = "direct" | "indirect";
+export type CompetitorEntry = { name: string; domain: string; type: CompetitorType };
+
+export const COMPETITOR_TYPE_LABEL: Record<CompetitorType, string> = {
+  direct: "Doğrudan rakip",
+  indirect: "Dolaylı rakip",
+};
+
+function normalizeType(value: unknown): CompetitorType {
+  return String(value ?? "").toLowerCase() === "indirect" ? "indirect" : "direct";
+}
 
 export function cleanDomain(value?: string | null): string {
   return String(value ?? "")
@@ -19,14 +29,14 @@ export function normalizeCompetitors(raw: unknown): CompetitorEntry[] {
   for (const item of raw) {
     if (typeof item === "string") {
       const name = item.trim();
-      if (name) out.push({ name, domain: "" });
+      if (name) out.push({ name, domain: "", type: "direct" });
       continue;
     }
     if (item && typeof item === "object") {
-      const record = item as { name?: unknown; domain?: unknown };
+      const record = item as { name?: unknown; domain?: unknown; type?: unknown };
       const name = String(record.name ?? "").trim();
       const domain = cleanDomain(record.domain as string | undefined);
-      if (name || domain) out.push({ name: name || domain, domain });
+      if (name || domain) out.push({ name: name || domain, domain, type: normalizeType(record.type) });
     }
   }
   return out;

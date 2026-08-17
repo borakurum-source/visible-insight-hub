@@ -1,29 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Info, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { WizardFrame } from "@/components/app/onboarding/wizard-frame";
+import { FUNNEL_LABEL, FUNNEL_STAGES, normalizeFunnel, type FunnelStage } from "@/lib/funnel";
+import { COMPETITOR_TYPE_LABEL, cleanDomain, type CompetitorEntry, type CompetitorType } from "@/lib/competitors";
 import {
   addKnowledgeSources,
   completeOnboarding,
   createBrand,
+  createPrompt,
+  deletePrompt,
   generateBrandIntelligence,
   generatePromptCandidates,
-  listPrompts,
+  getBrandEngines,
   getBrandIntelligence,
-  saveBrandIntelligence,
-  setPromptStatus,
+  getCompetitors,
   getPlanUsage,
+  listPrompts,
+  saveBrandIntelligence,
+  saveCompetitors,
+  setBrandEngines,
+  setPromptStatus,
   suggestKnowledgeSources,
+  updatePrompts,
 } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
@@ -31,503 +40,614 @@ export const Route = createFileRoute("/_authenticated/app/onboarding")({
   head: () => ({
     meta: [
       { title: "Kurulum — OneCite Paneli" },
-      { name: "description", content: "Markanızı ekleyin, marka zekasını onaylayın, bilgi bankasını doldurun ve promptları seçin." },
+      { name: "description", content: "Alan adınızı girin, marka kitabınızı onaylayın, promptları ve rakipleri seçin; ilk ölçümünüz otomatik başlasın." },
       { property: "og:title", content: "Kurulum — OneCite Paneli" },
-      { property: "og:description", content: "Dört adımda AI görünürlük kurulumu." },
+      { property: "og:description", content: "Altı adımda yapay zeka görünürlük kurulumu." },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: OnboardingPage,
 });
 
-const STEPS = [
-  { n: 1, title: "Marka", hint: "Hangi markayı takip edeceğiz? Tek alan yeterli." },
-  { n: 2, title: "Marka profili", hint: "Sitenizi okuduk: özeti ve kanıt sayfalarını onaylayın." },
-  { n: 3, title: "Promptlar", hint: "AI cevaplarında görünmeniz gereken sorular." },
+const TOTAL_STEPS = 6;
+
+const LANGUAGES = ["Türkçe", "English", "Deutsch", "Français", "Español"];
+
+const ENGINES = [
+  { key: "perplexity", name: "Perplexity", description: "Canlı web araması ve atıf kaynaklarıyla ölçüm." },
+  { key: "deepseek", name: "DeepSeek", description: "Üretken yanıt simülasyonu ve içerik analizi." },
 ] as const;
 
-type Intel = {
-  summary: string; positioning: string; tone: string;
-  products: string[]; audiences: string[]; competitors: string[]; keywords: string[];
+type BrandBook = {
+  brandName: string;
+  industry: string;
+  language: string;
+  location: string;
+  summary: string;
+  keyFeatures: string;
+  detailedDescription: string;
+  positioning: string;
+  tone: string;
+  products: string[];
+  audiences: string[];
+  keywords: string[];
 };
 
-const EMPTY_INTEL: Intel = { summary: "", positioning: "", tone: "", products: [], audiences: [], competitors: [], keywords: [] };
+const EMPTY_BOOK: BrandBook = {
+  brandName: "", industry: "", language: "Türkçe", location: "", summary: "",
+  keyFeatures: "", detailedDescription: "", positioning: "", tone: "",
+  products: [], audiences: [], keywords: [],
+};
+
+type PromptRow = { id: string; text: string; funnelStage: FunnelStage; status: string };
 
 function toList(value: unknown): string[] {
-  if (Array.isArray(value)) return value.map((v) => String(v));
-  return [];
+  return Array.isArray(value) ? value.map((v) => String(v)) : [];
 }
 
 function OnboardingPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { brand, brands, isLoading, selectBrand } = useActiveBrand();
+  const { brand, isLoading, selectBrand } = useActiveBrand();
+
+  const create = useServerFn(createBrand);
+  const generateIntel = useServerFn(generateBrandIntelligence);
+  const loadIntel = useServerFn(getBrandIntelligence);
+  const saveIntel = useServerFn(saveBrandIntelligence);
+  const suggestSources = useServerFn(suggestKnowledgeSources);
+  const addSources = useServerFn(addKnowledgeSources);
+  const genPrompts = useServerFn(generatePromptCandidates);
+  const listAllPrompts = useServerFn(listPrompts);
+  const savePromptEdits = useServerFn(updatePrompts);
+  const addPrompt = useServerFn(createPrompt);
+  const removePrompt = useServerFn(deletePrompt);
+  const setStatus = useServerFn(setPromptStatus);
+  const loadCompetitors = useServerFn(getCompetitors);
+  const storeCompetitors = useServerFn(saveCompetitors);
+  const loadEngines = useServerFn(getBrandEngines);
+  const storeEngines = useServerFn(setBrandEngines);
+  const complete = useServerFn(completeOnboarding);
+  const planUsage = useServerFn(getPlanUsage);
+
   const [step, setStep] = useState(1);
-  const [forceNew, setForceNew] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  // 1. adım
+  const [domain, setDomain] = useState("");
+  const [language, setLanguage] = useState("Türkçe");
+
+  // 3. adım
+  const [book, setBook] = useState<BrandBook>(EMPTY_BOOK);
+
+  // 4. adım
+  const [prompts, setPrompts] = useState<PromptRow[]>([]);
+  const [newPrompt, setNewPrompt] = useState("");
+  const [newPromptStage, setNewPromptStage] = useState<FunnelStage>("middle");
+  const [maxPrompts, setMaxPrompts] = useState<number>(0);
+
+  // 5. adım
+  const [competitors, setCompetitors] = useState<CompetitorEntry[]>([]);
+  const [maxCompetitors, setMaxCompetitors] = useState<number>(0);
+  const [newCompetitor, setNewCompetitor] = useState<CompetitorEntry>({ name: "", domain: "", type: "direct" });
+
+  // 6. adım
+  const [engines, setEngines] = useState<string[]>(["perplexity", "deepseek"]);
+
+  const brandId = brand?.id;
 
   useEffect(() => {
     if (isLoading) return;
-    if (!brand || forceNew) { setStep(1); return; }
-    if (brand.onboarding_completed) { setStep(3); return; }
-    const dbStep = Math.min(Math.max(brand.onboarding_step, 1), 4);
-    setStep(dbStep <= 1 ? 1 : dbStep === 4 ? 3 : 2);
-  }, [brand?.id, brand?.onboarding_step, brand?.onboarding_completed, isLoading, forceNew]);
+    if (!brandId) setStep(1);
+  }, [isLoading, brandId]);
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ["panel-session"] });
+  const refreshSession = () => queryClient.invalidateQueries({ queryKey: ["panel-session"] });
 
-  return (
-    <>
-      <header className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
-          <h1 className="font-display text-2xl font-semibold">Kurulum</h1>
-        </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Üç kısa adım. Her adımda biz hazırlıyoruz, siz onaylıyorsunuz — boş bir sayfaya hiçbir şey yazmanız gerekmiyor.
-        </p>
-        <Progress value={(step / 3) * 100} className="h-1.5" />
-        <ol className="flex flex-wrap gap-x-6 gap-y-2 text-xs">
-          {STEPS.map((s) => (
-            <li key={s.n} className={`flex items-center gap-1.5 ${s.n === step ? "font-semibold text-foreground" : s.n < step ? "text-primary" : "text-muted-foreground"}`}>
-              {s.n < step ? <Check className="h-3.5 w-3.5" /> : <span>{s.n}.</span>}
-              {s.title}
-            </li>
-          ))}
-        </ol>
-      </header>
-
-      {brands.length > 1 && step === 1 ? (
-        <p className="text-xs text-muted-foreground">
-          Kurulumdaki markayı değiştirmek için soldaki marka seçicisini kullanın.
-        </p>
-      ) : null}
-
-      {step === 1 ? (
-        <StepBrand
-          onCreated={async (id) => { selectBrand(id); setForceNew(false); await refresh(); setStep(2); }}
-        />
-      ) : null}
-
-      {step === 2 && brand ? (
-        <StepProfile brandId={brand.id} onDone={async () => { await refresh(); setStep(3); }} onBack={() => setStep(1)} />
-      ) : null}
-
-      {step === 3 && brand ? (
-        <StepPrompts
-          brandId={brand.id}
-          onBack={() => setStep(2)}
-          onDone={async () => {
-            await refresh();
-            toast.success("Kurulum tamamlandı — ilk ölçüm başlatılıyor");
-            navigate({ to: "/app/measurement", search: { autostart: true } });
-          }}
-        />
-      ) : null}
-
-      {step > 1 && brand?.onboarding_completed ? (
-        <Button variant="ghost" size="sm" onClick={() => { setForceNew(true); setStep(1); }}>
-          <Plus className="mr-1.5 h-4 w-4" /> Başka bir marka ekle
-        </Button>
-      ) : null}
-    </>
-  );
-}
-
-function StepFrame({ step, children, footer }: { step: (typeof STEPS)[number]; children: React.ReactNode; footer: React.ReactNode }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{step.n}. {step.title}</CardTitle>
-        <p className="text-sm text-muted-foreground">{step.hint}</p>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        {children}
-        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">{footer}</div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function StepBrand({ onCreated }: { onCreated: (id: string) => void | Promise<void> }) {
-  const create = useServerFn(createBrand);
-  const [name, setName] = useState("");
-  const [domain, setDomain] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: (input: { name: string; domain: string }) => create({ data: input }),
-    onSuccess: (brand) => { void onCreated(brand.id); },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  return (
-    <StepFrame
-      step={STEPS[0]}
-      footer={
-        <Button onClick={() => mutation.mutate({ name, domain })} disabled={!domain.trim() || mutation.isPending}>
-          {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Devam et <ArrowRight className="ml-1.5 h-4 w-4" />
-        </Button>
-      }
-    >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="brand-name">Marka adı</Label>
-          <Input id="brand-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Örn. OneCite" />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="brand-domain">Web siteniz</Label>
-          <Input id="brand-domain" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="1cite.com" />
-          <p className="text-xs text-muted-foreground">Neden soruyoruz? Siteyi okuyup markanızı sizin yerinize tanımlıyoruz.</p>
-        </div>
-      </div>
-    </StepFrame>
-  );
-}
-
-function ListEditor({ label, items, onChange }: { label: string; items: string[]; onChange: (next: string[]) => void }) {
-  const [draft, setDraft] = useState("");
-  return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
-      <div className="flex flex-wrap gap-1.5">
-        {items.map((item, index) => (
-          <Badge key={`${item}-${index}`} variant="secondary" className="gap-1">
-            {item}
-            <button type="button" aria-label={`${item} kaldır`} onClick={() => onChange(items.filter((_, i) => i !== index))}>
-              <Trash2 className="h-3 w-3" />
-            </button>
-          </Badge>
-        ))}
-        {items.length === 0 ? <span className="text-xs text-muted-foreground">Henüz yok</span> : null}
-      </div>
-      <div className="flex gap-2">
-        <Input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Ekle ve Enter'a bas"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && draft.trim()) { e.preventDefault(); onChange([...items, draft.trim()]); setDraft(""); }
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function StepProfile({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
-  const load = useServerFn(getBrandIntelligence);
-  const generate = useServerFn(generateBrandIntelligence);
-  const save = useServerFn(saveBrandIntelligence);
-  const suggest = useServerFn(suggestKnowledgeSources);
-  const addSources = useServerFn(addKnowledgeSources);
-  const [intel, setIntel] = useState<Intel>(EMPTY_INTEL);
-  const [loading, setLoading] = useState(true);
-  const [sources, setSources] = useState<Array<{ title: string; url: string }>>([]);
-  const [picked, setPicked] = useState<Record<string, boolean>>({});
-  const [manualUrl, setManualUrl] = useState("");
-  const [showDetails, setShowDetails] = useState(false);
-
-  const applyRow = (row: Awaited<ReturnType<typeof load>>) => {
+  const applyIntel = (row: Record<string, unknown> | null | undefined, fallbackName: string) => {
     if (!row) return;
-    setIntel({
-      summary: row.summary ?? "", positioning: row.positioning ?? "", tone: row.tone ?? "",
-      products: toList(row.products), audiences: toList(row.audiences),
-      competitors: toList(row.competitors), keywords: toList(row.keywords),
+    setBook({
+      brandName: fallbackName,
+      industry: String(row["industry"] ?? ""),
+      language: String(row["language"] ?? language) || language,
+      location: String(row["location"] ?? ""),
+      summary: String(row["summary"] ?? ""),
+      keyFeatures: toList(row["key_features"]).join(", "),
+      detailedDescription: String(row["detailed_description"] ?? ""),
+      positioning: String(row["positioning"] ?? ""),
+      tone: String(row["tone"] ?? ""),
+      products: toList(row["products"]),
+      audiences: toList(row["audiences"]),
+      keywords: toList(row["keywords"]),
     });
   };
 
-  // Sadece kayıtlı veriyi okur. Yapay zeka çağrıları butonla tetiklenir.
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    load({ data: { brandId } })
-      .then((row) => {
-        if (cancelled) return;
-        applyRow(row);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-    return () => { cancelled = true; };
-  }, [brandId]);
+  // 1 + 2: marka oluştur ve siteyi tara
+  async function startScan() {
+    const clean = cleanDomain(domain);
+    if (!clean) { toast.error("Geçerli bir alan adı girin, örn. markaniz.com"); return; }
+    setBusy(true);
+    setStep(2);
+    try {
+      const created = await create({ data: { name: clean, domain: clean } });
+      selectBrand(created.id);
+      await refreshSession();
+      const intel = await generateIntel({ data: { brandId: created.id } });
+      applyIntel(intel as never, created.name);
+      // Kanıt sayfalarını sessizce bilgi bankasına ekle.
+      const suggested = await suggestSources({ data: { brandId: created.id } }).catch(() => []);
+      if (suggested.length) {
+        await addSources({ data: { brandId: created.id, items: suggested.slice(0, 8) } }).catch(() => undefined);
+      }
+      setStep(3);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Site analizi başarısız oldu.");
+      setStep(1);
+    } finally {
+      setBusy(false);
+    }
+  }
 
-  const analyze = useMutation({
-    mutationFn: async () => {
-      const row = await generate({ data: { brandId } });
-      const suggested = await suggest({ data: { brandId } }).catch(() => []);
-      return { row, suggested };
-    },
-    onSuccess: ({ row, suggested }) => {
-      applyRow(row);
-      setSources(suggested);
-      setPicked(Object.fromEntries(suggested.map((s) => [s.url, true])));
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
+  // 3 → 4
+  async function saveBookAndGeneratePrompts() {
+    if (!brandId) return;
+    setBusy(true);
+    try {
+      await saveIntel({
+        data: {
+          brandId,
+          brandName: book.brandName,
+          summary: book.summary,
+          positioning: book.positioning,
+          tone: book.tone,
+          products: book.products,
+          audiences: book.audiences,
+          keywords: book.keywords,
+          industry: book.industry,
+          language: book.language,
+          location: book.location,
+          detailedDescription: book.detailedDescription,
+          keyFeatures: book.keyFeatures.split(",").map((v) => v.trim()).filter(Boolean),
+        } as never,
+      });
+      await refreshSession();
+      const existing = await listAllPrompts({ data: { brandId } });
+      const rows = existing.length ? existing : await genPrompts({ data: { brandId } });
+      setPrompts(rows.map((r: Record<string, unknown>) => ({
+        id: String(r["id"]),
+        text: String(r["text"]),
+        funnelStage: normalizeFunnel(r["funnel_stage"]),
+        status: String(r["status"] ?? "candidate"),
+      })));
+      const usage = await planUsage({ data: { brandId } }).catch(() => null);
+      if (usage) setMaxPrompts(usage.maxPrompts);
+      setStep(4);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Marka kitabı kaydedilemedi.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
-  const approve = useMutation({
-    mutationFn: async () => {
-      await save({ data: { brandId, ...intel } });
-      const items = sources.filter((s) => picked[s.url]).map((s) => ({ title: s.title, url: s.url }));
-      if (items.length) await addSources({ data: { brandId, items } });
-    },
-    onSuccess: () => { void onDone(); },
-    onError: (error: Error) => toast.error(error.message),
-  });
+  // 4 → 5
+  async function savePromptsAndLoadCompetitors() {
+    if (!brandId) return;
+    setBusy(true);
+    try {
+      await savePromptEdits({ data: { items: prompts.map((p) => ({ id: p.id, text: p.text, funnelStage: p.funnelStage })) } });
+      await setStatus({ data: { ids: prompts.map((p) => p.id), status: "approved" } });
+      const result = await loadCompetitors({ data: { brandId } });
+      setCompetitors(result.competitors);
+      setMaxCompetitors(result.unlimited ? 0 : result.maxCompetitors);
+      setStep(5);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Promptlar kaydedilemedi.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
-  if (loading) {
+  // 5 → 6
+  async function saveCompetitorsAndLoadEngines() {
+    if (!brandId) return;
+    setBusy(true);
+    try {
+      const result = await storeCompetitors({ data: { brandId, competitors } });
+      if (!result.ok) { toast.error(result.message); return; }
+      const current = await loadEngines({ data: { brandId } }).catch(() => ({ engines: ["perplexity", "deepseek"] }));
+      setEngines(current.engines);
+      setStep(6);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Rakipler kaydedilemedi.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // 6 → bitir
+  async function finish() {
+    if (!brandId) return;
+    setBusy(true);
+    try {
+      await storeEngines({ data: { brandId, engines } });
+      await complete({ data: { brandId } });
+      await refreshSession();
+      toast.success("Kurulum tamamlandı — ilk ölçümünüz başlıyor.");
+      navigate({ to: "/app/measurement", search: { autostart: true } });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Kurulum tamamlanamadı.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const promptQuotaExceeded = maxPrompts > 0 && prompts.length > maxPrompts;
+  const competitorQuotaFull = maxCompetitors > 0 && competitors.length >= maxCompetitors;
+
+  const funnelCounts = useMemo(() => {
+    const counts: Record<FunnelStage, number> = { top: 0, middle: 0, bottom: 0 };
+    for (const p of prompts) counts[p.funnelStage] += 1;
+    return counts;
+  }, [prompts]);
+
+  if (step === 1) {
     return (
-      <Card>
-        <CardContent className="flex items-center gap-3 py-10 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Kayıtlı marka bilgileri yükleniyor…
-        </CardContent>
-      </Card>
+      <WizardFrame
+        step={1}
+        total={TOTAL_STEPS}
+        title="Hoş geldiniz 🎉"
+        subtitle="Başlamak için alan adınızı girin. Gerisini biz hazırlayıp onayınıza sunacağız."
+        footer={
+          <Button size="lg" className="w-full max-w-md" onClick={startScan} disabled={busy}>
+            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Devam et
+          </Button>
+        }
+      >
+        <div className="mx-auto w-full max-w-md space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="domain">Alan adınız</Label>
+            <Input id="domain" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="markaniz.com" autoFocus />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="language">Birincil dil</Label>
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger id="language"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((lang) => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </WizardFrame>
     );
   }
 
-  if (!intel.summary && !analyze.isPending) {
+  if (step === 2) {
     return (
-      <StepFrame
-        step={STEPS[1]}
+      <WizardFrame step={2} total={TOTAL_STEPS} title="Siteniz taranıyor" subtitle="Sayfalarınızı okuyup marka kitabınızı çıkarıyoruz. Bu işlem yaklaşık bir dakika sürer.">
+        <Card>
+          <CardContent className="flex flex-col items-center gap-3 py-12 text-sm text-muted-foreground">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <span>Site içeriği okunuyor, marka profili ve kanıt sayfaları çıkarılıyor…</span>
+          </CardContent>
+        </Card>
+      </WizardFrame>
+    );
+  }
+
+  if (step === 3) {
+    return (
+      <WizardFrame
+        step={3}
+        total={TOTAL_STEPS}
+        title="Marka kitabınızı gözden geçirin ✨"
+        subtitle="Sitenize göre bir marka kitabı hazırladık. Aşağıdaki bilgileri kontrol edip düzenleyebilirsiniz."
         footer={
           <>
-            <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
-            <Button onClick={() => analyze.mutate()}>Siteyi analiz et <ArrowRight className="ml-1.5 h-4 w-4" /></Button>
+            <Button variant="outline" onClick={() => setStep(1)} disabled={busy}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+            <Button onClick={saveBookAndGeneratePrompts} disabled={busy || !book.summary.trim()}>
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Devam et <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
           </>
         }
       >
-        <p className="text-sm text-muted-foreground">
-          Hazır olduğunuzda sitenizi okuyup marka özeti, ürünler, hedef kitle ve rakip listesini çıkaralım.
-          Bu adım yapay zeka kullanır ve yalnızca siz başlattığınızda çalışır.
-        </p>
-      </StepFrame>
+        <div className="flex gap-2 rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+          <Info className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>Aşağıdaki bilgiler markanızı doğru yansıtmıyorsa düzeltin. Sitenizde bot korumasi (örn. Cloudflare) varsa içeriğe tam erişemeyip eksik çıkarım yapmış olabiliriz.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Marka adı" value={book.brandName} onChange={(v) => setBook({ ...book, brandName: v })} />
+          <Field label="Sektör" value={book.industry} onChange={(v) => setBook({ ...book, industry: v })} />
+          <div className="space-y-1.5">
+            <Label>Birincil dil</Label>
+            <Select value={book.language || "Türkçe"} onValueChange={(v) => setBook({ ...book, language: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <Field label="Ana lokasyon" value={book.location} onChange={(v) => setBook({ ...book, location: v })} placeholder="Örn. İstanbul, Türkiye" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Kısa açıklama</Label>
+          <Textarea rows={2} value={book.summary} onChange={(e) => setBook({ ...book, summary: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Öne çıkan özellikler</Label>
+          <Textarea rows={2} value={book.keyFeatures} onChange={(e) => setBook({ ...book, keyFeatures: e.target.value })} placeholder="Virgülle ayırın" />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Detaylı açıklama</Label>
+          <Textarea rows={5} value={book.detailedDescription} onChange={(e) => setBook({ ...book, detailedDescription: e.target.value })} />
+        </div>
+      </WizardFrame>
     );
   }
 
-  if (analyze.isPending && !intel.summary) {
+  if (step === 4) {
     return (
-      <Card>
-        <CardContent className="flex items-center gap-3 py-10 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Siteniz okunuyor ve marka özeti çıkarılıyor…
-        </CardContent>
-      </Card>
+      <WizardFrame
+        step={4}
+        total={TOTAL_STEPS}
+        title="Önerilen promptları gözden geçirin ✨"
+        subtitle="Bu sorular yapay zeka platformlarındaki görünürlük skorunuzu hesaplamak için kullanılır. Metni ve huni aşamasını düzenleyebilirsiniz."
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setStep(3)} disabled={busy}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+            <Button onClick={savePromptsAndLoadCompetitors} disabled={busy || prompts.length === 0 || promptQuotaExceeded}>
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Devam et <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span>
+            {prompts.length} prompt · Üst {funnelCounts.top} · Orta {funnelCounts.middle} · Alt {funnelCounts.bottom}
+          </span>
+          {maxPrompts > 0 ? (
+            <span className={promptQuotaExceeded ? "text-destructive" : ""}>
+              Plan hakkınız: {maxPrompts} prompt
+            </span>
+          ) : null}
+        </div>
+        {promptQuotaExceeded ? (
+          <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+            Planınızın prompt hakkını aştınız. Devam etmek için fazla promptları silin veya planınızı yükseltin.
+          </p>
+        ) : null}
+
+        <div className="space-y-2">
+          {prompts.map((prompt, index) => (
+            <div key={prompt.id} className="flex flex-col gap-2 rounded-lg border border-border p-2 sm:flex-row sm:items-center">
+              <Input
+                value={prompt.text}
+                onChange={(e) => {
+                  const next = [...prompts];
+                  next[index] = { ...prompt, text: e.target.value };
+                  setPrompts(next);
+                }}
+              />
+              <Select
+                value={prompt.funnelStage}
+                onValueChange={(value) => {
+                  const next = [...prompts];
+                  next[index] = { ...prompt, funnelStage: normalizeFunnel(value) };
+                  setPrompts(next);
+                }}
+              >
+                <SelectTrigger className="sm:w-48"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {FUNNEL_STAGES.map((stage) => <SelectItem key={stage} value={stage}>{FUNNEL_LABEL[stage]}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Promptu sil"
+                onClick={async () => {
+                  setPrompts(prompts.filter((p) => p.id !== prompt.id));
+                  await removePrompt({ data: { id: prompt.id } }).catch(() => undefined);
+                }}
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          {prompts.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Henüz prompt yok, aşağıdan ekleyebilirsiniz.</p> : null}
+        </div>
+
+        <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
+          <p className="text-sm font-medium">Yeni prompt ekle</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input value={newPrompt} onChange={(e) => setNewPrompt(e.target.value)} placeholder="Sorunuzu yazın" />
+            <Select value={newPromptStage} onValueChange={(v) => setNewPromptStage(normalizeFunnel(v))}>
+              <SelectTrigger className="sm:w-48"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {FUNNEL_STAGES.map((stage) => <SelectItem key={stage} value={stage}>{FUNNEL_LABEL[stage]}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              disabled={!newPrompt.trim() || busy}
+              onClick={async () => {
+                if (!brandId) return;
+                if (maxPrompts > 0 && prompts.length >= maxPrompts) {
+                  toast.error("Plan limitiniz doldu. Daha fazla prompt için planınızı yükseltin.");
+                  return;
+                }
+                try {
+                  await addPrompt({ data: { brandId, text: newPrompt.trim() } });
+                  const rows = await listAllPrompts({ data: { brandId } });
+                  setPrompts(rows.map((r: Record<string, unknown>) => ({
+                    id: String(r["id"]),
+                    text: String(r["text"]),
+                    funnelStage: normalizeFunnel(r["funnel_stage"]),
+                    status: String(r["status"] ?? "candidate"),
+                  })));
+                  setNewPrompt("");
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : "Prompt eklenemedi.");
+                }
+              }}
+            >
+              <Plus className="mr-1.5 h-4 w-4" /> Ekle
+            </Button>
+          </div>
+        </div>
+      </WizardFrame>
     );
   }
 
-  const pickedCount = sources.filter((s) => picked[s.url]).length;
+  if (step === 5) {
+    return (
+      <WizardFrame
+        step={5}
+        total={TOTAL_STEPS}
+        title="Rakiplerinizi gözden geçirin ✨"
+        subtitle="Bu rakipler pazar konumunuzu karşılaştırmak için kullanılır. Alan adı girmeniz atıf eşleşmesini güçlendirir."
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setStep(4)} disabled={busy}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+            <Button onClick={saveCompetitorsAndLoadEngines} disabled={busy}>
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Devam et <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Button>
+          </>
+        }
+      >
+        {maxCompetitors > 0 ? (
+          <p className="text-xs text-muted-foreground">Planınızda {maxCompetitors} rakip takip edebilirsiniz · {competitors.length} seçili</p>
+        ) : null}
+        <div className="space-y-2">
+          {competitors.map((entry, index) => (
+            <div key={`${entry.name}-${index}`} className="flex flex-col gap-2 rounded-lg border border-border p-2 sm:flex-row sm:items-center">
+              <Input
+                value={entry.name}
+                placeholder="Rakip adı"
+                onChange={(e) => {
+                  const next = [...competitors];
+                  next[index] = { ...entry, name: e.target.value };
+                  setCompetitors(next);
+                }}
+              />
+              <Input
+                value={entry.domain}
+                placeholder="rakip.com"
+                onChange={(e) => {
+                  const next = [...competitors];
+                  next[index] = { ...entry, domain: e.target.value };
+                  setCompetitors(next);
+                }}
+              />
+              <Select
+                value={entry.type}
+                onValueChange={(value) => {
+                  const next = [...competitors];
+                  next[index] = { ...entry, type: value as CompetitorType };
+                  setCompetitors(next);
+                }}
+              >
+                <SelectTrigger className="sm:w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="direct">{COMPETITOR_TYPE_LABEL.direct}</SelectItem>
+                  <SelectItem value="indirect">{COMPETITOR_TYPE_LABEL.indirect}</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="ghost" size="icon" aria-label="Rakibi kaldır" onClick={() => setCompetitors(competitors.filter((_, i) => i !== index))}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          {competitors.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Henüz rakip yok, aşağıdan ekleyin.</p> : null}
+        </div>
+
+        <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
+          <p className="text-sm font-medium">Yeni rakip ekle</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input value={newCompetitor.name} onChange={(e) => setNewCompetitor({ ...newCompetitor, name: e.target.value })} placeholder="Rakip adı" />
+            <Input value={newCompetitor.domain} onChange={(e) => setNewCompetitor({ ...newCompetitor, domain: e.target.value })} placeholder="rakip.com" />
+            <Select value={newCompetitor.type} onValueChange={(v) => setNewCompetitor({ ...newCompetitor, type: v as CompetitorType })}>
+              <SelectTrigger className="sm:w-44"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="direct">{COMPETITOR_TYPE_LABEL.direct}</SelectItem>
+                <SelectItem value="indirect">{COMPETITOR_TYPE_LABEL.indirect}</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              disabled={competitorQuotaFull}
+              onClick={() => {
+                const name = newCompetitor.name.trim();
+                const dom = cleanDomain(newCompetitor.domain);
+                if (!name && !dom) { toast.info("Rakip adı veya alan adı girin."); return; }
+                if (competitorQuotaFull) {
+                  toast.error("Plan limitiniz doldu. Daha fazla rakip için planınızı yükseltin.");
+                  return;
+                }
+                setCompetitors([...competitors, { name: name || dom, domain: dom, type: newCompetitor.type }]);
+                setNewCompetitor({ name: "", domain: "", type: "direct" });
+              }}
+            >
+              <Plus className="mr-1.5 h-4 w-4" /> Ekle
+            </Button>
+          </div>
+          {competitorQuotaFull ? (
+            <p className="text-xs text-destructive">Plan limitiniz dolu. Yeni rakip eklemek için bir rakibi kaldırın veya planınızı yükseltin.</p>
+          ) : null}
+        </div>
+      </WizardFrame>
+    );
+  }
 
   return (
-    <StepFrame
-      step={STEPS[1]}
+    <WizardFrame
+      step={6}
+      total={TOTAL_STEPS}
+      title="Yapay zeka motorlarını seçin ✨"
+      subtitle="Markanızın görünürlüğünü hangi motorlarda takip edeceğimizi seçin. Birden fazla motor seçebilirsiniz."
       footer={
         <>
-          <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
-          <Button variant="outline" onClick={() => analyze.mutate()} disabled={analyze.isPending}>
-            {analyze.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {intel.summary ? "Yeniden çıkar" : "Siteyi analiz et"}
-          </Button>
-          <Button onClick={() => approve.mutate()} disabled={approve.isPending}>
-            {approve.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Onayla ve devam et <ArrowRight className="ml-1.5 h-4 w-4" />
+          <Button variant="outline" onClick={() => setStep(5)} disabled={busy}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
+          <Button onClick={finish} disabled={busy || engines.length === 0}>
+            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-1.5 h-4 w-4" />}
+            Kurulumu tamamla
           </Button>
         </>
       }
     >
-      <div className="space-y-1.5">
-        <Label htmlFor="intel-summary">Marka özeti</Label>
-        <Textarea id="intel-summary" rows={3} value={intel.summary} onChange={(e) => setIntel({ ...intel, summary: e.target.value })} />
-        <p className="text-xs text-muted-foreground">Yanlış bir şey varsa doğrudan düzeltebilirsiniz — ölçüm bu özete göre kurgulanır.</p>
-      </div>
-
-      <div className="space-y-4 rounded-lg border border-border p-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium">Kanıt sayfaları</p>
-            <p className="text-xs text-muted-foreground">{pickedCount} sayfa seçili — AI cevaplarında kaynak gösterilmesini istediğiniz sayfalar.</p>
-          </div>
-        </div>
-        <div className="max-h-64 divide-y divide-border overflow-auto rounded-md border border-border">
-          {sources.map((item) => (
-            <label key={item.url} className="flex cursor-pointer items-start gap-3 p-2.5 text-sm">
-              <Checkbox checked={Boolean(picked[item.url])} onCheckedChange={(value) => setPicked({ ...picked, [item.url]: value === true })} />
+      <p className="text-center text-sm text-muted-foreground">{engines.length} / {ENGINES.length} motor izleniyor</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {ENGINES.map((engine) => {
+          const active = engines.includes(engine.key);
+          return (
+            <button
+              key={engine.key}
+              type="button"
+              onClick={() => setEngines(active ? engines.filter((e) => e !== engine.key) : [...engines, engine.key])}
+              className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${active ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}
+            >
+              <Sparkles className={`mt-0.5 h-5 w-5 ${active ? "text-primary" : "text-muted-foreground"}`} />
               <span className="min-w-0">
-                <span className="block font-medium">{item.title}</span>
-                <span className="block truncate font-mono text-xs text-muted-foreground">{item.url}</span>
+                <span className="block text-sm font-semibold">{engine.name}</span>
+                <span className="block text-xs text-muted-foreground">{engine.description}</span>
               </span>
-            </label>
-          ))}
-          {sources.length === 0 ? <p className="p-2.5 text-sm text-muted-foreground">Öneri bulunamadı, aşağıdan elle ekleyin.</p> : null}
-        </div>
-        <div className="flex gap-2">
-          <Input value={manualUrl} onChange={(e) => setManualUrl(e.target.value)} placeholder="https://…" aria-label="Kendi sayfanızı ekleyin" />
-          <Button
-            variant="outline"
-            onClick={() => {
-              const url = manualUrl.trim();
-              if (!url) return;
-              setSources([{ title: url.replace(/^https?:\/\//, ""), url }, ...sources]);
-              setPicked({ ...picked, [url]: true });
-              setManualUrl("");
-            }}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
+              {active ? <Badge variant="secondary" className="ml-auto shrink-0">Seçili</Badge> : null}
+            </button>
+          );
+        })}
       </div>
-
-      <Button variant="ghost" size="sm" onClick={() => setShowDetails((v) => !v)}>
-        {showDetails ? "Ayrıntıları gizle" : "Ayrıntıları düzenle (konumlandırma, kitle, rakipler)"}
-      </Button>
-
-      {showDetails ? (
-      <>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="intel-positioning">Konumlandırma</Label>
-          <Textarea id="intel-positioning" rows={2} value={intel.positioning} onChange={(e) => setIntel({ ...intel, positioning: e.target.value })} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="intel-tone">Ses tonu</Label>
-          <Textarea id="intel-tone" rows={2} value={intel.tone} onChange={(e) => setIntel({ ...intel, tone: e.target.value })} />
-        </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ListEditor label="Ürün / hizmetler" items={intel.products} onChange={(products) => setIntel({ ...intel, products })} />
-        <ListEditor label="Hedef kitle" items={intel.audiences} onChange={(audiences) => setIntel({ ...intel, audiences })} />
-        <ListEditor label="Rakipler" items={intel.competitors} onChange={(competitors) => setIntel({ ...intel, competitors })} />
-        <ListEditor label="Anahtar konular" items={intel.keywords} onChange={(keywords) => setIntel({ ...intel, keywords })} />
-      </div>
-      </>
-      ) : null}
-    </StepFrame>
+      <p className="text-center text-xs text-muted-foreground">
+        Kurulumu tamamladığınızda ilk ölçümünüz otomatik başlar ve skorunuz, atıf kaynaklarınız ve ilk görevleriniz oluşur.
+      </p>
+    </WizardFrame>
   );
 }
 
-function StepPrompts({ brandId, onDone, onBack }: { brandId: string; onDone: () => void | Promise<void>; onBack: () => void }) {
-  const generate = useServerFn(generatePromptCandidates);
-  const setStatus = useServerFn(setPromptStatus);
-  const complete = useServerFn(completeOnboarding);
-  const [prompts, setPrompts] = useState<Array<{ id: string; text: string; category: string }>>([]);
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
-  const listAll = useServerFn(listPrompts);
-  const [loading, setLoading] = useState(true);
-  const planUsage = useServerFn(getPlanUsage);
-  const [plan, setPlan] = useState<{ planLabel: string; maxPrompts: number; approvedPrompts: number } | null>(null);
-
-  useEffect(() => {
-    planUsage({ data: { brandId } })
-      .then((usage) => setPlan(usage))
-      .catch(() => undefined);
-  }, [brandId]);
-
-  const quota = plan && plan.maxPrompts > 0 ? Math.max(0, plan.maxPrompts - plan.approvedPrompts) : Infinity;
-
-  const applyRows = (rows: Array<{ id: string; text: string; category: string }>) => {
-    const list = rows.map((r) => ({ id: r.id, text: r.text, category: r.category }));
-    setPrompts(list);
-    setSelected(Object.fromEntries(list.map((r, index) => [r.id, index < quota])));
-  };
-
-  // Kayıtlı adayları okur; yeni üretim yalnızca butonla tetiklenir.
-  useEffect(() => {
-    let cancelled = false;
-    listAll({ data: { brandId } })
-      .then((rows) => { if (!cancelled) { applyRows(rows); setLoading(false); } })
-      .catch(() => setLoading(false));
-    return () => { cancelled = true; };
-  }, [brandId]);
-
-  const produce = useMutation({
-    mutationFn: () => generate({ data: { brandId } }),
-    onSuccess: (rows) => applyRows(rows),
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const finish = useMutation({
-    mutationFn: async () => {
-      const approved = prompts.filter((p) => selected[p.id]).map((p) => p.id);
-      const rejected = prompts.filter((p) => !selected[p.id]).map((p) => p.id);
-      if (approved.length) await setStatus({ data: { ids: approved, status: "approved" } });
-      if (rejected.length) await setStatus({ data: { ids: rejected, status: "inactive" } });
-      await complete({ data: { brandId } });
-    },
-    onSuccess: () => { void onDone(); },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const count = prompts.filter((p) => selected[p.id]).length;
-  const overQuota = count > quota;
-
-  const toggle = (id: string, value: boolean) => {
-    if (value && count >= quota) {
-      toast.error(
-        `${plan?.planLabel ?? "Mevcut"} planınızda en fazla ${plan?.maxPrompts} prompt izlenebilir. Planınızı yükselterek daha fazla soru ekleyebilirsiniz.`,
-      );
-      return;
-    }
-    setSelected({ ...selected, [id]: value });
-  };
-
+function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
-    <StepFrame
-      step={STEPS[2]}
-      footer={
-        <>
-          <Button variant="ghost" onClick={onBack}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
-          <Button variant="outline" onClick={() => produce.mutate()} disabled={produce.isPending}>
-            {produce.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {prompts.length ? "Yeniden üret" : "Soruları üret"}
-          </Button>
-          <Button onClick={() => finish.mutate()} disabled={count === 0 || overQuota || finish.isPending}>
-            {finish.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {count} promptu onayla ve kurulumu bitir <Check className="ml-1.5 h-4 w-4" />
-          </Button>
-        </>
-      }
-    >
-      {loading || produce.isPending ? (
-        <p className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Sorular hazırlanıyor…
-        </p>
-      ) : (
-        <>
-          {plan ? (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs">
-              <span className="text-muted-foreground">
-                <strong className="text-foreground">{plan.planLabel}</strong> planı ·{" "}
-                {plan.maxPrompts > 0 ? `${plan.maxPrompts} prompt hakkı` : "sınırsız prompt"}
-                {plan.approvedPrompts > 0 ? ` · ${plan.approvedPrompts} onaylı` : ""}
-              </span>
-              <span className={overQuota ? "text-destructive" : "text-muted-foreground"}>
-                Seçili: {count}
-                {plan.maxPrompts > 0 ? ` / ${quota}` : ""}
-              </span>
-            </div>
-          ) : null}
-          <div className="flex gap-2 text-xs">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelected(Object.fromEntries(prompts.map((p, index) => [p.id, index < quota])))}
-            >
-              {quota === Infinity ? "Tümünü seç" : `İlk ${Math.min(quota, prompts.length)} tanesini seç`}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setSelected({})}>Seçimi temizle</Button>
-          </div>
-          <div className="divide-y divide-border rounded-lg border border-border">
-            {prompts.map((prompt) => (
-              <label key={prompt.id} className="flex cursor-pointer items-start gap-3 p-3 text-sm">
-                <Checkbox
-                  checked={Boolean(selected[prompt.id])}
-                  onCheckedChange={(value) => toggle(prompt.id, value === true)}
-                />
-                <span className="min-w-0 flex-1">{prompt.text}</span>
-                <Badge variant="outline" className="shrink-0 text-[10px]">{prompt.category}</Badge>
-              </label>
-            ))}
-            {prompts.length === 0 ? <p className="p-3 text-sm text-muted-foreground">Henüz soru yok — “Soruları üret” ile markanıza özel soruları oluşturun.</p> : null}
-          </div>
-        </>
-      )}
-    </StepFrame>
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+    </div>
   );
 }

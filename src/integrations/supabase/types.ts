@@ -159,8 +159,13 @@ export type Database = {
           brand_id: string
           competitors: Json
           created_at: string
+          detailed_description: string | null
           id: string
+          industry: string | null
+          key_features: Json
           keywords: Json
+          language: string | null
+          location: string | null
           positioning: string | null
           products: Json
           summary: string | null
@@ -173,8 +178,13 @@ export type Database = {
           brand_id: string
           competitors?: Json
           created_at?: string
+          detailed_description?: string | null
           id?: string
+          industry?: string | null
+          key_features?: Json
           keywords?: Json
+          language?: string | null
+          location?: string | null
           positioning?: string | null
           products?: Json
           summary?: string | null
@@ -187,8 +197,13 @@ export type Database = {
           brand_id?: string
           competitors?: Json
           created_at?: string
+          detailed_description?: string | null
           id?: string
+          industry?: string | null
+          key_features?: Json
           keywords?: Json
+          language?: string | null
+          location?: string | null
           positioning?: string | null
           products?: Json
           summary?: string | null
@@ -242,6 +257,7 @@ export type Database = {
           created_at: string
           created_by: string
           domain: string
+          engines: string[]
           id: string
           name: string
           onboarding_completed: boolean
@@ -252,6 +268,7 @@ export type Database = {
           created_at?: string
           created_by: string
           domain: string
+          engines?: string[]
           id?: string
           name: string
           onboarding_completed?: boolean
@@ -262,6 +279,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           domain?: string
+          engines?: string[]
           id?: string
           name?: string
           onboarding_completed?: boolean
@@ -955,6 +973,7 @@ export type Database = {
           brand_id: string
           category: string
           created_at: string
+          funnel_stage: string
           id: string
           intent: string | null
           origin: string
@@ -966,6 +985,7 @@ export type Database = {
           brand_id: string
           category?: string
           created_at?: string
+          funnel_stage?: string
           id?: string
           intent?: string | null
           origin?: string
@@ -977,6 +997,7 @@ export type Database = {
           brand_id?: string
           category?: string
           created_at?: string
+          funnel_stage?: string
           id?: string
           intent?: string | null
           origin?: string
