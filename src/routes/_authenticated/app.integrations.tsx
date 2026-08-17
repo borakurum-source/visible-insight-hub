@@ -188,7 +188,7 @@ function IntegrationsPage() {
               <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
                 <LogIn className="h-4.5 w-4.5" />
               </div>
-              <CardTitle className="text-sm">Google hesabı</CardTitle>
+              <CardTitle className="text-sm">Adım 1 · Google hesabı</CardTitle>
             </div>
             {googleAccount.data?.connected ? (
               <Badge variant="outline" className="gap-1 border-success/40 text-success">
@@ -199,7 +199,8 @@ function IntegrationsPage() {
             )}
           </div>
           <CardDescription className="pt-1">
-            Search Console ve Analytics verileri bu markaya bağlanan Google hesabından okunur. Her marka kendi hesabini baglar.
+            Önce hesabınıza tek seferlik yetki verirsiniz. Ardından aşağıdaki adım 2 kartlarında hangi Search Console ve
+            Analytics mülkünün okunacağını seçersiniz. Her marka kendi hesabını bağlar.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
@@ -239,7 +240,7 @@ function IntegrationsPage() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
                   <Search className="h-4.5 w-4.5" />
                 </div>
-                <CardTitle className="text-sm">Google Search Console</CardTitle>
+                <CardTitle className="text-sm">Adım 2 · Search Console mülkü</CardTitle>
               </div>
               {gsc?.status === "bağlı" ? (
                 <Badge variant="outline" className="gap-1 border-success/40 text-success"><CheckCircle2 className="h-3 w-3" /> Bağlı</Badge>
@@ -266,8 +267,17 @@ function IntegrationsPage() {
                 </div>
               </>
             ) : (
-              <Button size="sm" className="w-full" disabled={!brand || loadProperties.isPending} onClick={() => loadProperties.mutate()}>
-                {loadProperties.isPending ? "Mülkler alınıyor…" : "Bağlan"}
+              <Button
+                size="sm"
+                className="w-full"
+                disabled={!brand || !googleAccount.data?.connected || loadProperties.isPending}
+                onClick={() => loadProperties.mutate()}
+              >
+                {loadProperties.isPending
+                  ? "Mülkler alınıyor…"
+                  : googleAccount.data?.connected
+                    ? "Mülk seç"
+                    : "Önce Google hesabınızı bağlayın"}
               </Button>
             )}
             {candidates ? (
@@ -297,7 +307,7 @@ function IntegrationsPage() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
                   <BarChart3 className="h-4.5 w-4.5" />
                 </div>
-                <CardTitle className="text-sm">Google Analytics 4</CardTitle>
+                <CardTitle className="text-sm">Adım 2 · Analytics 4 mülkü</CardTitle>
               </div>
               {ga4?.status === "bağlı" ? (
                 <Badge variant="outline" className="gap-1 border-success/40 text-success"><CheckCircle2 className="h-3 w-3" /> Bağlı</Badge>
@@ -327,8 +337,17 @@ function IntegrationsPage() {
                 </div>
               </>
             ) : (
-              <Button size="sm" className="w-full" disabled={!brand || loadGa4.isPending} onClick={() => loadGa4.mutate()}>
-                {loadGa4.isPending ? "Mülkler alınıyor…" : "Bağlan"}
+              <Button
+                size="sm"
+                className="w-full"
+                disabled={!brand || !googleAccount.data?.connected || loadGa4.isPending}
+                onClick={() => loadGa4.mutate()}
+              >
+                {loadGa4.isPending
+                  ? "Mülkler alınıyor…"
+                  : googleAccount.data?.connected
+                    ? "Mülk seç"
+                    : "Önce Google hesabınızı bağlayın"}
               </Button>
             )}
             {ga4Candidates ? (
