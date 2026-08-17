@@ -35,8 +35,10 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
+import { Route as AdminEmailsRouteImport } from './routes/admin/emails'
 import { Route as AdminErrorsRouteImport } from './routes/admin/errors'
 import { Route as AdminPromptsRouteImport } from './routes/admin/prompts'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminSubscriptionsRouteImport } from './routes/admin/subscriptions'
 import { Route as MakalelerIndexRouteImport } from './routes/makaleler.index'
 import { Route as MakalelerSlugRouteImport } from './routes/makaleler.$slug'
@@ -206,6 +208,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminEmailsRoute = AdminEmailsRouteImport.update({
+  id: '/emails',
+  path: '/emails',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminErrorsRoute = AdminErrorsRouteImport.update({
   id: '/errors',
   path: '/errors',
@@ -214,6 +221,11 @@ const AdminErrorsRoute = AdminErrorsRouteImport.update({
 const AdminPromptsRoute = AdminPromptsRouteImport.update({
   id: '/prompts',
   path: '/prompts',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminSubscriptionsRoute = AdminSubscriptionsRouteImport.update({
@@ -438,8 +450,10 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/admin/api': typeof AdminApiRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/prompts': typeof AdminPromptsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
@@ -499,8 +513,10 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/api': typeof AdminApiRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/prompts': typeof AdminPromptsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
@@ -566,8 +582,10 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/admin/api': typeof AdminApiRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
   '/admin/prompts': typeof AdminPromptsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
@@ -633,8 +651,10 @@ export interface FileRouteTypes {
     | '/app'
     | '/admin/api'
     | '/admin/customers'
+    | '/admin/emails'
     | '/admin/errors'
     | '/admin/prompts'
+    | '/admin/settings'
     | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
@@ -694,8 +714,10 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/api'
     | '/admin/customers'
+    | '/admin/emails'
     | '/admin/errors'
     | '/admin/prompts'
+    | '/admin/settings'
     | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
@@ -760,8 +782,10 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/admin/api'
     | '/admin/customers'
+    | '/admin/emails'
     | '/admin/errors'
     | '/admin/prompts'
+    | '/admin/settings'
     | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
@@ -1019,6 +1043,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/emails': {
+      id: '/admin/emails'
+      path: '/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AdminEmailsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/errors': {
       id: '/admin/errors'
       path: '/errors'
@@ -1031,6 +1062,13 @@ declare module '@tanstack/react-router' {
       path: '/prompts'
       fullPath: '/admin/prompts'
       preLoaderRoute: typeof AdminPromptsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/subscriptions': {
@@ -1354,8 +1392,10 @@ const AuthenticatedRouteRouteWithChildren =
 interface AdminRouteRouteChildren {
   AdminApiRoute: typeof AdminApiRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminEmailsRoute: typeof AdminEmailsRoute
   AdminErrorsRoute: typeof AdminErrorsRoute
   AdminPromptsRoute: typeof AdminPromptsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSubscriptionsRoute: typeof AdminSubscriptionsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -1363,8 +1403,10 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminApiRoute: AdminApiRoute,
   AdminCustomersRoute: AdminCustomersRoute,
+  AdminEmailsRoute: AdminEmailsRoute,
   AdminErrorsRoute: AdminErrorsRoute,
   AdminPromptsRoute: AdminPromptsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminSubscriptionsRoute: AdminSubscriptionsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
