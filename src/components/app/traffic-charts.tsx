@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Area, AreaChart, Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, ComposedChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowUpRight, BarChart3, Bot, Globe2, Search, Sparkles, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,15 @@ function Empty({ label, cta }: { label: string; cta?: { to: string; text: string
   );
 }
 
+function SectionTitle({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="mb-3 mt-6 first:mt-0">
+      <h2 className="font-display text-sm font-semibold tracking-tight">{title}</h2>
+      <p className="text-[11px] text-muted-foreground">{description}</p>
+    </div>
+  );
+}
+
 export function TrafficCharts({ data }: { data: TrafficOverview }) {
   const gscDaily = data.gsc.daily.map((row) => ({ ...row, label: shortDate(row.date) }));
   const referralDaily = data.aiReferral.daily.map((row) => ({ ...row, label: shortDate(row.date) }));
@@ -82,61 +91,21 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
 
   const aiPlatforms = data.ga4.ai?.platforms ?? [];
   const bingDaily = (data.bing?.daily ?? []).map((row) => ({ ...row, label: shortDate(row.date) }));
-  const bingQueries = data.bing?.queries ?? [];
+  // Copilot ekosistemi (Bing Chat / Edge / copilot.microsoft.com) GA4 tarafinda ayri gosterilir.
+  const copilotSessions = aiPlatforms
+    .filter((row) => /copilot|bing/i.test(row.platform))
+    .reduce((sum, row) => sum + row.sessions, 0);
+  const bingCtr = data.bing?.totals.impressions
+    ? Math.round((data.bing.totals.clicks / data.bing.totals.impressions) * 1000) / 10
+    : 0;
 
   return (
     <>
-    <div className="grid gap-4 md:grid-cols-2">
-      <MetricCard
-        icon={Search}
-        days={data.rangeDays}
-        metric="gsc-clicks"
-        title="Google Arama Trafiği (GSC)"
-        value={data.gsc.connected ? fmt(data.gsc.totals.clicks) : "—"}
-        caption={data.gsc.connected ? `tıklama · ${fmt(data.gsc.totals.impressions)} gösterim · ${period}` : "Search Console bağlı değil"}
-      >
-        {data.gsc.connected && gscDaily.length ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={gscDaily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
-              <defs>
-                <linearGradient id="gscFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
-              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "clicks" ? "Tıklama" : "Gösterim"]} />
-              <Area type="monotone" dataKey="clicks" stroke="var(--chart-1)" strokeWidth={2} fill="url(#gscFill)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        ) : (
-          <Empty label="Search Console verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
-        )}
-      </MetricCard>
-
-      <MetricCard
-        icon={BarChart3}
-        days={data.rangeDays}
-        metric="gsc-impressions"
-        title="Arama Görünürlüğü (Gösterim)"
-        value={data.gsc.connected ? fmt(data.gsc.totals.impressions) : "—"}
-        caption={data.gsc.connected ? `gösterim · ${data.gsc.queries.length} sorgu takipte` : "Bağlantı sonrası dolar"}
-      >
-        {data.gsc.connected && gscDaily.length ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={gscDaily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
-              <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
-              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [fmt(value), "Gösterim"]} />
-              <Bar dataKey="impressions" radius={[3, 3, 0, 0]} fill="var(--chart-2)" />
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <Empty label="Gösterim verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
-        )}
-      </MetricCard>
-
+    <SectionTitle
+      title="Yapay zeka görünürlüğü"
+      description="Önce yapay zeka: asistan yanıtlarındaki görünürlüğünüz, atıflarınız ve GA4'ten gelen gerçek yapay zeka trafiği."
+    />
+    <div className="grid gap-4 md:grid-cols-3">
       <MetricCard
         icon={Sparkles}
         days={data.rangeDays}
@@ -157,38 +126,6 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
           </ResponsiveContainer>
         ) : (
           <Empty label="Henüz ölçüm yapılmadı." cta={{ to: "/app/measurement", text: "Ölçümü başlat" }} />
-        )}
-      </MetricCard>
-
-      <MetricCard
-        icon={Users}
-        days={data.rangeDays}
-        metric="ga4-sessions"
-        title="Site Trafiği (GA4)"
-        value={data.ga4.connected ? fmt(data.ga4.totals.sessions) : "—"}
-        caption={
-          data.ga4.connected
-            ? `oturum · ${fmt(data.ga4.totals.users)} kullanıcı · son 28 gün`
-            : "Google Analytics bağlı değil"
-        }
-      >
-        {data.ga4.connected && ga4Daily.length ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={ga4Daily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
-              <defs>
-                <linearGradient id="ga4Fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-4)" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="var(--chart-4)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
-              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "sessions" ? "Oturum" : "Kullanıcı"]} />
-              <Area type="monotone" dataKey="sessions" stroke="var(--chart-4)" strokeWidth={2} fill="url(#ga4Fill)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        ) : (
-          <Empty label="GA4 verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
         )}
       </MetricCard>
 
@@ -219,73 +156,38 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
           <Empty label="Henüz atıf kaydı yok." cta={{ to: "/app/measurement", text: "Ölçümü başlat" }} />
         )}
       </MetricCard>
-    </div>
 
-    {/* Bing Webmaster Tools: Bing/Copilot ekosisteminin organik arama trafigi. */}
-    <div className="mt-4 grid gap-4 md:grid-cols-2">
       <MetricCard
-        icon={Globe2}
+        icon={Users}
         days={data.rangeDays}
-        title="Bing Organik Trafik"
-        value={fmt(data.bing?.totals.clicks ?? 0)}
+        metric="ga4-sessions"
+        title="AI Referral Trafiği (GA4)"
+        value={data.ga4.connected ? fmt(data.ga4.ai?.sessions ?? 0) : "—"}
         caption={
-          data.bing?.connected
-            ? `tıklama · ${fmt(data.bing.totals.impressions)} gösterim${data.bing.site ? ` · ${data.bing.site}` : ""}`
-            : "Bing Webmaster Tools bağlı değil"
+          data.ga4.connected
+            ? `yapay zeka kaynaklı oturum · toplam trafiğin %${data.ga4.ai?.share ?? 0}'i · Copilot: ${fmt(copilotSessions)}`
+            : "Google Analytics bağlı değil"
         }
       >
-        {data.bing?.connected && bingDaily.length ? (
+        {data.ga4.connected && ga4Daily.length ? (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={bingDaily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+            <AreaChart data={ga4Daily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
               <defs>
-                <linearGradient id="bingFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-3)" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="var(--chart-3)" stopOpacity={0} />
+                <linearGradient id="ga4Fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--chart-4)" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="var(--chart-4)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
-              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} allowDecimals={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "clicks" ? "Tıklama" : "Gösterim"]} />
-              <Area type="monotone" dataKey="clicks" stroke="var(--chart-3)" strokeWidth={2} fill="url(#bingFill)" />
+              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "sessions" ? "Oturum" : "Kullanıcı"]} />
+              <Area type="monotone" dataKey="sessions" stroke="var(--chart-4)" strokeWidth={2} fill="url(#ga4Fill)" />
             </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <Empty
-            label={data.bing?.connected ? "Bing verisi henüz gelmedi." : "Bing Webmaster Tools API anahtarınızı bağlayın."}
-            cta={{ to: "/app/integrations", text: "Bağla" }}
-          />
+          <Empty label="GA4 verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
         )}
       </MetricCard>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-1.5 text-sm">
-            <Globe2 className="h-4 w-4 text-primary" aria-hidden="true" />
-            Bing — en çok tıklanan sorgular
-          </CardTitle>
-          <CardDescription className="text-[11px]">
-            Bing ve Copilot ekosisteminde sitenize gelen aramalar.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {bingQueries.length ? (
-            <ul className="space-y-1.5">
-              {bingQueries.map((row) => (
-                <li key={row.query} className="flex items-center justify-between gap-3 rounded-md border border-border px-2.5 py-1.5 text-xs">
-                  <span className="min-w-0 truncate">{row.query}</span>
-                  <span className="shrink-0 text-[11px] text-muted-foreground">
-                    {fmt(row.clicks)} tıklama · {fmt(row.impressions)} gösterim
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="h-32">
-              <Empty label="Bing sorgu verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
 
     {/* GA4 kaynak kirilimi: hangi yapay zeka platformundan gercek ziyaret geliyor. */}
@@ -339,6 +241,108 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
         )}
       </CardContent>
     </Card>
+
+    <SectionTitle
+      title="Arama trafiği"
+      description="Yapay zeka yanıtlarını besleyen klasik arama sinyalleri: Google Search Console, Bing/Copilot ekosistemi ve toplam site trafiği."
+    />
+    <div className="grid gap-4 md:grid-cols-3">
+      <MetricCard
+        icon={Search}
+        days={data.rangeDays}
+        metric="gsc-clicks"
+        title="Google Arama Trafiği (GSC)"
+        value={data.gsc.connected ? fmt(data.gsc.totals.clicks) : "—"}
+        caption={data.gsc.connected ? `tıklama · ${fmt(data.gsc.totals.impressions)} gösterim · ${period}` : "Search Console bağlı değil"}
+      >
+        {data.gsc.connected && gscDaily.length ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={gscDaily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+              <defs>
+                <linearGradient id="gscFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
+              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "clicks" ? "Tıklama" : "Gösterim"]} />
+              <Area type="monotone" dataKey="clicks" stroke="var(--chart-1)" strokeWidth={2} fill="url(#gscFill)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <Empty label="Search Console verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
+        )}
+      </MetricCard>
+
+      <MetricCard
+        icon={BarChart3}
+        days={data.rangeDays}
+        metric="gsc-impressions"
+        title="Arama Görünürlüğü (Gösterim)"
+        value={data.gsc.connected ? fmt(data.gsc.totals.impressions) : "—"}
+        caption={data.gsc.connected ? `gösterim · ${data.gsc.queries.length} sorgu takipte` : "Bağlantı sonrası dolar"}
+      >
+        {data.gsc.connected && gscDaily.length ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={gscDaily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+              <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
+              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [fmt(value), "Gösterim"]} />
+              <Bar dataKey="impressions" radius={[3, 3, 0, 0]} fill="var(--chart-2)" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <Empty label="Gösterim verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
+        )}
+      </MetricCard>
+
+      {/* Bing/Copilot: tiklama + gosterim birlikte, ustte Copilot oturum ozeti. */}
+      <Card>
+        <CardHeader className="pb-1">
+          <CardTitle className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <Globe2 className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+            Bing & Copilot Ekosistemi
+          </CardTitle>
+          <p className="font-display text-2xl font-semibold">{data.bing?.connected ? fmt(data.bing.totals.clicks) : "—"}</p>
+          <CardDescription className="text-[11px]">
+            {data.bing?.connected
+              ? `tıklama · ${fmt(data.bing.totals.impressions)} gösterim · CTR %${bingCtr}`
+              : "Bing Webmaster Tools bağlı değil"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-1">
+          <div className="mb-2 grid grid-cols-2 gap-2">
+            <div className="rounded-md border border-border px-2 py-1.5">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Copilot oturum (GA4)</p>
+              <p className="font-display text-sm font-semibold">{fmt(copilotSessions)}</p>
+            </div>
+            <div className="rounded-md border border-border px-2 py-1.5">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Bing sorgu sayısı</p>
+              <p className="font-display text-sm font-semibold">{fmt(data.bing?.queries.length ?? 0)}</p>
+            </div>
+          </div>
+          <div className="h-24">
+            {data.bing?.connected && bingDaily.length ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={bingDaily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+                  <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
+                  <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} allowDecimals={false} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "clicks" ? "Tıklama" : "Gösterim"]} />
+                  <Bar dataKey="impressions" fill="var(--chart-2)" radius={[3, 3, 0, 0]} opacity={0.45} />
+                  <Line type="monotone" dataKey="clicks" stroke="var(--chart-3)" strokeWidth={2} dot={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            ) : (
+              <Empty
+                label={data.bing?.connected ? "Bing verisi henüz gelmedi." : "Bing Webmaster Tools API anahtarınızı bağlayın."}
+                cta={{ to: "/app/integrations", text: "Bağla" }}
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
     </>
   );
 }
