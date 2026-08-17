@@ -247,7 +247,7 @@ function FilmFolkOrnegi() {
 }
 
 const planFits: Record<string, string> = {
-  free_user: "İlk kez ölçmek isteyenler için",
+  trial: "Kredi kartsız 7 günlük tam erişim",
   starter: "Tek markayı düzenli izleyenler için",
   growth: "Büyüyen marka ekipleri için",
   agency: "Birden fazla marka yönetenler için",

@@ -1,4 +1,4 @@
-import type { PlanSlug } from "./plan-limits";
+import { DEFAULT_PLAN, type PlanSlug } from "./plan-limits";
 
 // Odeme saglayicisindaki urun kimligi -> uygulama plani
 export const PRODUCT_TO_PLAN: Record<string, PlanSlug> = {
@@ -7,7 +7,7 @@ export const PRODUCT_TO_PLAN: Record<string, PlanSlug> = {
 };
 
 export function planForProduct(productId?: string | null): PlanSlug {
-  return (productId && PRODUCT_TO_PLAN[productId]) || "free";
+  return (productId && PRODUCT_TO_PLAN[productId]) || DEFAULT_PLAN;
 }
 
 export const PLAN_PRICE_IDS: Record<string, { monthly: string; yearly: string }> = {

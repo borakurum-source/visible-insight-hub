@@ -111,7 +111,7 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
     await setPlan(userId, planForProduct(productId));
   } else if (data.status === "past_due" || data.status === "paused") {
     // Odeme alinamadi: ucretli ozellikler hemen kisitlanir.
-    await setPlan(userId, "free");
+    await setPlan(userId, "expired");
   }
 }
 
