@@ -13,6 +13,21 @@ export type IndexResult = {
   noiseRatio?: number;
 };
 
+/** Sabit genislikte paralel havuz: sayfalari tek tek beklemek yerine 4'lu isler. */
+export async function runPool<T, R>(items: T[], size: number, worker: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(size, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      results[index] = await worker(items[index]!);
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
+
 // Parçanın kanıt değeri: sayı, tarih, oran, isim gibi doğrulanabilir sinyaller puan getirir.
 function evidenceScore(text: string): number {
   let score = 40;
