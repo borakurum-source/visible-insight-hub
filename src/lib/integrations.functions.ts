@@ -351,6 +351,12 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
       totals: { clicks: number; impressions: number };
       daily: Array<{ date: string; clicks: number; impressions: number }>;
       queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+      ai?: {
+        available: boolean;
+        reason: string | null;
+        totals: { clicks: number; impressions: number };
+        daily: Array<{ date: string; clicks: number; impressions: number }>;
+      };
     };
     const ga4Payload = (ga4Snapshot?.payload ?? null) as null | {
       totals: { sessions: number; users: number };
@@ -360,6 +366,8 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         sessions: number;
         users: number;
         platforms: Array<{ platform: string; sessions: number; users: number; sources?: string[] }>;
+        pages?: Array<{ label: string; sessions: number; platforms?: string[] }>;
+        campaigns?: Array<{ label: string; sessions: number; platforms?: string[] }>;
       };
     };
     const payload = (snapshot?.payload ?? null) as null | {
@@ -368,6 +376,7 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
       totals: { clicks: number; impressions: number };
       daily: Array<{ date: string; clicks: number; impressions: number }>;
       queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+      pages?: Array<{ page: string; clicks: number; impressions: number; ctr: number; position: number }>;
     };
 
     const days = Array.from({ length: rangeDays }, (_, index) =>
@@ -415,6 +424,7 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         totals: gscTotals,
         daily: gscDaily,
         queries: (payload?.queries ?? []).slice(0, 10),
+        pages: (payload?.pages ?? []).slice(0, 25),
       },
       ga4: {
         connected: ga4Connection?.status === "bağlı",
@@ -432,6 +442,16 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
             sessions: row.sessions,
             users: row.users,
             sources: row.sources ?? [],
+          })),
+          pages: (ga4Payload?.ai?.pages ?? []).slice(0, 25).map((row) => ({
+            label: row.label,
+            sessions: row.sessions,
+            platforms: row.platforms ?? [],
+          })),
+          campaigns: (ga4Payload?.ai?.campaigns ?? []).slice(0, 25).map((row) => ({
+            label: row.label,
+            sessions: row.sessions,
+            platforms: row.platforms ?? [],
           })),
         },
       },
@@ -452,12 +472,26 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
           connected: bingConnection?.status === "bağlı",
           site: bingConnection?.property_id ?? null,
           lastSyncAt: bingConnection?.last_sync_at ?? null,
+          startDate: bingDaily[0]?.date ?? null,
+          endDate: bingDaily[bingDaily.length - 1]?.date ?? null,
           totals: bingDaily.reduce(
             (acc, row) => ({ clicks: acc.clicks + row.clicks, impressions: acc.impressions + row.impressions }),
             { clicks: 0, impressions: 0 },
           ),
           daily: bingDaily,
           queries: (bingPayload?.queries ?? []).slice(0, 10),
+          ai: (() => {
+            const aiDaily = (bingPayload?.ai?.daily ?? []).filter((row) => row.date >= rangeStart);
+            return {
+              available: Boolean(bingPayload?.ai?.available && aiDaily.length),
+              reason: bingPayload?.ai?.reason ?? (bingPayload ? null : "Bing anlık görüntüsü henüz alınmadı"),
+              totals: aiDaily.reduce(
+                (acc, row) => ({ clicks: acc.clicks + row.clicks, impressions: acc.impressions + row.impressions }),
+                { clicks: 0, impressions: 0 },
+              ),
+              daily: aiDaily,
+            };
+          })(),
         };
       })(),
     };
