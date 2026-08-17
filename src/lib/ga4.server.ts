@@ -63,10 +63,28 @@ function formatDate(raw: string) {
   return raw.length === 8 ? `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}` : raw;
 }
 
+// Yapay zeka asistanlarindan gelen referans trafigini tanimlayan kaynak eslesmeleri.
+const AI_PLATFORMS: Array<{ label: string; match: RegExp }> = [
+  { label: "ChatGPT", match: /chatgpt|openai|oai\.|chat\.com/i },
+  { label: "Perplexity", match: /perplexity/i },
+  { label: "Gemini / Google AI", match: /gemini|bard|aistudio|google_ai|googleai/i },
+  { label: "Claude", match: /claude|anthropic/i },
+  { label: "Microsoft Copilot", match: /copilot|bing\.com\/chat|edgeservices/i },
+  { label: "Grok", match: /grok|x\.ai/i },
+  { label: "DeepSeek", match: /deepseek/i },
+  { label: "Meta AI", match: /meta\.ai/i },
+  { label: "You.com", match: /you\.com/i },
+  { label: "Diğer AI", match: /mistral|poe\.com|phind|kagi|arc\.net|brave.*(ai|leo)/i },
+];
+
+function aiPlatformFor(source: string) {
+  return AI_PLATFORMS.find((platform) => platform.match.test(source))?.label ?? null;
+}
+
 // Son 28 günün oturum / kullanıcı kırılımını ve kanal dağılımını tek anlık görüntüde toplar.
 export async function buildGa4Snapshot(brandId: string, propertyId: string) {
   const dateRanges = [{ startDate: "28daysAgo", endDate: "yesterday" }];
-  const [byDate, byChannel] = await Promise.all([
+  const [byDate, byChannel, bySource] = await Promise.all([
     runReport(brandId, propertyId, {
       dateRanges,
       dimensions: [{ name: "date" }],
@@ -78,6 +96,13 @@ export async function buildGa4Snapshot(brandId: string, propertyId: string) {
       dimensions: [{ name: "sessionDefaultChannelGroup" }],
       metrics: [{ name: "sessions" }, { name: "totalUsers" }],
       limit: 20,
+    }),
+    // Kaynak/araci kirilimi: yapay zeka asistanlarindan gelen trafigi ayirmak icin.
+    runReport(brandId, propertyId, {
+      dateRanges,
+      dimensions: [{ name: "sessionSource" }, { name: "sessionMedium" }],
+      metrics: [{ name: "sessions" }, { name: "totalUsers" }],
+      limit: 300,
     }),
   ]);
 
@@ -97,6 +122,34 @@ export async function buildGa4Snapshot(brandId: string, propertyId: string) {
     }))
     .sort((a, b) => b.sessions - a.sessions);
 
+  // Ham kaynaklari yapay zeka platformlarina eslestirip topluyoruz.
+  const aiBuckets = new Map<string, { platform: string; sessions: number; users: number; sources: Set<string> }>();
+  let aiSessions = 0;
+  let aiUsers = 0;
+  for (const row of bySource.rows ?? []) {
+    const source = row.dimensionValues?.[0]?.value ?? "";
+    const medium = row.dimensionValues?.[1]?.value ?? "";
+    const platform = aiPlatformFor(`${source} ${medium}`);
+    if (!platform) continue;
+    const sessions = num(row.metricValues?.[0]?.value);
+    const users = num(row.metricValues?.[1]?.value);
+    aiSessions += sessions;
+    aiUsers += users;
+    const bucket = aiBuckets.get(platform) ?? { platform, sessions: 0, users: 0, sources: new Set<string>() };
+    bucket.sessions += sessions;
+    bucket.users += users;
+    if (source) bucket.sources.add(source);
+    aiBuckets.set(platform, bucket);
+  }
+  const aiPlatforms = [...aiBuckets.values()]
+    .map((bucket) => ({
+      platform: bucket.platform,
+      sessions: bucket.sessions,
+      users: bucket.users,
+      sources: [...bucket.sources].slice(0, 5),
+    }))
+    .sort((a, b) => b.sessions - a.sessions);
+
   return {
     propertyId,
     startDate: daily[0]?.date ?? "",
@@ -107,5 +160,10 @@ export async function buildGa4Snapshot(brandId: string, propertyId: string) {
     },
     daily,
     channels,
+    ai: {
+      sessions: aiSessions,
+      users: aiUsers,
+      platforms: aiPlatforms,
+    },
   };
 }
