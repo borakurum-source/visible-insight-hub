@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, ChevronDown, ExternalLink, ListChecks, ListTodo, Loader2, Pause, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronDown, ListChecks, Loader2, Pause, Plus, Trash2 } from "lucide-react";
 import { Hint } from "@/components/app/hint";
 import { PromptResultCard } from "@/components/app/prompt-result-card";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
