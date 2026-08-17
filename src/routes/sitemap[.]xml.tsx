@@ -32,18 +32,34 @@ const articleSlugs = [
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: () => {
+      GET: async () => {
         const today = new Date().toISOString().slice(0, 10);
+        const { listBlogSitemapEntries } = await import("@/lib/blog.functions");
+        let dbEntries: Array<{ path: string; priority: string; changefreq: string; lastmod?: string }> = [];
+        try {
+          const rows = await listBlogSitemapEntries();
+          dbEntries = (rows ?? [])
+            .filter((row) => !articleSlugs.includes(row.slug))
+            .map((row) => ({
+              path: `/makaleler/${row.slug}`,
+              priority: "0.6",
+              changefreq: "monthly",
+              lastmod: String(row.updated_at ?? "").slice(0, 10) || today,
+            }));
+        } catch {
+          dbEntries = [];
+        }
         const entries = [
           ...staticPaths,
           ...articleSlugs.map((slug) => ({ path: `/makaleler/${slug}`, priority: "0.6", changefreq: "monthly" })),
+          ...dbEntries,
         ];
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${entries
   .map(
     (entry) =>
-      `  <url><loc>${BASE_URL}${entry.path === "/" ? "/" : entry.path}</loc><lastmod>${today}</lastmod><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
+      `  <url><loc>${BASE_URL}${entry.path === "/" ? "/" : entry.path}</loc><lastmod>${("lastmod" in entry && entry.lastmod) || today}</lastmod><changefreq>${entry.changefreq}</changefreq><priority>${entry.priority}</priority></url>`,
   )
   .join("\n")}
 </urlset>`;

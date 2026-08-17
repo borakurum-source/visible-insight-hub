@@ -348,8 +348,98 @@ function ArticleNotFound() {
 
 function ArticleDetailPage() {
   const { slug } = Route.useParams();
+  const data = Route.useLoaderData();
   if (slug === "filmfolk-vaka-incelemesi") return <FilmFolkCaseStudy />;
-  const article = articles.find((item) => item.slug === slug);
-  if (!article) return <ArticleNotFound />;
-  return <GenericArticle article={article} />;
+  if (data.kind === "static") return <GenericArticle article={data.article} />;
+  if (data.kind === "db") return <DbArticle post={data.post} />;
+  return <DraftPreview slug={slug} />;
+}
+
+function DraftPreview({ slug }: { slug: string }) {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["blog", "draft", slug],
+    queryFn: () => adminGetBlogPost({ data: { slug } }),
+    retry: false,
+  });
+  if (isLoading) {
+    return (
+      <MarketingShell>
+        <section className="marketing-container px-4 py-24 text-center md:px-6"><p className="text-muted-foreground">Taslak yükleniyor…</p></section>
+      </MarketingShell>
+    );
+  }
+  if (isError || !data) return <ArticleNotFound />;
+  return <DbArticle post={dbToDetail(data as Record<string, unknown>)} draft />;
+}
+
+function DbArticle({ post, draft = false }: { post: BlogDetail; draft?: boolean }) {
+  return (
+    <MarketingShell>
+      <article>
+        <header className="border-b border-border bg-background px-4 py-14 md:px-6 md:py-20">
+          <div className="mx-auto max-w-3xl">
+            <Link to="/makaleler" className="inline-flex items-center gap-1 text-sm font-bold text-primary"><ArrowLeft className="h-4 w-4" /> Tüm makaleler</Link>
+            <div className="mt-8 flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="border-border bg-background text-primary">{post.category}</Badge>
+              {draft && <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Taslak önizleme</Badge>}
+              {post.tags.map((tag) => <Badge key={tag} variant="outline" className="border-border bg-muted text-muted-foreground">{tag}</Badge>)}
+            </div>
+            <h1 className="mt-5 text-4xl font-extrabold tracking-[-0.045em] text-foreground md:text-6xl">{post.title}</h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">{post.description}</p>
+            <div className="mt-7 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
+              {post.dateLabel && <span className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4" />{post.dateLabel}</span>}
+              <span className="flex items-center gap-1.5"><Clock3 className="h-4 w-4" />{post.readingTime}</span>
+              <span>{post.author}</span>
+            </div>
+          </div>
+        </header>
+        <div className="mx-auto grid max-w-5xl gap-10 px-4 py-16 md:px-6 md:py-24 lg:grid-cols-[minmax(0,1fr)_250px]">
+          <div>
+            {post.coverImageUrl && (
+              <img src={post.coverImageUrl} alt={post.title} className="mb-10 aspect-[16/9] w-full rounded-2xl object-cover" />
+            )}
+            {post.answerSummary && (
+              <div className="rounded-2xl border border-border bg-muted p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Kısa cevap</p>
+                <p className="mt-3 text-base leading-7 text-foreground">{post.answerSummary}</p>
+              </div>
+            )}
+            <MiniMarkdown content={post.body} />
+            {post.faq.length > 0 && (
+              <section className="mt-14">
+                <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-foreground">Sık sorulan sorular</h2>
+                <div className="mt-5 space-y-3">
+                  {post.faq.map((item) => (
+                    <details key={item.question} className="rounded-xl border border-border bg-background p-5">
+                      <summary className="cursor-pointer font-semibold text-foreground">{item.question}</summary>
+                      <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
+            )}
+            {post.sources.length > 0 && (
+              <section className="mt-14">
+                <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-foreground">Kaynaklar</h2>
+                <ul className="mt-5 space-y-2 text-sm">
+                  {post.sources.map((source) => (
+                    <li key={source.url}>
+                      <a href={source.url} target="_blank" rel="noreferrer" className="text-primary underline-offset-2 hover:underline">{source.title}</a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+          <aside className="h-fit rounded-2xl border border-border bg-muted p-5">
+            <FileText className="h-5 w-5 text-primary" />
+            <h2 className="mt-4 text-lg font-extrabold text-foreground">Bu kavramı markanızda görün.</h2>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">Ücretsiz raporla ilk kaynak ve kanıt çerçevenizi çıkarın.</p>
+            <Button className="mt-5 w-full" asChild><Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">Ücretsiz ölçüm</Link></Button>
+            <Link to="/ozellikler" className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-primary">Platformu inceleyin <SearchCheck className="h-4 w-4" /></Link>
+          </aside>
+        </div>
+      </article>
+    </MarketingShell>
+  );
 }
