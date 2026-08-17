@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BarChart3,
+  BadgeCheck,
   CheckCircle2,
   Goal,
   Network,
@@ -17,6 +18,13 @@ import { ProductTabs, type ProductTab } from "@/components/site/product-tabs";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { faqs } from "@/lib/faqData";
+import {
+  AUTHORITY_BADGES,
+  COMMITMENT_CONDITIONS,
+  COMMITMENT_MILESTONES,
+  REFERENCE_BRANDS,
+  TRUST_CARDS,
+} from "@/lib/trustSignals";
 import { formatUsd, pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
 import shotKb from "@/assets/landing/shot-kb.webp";
@@ -30,10 +38,10 @@ import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OneCite | AI Citation Intelligence" },
-      { name: "description", content: "Yapay zeka cevaplarında markanızın AI kaynak payını ölçün, eksik kanıtları görün ve doğru GEO uygulamasını önceliklendirin." },
-      { property: "og:title", content: "OneCite | AI Citation Intelligence" },
-      { property: "og:description", content: "Yapay zeka cevaplarında markanızın AI kaynak payını, eksik kanıtları ve öncelikli uygulamalarını görün." },
+      { title: "OneCite | Yapay Zeka Görünürlük ve Kaynak Payı Platformu" },
+      { name: "description", content: "Türkiye'de geliştirilen ilk uçtan uca yapay zeka görünürlük platformu: 10.000+ prompt ile test edilmiş akademik metodoloji, Marka Zekası RAG altyapısı ve 90 gün görünürlük taahhüdü." },
+      { property: "og:title", content: "OneCite | Yapay Zeka Görünürlük ve Kaynak Payı Platformu" },
+      { property: "og:description", content: "10.000+ prompt ile test edilmiş akademik metodoloji, Marka Zekası RAG altyapısı ve 90 gün görünürlük taahhüdü ile AI kaynak payınızı ölçün." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "https://1cite.com" },
