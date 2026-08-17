@@ -269,6 +269,16 @@ export type TrafficOverview = {
     rate: number;
     daily: Array<{ date: string; mentioned: number; total: number }>;
   };
+  bing: BingOverview;
+};
+
+export type BingOverview = {
+  connected: boolean;
+  site: string | null;
+  lastSyncAt: string | null;
+  totals: { clicks: number; impressions: number };
+  daily: Array<{ date: string; clicks: number; impressions: number }>;
+  queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
 };
 
 // Komuta merkezi için GSC anlık görüntüsü + yapay zeka atıf/görünürlük trafiği.
@@ -279,7 +289,7 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
     // Tarih aralığı filtresi: 7 / 30 / 90 gün.
     const rangeDays = [7, 30, 90].includes(data.days ?? 30) ? (data.days ?? 30) : 30;
     const since = new Date(Date.now() - rangeDays * 86400000).toISOString();
-    const [{ data: connections }, { data: snapshot }, { data: ga4Snapshot }, { data: citations }, { data: runs }] = await Promise.all([
+    const [{ data: connections }, { data: snapshot }, { data: ga4Snapshot }, { data: bingSnapshot }, { data: citations }, { data: runs }] = await Promise.all([
       context.supabase
         .from("integration_connections")
         .select("provider, status, property_id, last_sync_at")
@@ -301,6 +311,14 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         .limit(1)
         .maybeSingle(),
       context.supabase
+        .from("analytics_snapshots")
+        .select("payload")
+        .eq("brand_id", data.brandId)
+        .eq("provider", "bing")
+        .order("snapshot_date", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      context.supabase
         .from("citations")
         .select("created_at, is_own_domain")
         .eq("brand_id", data.brandId)
@@ -316,6 +334,13 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
 
     const gscConnection = (connections ?? []).find((c) => c.provider === "gsc") ?? null;
     const ga4Connection = (connections ?? []).find((c) => c.provider === "ga4") ?? null;
+    const bingConnection = (connections ?? []).find((c) => c.provider === "bing") ?? null;
+    const bingPayload = (bingSnapshot?.payload ?? null) as null | {
+      siteUrl: string;
+      totals: { clicks: number; impressions: number };
+      daily: Array<{ date: string; clicks: number; impressions: number }>;
+      queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+    };
     const ga4Payload = (ga4Snapshot?.payload ?? null) as null | {
       totals: { sessions: number; users: number };
       daily: Array<{ date: string; sessions: number; users: number }>;
@@ -410,6 +435,20 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         rate: runRows.length ? Math.round((mentioned / runRows.length) * 100) : 0,
         daily: aiOverviewDaily,
       },
+      bing: (() => {
+        const bingDaily = (bingPayload?.daily ?? []).filter((row) => row.date >= rangeStart);
+        return {
+          connected: bingConnection?.status === "bağlı",
+          site: bingConnection?.property_id ?? null,
+          lastSyncAt: bingConnection?.last_sync_at ?? null,
+          totals: bingDaily.reduce(
+            (acc, row) => ({ clicks: acc.clicks + row.clicks, impressions: acc.impressions + row.impressions }),
+            { clicks: 0, impressions: 0 },
+          ),
+          daily: bingDaily,
+          queries: (bingPayload?.queries ?? []).slice(0, 10),
+        };
+      })(),
     };
   });
 
@@ -454,5 +493,143 @@ export const disconnectGoogleAccount = createServerFn({ method: "POST" })
       .delete()
       .eq("brand_id", data.brandId)
       .in("provider", ["gsc", "ga4"]);
+    return { ok: true };
+  });
+
+// --- Bing Webmaster Tools (marka bazli API anahtari) ---
+
+export const getBingStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: brand } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).maybeSingle();
+    if (!brand) throw new Error("Marka bulunamadı");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: account } = await supabaseAdmin
+      .from("bing_webmaster_accounts").select("brand_id").eq("brand_id", data.brandId).maybeSingle();
+    const { data: snapshot } = await context.supabase
+      .from("analytics_snapshots")
+      .select("payload, snapshot_date")
+      .eq("brand_id", data.brandId)
+      .eq("provider", "bing")
+      .order("snapshot_date", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return {
+      hasKey: !!account,
+      snapshot: (snapshot?.payload ?? null) as null | {
+        siteUrl: string;
+        startDate: string;
+        endDate: string;
+        totals: { clicks: number; impressions: number };
+        daily: Array<{ date: string; clicks: number; impressions: number }>;
+        queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+      },
+    };
+  });
+
+// API anahtarini dogrular ve marka icin saklar; dogrulanmis site listesini doner.
+export const saveBingApiKey = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; apiKey: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: brand } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).maybeSingle();
+    if (!brand) throw new Error("Marka bulunamadı");
+    const apiKey = data.apiKey.trim();
+    if (apiKey.length < 8) throw new Error("Geçerli bir Bing Webmaster API anahtarı girin");
+    const { listBingSites } = await import("./bing.server");
+    const sites = await listBingSites(apiKey);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("bing_webmaster_accounts")
+      .upsert({ brand_id: data.brandId, api_key: apiKey, updated_at: new Date().toISOString() }, { onConflict: "brand_id" });
+    if (error) throw new Error(error.message);
+    return { sites };
+  });
+
+export const listBingSiteOptions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: brand } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).maybeSingle();
+    if (!brand) throw new Error("Marka bulunamadı");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getBrandBingKey, listBingSites } = await import("./bing.server");
+    const apiKey = await getBrandBingKey(supabaseAdmin, data.brandId);
+    return { sites: await listBingSites(apiKey) };
+  });
+
+export const connectBingSite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; siteUrl: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getBrandBingKey, listBingSites } = await import("./bing.server");
+    const apiKey = await getBrandBingKey(supabaseAdmin, data.brandId);
+    const sites = await listBingSites(apiKey);
+    if (!sites.includes(data.siteUrl)) throw new Error("Seçilen site Bing hesabınızda doğrulanmış değil");
+    const { error } = await context.supabase.from("integration_connections").upsert(
+      { brand_id: data.brandId, provider: "bing", status: "bağlı", property_id: data.siteUrl, last_error: null },
+      { onConflict: "brand_id,provider" },
+    );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const syncBing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: connection } = await context.supabase
+      .from("integration_connections")
+      .select("property_id")
+      .eq("brand_id", data.brandId)
+      .eq("provider", "bing")
+      .maybeSingle();
+    const siteUrl = connection?.property_id;
+    if (!siteUrl) throw new Error("Önce bir Bing sitesi seçin");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getBrandBingKey, buildBingSnapshot } = await import("./bing.server");
+    try {
+      const apiKey = await getBrandBingKey(supabaseAdmin, data.brandId);
+      const payload = await buildBingSnapshot(apiKey, siteUrl);
+      await context.supabase.from("analytics_snapshots").upsert(
+        { brand_id: data.brandId, provider: "bing", snapshot_date: new Date().toISOString().slice(0, 10), payload },
+        { onConflict: "brand_id,provider,snapshot_date" },
+      );
+      await context.supabase
+        .from("integration_connections")
+        .update({ status: "bağlı", last_sync_at: new Date().toISOString(), last_error: null })
+        .eq("brand_id", data.brandId)
+        .eq("provider", "bing");
+      return { ok: true, clicks: payload.totals.clicks, queries: payload.queries.length };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await context.supabase
+        .from("integration_connections")
+        .update({ status: "hata", last_error: message })
+        .eq("brand_id", data.brandId)
+        .eq("provider", "bing");
+      throw new Error(message);
+    }
+  });
+
+export const disconnectBing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: brand } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).maybeSingle();
+    if (!brand) throw new Error("Marka bulunamadı");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("bing_webmaster_accounts").delete().eq("brand_id", data.brandId);
+    await context.supabase
+      .from("integration_connections")
+      .delete()
+      .eq("brand_id", data.brandId)
+      .eq("provider", "bing");
     return { ok: true };
   });

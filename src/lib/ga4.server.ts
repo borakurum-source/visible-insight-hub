@@ -65,16 +65,19 @@ function formatDate(raw: string) {
 
 // Yapay zeka asistanlarindan gelen referans trafigini tanimlayan kaynak eslesmeleri.
 const AI_PLATFORMS: Array<{ label: string; match: RegExp }> = [
-  { label: "ChatGPT", match: /chatgpt|openai|oai\.|chat\.com/i },
-  { label: "Perplexity", match: /perplexity/i },
-  { label: "Gemini / Google AI", match: /gemini|bard|aistudio|google_ai|googleai/i },
-  { label: "Claude", match: /claude|anthropic/i },
-  { label: "Microsoft Copilot", match: /copilot|bing\.com\/chat|edgeservices/i },
-  { label: "Grok", match: /grok|x\.ai/i },
-  { label: "DeepSeek", match: /deepseek/i },
-  { label: "Meta AI", match: /meta\.ai/i },
+  { label: "ChatGPT", match: /chatgpt\.com|chat\.openai\.com|openai\.com|\boai\b|oai\.|chat\.com|searchgpt/i },
+  { label: "Perplexity", match: /perplexity\.ai|perplexity/i },
+  { label: "Gemini / Google AI", match: /gemini\.google\.com|gemini|bard\.google\.com|bard|aistudio\.google\.com|aistudio|google_ai|googleai|ai\.google/i },
+  { label: "Claude", match: /claude\.ai|claude|anthropic/i },
+  {
+    label: "Microsoft Copilot",
+    match: /copilot\.microsoft\.com|copilot\.cloud\.microsoft|m365\.cloud\.microsoft|bing\.com\/chat|edgeservices\.bing\.com|edgeservices|bingchat|copilot/i,
+  },
+  { label: "Grok", match: /grok\.com|grok|x\.ai/i },
+  { label: "DeepSeek", match: /deepseek\.com|deepseek/i },
+  { label: "Meta AI", match: /meta\.ai|metaai/i },
   { label: "You.com", match: /you\.com/i },
-  { label: "Diğer AI", match: /mistral|poe\.com|phind|kagi|arc\.net|brave.*(ai|leo)/i },
+  { label: "Diğer AI", match: /mistral|le ?chat|poe\.com|phind|kagi|arc\.net|andisearch|komo\.ai|brave.*(ai|leo)|duckduckgo.*(ai|chat)/i },
 ];
 
 function aiPlatformFor(source: string) {

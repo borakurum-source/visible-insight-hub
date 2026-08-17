@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Area, AreaChart, Bar, BarChart, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowUpRight, BarChart3, Bot, Search, Sparkles, Users } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bot, Globe2, Search, Sparkles, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { TrafficOverview } from "@/lib/integrations.functions";
@@ -81,6 +81,8 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
   const period = data.gsc.startDate && data.gsc.endDate ? `${shortDate(data.gsc.startDate)} – ${shortDate(data.gsc.endDate)}` : "son 30 gün";
 
   const aiPlatforms = data.ga4.ai?.platforms ?? [];
+  const bingDaily = (data.bing?.daily ?? []).map((row) => ({ ...row, label: shortDate(row.date) }));
+  const bingQueries = data.bing?.queries ?? [];
 
   return (
     <>
@@ -217,6 +219,73 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
           <Empty label="Henüz atıf kaydı yok." cta={{ to: "/app/measurement", text: "Ölçümü başlat" }} />
         )}
       </MetricCard>
+    </div>
+
+    {/* Bing Webmaster Tools: Bing/Copilot ekosisteminin organik arama trafigi. */}
+    <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <MetricCard
+        icon={Globe2}
+        days={data.rangeDays}
+        title="Bing Organik Trafik"
+        value={fmt(data.bing?.totals.clicks ?? 0)}
+        caption={
+          data.bing?.connected
+            ? `tıklama · ${fmt(data.bing.totals.impressions)} gösterim${data.bing.site ? ` · ${data.bing.site}` : ""}`
+            : "Bing Webmaster Tools bağlı değil"
+        }
+      >
+        {data.bing?.connected && bingDaily.length ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={bingDaily} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+              <defs>
+                <linearGradient id="bingFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--chart-3)" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="var(--chart-3)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
+              <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} allowDecimals={false} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "clicks" ? "Tıklama" : "Gösterim"]} />
+              <Area type="monotone" dataKey="clicks" stroke="var(--chart-3)" strokeWidth={2} fill="url(#bingFill)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <Empty
+            label={data.bing?.connected ? "Bing verisi henüz gelmedi." : "Bing Webmaster Tools API anahtarınızı bağlayın."}
+            cta={{ to: "/app/integrations", text: "Bağla" }}
+          />
+        )}
+      </MetricCard>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-1.5 text-sm">
+            <Globe2 className="h-4 w-4 text-primary" aria-hidden="true" />
+            Bing — en çok tıklanan sorgular
+          </CardTitle>
+          <CardDescription className="text-[11px]">
+            Bing ve Copilot ekosisteminde sitenize gelen aramalar.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {bingQueries.length ? (
+            <ul className="space-y-1.5">
+              {bingQueries.map((row) => (
+                <li key={row.query} className="flex items-center justify-between gap-3 rounded-md border border-border px-2.5 py-1.5 text-xs">
+                  <span className="min-w-0 truncate">{row.query}</span>
+                  <span className="shrink-0 text-[11px] text-muted-foreground">
+                    {fmt(row.clicks)} tıklama · {fmt(row.impressions)} gösterim
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="h-32">
+              <Empty label="Bing sorgu verisi yok." cta={{ to: "/app/integrations", text: "Bağla" }} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
 
     {/* GA4 kaynak kirilimi: hangi yapay zeka platformundan gercek ziyaret geliyor. */}
