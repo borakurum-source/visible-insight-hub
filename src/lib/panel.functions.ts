@@ -826,6 +826,16 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         promptText: prompt.text,
         systemPrompt,
       });
+      const { count: previousRuns } = await context.supabase
+        .from("prompt_runs")
+        .select("id", { count: "exact", head: true })
+        .eq("prompt_id", prompt.id);
+      const runIndex = (previousRuns ?? 0) + 1;
+      const visibility = !measured.brandMentioned
+        ? 0
+        : measured.position
+          ? Math.max(40, 100 - (measured.position - 1) * 10)
+          : 60;
       const { data: run } = await context.supabase.from("prompt_runs").insert({
         brand_id: data.brandId,
         prompt_id: prompt.id,
@@ -834,7 +844,40 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         position: measured.position,
         raw_answer: measured.answer,
         answer_summary: measured.answer.slice(0, 280),
+        mentioned_brands: measured.mentionedBrands,
+        run_index: runIndex,
+        visibility,
       }).select("id").single();
+
+      // Yanıtta geçen, bilinmeyen markaları rakip adayı olarak biriktir.
+      const ownNeedle = brand.name.toLowerCase();
+      for (const rawName of measured.mentionedBrands) {
+        const name = rawName.trim();
+        const lower = name.toLowerCase();
+        if (!name || lower.includes(ownNeedle) || ownNeedle.includes(lower)) continue;
+        if (competitors.some((competitor) => competitorMatches(competitor, { answer: name, domains: [] }))) continue;
+        const { data: existing } = await context.supabase
+          .from("competitor_candidates")
+          .select("id, prompt_count, status")
+          .eq("brand_id", data.brandId)
+          .eq("name", name)
+          .maybeSingle();
+        if (existing) {
+          await context.supabase
+            .from("competitor_candidates")
+            .update({ prompt_count: (existing.prompt_count ?? 1) + 1, updated_at: new Date().toISOString() })
+            .eq("id", existing.id);
+        } else {
+          await context.supabase.from("competitor_candidates").insert({
+            brand_id: data.brandId,
+            name,
+            first_seen_run_id: run?.id ?? null,
+            first_seen_prompt_id: prompt.id,
+            prompt_count: 1,
+            status: "new",
+          });
+        }
+      }
 
       const seen = new Set<string>();
       const unique = measured.sources.filter((s) => (seen.has(s.url) ? false : seen.add(s.url)));
