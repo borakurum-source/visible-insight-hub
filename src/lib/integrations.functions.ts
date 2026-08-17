@@ -396,9 +396,9 @@ export const getGoogleAccount = createServerFn({ method: "POST" })
     const { data: member } = await context.supabase
       .from("brands").select("id").eq("id", data.brandId).maybeSingle();
     if (!member) throw new Error("Marka bulunamadı");
-    const { hasGoogleAccount, isGoogleOAuthConfigured } = await import("./google-oauth.server");
+    const { hasGoogleAccount, isGoogleOAuthConfigured, redirectUri } = await import("./google-oauth.server");
     const account = await hasGoogleAccount(data.brandId);
-    return { ...account, configured: isGoogleOAuthConfigured() };
+    return { ...account, configured: isGoogleOAuthConfigured(), redirectUri: redirectUri("") };
   });
 
 // Kullanicinin kendi Google hesabini baglamasi için izin adresini uretir.
