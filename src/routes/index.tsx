@@ -21,9 +21,6 @@ import { faqs } from "@/lib/faqData";
 import {
   AUTHORITY_BADGES,
   CASE_RESULTS,
-  COMMITMENT_FAQ,
-  COMMITMENT_CONDITIONS,
-  COMMITMENT_STEPS,
   TRUST_CARDS,
 } from "@/lib/trustSignals";
 import { CASE_LOGOS } from "@/lib/caseLogos";
