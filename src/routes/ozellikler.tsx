@@ -317,7 +317,7 @@ function FeaturesPage() {
   return (
     <MarketingShell>
       <VisualHero
-        eyebrow="ÖZELLİKLER · SOURCE → SIGNAL → ACTION"
+        eyebrow="ÜRÜN · KAYNAK → SİNYAL → UYGULAMA"
         title={
           <>
             Yapay zeka cevaplarında görünmek için <span className="text-cyan">gereken her şey</span>.
@@ -337,6 +337,34 @@ function FeaturesPage() {
           { value: "7 gün", label: "Ücretsiz deneme" },
         ]}
       />
+
+      <section className="border-b border-border bg-secondary/30 px-4 py-16 md:px-6 md:py-20">
+        <div className="marketing-container">
+          <div className="max-w-2xl">
+            <p className="editorial-eyebrow text-primary">Çalışma modeli</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">
+              Kaynak, sinyal ve uygulama tek döngüde.
+            </h2>
+            <p className="mt-4 max-w-prose text-base leading-7 text-muted-foreground">
+              OneCite yalnızca bir panel değil: yapay zekanın seçebileceği kanıtı kurar, seçim davranışını ölçer ve sonucu
+              uygulanabilir bir iş listesine çevirir.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-4 lg:grid-cols-3">
+            {workModel.map((step) => (
+              <article key={step.number} className="rounded-2xl border border-border bg-background p-6">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-sm text-primary">{step.number}</span>
+                  <step.icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                </div>
+                <p className="mt-8 editorial-eyebrow text-muted-foreground">{step.label}</p>
+                <h3 className="mt-3 text-xl font-extrabold text-foreground">{step.title}</h3>
+                <p className="mt-3 max-w-prose text-sm leading-6 text-muted-foreground">{step.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="marketing-container px-4 py-16 md:px-6 md:py-20">
         <div className="max-w-2xl">
