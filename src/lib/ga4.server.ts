@@ -87,7 +87,7 @@ function aiPlatformFor(source: string) {
 // Son 28 günün oturum / kullanıcı kırılımını ve kanal dağılımını tek anlık görüntüde toplar.
 export async function buildGa4Snapshot(brandId: string, propertyId: string) {
   const dateRanges = [{ startDate: "28daysAgo", endDate: "yesterday" }];
-  const [byDate, byChannel, bySource] = await Promise.all([
+  const [byDate, byChannel, bySource, byLanding, byCampaign] = await Promise.all([
     runReport(brandId, propertyId, {
       dateRanges,
       dimensions: [{ name: "date" }],
@@ -105,6 +105,20 @@ export async function buildGa4Snapshot(brandId: string, propertyId: string) {
       dateRanges,
       dimensions: [{ name: "sessionSource" }, { name: "sessionMedium" }],
       metrics: [{ name: "sessions" }, { name: "totalUsers" }],
+      limit: 300,
+    }),
+    // Yapay zekadan gelen ziyaretcilerin girdigi sayfalar.
+    runReport(brandId, propertyId, {
+      dateRanges,
+      dimensions: [{ name: "sessionSource" }, { name: "landingPagePlusQueryString" }],
+      metrics: [{ name: "sessions" }],
+      limit: 300,
+    }),
+    // Kampanya kirilimi (utm_campaign).
+    runReport(brandId, propertyId, {
+      dateRanges,
+      dimensions: [{ name: "sessionSource" }, { name: "sessionCampaignName" }],
+      metrics: [{ name: "sessions" }],
       limit: 300,
     }),
   ]);
@@ -153,6 +167,29 @@ export async function buildGa4Snapshot(brandId: string, propertyId: string) {
     }))
     .sort((a, b) => b.sessions - a.sessions);
 
+  // Kaynak sayfa / kampanya kirilimi: sadece AI kaynakli satirlar.
+  function aiBreakdown(report: typeof byLanding) {
+    const map = new Map<string, { label: string; sessions: number; platforms: Set<string> }>();
+    for (const row of report.rows ?? []) {
+      const source = row.dimensionValues?.[0]?.value ?? "";
+      const platform = aiPlatformFor(source);
+      if (!platform) continue;
+      const label = row.dimensionValues?.[1]?.value || "(bilinmiyor)";
+      const sessions = num(row.metricValues?.[0]?.value);
+      const bucket = map.get(label) ?? { label, sessions: 0, platforms: new Set<string>() };
+      bucket.sessions += sessions;
+      bucket.platforms.add(platform);
+      map.set(label, bucket);
+    }
+    return [...map.values()]
+      .map((row) => ({ label: row.label, sessions: row.sessions, platforms: [...row.platforms] }))
+      .sort((a, b) => b.sessions - a.sessions)
+      .slice(0, 25);
+  }
+
+  const aiPages = aiBreakdown(byLanding);
+  const aiCampaigns = aiBreakdown(byCampaign).filter((row) => row.label !== "(not set)");
+
   return {
     propertyId,
     startDate: daily[0]?.date ?? "",
@@ -167,6 +204,8 @@ export async function buildGa4Snapshot(brandId: string, propertyId: string) {
       sessions: aiSessions,
       users: aiUsers,
       platforms: aiPlatforms,
+      pages: aiPages,
+      campaigns: aiCampaigns,
     },
   };
 }

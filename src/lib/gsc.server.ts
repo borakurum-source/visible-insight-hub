@@ -59,9 +59,10 @@ function isoDaysAgo(days: number) {
 export async function buildGscSnapshot(brandId: string, siteUrl: string) {
   const startDate = isoDaysAgo(30);
   const endDate = isoDaysAgo(2);
-  const [byQuery, byDate] = await Promise.all([
+  const [byQuery, byDate, byPage] = await Promise.all([
     searchAnalyticsQuery(brandId, siteUrl, { startDate, endDate, dimensions: ["query"], rowLimit: 50 }),
     searchAnalyticsQuery(brandId, siteUrl, { startDate, endDate, dimensions: ["date"], rowLimit: 60 }),
+    searchAnalyticsQuery(brandId, siteUrl, { startDate, endDate, dimensions: ["page"], rowLimit: 50 }),
   ]);
 
   const queries = (byQuery.rows ?? []).map((row) => ({
@@ -76,6 +77,13 @@ export async function buildGscSnapshot(brandId: string, siteUrl: string) {
     clicks: row.clicks ?? 0,
     impressions: row.impressions ?? 0,
   }));
+  const pages = (byPage.rows ?? []).map((row) => ({
+    page: row.keys?.[0] ?? "",
+    clicks: row.clicks ?? 0,
+    impressions: row.impressions ?? 0,
+    ctr: row.ctr ?? 0,
+    position: Number((row.position ?? 0).toFixed(1)),
+  }));
 
   return {
     siteUrl,
@@ -87,5 +95,6 @@ export async function buildGscSnapshot(brandId: string, siteUrl: string) {
     },
     queries,
     daily,
+    pages,
   };
 }

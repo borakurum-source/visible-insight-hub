@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, Settings2, Sparkles } from "lucide-react";
+import { Loader2, Plus, Settings2, Sparkles } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, WORKSPACE_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteBrand, updateBrand } from "@/lib/panel.functions";
+import { createBrand, deleteBrand, updateBrand } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/settings")({
@@ -31,7 +31,61 @@ export const Route = createFileRoute("/_authenticated/app/settings")({
 });
 
 function SettingsPage() {
-  const { brand } = useActiveBrand();
+  return <SettingsPageBody />;
+}
+
+// Marka ekleme artik kurulum sihirbazi yerine marka ayarlarindan yapiliyor.
+function NewBrandCard({ onCreated }: { onCreated: (id: string) => void }) {
+  const create = useServerFn(createBrand);
+  const queryClient = useQueryClient();
+  const [newName, setNewName] = useState("");
+  const [newDomain, setNewDomain] = useState("");
+
+  const createMutation = useMutation({
+    mutationFn: () => create({ data: { name: newName, domain: newDomain } }),
+    onSuccess: async (created: { id: string }) => {
+      toast.success("Marka eklendi");
+      setNewName("");
+      setNewDomain("");
+      await queryClient.invalidateQueries({ queryKey: ["panel-session"] });
+      onCreated(created.id);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  return (
+    <Card>
+      <CardHeader><CardTitle className="text-base">Yeni marka ekle</CardTitle></CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Her marka kendi promptları, entegrasyonları ve skoruyla ayrı takip edilir. Plan limitiniz kadar marka ekleyebilirsiniz.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="new-brand-name">Marka adı</Label>
+            <Input id="new-brand-name" value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="Örn. ABS Kör Kalıp" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-brand-domain">Alan adı</Label>
+            <Input id="new-brand-domain" value={newDomain} onChange={(event) => setNewDomain(event.target.value)} placeholder="ornek.com" />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !newDomain.trim()}>
+            {createMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+            Markayı ekle
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/app/onboarding">Kurulum sihirbazını aç</Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SettingsPageBody() {
+  const { brand, selectBrand } = useActiveBrand();
   const queryClient = useQueryClient();
   const save = useServerFn(updateBrand);
   const remove = useServerFn(deleteBrand);
@@ -59,7 +113,7 @@ function SettingsPage() {
       <>
         <PanelSubnav items={WORKSPACE_SUBNAV} />
         <PanelPageHeading meta={{ title: "Marka Ayarları", description: "Önce bir marka ekleyin.", icon: Settings2 }} />
-        <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
+        <NewBrandCard onCreated={selectBrand} />
       </>
     );
   }
@@ -94,6 +148,8 @@ function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      <NewBrandCard onCreated={selectBrand} />
 
       <Card>
         <CardHeader><CardTitle className="text-base text-destructive">Tehlikeli bölge</CardTitle></CardHeader>

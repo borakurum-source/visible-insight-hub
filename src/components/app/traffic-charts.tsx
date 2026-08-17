@@ -98,8 +98,16 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
   const bingCtr = data.bing?.totals.impressions
     ? Math.round((data.bing.totals.clicks / data.bing.totals.impressions) * 1000) / 10
     : 0;
+  const bingPeriod =
+    data.bing?.startDate && data.bing?.endDate
+      ? `${shortDate(data.bing.startDate)} – ${shortDate(data.bing.endDate)}`
+      : `son ${data.rangeDays} gün`;
+  const bingAi = data.bing?.ai;
+  // Dinamik siralama: yapay zeka verisi varsa AI bloklari en uste gelir.
+  const hasAiData =
+    data.aiOverview.total > 0 || data.aiReferral.total > 0 || (data.ga4.ai?.sessions ?? 0) > 0 || Boolean(bingAi?.available);
 
-  return (
+  const aiSection = (
     <>
     <SectionTitle
       title="Yapay zeka görünürlüğü"
@@ -160,7 +168,7 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
       <MetricCard
         icon={Users}
         days={data.rangeDays}
-        metric="ga4-sessions"
+        metric="ga4-ai"
         title="AI Referral Trafiği (GA4)"
         value={data.ga4.connected ? fmt(data.ga4.ai?.sessions ?? 0) : "—"}
         caption={
@@ -242,6 +250,64 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
       </CardContent>
     </Card>
 
+    {/* Bing AI Performance: Copilot ve is ortaklarindan gelen atif/tiklama. */}
+    <Card className="mt-4">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-1.5 text-sm">
+          <Bot className="h-4 w-4 text-primary" aria-hidden="true" />
+          Bing AI Performansı (Copilot ve iş ortakları)
+        </CardTitle>
+        <CardDescription className="text-[11px]">
+          {bingAi?.available
+            ? `${bingPeriod} · ${fmt(bingAi.totals.clicks)} tıklama · ${fmt(bingAi.totals.impressions)} atıf/gösterim`
+            : "Bing Webmaster Tools > AI Performance verisi."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {bingAi?.available ? (
+          <div className="h-40">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={bingAi.daily.map((row) => ({ ...row, label: shortDate(row.date) }))} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+                <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
+                <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} allowDecimals={false} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name) => [fmt(value), name === "clicks" ? "Tıklama" : "Atıf/Gösterim"]} />
+                <Bar dataKey="impressions" fill="var(--chart-2)" radius={[3, 3, 0, 0]} opacity={0.45} />
+                <Line type="monotone" dataKey="clicks" stroke="var(--chart-1)" strokeWidth={2} dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          // Bos durum: tarih araligi, bagli hesap/izin durumu ve cozum adimlari.
+          <div className="space-y-3 rounded-md border border-dashed border-border p-4 text-xs">
+            <p className="font-medium text-foreground">
+              Bu dönemde Bing AI performans verisi gelmedi.
+            </p>
+            <ul className="space-y-1 text-muted-foreground">
+              <li>· Tarih aralığı: {bingPeriod} (seçili {data.rangeDays} gün)</li>
+              <li>· Bağlantı: {data.bing?.connected ? `bağlı — ${data.bing.site ?? "site seçilmedi"}` : "Bing Webmaster Tools bağlı değil"}</li>
+              <li>· Son senkron: {data.bing?.lastSyncAt ? new Date(data.bing.lastSyncAt).toLocaleString("tr-TR") : "hiç yapılmadı"}</li>
+              <li>· Neden: {bingAi?.reason ?? "AI Performance verisi hesabınızda henüz açık değil"}</li>
+            </ul>
+            <div className="space-y-1 text-muted-foreground">
+              <p className="font-medium text-foreground">Nasıl düzeltilir?</p>
+              <p>1. Bing Webmaster Tools'ta siteyi doğrulayın ve API anahtarını Ayarlar → API Access'ten alın.</p>
+              <p>2. Anahtarı Entegrasyonlar sayfasına kaydedip site seçimini yapın.</p>
+              <p>3. AI Performance raporu yeni siteler için birkaç gün sonra dolar; veriler günlük senkronla otomatik gelir.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild size="sm" variant="outline">
+                <Link to="/app/integrations">Bing bağlantısını aç <ArrowUpRight className="ml-1 h-3 w-3" /></Link>
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+    </>
+  );
+
+  const searchSection = (
+    <>
     <SectionTitle
       title="Arama trafiği"
       description="Yapay zeka yanıtlarını besleyen klasik arama sinyalleri: Google Search Console, Bing/Copilot ekosistemi ve toplam site trafiği."
@@ -344,5 +410,11 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
       </Card>
     </div>
     </>
+  );
+
+  return hasAiData ? (
+    <>{aiSection}{searchSection}</>
+  ) : (
+    <>{searchSection}{aiSection}</>
   );
 }

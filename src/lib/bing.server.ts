@@ -49,9 +49,10 @@ export async function listBingSites(apiKey: string): Promise<string[]> {
 
 // Son ~30 gunun gunluk trafigi + en iyi sorgular tek anlik goruntude toplanir.
 export async function buildBingSnapshot(apiKey: string, siteUrl: string) {
-  const [traffic, queries] = await Promise.all([
+  const [traffic, queries, ai] = await Promise.all([
     call<{ d?: Array<Record<string, unknown>> }>(apiKey, "GetRankAndTrafficStats", { siteUrl }),
     call<{ d?: Array<Record<string, unknown>> }>(apiKey, "GetQueryStats", { siteUrl }),
+    fetchBingAiPerformance(apiKey, siteUrl),
   ]);
 
   const daily = (traffic.d ?? [])
@@ -90,5 +91,51 @@ export async function buildBingSnapshot(apiKey: string, siteUrl: string) {
     },
     daily,
     queries: topQueries,
+    ai,
   };
+}
+
+// Bing Webmaster Tools "AI Performance" (Copilot ve is ortaklarindan gelen atif/tiklama)
+// verisi tum hesaplarda ve tum API surumlerinde acik degil. Bilinen uc nokta adaylarini
+// sirayla deniyoruz; hicbiri yoksa nedenini kullaniciya gostermek uzere geri donuyoruz.
+const AI_METHODS = ["GetAIPerformanceStats", "GetCopilotStats", "GetAITrafficStats"] as const;
+
+export async function fetchBingAiPerformance(apiKey: string, siteUrl: string): Promise<{
+  available: boolean;
+  reason: string | null;
+  totals: { clicks: number; impressions: number };
+  daily: Array<{ date: string; clicks: number; impressions: number }>;
+}> {
+  const empty = { totals: { clicks: 0, impressions: 0 }, daily: [] as Array<{ date: string; clicks: number; impressions: number }> };
+  let lastReason = "Bing hesabinizda AI Performance API verisi bulunamadi";
+  for (const method of AI_METHODS) {
+    try {
+      const json = await call<{ d?: Array<Record<string, unknown>> }>(apiKey, method, { siteUrl });
+      const daily = (json.d ?? [])
+        .map((row) => ({
+          date: bingDate(row["Date"]),
+          clicks: num(row["Clicks"] ?? row["AIClicks"]),
+          impressions: num(row["Impressions"] ?? row["AIImpressions"] ?? row["Citations"]),
+        }))
+        .filter((row) => row.date)
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .slice(-30);
+      if (!daily.length) {
+        lastReason = "Bing AI Performance verisi bu site icin henuz uretilmedi";
+        continue;
+      }
+      return {
+        available: true,
+        reason: null,
+        totals: {
+          clicks: daily.reduce((sum, row) => sum + row.clicks, 0),
+          impressions: daily.reduce((sum, row) => sum + row.impressions, 0),
+        },
+        daily,
+      };
+    } catch (error) {
+      lastReason = error instanceof Error ? error.message : "Bing AI Performance verisi alinamadi";
+    }
+  }
+  return { available: false, reason: lastReason, ...empty };
 }
