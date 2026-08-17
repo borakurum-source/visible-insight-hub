@@ -241,6 +241,7 @@ function FreeReportPage() {
       <section className="border-y border-border bg-background px-4 py-16 md:px-6 md:py-24">
         <div className="mx-auto max-w-3xl">
           <p className="editorial-eyebrow text-primary">Sık sorulan sorular</p>
+          <span className="sr-only">Yapay zeka görünürlük raporu SSS</span>
           <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Yapay zeka görünürlük testi hakkında.</h2>
           <Accordion type="single" collapsible className="mt-9 w-full">
             {faqs.map((faq, index) => (
