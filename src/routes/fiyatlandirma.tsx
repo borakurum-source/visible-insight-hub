@@ -9,8 +9,8 @@ import { formatUsd, pricingPlans } from "@/lib/pricingData";
 
 const pricingFaqs = [
   {
-    q: "Ücretsiz planla nereye kadar gidebilirim?",
-    a: "1 marka, 5 prompt ve 1 rakip ile ilk ölçümünüzü yapar, atıf payınızı ve eksik kanıt başlıklarını görürsünüz. Kredi kartı istenmez.",
+    q: "7 günlük deneme neleri kapsıyor?",
+    a: "Deneme, Başlangıç planının tamamını kapsar: 1 marka, 20 prompt, haftalık ölçüm ve 3 rakip takibi. Kredi kartı istenmez; süre bitiminde otomatik ücret alınmaz, hesabınız salt okunur moda geçer.",
   },
   {
     q: "Yıllık ödemede ne kazanıyorum?",
@@ -212,7 +212,7 @@ function PricingPage() {
                   {isContact ? (
                     <a href="mailto:hello@1cite.com?subject=Ajans%20plan%C4%B1%20teklif%20talebi">İletişime geç</a>
                   ) : (
-                    <Link to={isFree ? "/ucretsiz-yapay-zeka-gorunurluk-raporu" : "/app/pricing"}>{isFree ? "Ücretsiz başla" : "Planı seç"}</Link>
+                    <Link to={isFree ? "/ucretsiz-yapay-zeka-gorunurluk-raporu" : "/app/pricing"}>{isFree ? "7 gün ücretsiz dene" : "Planı seç"}</Link>
                   )}
                 </Button>
               </div>
