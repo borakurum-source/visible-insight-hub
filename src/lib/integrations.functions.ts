@@ -243,6 +243,7 @@ export type TrafficOverview = {
     totals: { clicks: number; impressions: number };
     daily: Array<{ date: string; clicks: number; impressions: number }>;
     queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+    pages: Array<{ page: string; clicks: number; impressions: number; ctr: number; position: number }>;
   };
   ga4: {
     connected: boolean;
@@ -256,6 +257,8 @@ export type TrafficOverview = {
       users: number;
       share: number;
       platforms: Array<{ platform: string; sessions: number; users: number; sources: string[] }>;
+      pages: Array<{ label: string; sessions: number; platforms: string[] }>;
+      campaigns: Array<{ label: string; sessions: number; platforms: string[] }>;
     };
   };
   aiReferral: {
@@ -276,9 +279,17 @@ export type BingOverview = {
   connected: boolean;
   site: string | null;
   lastSyncAt: string | null;
+  startDate: string | null;
+  endDate: string | null;
   totals: { clicks: number; impressions: number };
   daily: Array<{ date: string; clicks: number; impressions: number }>;
   queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+  ai: {
+    available: boolean;
+    reason: string | null;
+    totals: { clicks: number; impressions: number };
+    daily: Array<{ date: string; clicks: number; impressions: number }>;
+  };
 };
 
 // Komuta merkezi için GSC anlık görüntüsü + yapay zeka atıf/görünürlük trafiği.
