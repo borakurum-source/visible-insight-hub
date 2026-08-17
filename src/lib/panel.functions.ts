@@ -240,7 +240,38 @@ export const listPrompts = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
       .from("prompts").select("*").eq("brand_id", data.brandId).order("created_at");
-    return rows ?? [];
+    const prompts = rows ?? [];
+    if (!prompts.length) return prompts.map((row) => ({ ...row, lastRun: null }));
+
+    const { data: runs } = await context.supabase
+      .from("prompt_runs")
+      .select("prompt_id, engine, created_at, brand_mentioned, position, visibility, run_index")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false })
+      .limit(2000);
+
+    const latest = new Map<string, { engine: string; createdAt: string; brandMentioned: boolean; position: number | null; visibility: number; runIndex: number | null }>();
+    for (const run of runs ?? []) {
+      if (!run.prompt_id || latest.has(run.prompt_id)) continue;
+      const visibility =
+        run.visibility === null || run.visibility === undefined
+          ? run.brand_mentioned
+            ? run.position
+              ? Math.max(40, 100 - (run.position - 1) * 10)
+              : 60
+            : 0
+          : Number(run.visibility);
+      latest.set(run.prompt_id, {
+        engine: run.engine,
+        createdAt: run.created_at,
+        brandMentioned: Boolean(run.brand_mentioned),
+        position: run.position,
+        visibility,
+        runIndex: run.run_index ?? null,
+      });
+    }
+
+    return prompts.map((row) => ({ ...row, lastRun: latest.get(row.id) ?? null }));
   });
 
 export type DiscoveredPrompt = {
