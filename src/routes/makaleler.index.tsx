@@ -81,10 +81,13 @@ export const articles: Article[] = [
 ];
 
 export const Route = createFileRoute("/makaleler/")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    sayfa: Math.max(1, Number(search["sayfa"] ?? 1) || 1),
-    durum: search["durum"] === "taslak" ? ("taslak" as const) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>) => {
+    const out: { sayfa?: number; durum?: "taslak" } = {};
+    const page = Math.max(1, Number(search["sayfa"] ?? 1) || 1);
+    if (page > 1) out.sayfa = page;
+    if (search["durum"] === "taslak") out.durum = "taslak";
+    return out;
+  },
   loader: async () => ({ posts: await listBlogPosts() }),
   head: () => ({
     meta: [
