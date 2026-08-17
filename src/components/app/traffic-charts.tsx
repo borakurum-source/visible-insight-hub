@@ -81,6 +81,8 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
   const period = data.gsc.startDate && data.gsc.endDate ? `${shortDate(data.gsc.startDate)} – ${shortDate(data.gsc.endDate)}` : "son 30 gün";
 
   const aiPlatforms = data.ga4.ai?.platforms ?? [];
+  const bingDaily = (data.bing?.daily ?? []).map((row) => ({ ...row, label: shortDate(row.date) }));
+  const bingQueries = data.bing?.queries ?? [];
 
   return (
     <>
