@@ -22,6 +22,10 @@ export default defineConfig({
     plugins: [mcpPlugin()],
     resolve: {
       alias: {
+        // cheerio/htmlparser2 ships entities v7 (subpath "./decode"), while react-email uses v4
+        // ("./lib/decode.js"). Point each consumer at the version it expects.
+        "entities/decode": path.resolve(import.meta.dirname, "node_modules/htmlparser2/node_modules/entities/dist/esm/decode.js"),
+        "entities/escape": path.resolve(import.meta.dirname, "node_modules/htmlparser2/node_modules/entities/dist/esm/escape.js"),
         "entities/lib/decode.js": path.resolve(import.meta.dirname, "node_modules/entities/lib/decode.js"),
         "entities/lib/encode.js": path.resolve(import.meta.dirname, "node_modules/entities/lib/encode.js"),
         entities: path.resolve(import.meta.dirname, "node_modules/entities"),
