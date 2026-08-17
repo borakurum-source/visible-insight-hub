@@ -113,7 +113,7 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
       tone: data.tone,
       products: data.products,
       audiences: data.audiences,
-      ...(data.competitors ? { competitors: data.competitors as unknown as Json } : {}),
+      ...(data.competitors ? { competitors: JSON.parse(JSON.stringify(data.competitors)) } : {}),
       keywords: data.keywords,
       industry: data.industry ?? null,
       language: data.language ?? null,
