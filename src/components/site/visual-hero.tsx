@@ -60,16 +60,18 @@ export function VisualHero({
             ) : null}
           </div>
           {proof?.length ? (
-            <dl className="mt-12 grid w-full grid-cols-1 gap-8 border-t border-white/10 pt-10 text-left sm:grid-cols-3">
+            <dl className="mt-12 grid w-full grid-cols-3 gap-4 border-t border-white/10 pt-8 text-center sm:gap-8">
               {proof.map((item) => (
-                <div key={item.label}>
-                  <dt className="font-mono text-2xl font-bold text-white md:text-3xl">{item.value}</dt>
-                  <dd className="mt-1.5 text-[11px] uppercase tracking-wider leading-4 text-slate-500">{item.label}</dd>
+                <div key={item.label} className="min-w-0">
+                  <dt className="font-mono text-lg font-bold text-white sm:text-2xl md:text-3xl">{item.value}</dt>
+                  <dd className="mx-auto mt-1.5 max-w-[16ch] text-[10px] uppercase tracking-wider leading-4 text-slate-400 sm:text-[11px]">
+                    {item.label}
+                  </dd>
                 </div>
               ))}
             </dl>
           ) : null}
-          {note ? <p className="mt-6 text-[10px] text-slate-600">{note}</p> : null}
+          {note ? <p className="mt-6 text-center text-[11px] text-slate-500">{note}</p> : null}
           {children ? <div className="mt-8 w-full">{children}</div> : null}
         </div>
       </div>

@@ -13,7 +13,6 @@ import {
 import { MarketingShell } from "@/components/site/MarketingShell";
 import { Reveal } from "@/components/site/marketing-motion";
 import { PublicReportAnalyzer } from "@/components/site/public-report-analyzer";
-import { MetricRise } from "@/components/site/citation-motion";
 import { ProductTabs, type ProductTab } from "@/components/site/product-tabs";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -59,9 +58,9 @@ export const Route = createFileRoute("/")({
 });
 
 const HERO_PROOF = [
-  { value: 28.1, suffix: " puan", label: "6 ayda ağırlıklı atıf payı artışı" },
-  { value: 41, suffix: "", label: "Satın alma niyetli soru" },
-  { value: 286, suffix: "", label: "Ölçüm tekrarı" },
+  { value: "+28,1 puan", label: "6 ayda ağırlıklı atıf payı artışı" },
+  { value: "41", label: "Satın alma niyetli soru" },
+  { value: "286", label: "Ölçüm tekrarı" },
 ];
 
 const MEASURED_ENGINES = ["ChatGPT", "Perplexity", "Gemini", "Copilot", "Claude"];
@@ -128,17 +127,17 @@ function Hero() {
               ))}
             </div>
           </div>
-          <dl className="grid w-full grid-cols-1 gap-8 border-t border-white/10 pt-10 text-left sm:grid-cols-3" data-testid="hero-proof-strip">
+          <dl className="grid w-full grid-cols-3 gap-4 border-t border-white/10 pt-8 text-center sm:gap-8" data-testid="hero-proof-strip">
             {HERO_PROOF.map((item) => (
-              <div key={item.label}>
-                <dt className="font-mono text-2xl font-bold text-white md:text-3xl">
-                  <MetricRise value={item.value} suffix={item.suffix} />
-                </dt>
-                <dd className="mt-1.5 text-[11px] uppercase tracking-wider leading-4 text-slate-500">{item.label}</dd>
+              <div key={item.label} className="min-w-0">
+                <dt className="font-mono text-lg font-bold text-white sm:text-2xl md:text-3xl">{item.value}</dt>
+                <dd className="mx-auto mt-1.5 max-w-[16ch] text-[10px] uppercase tracking-wider leading-4 text-slate-400 sm:text-[11px]">
+                  {item.label}
+                </dd>
               </div>
             ))}
           </dl>
-          <p className="w-full text-left text-[10px] text-slate-600">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
+          <p className="w-full text-center text-[11px] text-slate-500">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
         </div>
       </div>
     </section>

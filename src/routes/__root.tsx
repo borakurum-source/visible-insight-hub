@@ -135,7 +135,7 @@ import { useGoogleAnalytics } from "@/lib/analytics";
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="tr">
       <head>
         <HeadContent />
       </head>
