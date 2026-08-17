@@ -18,13 +18,17 @@ export interface PricingPlan {
 
 export const pricingPlans: PricingPlan[] = [
   {
-    slug: "free_user",
-    label: "Ücretsiz",
-    desc: "Tek marka için yapay zeka görünürlüğünüzü ölçmeye başlayın.",
+    slug: "trial",
+    label: "7 gün deneme",
+    desc: "Kredi kartı istemeden Başlangıç planının tamamını 7 gün deneyin.",
     monthly: 0,
     annualTotal: 0,
-    limits: ["1 marka", "5 prompt", "Aylık 20 yanıt ölçümü", "1 rakip takibi", "1 kullanıcı"],
-    features: ["Atıf payı ölçümü ve OneCite Score kırılımı", "Öncelikli eksik kanıt listesi", "Perplexity atıf kaynakları"],
+    limits: ["1 marka", "20 prompt", "Haftalık ölçüm", "3 rakip takibi", "7 gün süre"],
+    features: [
+      "Başlangıç planının tüm özellikleri",
+      "Ücretsiz yapay zeka görünürlük raporu",
+      "Kredi kartı gerekmez",
+    ],
   },
   {
     slug: "starter",
