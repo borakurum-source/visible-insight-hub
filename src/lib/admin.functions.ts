@@ -85,11 +85,28 @@ export const adminCustomerDetail = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { assertAdmin } = await import("./admin.server");
     const { supabaseAdmin } = await assertAdmin(context);
-    const { data: profile } = await supabaseAdmin
+    const { data: profileRow } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name, plan, plan_source, plan_expires_at, trial_ends_at, suspended, created_at")
       .eq("id", data.userId).maybeSingle();
-    if (!profile) throw new Error("Hesap bulunamadı");
+    let profile = profileRow;
+    if (!profile) {
+      // Profil satırı yoksa auth kaydından türet (blank screen yerine kullanılabilir detay)
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(data.userId);
+      const u = authUser?.user;
+      const createdAt = u?.created_at ?? new Date().toISOString();
+      profile = {
+        id: data.userId,
+        email: u?.email ?? null,
+        full_name: (u?.user_metadata?.["full_name"] as string | undefined) ?? null,
+        plan: "expired",
+        plan_source: "manual",
+        plan_expires_at: null,
+        trial_ends_at: createdAt,
+        suspended: false,
+        created_at: createdAt,
+      };
+    }
 
     const { data: memberships } = await supabaseAdmin.from("brand_members").select("brand_id, role").eq("user_id", data.userId);
     const brandIds = (memberships ?? []).map((m) => m.brand_id);
