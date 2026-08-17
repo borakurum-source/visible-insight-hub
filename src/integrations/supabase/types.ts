@@ -1427,6 +1427,45 @@ export type Database = {
           },
         ]
       }
+      public_reports: {
+        Row: {
+          category_scores: Json
+          citation: Json
+          created_at: string
+          domain: string
+          email: string | null
+          findings: Json
+          id: string
+          score: number
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          category_scores?: Json
+          citation?: Json
+          created_at?: string
+          domain: string
+          email?: string | null
+          findings?: Json
+          id?: string
+          score?: number
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          category_scores?: Json
+          citation?: Json
+          created_at?: string
+          domain?: string
+          email?: string | null
+          findings?: Json
+          id?: string
+          score?: number
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           brand_id: string
