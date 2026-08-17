@@ -81,6 +81,11 @@ export const articles: Article[] = [
 ];
 
 export const Route = createFileRoute("/makaleler/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    sayfa: Math.max(1, Number(search["sayfa"] ?? 1) || 1),
+    durum: search["durum"] === "taslak" ? ("taslak" as const) : undefined,
+  }),
+  loader: async () => ({ posts: await listBlogPosts() }),
   head: () => ({
     meta: [
       { title: "Makaleler | OneCite Kaynak Merkezi" },
