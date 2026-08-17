@@ -74,3 +74,41 @@ export function trackEvent(name: string, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined" || !loaded || !window.gtag) return;
   window.gtag("event", name, params);
 }
+
+/** GA4 dönüşüm olayı: oturum açma. */
+export function trackLogin(method: "google" | "email") {
+  trackEvent("login", { method });
+}
+
+/** GA4 dönüşüm olayı: kayıt. */
+export function trackSignUp(method: "google" | "email", status: "completed" | "pending_verification" = "completed") {
+  trackEvent("sign_up", { method, status });
+}
+
+const PENDING_AUTH_KEY = "onecite.ga.pending_auth";
+
+/** OAuth yönlendirmesi öncesi olayı işaretle; dönüşte gönderilir. */
+export function markPendingOAuth(method: "google") {
+  try {
+    window.sessionStorage.setItem(PENDING_AUTH_KEY, method);
+  } catch {
+    /* sessionStorage kapalı olabilir */
+  }
+}
+
+/**
+ * OAuth dönüşünde bekleyen olayı gönderir.
+ * isNewUser true ise sign_up, değilse login olarak raporlanır.
+ */
+export function flushPendingOAuth(isNewUser: boolean) {
+  let method: string | null = null;
+  try {
+    method = window.sessionStorage.getItem(PENDING_AUTH_KEY);
+    if (method) window.sessionStorage.removeItem(PENDING_AUTH_KEY);
+  } catch {
+    return;
+  }
+  if (method !== "google") return;
+  if (isNewUser) trackSignUp("google");
+  else trackLogin("google");
+}
