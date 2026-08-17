@@ -46,6 +46,7 @@ function MetricDetailPage() {
     "gsc-clicks": { title: "Google Arama Tıklamaları", key: "clicks", label: "Tıklama" },
     "gsc-impressions": { title: "Arama Gösterimleri", key: "impressions", label: "Gösterim" },
     "ga4-sessions": { title: "Site Trafiği (GA4)", key: "sessions", label: "Oturum" },
+    "ga4-ai": { title: "AI Referral Trafiği (GA4)", key: "sessions", label: "Oturum" },
     "ai-citations": { title: "AI Atıf Trafiği", key: "citations", label: "Atıf" },
     "ai-visibility": { title: "Yapay Zeka Görünürlüğü", key: "mentioned", label: "Markanın geçtiği yanıt" },
   }[metric as string] ?? { title: "Metrik", key: "value", label: "Deger" };
@@ -53,7 +54,7 @@ function MetricDetailPage() {
   const series: Array<Record<string, number | string>> = data
     ? metric.startsWith("gsc")
       ? data.gsc.daily
-      : metric === "ga4-sessions"
+      : metric.startsWith("ga4")
         ? data.ga4.daily
         : metric === "ai-citations"
           ? data.aiReferral.daily
@@ -62,12 +63,54 @@ function MetricDetailPage() {
 
   const total = series.reduce((sum, row) => sum + Number(row[config.key] ?? 0), 0);
 
-  const breakdown =
-    data && metric.startsWith("gsc")
-      ? data.gsc.queries.map((q) => ({ label: q.query, value: metric === "gsc-clicks" ? q.clicks : q.impressions }))
-      : data && metric === "ga4-sessions"
-        ? data.ga4.channels.map((c) => ({ label: c.channel, value: c.sessions }))
-        : [];
+  // Metrige gore birden fazla kirilim: sorgular, sayfalar, kanallar, AI platform/sayfa/kampanya.
+  const sections: Array<{ title: string; hint?: string; rows: Array<{ label: string; value: number; meta?: string }> }> = [];
+  if (data && metric.startsWith("gsc")) {
+    const useClicks = metric === "gsc-clicks";
+    sections.push({
+      title: "En çok performans gösteren sorgular",
+      rows: data.gsc.queries.map((q) => ({
+        label: q.query,
+        value: useClicks ? q.clicks : q.impressions,
+        meta: `poz. ${q.position}`,
+      })),
+    });
+    sections.push({
+      title: "Kaynak sayfalar",
+      hint: "Yapay zeka asistanlarının alıntıladığı içerikler genelde bu sayfalardır.",
+      rows: data.gsc.pages.map((p) => ({
+        label: p.page,
+        value: useClicks ? p.clicks : p.impressions,
+        meta: `poz. ${p.position}`,
+      })),
+    });
+  }
+  if (data && metric.startsWith("ga4")) {
+    if (metric === "ga4-ai") {
+      sections.push({
+        title: "Yapay zeka platformları",
+        rows: data.ga4.ai.platforms.map((p) => ({
+          label: p.platform,
+          value: p.sessions,
+          meta: p.sources.join(", "),
+        })),
+      });
+      sections.push({
+        title: "Kaynak sayfalar (giriş sayfası)",
+        hint: "Yapay zeka yanıtlarından gelen ziyaretçilerin ilk açtığı sayfalar.",
+        rows: data.ga4.ai.pages.map((p) => ({ label: p.label, value: p.sessions, meta: p.platforms.join(", ") })),
+      });
+      sections.push({
+        title: "Kampanya kırılımı",
+        rows: data.ga4.ai.campaigns.map((c) => ({ label: c.label, value: c.sessions, meta: c.platforms.join(", ") })),
+      });
+    }
+    sections.push({
+      title: "Kanal kırılımı",
+      rows: data.ga4.channels.map((c) => ({ label: c.channel, value: c.sessions })),
+    });
+  }
+  const visibleSections = sections.filter((section) => section.rows.length);
 
   return (
     <>
@@ -116,21 +159,25 @@ function MetricDetailPage() {
         </CardContent>
       </Card>
 
-      {breakdown.length ? (
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Kaynak kırılımı</CardTitle></CardHeader>
+      {visibleSections.map((section) => (
+        <Card key={section.title}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{section.title}</CardTitle>
+            {section.hint ? <p className="text-[11px] text-muted-foreground">{section.hint}</p> : null}
+          </CardHeader>
           <CardContent className="p-0">
             <ul className="divide-y divide-border text-sm">
-              {breakdown.map((row) => (
+              {section.rows.slice(0, 25).map((row) => (
                 <li key={row.label} className="flex items-center gap-3 px-4 py-2">
                   <span className="min-w-0 flex-1 truncate">{row.label}</span>
+                  {row.meta ? <span className="hidden max-w-[40%] truncate text-[11px] text-muted-foreground sm:block">{row.meta}</span> : null}
                   <span className="font-mono text-xs">{fmt(row.value)}</span>
                 </li>
               ))}
             </ul>
           </CardContent>
         </Card>
-      ) : null}
+      ))}
     </>
   );
 }
