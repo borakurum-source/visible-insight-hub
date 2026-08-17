@@ -62,8 +62,10 @@ export const generateBrandIntelligence = createServerFn({ method: "POST" })
     const siteText = await fetchSiteText(brand.domain);
     const systemPrompt = await resolveSystemPrompt(context.supabase, "brand_intelligence");
     const result = await aiJson<{
-      summary: string; positioning: string; tone: string;
-      products: string[]; audiences: string[]; competitors: string[]; keywords: string[];
+      summary: string; detailedDescription?: string; industry?: string; language?: string; location?: string;
+      positioning: string; tone: string;
+      products: string[]; audiences: string[]; keyFeatures?: string[];
+      competitors: unknown; keywords: string[];
     }>(
       [
         { role: "system", content: systemPrompt },
@@ -72,14 +74,20 @@ export const generateBrandIntelligence = createServerFn({ method: "POST" })
       { summary: "", positioning: "", tone: "", products: [], audiences: [], competitors: [], keywords: [] },
     );
 
+    const { normalizeCompetitors } = await import("./competitors");
     const payload = {
       brand_id: brand.id,
       summary: result.summary,
+      detailed_description: result.detailedDescription ?? null,
+      industry: result.industry ?? null,
+      language: result.language ?? "Türkçe",
+      location: result.location ?? null,
+      key_features: result.keyFeatures ?? [],
       positioning: result.positioning,
       tone: result.tone,
       products: result.products,
       audiences: result.audiences,
-      competitors: result.competitors,
+      competitors: normalizeCompetitors(result.competitors),
       keywords: result.keywords,
       approved: false,
     };
@@ -94,6 +102,8 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
   .inputValidator((input: {
     brandId: string; summary: string; positioning: string; tone: string;
     products: string[]; audiences: string[]; competitors: string[]; keywords: string[];
+    industry?: string; language?: string; location?: string; detailedDescription?: string; keyFeatures?: string[];
+    brandName?: string;
   }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("brand_intelligence").upsert({
@@ -105,9 +115,17 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
       audiences: data.audiences,
       competitors: data.competitors,
       keywords: data.keywords,
+      industry: data.industry ?? null,
+      language: data.language ?? null,
+      location: data.location ?? null,
+      detailed_description: data.detailedDescription ?? null,
+      key_features: data.keyFeatures ?? [],
       approved: true,
     }, { onConflict: "brand_id" });
     if (error) throw new Error(error.message);
+    if (data.brandName && data.brandName.trim()) {
+      await context.supabase.from("brands").update({ name: data.brandName.trim() }).eq("id", data.brandId);
+    }
     await context.supabase.from("brands").update({ onboarding_step: 3 }).eq("id", data.brandId);
     return { ok: true };
   });
