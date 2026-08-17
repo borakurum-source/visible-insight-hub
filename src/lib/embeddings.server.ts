@@ -126,27 +126,10 @@ export function chunkText(text: string, size = 1100, overlap = 180): string[] {
 }
 
 export async function fetchPageText(url: string): Promise<string> {
-  try {
-    const target = url.startsWith("http") ? url : `https://${url}`;
-    const res = await fetch(target, {
-      headers: { "user-agent": "Mozilla/5.0 (compatible; OneCiteBot/1.0)" },
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!res.ok) return "";
-    const html = await res.text();
-    return html
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<nav[\s\S]*?<\/nav>/gi, " ")
-      .replace(/<footer[\s\S]*?<\/footer>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 40000);
-  } catch {
-    return "";
-  }
+  const { fetchAndExtract } = await import("./extract.server");
+  const page = await fetchAndExtract(url);
+  if (!page) return "";
+  return [page.structured, page.text].filter(Boolean).join("\n\n");
 }
 
 function decodeInt8Base64(b64: string): number[] {
