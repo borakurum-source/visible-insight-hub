@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   LayoutDashboard, Sparkles, Settings, Menu, Building2, Gauge,
   KanbanSquare, BookOpen, PenSquare, Waypoints,
-  Users, Lock, LogOut, Plus, ChevronDown,
+  Users, Lock, LogOut, Plus, ChevronDown, LifeBuoy,
 } from "lucide-react";
 import BrandLogo from "@/components/site/BrandLogo";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,7 +105,7 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-const ALWAYS_OPEN = new Set(["/app", "/app/onboarding", "/app/account", "/app/pricing"]);
+const ALWAYS_OPEN = new Set(["/app", "/app/onboarding", "/app/account", "/app/pricing", "/app/help"]);
 
 function itemPaths(item: NavItem): string[] {
   return item.children ? item.children.map((child) => child.to) : [item.to];
