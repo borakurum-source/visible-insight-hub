@@ -23,7 +23,7 @@ export function WizardFrame({
       </header>
       <div className="space-y-5">{children}</div>
       {footer ? <div className="flex flex-wrap items-center justify-center gap-3 pt-2">{footer}</div> : null}
-      <div className="flex items-center justify-center gap-2 pt-1" aria-label={`Adim ${step} / ${total}`}>
+      <div className="flex items-center justify-center gap-2 pt-1" aria-label={`Adım ${step} / ${total}`}>
         {Array.from({ length: total }).map((_, index) => (
           <span
             key={index}

@@ -6,8 +6,8 @@ export type CompetitorType = "direct" | "indirect";
 export type CompetitorEntry = { name: string; domain: string; type: CompetitorType };
 
 export const COMPETITOR_TYPE_LABEL: Record<CompetitorType, string> = {
-  direct: "Dogrudan rakip",
-  indirect: "Dolayli rakip",
+  direct: "Doğrudan rakip",
+  indirect: "Dolaylı rakip",
 };
 
 function normalizeType(value: unknown): CompetitorType {
