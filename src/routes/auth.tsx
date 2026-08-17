@@ -74,6 +74,7 @@ function AuthPage() {
   const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
+    markPendingOAuth("google");
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: `${window.location.origin}/auth${next ? `?next=${encodeURIComponent(next)}` : ""}`,
     });
@@ -82,7 +83,6 @@ function AuthPage() {
       setLoading(false);
       return;
     }
-    markPendingOAuth("google");
     if (result.redirected) return;
     flushPendingOAuth(false);
     void navigate({ to: "/app" });
@@ -105,6 +105,7 @@ function AuthPage() {
         setEmailLoading(false);
         return;
       }
+      trackLogin("email");
       void navigate({ to: "/app" });
       return;
     }
