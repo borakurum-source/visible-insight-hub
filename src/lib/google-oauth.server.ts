@@ -32,6 +32,8 @@ export function redirectUri(origin: string) {
   try {
     const url = new URL(origin);
     const host = url.hostname;
+    // Apex alan adi Google Console'da kayitli degil; www'ye normalize et.
+    if (host === "1cite.com") return CANONICAL_GOOGLE_REDIRECT_URI;
     const allowed =
       host === "localhost" ||
       host === "127.0.0.1" ||
