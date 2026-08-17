@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, Clock3 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarketingShell } from "@/components/site/MarketingShell";
 import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
 import { Reveal, MotionPress } from "@/components/site/marketing-motion";
+import { adminListAllBlogPosts, listBlogPosts } from "@/lib/blog.functions";
+import { dbToListItem, type BlogListItem } from "@/lib/blog-view";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 import generalAiVisibilityArticle from "@/content/articles/2026-en-iyi-10-ai-gorunurluk-araci.md?raw";
 import agencyGeoArticle from "@/content/articles/ajanslar-icin-en-iyi-8-geo-ai-gorunurluk-araci.md?raw";
