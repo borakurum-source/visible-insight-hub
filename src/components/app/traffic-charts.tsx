@@ -80,7 +80,10 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
   const overviewDaily = data.aiOverview.daily.map((row) => ({ ...row, label: shortDate(row.date) }));
   const period = data.gsc.startDate && data.gsc.endDate ? `${shortDate(data.gsc.startDate)} – ${shortDate(data.gsc.endDate)}` : "son 30 gün";
 
+  const aiPlatforms = data.ga4.ai?.platforms ?? [];
+
   return (
+    <>
     <div className="grid gap-4 md:grid-cols-2">
       <MetricCard
         icon={Search}
@@ -215,5 +218,58 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
         )}
       </MetricCard>
     </div>
+
+    {/* GA4 kaynak kirilimi: hangi yapay zeka platformundan gercek ziyaret geliyor. */}
+    <Card className="mt-4">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-1.5 text-sm">
+          <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+          Yapay Zekadan Gelen Site Trafiği (GA4)
+        </CardTitle>
+        <CardDescription className="text-[11px]">
+          {data.ga4.connected
+            ? `Son 28 günde ${fmt(data.ga4.ai?.sessions ?? 0)} oturum yapay zeka asistanlarından geldi · toplam trafiğin %${data.ga4.ai?.share ?? 0}'i`
+            : "Google Analytics bağlı değil."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {!data.ga4.connected ? (
+          <div className="h-40">
+            <Empty label="GA4 bağlandığında yapay zeka kaynakları burada listelenir." cta={{ to: "/app/integrations", text: "Bağla" }} />
+          </div>
+        ) : aiPlatforms.length ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={aiPlatforms} layout="vertical" margin={{ top: 4, right: 8, left: 8, bottom: 0 }}>
+                  <XAxis type="number" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} allowDecimals={false} />
+                  <YAxis type="category" dataKey="platform" width={120} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [fmt(value), "Oturum"]} />
+                  <Bar dataKey="sessions" fill="var(--chart-2)" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <ul className="space-y-1.5">
+              {aiPlatforms.map((row) => (
+                <li key={row.platform} className="flex items-start justify-between gap-3 rounded-md border border-border px-2.5 py-2 text-xs">
+                  <div className="min-w-0">
+                    <p className="font-medium">{row.platform}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">
+                      {row.sources.length ? row.sources.join(", ") : "kaynak bilgisi yok"}
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-display font-semibold">{fmt(row.sessions)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="h-40">
+            <Empty label="Son 28 günde yapay zeka asistanlarından gelen oturum kaydedilmedi." />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+    </>
   );
 }
