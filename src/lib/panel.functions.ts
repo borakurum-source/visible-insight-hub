@@ -1310,6 +1310,61 @@ export const saveCompetitors = createServerFn({ method: "POST" })
     return { ok: true as const, message: "" };
   });
 
+// Prompt sonuçlarından çıkan rakip adayını takip listesine ekler.
+export const promoteCompetitorCandidate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; candidateId: string; domain?: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { normalizeCompetitors } = await import("./competitors");
+    const [{ data: candidate }, { data: current }] = await Promise.all([
+      context.supabase
+        .from("competitor_candidates")
+        .select("id, name, domain")
+        .eq("id", data.candidateId)
+        .eq("brand_id", data.brandId)
+        .single(),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+    ]);
+    if (!candidate) return { ok: false as const, message: "Aday bulunamadı." };
+
+    const existing = normalizeCompetitors(current?.competitors);
+    const next = normalizeCompetitors([
+      ...existing,
+      { name: candidate.name, domain: data.domain ?? candidate.domain ?? "", type: "direct" },
+    ]);
+    if (next.length > existing.length) {
+      const { assertCompetitorQuota } = await import("./plan.server");
+      try {
+        await assertCompetitorQuota(context.supabase, context.userId, next.length);
+      } catch (error) {
+        return { ok: false as const, message: error instanceof Error ? error.message : "Plan limiti aşıldı." };
+      }
+    }
+    const { error } = await context.supabase
+      .from("brand_intelligence")
+      .upsert({ brand_id: data.brandId, competitors: next }, { onConflict: "brand_id" });
+    if (error) throw new Error(error.message);
+    await context.supabase
+      .from("competitor_candidates")
+      .update({ status: "tracked", updated_at: new Date().toISOString() })
+      .eq("id", candidate.id);
+    return { ok: true as const, message: `${candidate.name} rakip listesine eklendi.` };
+  });
+
+// Rakip adayını yoksayar; bir daha listelenmez.
+export const dismissCompetitorCandidate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; candidateId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("competitor_candidates")
+      .update({ status: "dismissed", updated_at: new Date().toISOString() })
+      .eq("id", data.candidateId)
+      .eq("brand_id", data.brandId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
 // Ölçüm sonuçlarından öncelikli görev üretir (Görevler ekranındaki buton).
 export const suggestGeoTasks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
