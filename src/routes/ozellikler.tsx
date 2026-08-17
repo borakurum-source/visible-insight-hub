@@ -304,6 +304,34 @@ const deepFeatures = [
 
 const integrations = [
   "Google Search Console",
+];
+
+const workModel = [
+  {
+    number: "01",
+    icon: Network,
+    label: "Kaynak",
+    title: "Marka kanıtınızı modelleyin",
+    body: "Hizmetleriniz, SSS'leriniz, referanslarınız ve güven sinyalleriniz ölçümün referans katmanına dönüşür.",
+  },
+  {
+    number: "02",
+    icon: BarChart3,
+    label: "Sinyal",
+    title: "Yapay zekanın seçimini okuyun",
+    body: "Satın alma niyetli sorularda hangi modelin sizi, rakibinizi ya da üçüncü taraf bir kaynağı seçtiğini görün.",
+  },
+  {
+    number: "03",
+    icon: Goal,
+    label: "Uygulama",
+    title: "Doğru kanıtı önce üretin",
+    body: "Eksik kanıt; içerik, vaka çalışması, üçüncü taraf otorite veya teknik iyileştirme görevine bağlanır.",
+  },
+];
+
+const integrationsList = [
+  "Google Search Console",
   "Google Analytics 4",
   "Bing Webmaster Tools",
   "Perplexity",
