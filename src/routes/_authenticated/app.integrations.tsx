@@ -186,6 +186,7 @@ function IntegrationsPage() {
 
   const gsc = integrations.data?.connections.find((c) => c.provider === "gsc") ?? null;
   const ga4 = integrations.data?.connections.find((c) => c.provider === "ga4") ?? null;
+  const bing = integrations.data?.connections.find((c) => c.provider === "bing") ?? null;
   const ga4Snapshot = integrations.data?.ga4Snapshot ?? null;
   const snapshot = integrations.data?.gscSnapshot ?? null;
 
