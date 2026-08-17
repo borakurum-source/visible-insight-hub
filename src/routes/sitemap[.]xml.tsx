@@ -6,6 +6,7 @@ const staticPaths = [
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/ucretsiz-yapay-zeka-gorunurluk-raporu", priority: "0.9", changefreq: "weekly" },
   { path: "/ozellikler", priority: "0.9", changefreq: "monthly" },
+  { path: "/metodoloji", priority: "0.8", changefreq: "monthly" },
   { path: "/platform/citation-share", priority: "0.7", changefreq: "monthly" },
   { path: "/platform/evidence-gaps", priority: "0.7", changefreq: "monthly" },
   { path: "/solutions/agencies", priority: "0.7", changefreq: "monthly" },

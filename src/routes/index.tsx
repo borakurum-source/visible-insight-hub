@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BarChart3,
+  BadgeCheck,
   CheckCircle2,
   Goal,
   Network,
@@ -17,6 +18,13 @@ import { ProductTabs, type ProductTab } from "@/components/site/product-tabs";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { faqs } from "@/lib/faqData";
+import {
+  AUTHORITY_BADGES,
+  COMMITMENT_CONDITIONS,
+  COMMITMENT_MILESTONES,
+  REFERENCE_BRANDS,
+  TRUST_CARDS,
+} from "@/lib/trustSignals";
 import { formatUsd, pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
 import shotKb from "@/assets/landing/shot-kb.webp";
@@ -30,10 +38,10 @@ import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OneCite | AI Citation Intelligence" },
-      { name: "description", content: "Yapay zeka cevaplarında markanızın AI kaynak payını ölçün, eksik kanıtları görün ve doğru GEO uygulamasını önceliklendirin." },
-      { property: "og:title", content: "OneCite | AI Citation Intelligence" },
-      { property: "og:description", content: "Yapay zeka cevaplarında markanızın AI kaynak payını, eksik kanıtları ve öncelikli uygulamalarını görün." },
+      { title: "OneCite | Yapay Zeka Görünürlük ve Kaynak Payı Platformu" },
+      { name: "description", content: "Türkiye'de geliştirilen ilk uçtan uca yapay zeka görünürlük platformu: 10.000+ prompt ile test edilmiş akademik metodoloji, Marka Zekası RAG altyapısı ve 90 gün görünürlük taahhüdü." },
+      { property: "og:title", content: "OneCite | Yapay Zeka Görünürlük ve Kaynak Payı Platformu" },
+      { property: "og:description", content: "10.000+ prompt ile test edilmiş akademik metodoloji, Marka Zekası RAG altyapısı ve 90 gün görünürlük taahhüdü ile AI kaynak payınızı ölçün." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "https://1cite.com" },
@@ -138,6 +146,150 @@ function Hero() {
             ))}
           </dl>
           <p className="w-full text-center text-[11px] text-slate-500">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
+          <div className="grid w-full gap-2 border-t border-white/10 pt-6 sm:grid-cols-2 lg:grid-cols-4" data-testid="hero-authority-strip">
+            {AUTHORITY_BADGES.map((badge) => {
+              const inner = (
+                <>
+                  <span className="flex items-center gap-1.5 text-[12px] font-bold text-white">
+                    <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-cyan" aria-hidden="true" />
+                    {badge.value}
+                  </span>
+                  <span className="mt-1 block text-[11px] leading-4 text-slate-400">{badge.label}</span>
+                </>
+              );
+              return badge.to ? (
+                <Link
+                  key={badge.value}
+                  to={badge.to}
+                  className="rounded-xl border border-white/10 bg-white/[0.04] p-3 text-left transition-colors hover:border-cyan/50 hover:bg-white/[0.07]"
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <div key={badge.value} className="rounded-xl border border-white/10 bg-white/[0.04] p-3 text-left">
+                  {inner}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NedenOneCite() {
+  return (
+    <section className="border-b border-border bg-ink py-16 text-white md:py-24" data-testid="section-why-onecite">
+      <div className="marketing-container">
+        <div className="max-w-2xl">
+          <p className="editorial-eyebrow text-cyan">Neden OneCite?</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] md:text-4xl">
+            Türkçe pazarda yapay zeka görünürlüğünü uçtan uca ölçen tek sistem.
+          </h2>
+          <p className="mt-4 text-base leading-7 text-slate-300">
+            Her iddianın arkasında bir kanıt var: yayınlanmış metodoloji, tekrarlı ölçüm ve gerçek marka sonuçları.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {TRUST_CARDS.map((card, index) => (
+            <Reveal key={card.title} delay={index * 0.05} className="flex h-full flex-col rounded-xl border border-white/15 bg-white/[0.04] p-5">
+              <span className="w-fit rounded-full border border-cyan/40 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-cyan">
+                {card.proof}
+              </span>
+              <h3 className="mt-4 text-base font-bold text-white">{card.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{card.body}</p>
+            </Reveal>
+          ))}
+        </div>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Button asChild className="bg-cyan text-foreground hover:bg-[#B8F4FF]">
+            <Link to="/metodoloji">Metodolojiyi inceleyin <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+          </Button>
+          <Button asChild variant="outline" className="border-white/25 bg-transparent text-white hover:bg-white/10">
+            <Link to="/proof/filmfolk">Gerçek ölçüm sonucuna bakın</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GorunurlukTaahhudu() {
+  return (
+    <section className="border-y border-border bg-background py-16 md:py-24" data-testid="section-commitment">
+      <div className="marketing-container">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
+          <div>
+            <p className="editorial-eyebrow text-primary">90 Gün Görünürlük Taahhüdü</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">
+              90. gün, 0. günün üzerinde olur. Olmazsa ücretinizi iade ederiz.
+            </h2>
+            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
+              OneCite metodolojisi uygulanır ve panelde üretilen görevler tamamlanırsa, takip edilen prompt setinizin
+              toplam görünürlüğü 90. günde başlangıç ölçümünüzün üzerine çıkar.
+            </p>
+            <ul className="mt-7 space-y-2.5">
+              {COMMITMENT_CONDITIONS.map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm leading-6 text-foreground">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 max-w-xl text-xs leading-5 text-muted-foreground">
+              Yapay zeka motorları kapalı sistemlerdir; taahhüt tek tek cevapları değil, takip edilen prompt setinin
+              toplam görünürlüğünü kapsar. Ayrıntılar için{" "}
+              <Link to="/refund-policy" className="font-semibold text-primary underline underline-offset-4">
+                İade Politikası
+              </Link>{" "}
+              sayfasına bakın.
+            </p>
+          </div>
+          <ol className="space-y-3">
+            {COMMITMENT_MILESTONES.map((item) => (
+              <li key={item.day} className="flex gap-4 rounded-xl border border-border bg-secondary p-4 md:p-5">
+                <span className="font-mono text-xs font-semibold text-primary">{item.day}</span>
+                <p className="text-sm leading-6 text-muted-foreground">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SonucVerenMarkalar() {
+  return (
+    <section className="border-b border-border bg-secondary py-16 md:py-24" data-testid="section-reference-brands">
+      <div className="marketing-container">
+        <div className="max-w-2xl">
+          <p className="editorial-eyebrow text-primary">Sonuç veren uygulamalar</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">
+            OneCite metodolojisiyle ölçülen markalar.
+          </h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">
+            Farklı sektörlerde aynı akış çalışıyor: prompt setini sabitle, eksik kanıtı üret, görünürlüğü yeniden ölç.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {REFERENCE_BRANDS.map((brand) => (
+            <div key={brand.name} className="rounded-xl border border-border bg-background p-4">
+              <p className="text-sm font-bold text-foreground">{brand.name}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">{brand.sector}</p>
+            </div>
+          ))}
+          <Link
+            to="/proof/filmfolk"
+            className="flex flex-col justify-between rounded-xl border border-primary bg-background p-4 transition-colors hover:bg-muted"
+          >
+            <p className="text-sm font-bold text-foreground">FilmFolk</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">AI Kaynak Payı %30,7 → %58,9</p>
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary">
+              Vakayı inceleyin <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </Link>
         </div>
       </div>
     </section>
@@ -394,9 +546,12 @@ function Landing() {
     <MarketingShell>
       <Hero />
       <NeGoreceksiniz />
+      <NedenOneCite />
       <Problem />
       <NasilCalisir />
       <FilmFolkOrnegi />
+      <SonucVerenMarkalar />
+      <GorunurlukTaahhudu />
       <PlanlarVeKimIcin />
       <SSS />
       <SonCagri />
