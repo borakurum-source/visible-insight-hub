@@ -52,7 +52,8 @@ const profiles = [
   {
     title: "İlk kez ölçüyorum",
     body: "Markanızın yapay zeka cevaplarında nerede durduğunu tek ölçümle görün.",
-    plan: "Ücretsiz",
+    plan: "7 gün deneme",
+    usage: "1 marka · 20 prompt · 3 rakip",
     href: "/ucretsiz-yapay-zeka-gorunurluk-raporu",
     action: "Ücretsiz ölçüm başlat",
   },
@@ -60,13 +61,15 @@ const profiles = [
     title: "Tek markayı düzenli izliyorum",
     body: "Sabit soru seti, Bilgi Bankası ve aylık trend takibiyle ritim kurun.",
     plan: "Başlangıç / Büyüme",
+    usage: "1-3 marka · 20-60 prompt · 3-10 rakip",
     href: "/ozellikler",
-    action: "Platformu incele",
+    action: "Ürünü incele",
   },
   {
     title: "Birden fazla marka yönetiyorum",
     body: "Ajans veya grup şirketi ölçeğinde müşteri, soru ve rakip görünürlüğünü karşılaştırın.",
     plan: "Ajans · Teklife göre",
+    usage: "Sınırsız marka · özel prompt kotası",
     href: "/solutions/agencies",
     action: "Ajans çözümü",
   },
@@ -283,6 +286,7 @@ function PricingPage() {
               <p className="editorial-eyebrow text-muted-foreground">{profile.plan}</p>
               <p className="mt-4 text-lg font-bold text-foreground">{profile.title}</p>
               <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">{profile.body}</p>
+              <p className="mt-4 font-mono text-[11px] text-muted-foreground">{profile.usage}</p>
               <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-primary group-hover:text-foreground">
                 {profile.action} <ArrowRight className="h-4 w-4" />
               </span>
