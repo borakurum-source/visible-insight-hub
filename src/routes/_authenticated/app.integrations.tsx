@@ -218,6 +218,17 @@ function IntegrationsPage() {
             </Button>
           )}
         </CardContent>
+        {googleAccount.data?.redirectUri ? (
+          <CardContent className="pt-0">
+            <p className="text-xs text-muted-foreground">
+              Google izin ekranında <strong>redirect_uri_mismatch</strong> hatası alırsanız, Google Cloud Console →
+              Kimlik bilgileri → OAuth istemcisi → “Yetkili yönlendirme URI’leri” alanına şu adresi ekleyin:
+            </p>
+            <code className="mt-2 block break-all rounded-md border border-border bg-muted/40 px-2 py-1.5 font-mono text-[11px]">
+              {googleAccount.data.redirectUri}
+            </code>
+          </CardContent>
+        ) : null}
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
