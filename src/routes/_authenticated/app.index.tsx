@@ -8,9 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
 import { VisibilityCharts } from "@/components/app/visibility-charts";
+import { CompetitorTrendChart } from "@/components/app/competitor-trend-chart";
 import { TrafficCharts } from "@/components/app/traffic-charts";
 import { GscStatusPanel } from "@/components/app/gsc-status";
-import { getBrandOverview, getMeasurementState, getVisibilityAnalytics } from "@/lib/panel.functions";
+import {
+  getBrandOverview,
+  getCompetitorVisibilityTrend,
+  getMeasurementState,
+  getVisibilityAnalytics,
+} from "@/lib/panel.functions";
 import { getTrafficOverview } from "@/lib/integrations.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
@@ -52,6 +58,12 @@ function DashboardPage() {
   const { data: traffic } = useQuery({
     queryKey: ["traffic-overview", brand?.id, rangeDays],
     queryFn: () => fetchTraffic({ data: { brandId: brand!.id, days: rangeDays } }),
+    enabled: Boolean(brand?.id),
+  });
+  const fetchCompetitorTrend = useServerFn(getCompetitorVisibilityTrend);
+  const { data: competitorTrend } = useQuery({
+    queryKey: ["competitor-trend", brand?.id, rangeDays],
+    queryFn: () => fetchCompetitorTrend({ data: { brandId: brand!.id, days: rangeDays } }),
     enabled: Boolean(brand?.id),
   });
 
@@ -124,6 +136,8 @@ function DashboardPage() {
               </Button>
             ))}
           </div>
+
+          {competitorTrend ? <CompetitorTrendChart data={competitorTrend} /> : null}
 
           {traffic ? <GscStatusPanel data={traffic} /> : null}
           {traffic ? <TrafficCharts data={traffic} /> : null}

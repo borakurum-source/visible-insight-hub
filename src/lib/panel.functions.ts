@@ -1189,3 +1189,30 @@ export const getCompetitorInsights = createServerFn({ method: "POST" })
 
     return { suggestions, totalCitations: (citations ?? []).length };
   });
+
+export const getCompetitorVisibilityTrend = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; days?: number }) => input)
+  .handler(async ({ data, context }) => {
+    const { buildCompetitorTrend } = await import("./competitor-trend.server");
+    const days = data.days ?? 30;
+    const since = new Date(Date.now() - days * 86400000).toISOString();
+    const [{ data: runs }, { data: intel }, { data: brand }] = await Promise.all([
+      context.supabase
+        .from("prompt_runs")
+        .select("created_at, brand_mentioned, raw_answer")
+        .eq("brand_id", data.brandId)
+        .gte("created_at", since)
+        .order("created_at", { ascending: true })
+        .limit(2000),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase.from("brands").select("name").eq("id", data.brandId).single(),
+    ]);
+
+    return buildCompetitorTrend(
+      (runs ?? []).map((r) => ({ created_at: r.created_at, brand_mentioned: Boolean(r.brand_mentioned), raw_answer: r.raw_answer })),
+      brand?.name ?? "Markanız",
+      ((intel?.competitors as string[] | null) ?? []).map(String),
+      days,
+    );
+  });
