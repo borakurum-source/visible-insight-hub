@@ -546,9 +546,12 @@ function Landing() {
     <MarketingShell>
       <Hero />
       <NeGoreceksiniz />
+      <NedenOneCite />
       <Problem />
       <NasilCalisir />
       <FilmFolkOrnegi />
+      <SonucVerenMarkalar />
+      <GorunurlukTaahhudu />
       <PlanlarVeKimIcin />
       <SSS />
       <SonCagri />
