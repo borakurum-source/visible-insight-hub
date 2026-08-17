@@ -396,6 +396,7 @@ function Landing() {
   return (
     <MarketingShell>
       <Hero />
+      <NeGoreceksiniz />
       <Problem />
       <NasilCalisir />
       <FilmFolkOrnegi />
