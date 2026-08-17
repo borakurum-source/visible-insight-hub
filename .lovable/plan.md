@@ -52,6 +52,38 @@ Kullanılmayan `SiteHeader`/`SiteFooter` bileşenleri silinir.
 - "Source → Signal → Action" gibi İngilizce çerçeve arka plana alınır; başlıklarda Türkçe iş dili kullanılır ("Hangi soruda kaynak olarak seçiliyorsunuz?").
 - Tekrarlayan jargon terimleri için ilk geçtiği yerde tek cümlelik açıklama.
 
+### 6. Tasarımsal geliştirmeler
+
+**Hiyerarşi ve ritim**
+- Her bölüm aynı kalıpta ilerliyor (eyebrow + başlık + 3 kart). Bölümler arası ritim değiştirilir: tam genişlik ürün görseli, iki sütunlu anlatım, koyu zeminli vurgu bloğu, sayısal kanıt şeridi sırayla kullanılır.
+- Başlık ölçekleri tek bir merdivene oturtulur (hero > bölüm > kart). Şu an 3xl/4xl/5xl karışık.
+
+**Ürünü göstermek**
+- Ekran görüntülerinin üzerine tek bir vurgu rozeti/işaretçi konur ("atıf payı %58,9", "bu kanıt eksik") — kullanıcıya nereye bakacağı söylenir.
+- Ana sayfada 3 sekmeli tek ürün çerçevesi: Skor / Rakip trendi / Görevler.
+
+**Kanıt ve güven katmanı**
+- Hero altına sabit, taranabilir "ölçülen motorlar" şeridi (ChatGPT, Perplexity, Gemini, Copilot); dönen yazı yerine sabit sıra.
+- Vaka sonucu büyük öncesi/sonrası rakam bloğuna çevrilir: %30,7 → %58,9.
+
+**Renk ve vurgu disiplini**
+- Cyan şu an eyebrow, link, başlık vurgusu ve butonda birden kullanılıyor; anlamı zayıflıyor. Kural: cyan yalnızca birincil aksiyon ve tek vurgu kelimesi için.
+- Önem sırasına göre iki kart yüzeyi tanımlanır (nötr / vurgulu); hepsi aynı kenarlıkta olmaz.
+
+**Tipografi**
+- Uzun paragraflara satır uzunluğu sınırı (max-w) uygulanır.
+- Mono font yalnızca sayısal metrik ve etiketlerde kalır.
+
+**Mobil**
+- Hero'da başlık + tek CTA + güven satırı ilk ekrana sığar.
+- Bölüm dolguları mobilde azaltılır; kart aralıkları sıkılaştırılır.
+
+**Mikro etkileşim**
+- Tek tutarlı hover dili: yükselme + ok kayması + kenarlığın vurgu rengine geçişi.
+- Bölüm girişlerinde aynı süre/eğri ile hafif yukarı kayma animasyonu (mevcut marketing-motion).
+
+Tümü mevcut token seti ve bileşenlerle yapılır; yeni palet veya font eklenmez.
+
 ## Teknik notlar
 - Kaldırılan `/platform` için `src/routes/platform.index.tsx` yerine `/ozellikler`'e redirect (`beforeLoad` + `redirect`), `platform.tsx` layout korunur.
 - `MarketingShell` içindeki `primaryLinks` ve `footerGroups` yeniden düzenlenir.
