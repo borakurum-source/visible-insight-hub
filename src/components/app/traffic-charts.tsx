@@ -98,8 +98,16 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
   const bingCtr = data.bing?.totals.impressions
     ? Math.round((data.bing.totals.clicks / data.bing.totals.impressions) * 1000) / 10
     : 0;
+  const bingPeriod =
+    data.bing?.startDate && data.bing?.endDate
+      ? `${shortDate(data.bing.startDate)} – ${shortDate(data.bing.endDate)}`
+      : `son ${data.rangeDays} gün`;
+  const bingAi = data.bing?.ai;
+  // Dinamik siralama: yapay zeka verisi varsa AI bloklari en uste gelir.
+  const hasAiData =
+    data.aiOverview.total > 0 || data.aiReferral.total > 0 || (data.ga4.ai?.sessions ?? 0) > 0 || Boolean(bingAi?.available);
 
-  return (
+  const aiSection = (
     <>
     <SectionTitle
       title="Yapay zeka görünürlüğü"
@@ -160,7 +168,7 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
       <MetricCard
         icon={Users}
         days={data.rangeDays}
-        metric="ga4-sessions"
+        metric="ga4-ai"
         title="AI Referral Trafiği (GA4)"
         value={data.ga4.connected ? fmt(data.ga4.ai?.sessions ?? 0) : "—"}
         caption={
