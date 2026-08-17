@@ -207,7 +207,7 @@ export const generatePromptCandidates = createServerFn({ method: "POST" })
     if (!brand) throw new Error("Marka bulunamadı");
 
     const { resolveSystemPrompt } = await import("./system-prompts.server");
-    const result = await aiJson<{ items: Array<{ text: string; category: string; intent: string }> }>(
+    const result = await aiJson<{ items: Array<{ text: string; category: string; intent: string; funnel?: string }> }>(
       [
         { role: "system", content: await resolveSystemPrompt(context.supabase, "prompt_generation") },
         { role: "user", content: `Marka: ${brand.name} (${brand.domain})\nÖzet: ${intel?.summary ?? ""}\nÜrünler: ${JSON.stringify(intel?.products ?? [])}\nKitle: ${JSON.stringify(intel?.audiences ?? [])}\nRakipler: ${JSON.stringify(intel?.competitors ?? [])}\nBilgi bankası: ${(sources ?? []).map((s) => s.title).join(", ")}` },
@@ -220,6 +220,7 @@ export const generatePromptCandidates = createServerFn({ method: "POST" })
       text: item.text,
       category: item.category || "genel",
       intent: item.intent || null,
+      funnel_stage: ["top", "middle", "bottom"].includes(String(item.funnel)) ? String(item.funnel) : "middle",
       status: "candidate",
       origin: "ai",
     }));
@@ -522,6 +523,45 @@ export const completeOnboarding = createServerFn({ method: "POST" })
       .from("brands").update({ onboarding_completed: true, onboarding_step: 4 }).eq("id", data.brandId);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+// Kurulum sihirbazında prompt metni ve huni aşamasını günceller.
+export const updatePrompts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { items: Array<{ id: string; text: string; funnelStage: string }> }) => input)
+  .handler(async ({ data, context }) => {
+    for (const item of data.items) {
+      const stage = ["top", "middle", "bottom"].includes(item.funnelStage) ? item.funnelStage : "middle";
+      await context.supabase
+        .from("prompts")
+        .update({ text: item.text, funnel_stage: stage })
+        .eq("id", item.id);
+    }
+    return { ok: true };
+  });
+
+// Kurulumda seçilen yapay zeka motorlarını saklar.
+export const setBrandEngines = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; engines: string[] }) => input)
+  .handler(async ({ data, context }) => {
+    const allowed = ["perplexity", "deepseek"];
+    const engines = data.engines.filter((e) => allowed.includes(e));
+    const { error } = await context.supabase
+      .from("brands")
+      .update({ engines: engines.length ? engines : ["perplexity"] })
+      .eq("id", data.brandId);
+    if (error) throw new Error(error.message);
+    return { ok: true, engines };
+  });
+
+export const getBrandEngines = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: row } = await context.supabase
+      .from("brands").select("engines").eq("id", data.brandId).maybeSingle();
+    return { engines: (row?.engines as string[] | null) ?? ["perplexity", "deepseek"] };
   });
 
 export const getBrandOverview = createServerFn({ method: "POST" })
