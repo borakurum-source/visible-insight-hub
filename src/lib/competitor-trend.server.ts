@@ -64,7 +64,7 @@ export function buildCompetitorTrend(
       const current = values.length ? values[values.length - 1]! : 0;
       const first = values.find((v) => v > 0) ?? 0;
       const totalMentions = rows.filter((row) =>
-        brand.isOwn ? row.brand_mentioned : mentions(row.raw_answer ?? "", brand.match),
+        brand.isOwn ? row.brand_mentioned : competitorMatches(brand.match, { answer: row.raw_answer ?? "" }),
       ).length;
       return { key: brand.key, name: brand.name, isOwn: brand.isOwn, current, change: current - first, mentions: totalMentions };
     })
