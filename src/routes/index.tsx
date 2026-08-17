@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { MarketingShell } from "@/components/site/MarketingShell";
 import { Reveal } from "@/components/site/marketing-motion";
-import { HeroVisual } from "@/components/site/hero-visual";
 import { PublicReportAnalyzer } from "@/components/site/public-report-analyzer";
 import { MetricRise } from "@/components/site/citation-motion";
 import { ProductTabs, type ProductTab } from "@/components/site/product-tabs";
@@ -26,7 +25,6 @@ import shotContent from "@/assets/landing/shot-content.webp";
 import shotDashboard from "@/assets/features/dashboard.webp.asset.json";
 import shotCompetitors from "@/assets/features/competitors.webp.asset.json";
 import shotTasks from "@/assets/features/tasks.webp.asset.json";
-import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 import heroEvidenceGap from "@/assets/landing/hero-evidence-gap.webp";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
 
