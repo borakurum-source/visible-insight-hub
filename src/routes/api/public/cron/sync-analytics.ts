@@ -19,12 +19,13 @@ export const Route = createFileRoute("/api/public/cron/sync-analytics")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { buildGscSnapshot } = await import("@/lib/gsc.server");
         const { buildGa4Snapshot } = await import("@/lib/ga4.server");
+        const { buildBingSnapshot, getBrandBingKey } = await import("@/lib/bing.server");
 
         const { data: connections } = await supabaseAdmin
           .from("integration_connections")
           .select("brand_id, provider, property_id")
-          .in("provider", ["gsc", "ga4"])
-          .eq("status", "bagli");
+          .in("provider", ["gsc", "ga4", "bing"])
+          .in("status", ["bağlı", "bagli"]);
 
         const today = new Date().toISOString().slice(0, 10);
         const results: Array<{ brandId: string; provider: string; ok: boolean; error?: string }> = [];
@@ -36,7 +37,9 @@ export const Route = createFileRoute("/api/public/cron/sync-analytics")({
             const payload =
               connection.provider === "gsc"
                 ? await buildGscSnapshot(connection.brand_id, siteUrl)
-                : await buildGa4Snapshot(connection.brand_id, siteUrl);
+                : connection.provider === "bing"
+                  ? await buildBingSnapshot(await getBrandBingKey(supabaseAdmin, connection.brand_id), siteUrl)
+                  : await buildGa4Snapshot(connection.brand_id, siteUrl);
             await supabaseAdmin.from("analytics_snapshots").upsert(
               { brand_id: connection.brand_id, provider: connection.provider, snapshot_date: today, payload },
               { onConflict: "brand_id,provider,snapshot_date" },
