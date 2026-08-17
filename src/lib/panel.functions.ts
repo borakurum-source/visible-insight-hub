@@ -1180,7 +1180,8 @@ export const getCompetitorInsights = createServerFn({ method: "POST" })
       context.supabase.from("brands").select("domain").eq("id", data.brandId).single(),
     ]);
 
-    const tracked = ((intel?.competitors as string[] | null) ?? []).map((name) => String(name).toLowerCase());
+    const { normalizeCompetitors, domainIsTracked } = await import("./competitors");
+    const tracked = normalizeCompetitors(intel?.competitors);
     const ownDomain = (brand?.domain ?? "").replace(/^https?:\/\//, "").replace(/^www\./, "").toLowerCase();
     const counts = new Map<string, number>();
     for (const row of citations ?? []) {
@@ -1196,7 +1197,7 @@ export const getCompetitorInsights = createServerFn({ method: "POST" })
       .map(([domain, mentions]) => ({
         domain,
         mentions,
-        tracked: tracked.some((name) => domain.includes(name) || name.includes(domain.split(".")[0] ?? "")),
+        tracked: domainIsTracked(tracked, domain),
       }));
 
     return { suggestions, totalCitations: (citations ?? []).length };
@@ -1207,6 +1208,7 @@ export const getCompetitorVisibilityTrend = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string; days?: number }) => input)
   .handler(async ({ data, context }) => {
     const { buildCompetitorTrend } = await import("./competitor-trend.server");
+    const { normalizeCompetitors } = await import("./competitors");
     const days = data.days ?? 30;
     const since = new Date(Date.now() - days * 86400000).toISOString();
     const [{ data: runs }, { data: intel }, { data: brand }] = await Promise.all([
@@ -1224,7 +1226,7 @@ export const getCompetitorVisibilityTrend = createServerFn({ method: "POST" })
     return buildCompetitorTrend(
       (runs ?? []).map((r) => ({ created_at: r.created_at, brand_mentioned: Boolean(r.brand_mentioned), raw_answer: r.raw_answer })),
       brand?.name ?? "Markanız",
-      ((intel?.competitors as string[] | null) ?? []).map(String),
+      normalizeCompetitors(intel?.competitors),
       days,
     );
   });
