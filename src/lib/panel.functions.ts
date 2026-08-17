@@ -1186,7 +1186,7 @@ export const getCompetitors = createServerFn({ method: "POST" })
 
 export const saveCompetitors = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; competitors: Array<{ name: string; domain?: string }> }) => input)
+  .inputValidator((input: { brandId: string; competitors: Array<{ name: string; domain?: string; type?: string }> }) => input)
   .handler(async ({ data, context }) => {
     const { normalizeCompetitors } = await import("./competitors");
     const { data: current } = await context.supabase
