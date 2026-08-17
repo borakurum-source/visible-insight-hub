@@ -22,9 +22,9 @@ import {
   AUTHORITY_BADGES,
   COMMITMENT_CONDITIONS,
   COMMITMENT_MILESTONES,
-  REFERENCE_BRANDS,
   TRUST_CARDS,
 } from "@/lib/trustSignals";
+import { ClientLogoStrip, ClientLogoWall } from "@/components/site/client-logos";
 import { formatUsd, pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
 import shotKb from "@/assets/landing/shot-kb.webp";
@@ -273,20 +273,19 @@ function SonucVerenMarkalar() {
             Farklı sektörlerde aynı akış çalışıyor: prompt setini sabitle, eksik kanıtı üret, görünürlüğü yeniden ölç.
           </p>
         </div>
-        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {REFERENCE_BRANDS.map((brand) => (
-            <div key={brand.name} className="rounded-xl border border-border bg-background p-4">
-              <p className="text-sm font-bold text-foreground">{brand.name}</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">{brand.sector}</p>
-            </div>
-          ))}
+        <div className="mt-10">
+          <ClientLogoWall />
+        </div>
+        <div className="mt-4">
           <Link
             to="/proof/filmfolk"
-            className="flex flex-col justify-between rounded-xl border border-primary bg-background p-4 transition-colors hover:bg-muted"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary bg-background p-5 transition-colors hover:bg-muted"
           >
-            <p className="text-sm font-bold text-foreground">FilmFolk</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">AI Kaynak Payı %30,7 → %58,9</p>
-            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary">
+            <div>
+              <p className="text-sm font-bold text-foreground">FilmFolk vaka incelemesi</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">AI Kaynak Payı %30,7 → %58,9</p>
+            </div>
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
               Vakayı inceleyin <ArrowRight className="h-3.5 w-3.5" />
             </span>
           </Link>
@@ -545,6 +544,7 @@ function Landing() {
   return (
     <MarketingShell>
       <Hero />
+      <ClientLogoStrip />
       <NeGoreceksiniz />
       <NedenOneCite />
       <Problem />

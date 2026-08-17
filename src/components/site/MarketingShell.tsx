@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/site/BrandLogo";
 
 const primaryLinks = [
-  { href: "/ozellikler", label: "Ürün" },
+  { href: "/ozellikler", label: "Özellikler" },
   { href: "/solutions/agencies", label: "Çözümler" },
   { href: "/metodoloji", label: "Metodoloji" },
   { href: "/fiyatlandirma", label: "Fiyatlandırma" },
