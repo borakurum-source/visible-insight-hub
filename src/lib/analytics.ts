@@ -5,7 +5,7 @@ import { useRouterState } from "@tanstack/react-router";
 import { CONSENT_EVENT, hasConsent } from "./consent";
 
 export const GA_MEASUREMENT_ID =
-  (import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY as string | undefined) ||
+  (import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY"] as string | undefined) ||
   "G-10XBL984LZ";
 
 declare global {
