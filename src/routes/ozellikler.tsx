@@ -157,7 +157,7 @@ const mainFeatures: MainFeature[] = [
     alt: "OneCite marka zekası ekranı: 3D vektör haritası ve bilgi parçaları",
     caption: "Marka Zekası — canlı 3B vektör haritası",
     href: "/platform/evidence-gaps",
-    hrefLabel: "Platformu keşfet",
+    hrefLabel: "Kanıt boşluklarını gör",
   },
   {
     id: "icerik",
