@@ -5,20 +5,22 @@ import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/site/BrandLogo";
 
 const primaryLinks = [
-  { href: "/ozellikler", label: "Özellikler" },
-  { href: "/platform", label: "Platform" },
-  { href: "/solutions/agencies", label: "Ajanslar" },
-  { href: "/proof/filmfolk", label: "Vaka" },
+  { href: "/ozellikler", label: "Ürün" },
+  { href: "/solutions/agencies", label: "Çözümler" },
   { href: "/fiyatlandirma", label: "Fiyatlandırma" },
   { href: "/makaleler", label: "Kaynaklar" },
 ];
 
+const solutionsMenu = [
+  { href: "/solutions/agencies", label: "Ajanslar için", desc: "Birden fazla markayı tek panelden yönetin." },
+  { href: "/proof/filmfolk", label: "FilmFolk vakası", desc: "Atıf payı %30,7 → %58,9." },
+];
+
 const footerGroups = [
   {
-    title: "Platform",
+    title: "Ürün",
     links: [
-      { href: "/ozellikler", label: "Özellikler" },
-      { href: "/platform", label: "Genel bakış" },
+      { href: "/ozellikler", label: "Özellikler ve çalışma modeli" },
       { href: "/platform/citation-share", label: "Atıf Payı" },
       { href: "/platform/evidence-gaps", label: "Eksik Kanıtlar" },
       { href: "/ucretsiz-yapay-zeka-gorunurluk-raporu", label: "Ücretsiz rapor" },
