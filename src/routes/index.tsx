@@ -291,25 +291,78 @@ function SonucVerenMarkalar() {
             Farklı sektörlerde aynı akış çalışıyor: prompt setini sabitle, eksik kanıtı üret, görünürlüğü yeniden ölç.
           </p>
         </div>
-        <div className="mt-10">
-          <ClientLogoWall />
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="case-gallery">
+          {CASE_RESULTS.map((item) => (
+            <CaseCard key={item.brand} item={item} />
+          ))}
         </div>
-        <div className="mt-4">
-          <Link
-            to="/proof/filmfolk"
-            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary bg-background p-5 transition-colors hover:bg-muted"
-          >
-            <div>
-              <p className="text-sm font-bold text-foreground">FilmFolk vaka incelemesi</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">AI Kaynak Payı %30,7 → %58,9</p>
-            </div>
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
-              Vakayı inceleyin <ArrowRight className="h-3.5 w-3.5" />
-            </span>
-          </Link>
+        <p className="mt-4 text-xs leading-5 text-muted-foreground">
+          Rakamlar ilgili dönemde takip edilen prompt setinin ağırlıklı AI kaynak payıdır. "Doğrulanmış" etiketli
+          vakaların ham ölçüm raporu yayımlanmıştır; diğerleri marka onayıyla anonim olmayan özet verilerdir.
+        </p>
+        <div className="mt-10 border-t border-border pt-8">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Bizi tercih eden markalar</p>
+          <div className="mt-5">
+            <ClientLogoWall />
+          </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function CaseCard({ item }: { item: (typeof CASE_RESULTS)[number] }) {
+  const delta = Math.round((item.after - item.before) * 10) / 10;
+  const logo = item.logoSlug ? CASE_LOGOS[item.logoSlug] : undefined;
+  const inner = (
+    <>
+      <div className="flex h-9 items-center">
+        {logo ? (
+          <img
+            src={logo}
+            alt={`${item.brand} logosu`}
+            loading="lazy"
+            className="max-h-8 w-auto max-w-[130px] object-contain opacity-80"
+          />
+        ) : (
+          <span className="text-base font-extrabold tracking-[-0.02em] text-foreground">{item.brand}</span>
+        )}
+      </div>
+      <p className="mt-3 text-xs leading-5 text-muted-foreground">{item.sector}</p>
+      <div className="mt-4 flex items-baseline gap-2 font-mono">
+        <span className="text-sm text-muted-foreground line-through">%{item.before.toString().replace(".", ",")}</span>
+        <ArrowRight className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+        <span className="text-2xl font-bold text-foreground">%{item.after.toString().replace(".", ",")}</span>
+      </div>
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted" aria-hidden="true">
+        <div className="h-full rounded-full bg-primary" style={{ width: `${item.after}%` }} />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+        <span className="rounded-md bg-primary/10 px-2 py-0.5 font-mono font-bold text-primary">
+          +{delta.toString().replace(".", ",")} puan
+        </span>
+        <span className="text-muted-foreground">{item.window}</span>
+        {item.verified ? (
+          <span className="inline-flex items-center gap-1 font-semibold text-primary">
+            <BadgeCheck className="h-3 w-3" aria-hidden="true" /> Doğrulanmış
+          </span>
+        ) : null}
+      </div>
+      {item.to ? (
+        <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary">
+          Vakayı inceleyin <ArrowRight className="h-3.5 w-3.5" />
+        </span>
+      ) : null}
+    </>
+  );
+  const className =
+    "flex flex-col rounded-xl border border-border bg-background p-5 transition-colors hover:border-primary";
+  return item.to ? (
+    <Link to={item.to} className={className}>
+      {inner}
+    </Link>
+  ) : (
+    <div className={className}>{inner}</div>
   );
 }
 
