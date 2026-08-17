@@ -56,6 +56,8 @@ async function perplexityJsonUncached<T>(
   schema: { name: string; schema: object },
   fallback: T,
 ): Promise<PerplexityResult<T>> {
+  const { recordApiUsage } = await import("./observability.server");
+  const startedAt = Date.now();
   const key = process.env["PERPLEXITY_API_KEY"];
   if (!key) {
     console.warn("PERPLEXITY_API_KEY missing");
@@ -76,6 +78,12 @@ async function perplexityJsonUncached<T>(
     const bodyText = await res.text();
     if (!res.ok) {
       console.error("Perplexity error", res.status, bodyText);
+      recordApiUsage({
+        provider: "perplexity", operation: "chat.json", model: "sonar",
+        durationMs: Date.now() - startedAt,
+        status: res.status === 429 ? "rate_limited" : "error",
+        error: `${res.status} ${bodyText.slice(0, 400)}`,
+      });
       if (res.status === 401 && bodyText.includes("insufficient_quota")) {
         throw new Error("Perplexity API credits exhausted. Buy credits at https://console.perplexity.ai");
       }
@@ -85,7 +93,14 @@ async function perplexityJsonUncached<T>(
       choices?: Array<{ message?: { content?: string } }>;
       citations?: string[];
       search_results?: RawSearchResult[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
     };
+    recordApiUsage({
+      provider: "perplexity", operation: "chat.json", model: "sonar",
+      durationMs: Date.now() - startedAt,
+      inputTokens: json.usage?.prompt_tokens ?? 0,
+      outputTokens: json.usage?.completion_tokens ?? 0,
+    });
     const sources = buildCitationSources(json.citations, json.search_results);
     const content = json.choices?.[0]?.message?.content;
     if (!content) return { result: fallback, citations: json.citations ?? [], sources };
@@ -110,6 +125,8 @@ export async function perplexitySearch(messages: ChatMessage[]): Promise<{ answe
 async function perplexitySearchUncached(
   messages: ChatMessage[],
 ): Promise<{ answer: string; citations: string[] }> {
+  const { recordApiUsage } = await import("./observability.server");
+  const startedAt = Date.now();
   const key = process.env["PERPLEXITY_API_KEY"];
   if (!key) throw new Error("PERPLEXITY_API_KEY missing");
   const res = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -125,6 +142,12 @@ async function perplexitySearchUncached(
   const bodyText = await res.text();
   if (!res.ok) {
     console.error("Perplexity error", res.status, bodyText);
+    recordApiUsage({
+      provider: "perplexity", operation: "search", model: "sonar",
+      durationMs: Date.now() - startedAt,
+      status: res.status === 429 ? "rate_limited" : "error",
+      error: `${res.status} ${bodyText.slice(0, 400)}`,
+    });
     if (res.status === 401 && bodyText.includes("insufficient_quota")) {
       throw new Error("Perplexity API credits exhausted. Buy credits at https://console.perplexity.ai");
     }
@@ -133,7 +156,14 @@ async function perplexitySearchUncached(
   const json = JSON.parse(bodyText) as {
     choices?: Array<{ message?: { content?: string } }>;
     citations?: string[];
+    usage?: { prompt_tokens?: number; completion_tokens?: number };
   };
+  recordApiUsage({
+    provider: "perplexity", operation: "search", model: "sonar",
+    durationMs: Date.now() - startedAt,
+    inputTokens: json.usage?.prompt_tokens ?? 0,
+    outputTokens: json.usage?.completion_tokens ?? 0,
+  });
   return {
     answer: json.choices?.[0]?.message?.content ?? "",
     citations: json.citations ?? [],

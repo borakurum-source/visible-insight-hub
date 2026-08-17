@@ -230,6 +230,8 @@ const USER_AGENT = "Mozilla/5.0 (compatible; OneCiteBot/1.0; +https://1cite.com)
 
 /** JS ile render edilen sayfalar icin Firecrawl'a duser. Baglanti yoksa null doner. */
 export async function renderWithFirecrawl(url: string): Promise<ExtractedPage | null> {
+  const { recordApiUsage } = await import("./observability.server");
+  const startedAt = Date.now();
   const key = process.env["FIRECRAWL_API_KEY"];
   if (!key) return null;
   const gatewayKey = process.env["LOVABLE_API_KEY"];
@@ -253,8 +255,15 @@ export async function renderWithFirecrawl(url: string): Promise<ExtractedPage | 
       | null;
     if (!res.ok) {
       console.error(`Firecrawl render failed [${res.status}]: ${payload?.error ?? "bilinmeyen hata"}`);
+      recordApiUsage({
+        provider: "firecrawl", operation: "scrape",
+        durationMs: Date.now() - startedAt,
+        status: res.status === 429 ? "rate_limited" : "error",
+        error: `${res.status} ${payload?.error ?? ""}`,
+      });
       return null;
     }
+    recordApiUsage({ provider: "firecrawl", operation: "scrape", durationMs: Date.now() - startedAt });
     const markdown = payload?.markdown ?? payload?.data?.markdown ?? "";
     if (!markdown.trim()) return null;
     const metadata = payload?.metadata ?? payload?.data?.metadata ?? {};
@@ -264,6 +273,10 @@ export async function renderWithFirecrawl(url: string): Promise<ExtractedPage | 
     });
   } catch (error) {
     console.error("Firecrawl render error", error);
+    recordApiUsage({
+      provider: "firecrawl", operation: "scrape",
+      durationMs: Date.now() - startedAt, status: "error", error: String(error),
+    });
     return null;
   }
 }

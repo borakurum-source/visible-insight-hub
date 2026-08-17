@@ -58,12 +58,22 @@ export async function sendTemplateEmail(
 
   const templateData = options.templateData ?? {}
   const element = React.createElement(template.component, templateData)
-  const html = await render(element)
-  const text = await render(element, { plainText: true })
-  const subject =
+  let html = await render(element)
+  let text = await render(element, { plainText: true })
+  let subject =
     typeof template.subject === 'function'
       ? template.subject(templateData)
       : template.subject
+
+  // Yonetim panelinden duzenlenmis sablon varsa onu kullan.
+  const override = await loadTemplateOverride(templateName, templateData)
+  if (override) {
+    subject = override.subject
+    html = override.html
+    text = override.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  }
+
+  const { recordEmailLog } = await import('@/lib/observability.server')
 
   try {
     await sendLovableEmail(
@@ -83,10 +93,41 @@ export async function sendTemplateEmail(
     )
   } catch (error) {
     if (error instanceof EmailAPIError && error.code === 'recipient_suppressed') {
+      recordEmailLog({ toEmail: recipient, subject, templateKey: templateName, status: 'suppressed' })
       return { sent: false, reason: 'recipient_suppressed' }
     }
+    recordEmailLog({
+      toEmail: recipient, subject, templateKey: templateName, status: 'failed', error: String(error),
+    })
     throw error
   }
 
+  recordEmailLog({ toEmail: recipient, subject, templateKey: templateName, status: 'sent' })
   return { sent: true }
+}
+
+/** Veritabanindaki sablon override'ini okur ve {{degisken}} yer tutucularini doldurur. */
+async function loadTemplateOverride(
+  key: string,
+  data: Record<string, any>
+): Promise<{ subject: string; html: string } | null> {
+  try {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data: row } = await supabaseAdmin
+      .from('email_templates')
+      .select('subject, body')
+      .eq('key', key)
+      .maybeSingle()
+    if (!row?.body) return null
+    return { subject: fillPlaceholders(row.subject, data), html: fillPlaceholders(row.body, data) }
+  } catch {
+    return null
+  }
+}
+
+export function fillPlaceholders(input: string, data: Record<string, any>): string {
+  return input.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_match, path: string) => {
+    const value = path.split('.').reduce<any>((acc, part) => (acc == null ? acc : acc[part]), data)
+    return value == null ? '' : String(value)
+  })
 }
