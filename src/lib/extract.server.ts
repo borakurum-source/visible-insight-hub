@@ -32,7 +32,11 @@ const NOISE_PATTERN =
 
 // Bu cumleler sayfadan bagimsiz gurultudur; satir bazinda atilir.
 const NOISE_LINE_PATTERN =
-  /(çerez|cerez|cookie|kvkk|gizlilik politikas|kullanım koşullar|kullanim kosullar|tüm hakları saklıdır|tum haklari saklidir|all rights reserved|bültenimize|bultenimize|newsletter|abone ol|subscribe|sepete ekle|giriş yap|giris yap|kayıt ol|kayit ol|menüyü aç|menuyu ac)/i;
+  /(çerez|cerez|cookie|kvkk|gizlilik politikas|kullanım koşullar|kullanim kosullar|tüm hakları saklıdır|tum haklari saklidir|all rights reserved|bültenimize|bultenimize|newsletter|abone ol|subscribe|sepete ekle|giriş yap|giris yap|kayıt ol|kayit ol|menüyü aç|menuyu ac|we value your privacy|consent preferences|manage consent|accept all|reject all|customise consent|customize consent|privacy policy|terms of service|book a demo|sign in|sign up|log in)/i;
+
+// Cerez tablosu satirlari: "1 year 1 month 4 days", "_ga | 2 years | ...".
+const CONSENT_ROW_PATTERN =
+  /^(_|\w+_)?[\w.-]*\s*\|?\s*(\d+\s*(year|month|day|hour|minute|second|yıl|ay|gün|saat)s?\b)/i;
 
 function stripNoise($: CheerioAPI) {
   $(NOISE_SELECTORS.join(",")).remove();
@@ -168,6 +172,7 @@ export function extractFromHtml(html: string, maxChars = 120000): ExtractedPage 
       if (line.startsWith("##")) return line.replace(/#/g, "").trim().length > 1;
       if (line.length < 3) return false;
       if (NOISE_LINE_PATTERN.test(line) && line.length < 220) return false;
+      if (CONSENT_ROW_PATTERN.test(line) && line.length < 220) return false;
       // Menu kirintisi: kisa, noktalama icermeyen tek kelimelik satirlar.
       if (line.length < 25 && !/[.!?:]/.test(line) && line.split(" ").length <= 3) return false;
       return true;
@@ -200,6 +205,7 @@ export function extractFromMarkdown(markdown: string, meta: { title?: string; de
       if (!line || line === "---") return false;
       if (line.startsWith("##")) return line.replace(/#/g, "").trim().length > 1;
       if (NOISE_LINE_PATTERN.test(line) && line.length < 220) return false;
+      if (CONSENT_ROW_PATTERN.test(line) && line.length < 220) return false;
       if (line.length < 25 && !/[.!?:]/.test(line) && line.split(" ").length <= 3) return false;
       return true;
     });
