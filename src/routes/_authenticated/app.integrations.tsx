@@ -9,19 +9,26 @@ import { PanelSubnav, WORKSPACE_SUBNAV } from "@/components/app/panel-subnav";
 import { QueryEmpty, QuerySkeleton } from "@/components/app/panel-query-states";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useActiveBrand } from "@/lib/use-panel";
 import {
   connectGa4Property,
   connectGscProperty,
+  connectBingSite,
+  disconnectBing,
   disconnectGoogleAccount,
   disconnectIntegration,
+  getBingStatus,
   getGoogleAccount,
   getIntegrations,
+  listBingSiteOptions,
   listGa4PropertyOptions,
   listGscProperties,
+  saveBingApiKey,
   startGoogleConnect,
+  syncBing,
   syncGa4,
   syncGsc,
 } from "@/lib/integrations.functions";
