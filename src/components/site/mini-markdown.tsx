@@ -2,9 +2,21 @@
 // makale içeriklerindeki başlık, paragraf, liste, tablo, alıntı ve bağlantı
 // kalıplarını karşılar.
 function inline(text: string, keyPrefix: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
+  const parts = text.split(/(!?\[[^\]]*\]\([^)]+\)|\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     const key = `${keyPrefix}-${i}`;
+    const image = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (image) {
+      return (
+        <img
+          key={key}
+          src={image[2]}
+          alt={image[1]}
+          loading="lazy"
+          className="my-6 w-full rounded-2xl border border-border object-cover"
+        />
+      );
+    }
     const bold = part.match(/^\*\*([^*]+)\*\*$/);
     if (bold) return <strong key={key}>{bold[1]}</strong>;
     const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
@@ -22,6 +34,17 @@ export function MiniMarkdown({ content }: { content: string }) {
     const line = lines[i] ?? "";
     if (!line.trim()) { i++; continue; }
     if (line.startsWith("---")) { i++; continue; }
+    const standaloneImage = line.trim().match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (standaloneImage) {
+      blocks.push(
+        <figure key={key++} className="my-8">
+          <img src={standaloneImage[2]} alt={standaloneImage[1]} loading="lazy" className="w-full rounded-2xl border border-border object-cover" />
+          {standaloneImage[1] ? <figcaption className="mt-2 text-center text-xs text-muted-foreground">{standaloneImage[1]}</figcaption> : null}
+        </figure>,
+      );
+      i++;
+      continue;
+    }
     if (line.startsWith("# ")) { blocks.push(<h1 key={key++} className="text-3xl font-extrabold text-foreground mt-10 mb-4">{inline(line.slice(2), `h1-${key}`)}</h1>); i++; continue; }
     if (line.startsWith("## ")) { blocks.push(<h2 key={key++} className="text-2xl font-extrabold text-foreground mt-10 mb-4">{inline(line.slice(3), `h2-${key}`)}</h2>); i++; continue; }
     if (line.startsWith("### ")) { blocks.push(<h3 key={key++} className="text-xl font-bold text-foreground mt-8 mb-3">{inline(line.slice(4), `h3-${key}`)}</h3>); i++; continue; }
