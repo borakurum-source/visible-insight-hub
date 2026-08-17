@@ -38,6 +38,10 @@ const NOISE_LINE_PATTERN =
 const CONSENT_ROW_PATTERN =
   /^(_|\w+_)?[\w.-]*\s*\|?\s*(\d+\s*(year|month|day|hour|minute|second|yıl|ay|gün|saat)s?\b)/i;
 
+// Cerez aciklama cumleleri uzun olabilir; uzunluktan bagimsiz atilir.
+const COOKIE_DESCRIPTION_PATTERN =
+  /(sets? this cookie|cookie is (used|set)|cookies? (is|are) (set|used)|cookie stores|this cookie is|çerez(i|ler)? (kullan|saklan)|bu çerez)/i;
+
 function stripNoise($: CheerioAPI) {
   $(NOISE_SELECTORS.join(",")).remove();
   $("*").each((_, element) => {
@@ -173,6 +177,7 @@ export function extractFromHtml(html: string, maxChars = 120000): ExtractedPage 
       if (line.length < 3) return false;
       if (NOISE_LINE_PATTERN.test(line) && line.length < 220) return false;
       if (CONSENT_ROW_PATTERN.test(line) && line.length < 220) return false;
+      if (COOKIE_DESCRIPTION_PATTERN.test(line)) return false;
       // Menu kirintisi: kisa, noktalama icermeyen tek kelimelik satirlar.
       if (line.length < 25 && !/[.!?:]/.test(line) && line.split(" ").length <= 3) return false;
       return true;
@@ -206,6 +211,7 @@ export function extractFromMarkdown(markdown: string, meta: { title?: string; de
       if (line.startsWith("##")) return line.replace(/#/g, "").trim().length > 1;
       if (NOISE_LINE_PATTERN.test(line) && line.length < 220) return false;
       if (CONSENT_ROW_PATTERN.test(line) && line.length < 220) return false;
+      if (COOKIE_DESCRIPTION_PATTERN.test(line)) return false;
       if (line.length < 25 && !/[.!?:]/.test(line) && line.split(" ").length <= 3) return false;
       return true;
     });
