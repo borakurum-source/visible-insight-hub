@@ -76,6 +76,38 @@ export type Database = {
           },
         ]
       }
+      bing_webmaster_accounts: {
+        Row: {
+          api_key: string
+          brand_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          api_key: string
+          brand_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          brand_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bing_webmaster_accounts_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: true
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_domains: {
         Row: {
           brand_id: string
