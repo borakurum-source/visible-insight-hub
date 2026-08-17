@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Hint } from "@/components/app/hint";
+import { cleanDomain, type CompetitorEntry } from "@/lib/competitors";
 import { getCompetitors, saveCompetitors, searchCompetitors } from "@/lib/panel.functions";
 
 // Rakibini bilmeyen kullanıcı için: sektörden gerçek rakip adayları bulan arama kartı.
@@ -19,6 +20,8 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
   const runSearch = useServerFn(searchCompetitors);
   const persist = useServerFn(saveCompetitors);
   const [query, setQuery] = useState("");
+  const [manualName, setManualName] = useState("");
+  const [manualDomain, setManualDomain] = useState("");
   const [results, setResults] = useState<Array<{ name: string; domain: string; reason: string }>>([]);
 
   const saved = useQuery({
@@ -57,7 +60,7 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
   });
 
   const save = useMutation({
-    mutationFn: (list: string[]) => persist({ data: { brandId, competitors: list } }),
+    mutationFn: (list: CompetitorEntry[]) => persist({ data: { brandId, competitors: list } }),
     onSuccess: async (result) => {
       if (!result.ok) {
         await queryClient.invalidateQueries({ queryKey: ["competitors", brandId] });
@@ -72,10 +75,14 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
   });
 
   // Sunucuya gitmeden once yerel validasyon: bos ad, tekrar ve kota kontrolu.
-  function addCompetitor(name: string) {
+  function addCompetitor(name: string, domain = "") {
     const clean = name.trim();
-    if (!clean) return;
-    if (list.some((item) => item.toLowerCase() === clean.toLowerCase())) {
+    const cleanedDomain = cleanDomain(domain);
+    if (!clean && !cleanedDomain) {
+      toast.info("Rakip adı veya alan adı girin.");
+      return;
+    }
+    if (list.some((item) => item.name.toLowerCase() === clean.toLowerCase() || (cleanedDomain && item.domain === cleanedDomain))) {
       toast.info(`${clean} zaten takip listenizde.`);
       return;
     }
@@ -83,7 +90,9 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
       explainQuota();
       return;
     }
-    save.mutate([...list, clean]);
+    save.mutate([...list, { name: clean || cleanedDomain, domain: cleanedDomain }]);
+    setManualName("");
+    setManualDomain("");
   }
 
   return (
