@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { openConsentPreferences } from "@/lib/consent";
 
 export function SiteFooter() {
   return (
@@ -12,6 +13,11 @@ export function SiteFooter() {
           <Link to="/platform" className="hover:text-foreground">Platform</Link>
           <Link to="/fiyatlandirma" className="hover:text-foreground">Fiyatlandırma</Link>
           <Link to="/app" className="hover:text-foreground">Panel</Link>
+          <Link to="/data-processing" className="hover:text-foreground">Veri İşleme</Link>
+          <Link to="/privacy" className="hover:text-foreground">Gizlilik</Link>
+          <button type="button" onClick={() => openConsentPreferences()} className="hover:text-foreground">
+            Çerez tercihleri
+          </button>
         </nav>
       </div>
       <p className="mx-auto mt-8 max-w-6xl px-6 font-mono text-xs text-muted-foreground">© 2026 OneCite</p>
