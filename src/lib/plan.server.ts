@@ -1,10 +1,15 @@
-import { planLimits, isUnlimited, type PlanLimits } from "./plan-limits";
+import { planLimits, isUnlimited, normalizePlan, type PlanLimits } from "./plan-limits";
 
 type Sb = { from: (t: string) => any };
 
 export async function getUserPlan(supabase: Sb, userId: string): Promise<PlanLimits> {
-  const { data } = await supabase.from("profiles").select("plan").eq("id", userId).maybeSingle();
-  return planLimits(data?.plan);
+  const { data } = await supabase.from("profiles").select("plan, trial_ends_at").eq("id", userId).maybeSingle();
+  const slug = normalizePlan(data?.plan);
+  // Deneme süresi dolduysa hesap salt okunur "expired" tierine düşer.
+  if (slug === "trial" && data?.trial_ends_at && new Date(data.trial_ends_at).getTime() < Date.now()) {
+    return planLimits("expired");
+  }
+  return planLimits(slug);
 }
 
 export async function countApprovedPrompts(supabase: Sb, brandId: string) {
