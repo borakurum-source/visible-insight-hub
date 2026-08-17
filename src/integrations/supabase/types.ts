@@ -817,6 +817,7 @@ export type Database = {
           full_name: string | null
           id: string
           plan: string
+          trial_ends_at: string
           updated_at: string
         }
         Insert: {
@@ -826,6 +827,7 @@ export type Database = {
           full_name?: string | null
           id: string
           plan?: string
+          trial_ends_at?: string
           updated_at?: string
         }
         Update: {
@@ -835,6 +837,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           plan?: string
+          trial_ends_at?: string
           updated_at?: string
         }
         Relationships: []

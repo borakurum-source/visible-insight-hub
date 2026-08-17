@@ -19,6 +19,7 @@ import { Route as KvkkRouteImport } from './routes/kvkk'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MakalelerRouteImport } from './routes/makaleler'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OzelliklerRouteImport } from './routes/ozellikler'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
@@ -48,6 +49,7 @@ import { Route as AuthenticatedAppCompetitorsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppContentRouteImport } from './routes/_authenticated/app.content'
 import { Route as AuthenticatedAppGeoTasksRouteImport } from './routes/_authenticated/app.geo-tasks'
 import { Route as AuthenticatedAppGraphRouteImport } from './routes/_authenticated/app.graph'
+import { Route as AuthenticatedAppHelpRouteImport } from './routes/_authenticated/app.help'
 import { Route as AuthenticatedAppIntegrationsRouteImport } from './routes/_authenticated/app.integrations'
 import { Route as AuthenticatedAppKnowledgeBaseRouteImport } from './routes/_authenticated/app.knowledge-base'
 import { Route as AuthenticatedAppMeasurementRouteImport } from './routes/_authenticated/app.measurement'
@@ -111,6 +113,11 @@ const MakalelerRoute = MakalelerRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OzelliklerRoute = OzelliklerRouteImport.update({
+  id: '/ozellikler',
+  path: '/ozellikler',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformRoute = PlatformRouteImport.update({
@@ -265,6 +272,11 @@ const AuthenticatedAppGraphRoute = AuthenticatedAppGraphRouteImport.update({
   path: '/graph',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppHelpRoute = AuthenticatedAppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppIntegrationsRoute =
   AuthenticatedAppIntegrationsRouteImport.update({
     id: '/integrations',
@@ -363,6 +375,7 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/makaleler': typeof MakalelerRouteWithChildren
   '/mcp': typeof McpRoute
+  '/ozellikler': typeof OzelliklerRoute
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
@@ -391,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/app/content': typeof AuthenticatedAppContentRoute
   '/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/app/graph': typeof AuthenticatedAppGraphRoute
+  '/app/help': typeof AuthenticatedAppHelpRoute
   '/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
   '/app/measurement': typeof AuthenticatedAppMeasurementRoute
@@ -417,6 +431,7 @@ export interface FileRoutesByTo {
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
+  '/ozellikler': typeof OzelliklerRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -443,6 +458,7 @@ export interface FileRoutesByTo {
   '/app/content': typeof AuthenticatedAppContentRoute
   '/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/app/graph': typeof AuthenticatedAppGraphRoute
+  '/app/help': typeof AuthenticatedAppHelpRoute
   '/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
   '/app/measurement': typeof AuthenticatedAppMeasurementRoute
@@ -472,6 +488,7 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/makaleler': typeof MakalelerRouteWithChildren
   '/mcp': typeof McpRoute
+  '/ozellikler': typeof OzelliklerRoute
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
@@ -500,6 +517,7 @@ export interface FileRoutesById {
   '/_authenticated/app/content': typeof AuthenticatedAppContentRoute
   '/_authenticated/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/_authenticated/app/graph': typeof AuthenticatedAppGraphRoute
+  '/_authenticated/app/help': typeof AuthenticatedAppHelpRoute
   '/_authenticated/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/_authenticated/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
   '/_authenticated/app/measurement': typeof AuthenticatedAppMeasurementRoute
@@ -529,6 +547,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/makaleler'
     | '/mcp'
+    | '/ozellikler'
     | '/platform'
     | '/privacy'
     | '/refund-policy'
@@ -557,6 +576,7 @@ export interface FileRouteTypes {
     | '/app/content'
     | '/app/geo-tasks'
     | '/app/graph'
+    | '/app/help'
     | '/app/integrations'
     | '/app/knowledge-base'
     | '/app/measurement'
@@ -583,6 +603,7 @@ export interface FileRouteTypes {
     | '/kvkk'
     | '/llms.txt'
     | '/mcp'
+    | '/ozellikler'
     | '/privacy'
     | '/refund-policy'
     | '/sitemap.xml'
@@ -609,6 +630,7 @@ export interface FileRouteTypes {
     | '/app/content'
     | '/app/geo-tasks'
     | '/app/graph'
+    | '/app/help'
     | '/app/integrations'
     | '/app/knowledge-base'
     | '/app/measurement'
@@ -637,6 +659,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/makaleler'
     | '/mcp'
+    | '/ozellikler'
     | '/platform'
     | '/privacy'
     | '/refund-policy'
@@ -665,6 +688,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/content'
     | '/_authenticated/app/geo-tasks'
     | '/_authenticated/app/graph'
+    | '/_authenticated/app/help'
     | '/_authenticated/app/integrations'
     | '/_authenticated/app/knowledge-base'
     | '/_authenticated/app/measurement'
@@ -694,6 +718,7 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   MakalelerRoute: typeof MakalelerRouteWithChildren
   McpRoute: typeof McpRoute
+  OzelliklerRoute: typeof OzelliklerRoute
   PlatformRoute: typeof PlatformRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
@@ -784,6 +809,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ozellikler': {
+      id: '/ozellikler'
+      path: '/ozellikler'
+      fullPath: '/ozellikler'
+      preLoaderRoute: typeof OzelliklerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform': {
@@ -989,6 +1021,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppGraphRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/help': {
+      id: '/_authenticated/app/help'
+      path: '/help'
+      fullPath: '/app/help'
+      preLoaderRoute: typeof AuthenticatedAppHelpRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/integrations': {
       id: '/_authenticated/app/integrations'
       path: '/integrations'
@@ -1106,6 +1145,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppContentRoute: typeof AuthenticatedAppContentRoute
   AuthenticatedAppGeoTasksRoute: typeof AuthenticatedAppGeoTasksRoute
   AuthenticatedAppGraphRoute: typeof AuthenticatedAppGraphRoute
+  AuthenticatedAppHelpRoute: typeof AuthenticatedAppHelpRoute
   AuthenticatedAppIntegrationsRoute: typeof AuthenticatedAppIntegrationsRoute
   AuthenticatedAppKnowledgeBaseRoute: typeof AuthenticatedAppKnowledgeBaseRoute
   AuthenticatedAppMeasurementRoute: typeof AuthenticatedAppMeasurementRoute
@@ -1130,6 +1170,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppContentRoute: AuthenticatedAppContentRoute,
   AuthenticatedAppGeoTasksRoute: AuthenticatedAppGeoTasksRoute,
   AuthenticatedAppGraphRoute: AuthenticatedAppGraphRoute,
+  AuthenticatedAppHelpRoute: AuthenticatedAppHelpRoute,
   AuthenticatedAppIntegrationsRoute: AuthenticatedAppIntegrationsRoute,
   AuthenticatedAppKnowledgeBaseRoute: AuthenticatedAppKnowledgeBaseRoute,
   AuthenticatedAppMeasurementRoute: AuthenticatedAppMeasurementRoute,
@@ -1199,6 +1240,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   MakalelerRoute: MakalelerRouteWithChildren,
   McpRoute: McpRoute,
+  OzelliklerRoute: OzelliklerRoute,
   PlatformRoute: PlatformRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   RefundPolicyRoute: RefundPolicyRoute,

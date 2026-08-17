@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { normalizePlan } from "@/lib/plan-limits";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 type PaddleEnv = "sandbox" | "live";
@@ -44,7 +45,7 @@ export const getMySubscription = createServerFn({ method: "POST" })
       .maybeSingle();
     const { data: profile } = await context.supabase
       .from("profiles").select("plan").eq("id", context.userId).maybeSingle();
-    return { subscription: (row ?? null) as SubscriptionRow | null, plan: profile?.plan ?? "free" };
+    return { subscription: (row ?? null) as SubscriptionRow | null, plan: normalizePlan(profile?.plan) };
   });
 
 // Musteri portali (odeme yontemi, fatura, iptal) icin gecici baglanti uretir.

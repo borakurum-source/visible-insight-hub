@@ -247,7 +247,7 @@ function FilmFolkOrnegi() {
 }
 
 const planFits: Record<string, string> = {
-  free_user: "İlk kez ölçmek isteyenler için",
+  trial: "Kredi kartsız 7 günlük tam erişim",
   starter: "Tek markayı düzenli izleyenler için",
   growth: "Büyüyen marka ekipleri için",
   agency: "Birden fazla marka yönetenler için",
@@ -259,7 +259,7 @@ function PlanlarVeKimIcin() {
       <div className="marketing-container">
         <div className="max-w-2xl">
           <p className="editorial-eyebrow text-primary">Kimin için ve ne kadar?</p>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Ücretsiz başlayın, ihtiyaç büyüdükçe ölçeklendirin.</h2>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">7 gün ücretsiz deneyin, ihtiyaç büyüdükçe ölçeklendirin.</h2>
           <p className="mt-4 text-base leading-7 text-muted-foreground">Kurulum ücreti ve taahhüt yok. Planlar takip ettiğiniz marka, soru ve rakip sayısına göre değişir.</p>
         </div>
         <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-4">

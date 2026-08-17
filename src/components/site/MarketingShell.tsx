@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/site/BrandLogo";
 
 const primaryLinks = [
+  { href: "/ozellikler", label: "Özellikler" },
   { href: "/platform", label: "Platform" },
   { href: "/solutions/agencies", label: "Ajanslar" },
   { href: "/proof/filmfolk", label: "Vaka" },
@@ -16,6 +17,7 @@ const footerGroups = [
   {
     title: "Platform",
     links: [
+      { href: "/ozellikler", label: "Özellikler" },
       { href: "/platform", label: "Genel bakış" },
       { href: "/platform/citation-share", label: "Atıf Payı" },
       { href: "/platform/evidence-gaps", label: "Eksik Kanıtlar" },

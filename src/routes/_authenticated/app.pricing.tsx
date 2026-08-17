@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { pricingPlans, formatUsd } from "@/lib/pricingData";
 import { PLAN_PRICE_IDS } from "@/lib/plan-mapping";
+import { normalizePlan } from "@/lib/plan-limits";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { getMySubscription, createPortalSession } from "@/utils/payments.functions";
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/app/pricing")({
 });
 
 const PLAN_LABELS: Record<string, string> = {
-  free: "Ücretsiz", starter: "Başlangıç", growth: "Büyüme", agency: "Ajans",
+  trial: "Deneme (7 gün)", expired: "Deneme bitti", starter: "Başlangıç", growth: "Büyüme", agency: "Ajans",
 };
 
 function PricingPage() {
@@ -46,7 +47,7 @@ function PricingPage() {
     queryFn: () => fetchSub({ data: { environment: env } }),
   });
 
-  const currentPlan = data?.plan ?? "free";
+  const currentPlan = normalizePlan(data?.plan);
   const sub = data?.subscription ?? null;
 
   // Odeme sonrasi Paddle webhook'u birkac saniye gecikebilir: plan degisene kadar
@@ -63,7 +64,7 @@ function PricingPage() {
       await queryClient.invalidateQueries({ queryKey: ["competitors"] });
       await queryClient.invalidateQueries({ queryKey: ["plan-usage"] });
       if (cancelled) return;
-      if (result.data?.plan && result.data.plan !== "free") {
+      if (result.data?.plan && result.data.plan !== "trial") {
         toast.success("Planınız güncellendi. Yeni limitleriniz aktif.");
         window.history.replaceState({}, "", "/app/pricing");
         return;
@@ -140,7 +141,7 @@ function PricingPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {pricingPlans.map((plan) => {
-          const slug = plan.slug === "free_user" ? "free" : plan.slug;
+          const slug = plan.slug;
           const isCurrent = slug === currentPlan;
           const price = plan.contactOnly
             ? "Teklife göre"
@@ -173,7 +174,7 @@ function PricingPage() {
                   <Button asChild className="w-full" variant="outline">
                     <a href="mailto:hello@1cite.com?subject=Ajans%20plan%C4%B1%20teklif%20talebi">İletişime geç</a>
                   </Button>
-                ) : slug === "free" ? (
+                ) : slug === "trial" ? (
                   <Button className="w-full" variant="outline" disabled>
                     {isCurrent ? "Kullanımda" : "Ücretsiz plan"}
                   </Button>

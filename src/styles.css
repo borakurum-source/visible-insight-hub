@@ -203,6 +203,13 @@
   box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08) inset;
 }
 
+@utility feature-shot-surface {
+  background:
+    radial-gradient(circle at 18% 12%, rgb(63 191 178 / 0.18), transparent 46%),
+    radial-gradient(circle at 88% 88%, rgb(37 99 235 / 0.14), transparent 44%),
+    color-mix(in oklab, var(--color-secondary) 70%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .visual-hero-grid {
     mask-image: none;
