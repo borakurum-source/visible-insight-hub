@@ -545,16 +545,58 @@ export const createClaim = createServerFn({ method: "POST" })
       brand_id: data.brandId, statement: data.statement, evidence_url: data.evidenceUrl ?? null, status: "draft",
     });
     if (error) throw new Error(error.message);
+    const { syncClaimsKnowledgeSource } = await import("./claims.server");
+    await syncClaimsKnowledgeSource(context.supabase, data.brandId);
     return { ok: true };
   });
 
 export const deleteClaim = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string }) => input)
+  .inputValidator((input: { id: string; brandId?: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("claims").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
+    if (data.brandId) {
+      const { syncClaimsKnowledgeSource } = await import("./claims.server");
+      await syncClaimsKnowledgeSource(context.supabase, data.brandId);
+    }
     return { ok: true };
+  });
+
+// Her iddia icin: bilgi bankasinda indekslendi mi, kanit linki AI yanitlarinda atif aldi mi,
+// iddia olcum yanitlarinda tekrar edildi mi.
+export const getClaimsInsight = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { claimEchoScore } = await import("./claims.server");
+    const [claimsRes, runsRes, citationsRes, sourceRes] = await Promise.all([
+      context.supabase.from("claims").select("*").eq("brand_id", data.brandId).order("created_at", { ascending: false }),
+      context.supabase.from("prompt_runs").select("raw_answer, answer_summary").eq("brand_id", data.brandId).order("created_at", { ascending: false }).limit(80),
+      context.supabase.from("citations").select("url").eq("brand_id", data.brandId),
+      context.supabase.from("knowledge_sources").select("index_status, chunk_count, indexed_at").eq("brand_id", data.brandId).eq("title", "Marka İddiaları").maybeSingle(),
+    ]);
+
+    const answers = (runsRes.data ?? []).map((r) => `${r.raw_answer ?? ""} ${r.answer_summary ?? ""}`).filter((a) => a.trim());
+    const citedUrls = new Set((citationsRes.data ?? []).map((c) => (c.url ?? "").split("?")[0]!.replace(/\/$/, "")));
+
+    const claims = (claimsRes.data ?? []).map((claim) => {
+      const echoes = answers.filter((answer) => claimEchoScore(claim.statement, answer) >= 0.6).length;
+      const evidence = claim.evidence_url ? claim.evidence_url.split("?")[0]!.replace(/\/$/, "") : null;
+      return {
+        ...claim,
+        echoes,
+        evidenceCited: evidence ? citedUrls.has(evidence) : false,
+      };
+    });
+
+    return {
+      claims,
+      measuredAnswers: answers.length,
+      indexStatus: sourceRes.data?.index_status ?? null,
+      indexedChunks: sourceRes.data?.chunk_count ?? 0,
+      indexedAt: sourceRes.data?.indexed_at ?? null,
+    };
   });
 
 export const listGeoTasks = createServerFn({ method: "POST" })
