@@ -101,7 +101,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Yönetim",
     adminOnly: true,
-    items: [{ to: "/app/admin", label: "Admin", icon: Users, exact: false }],
+    items: [{ to: "/admin", label: "Yönetim paneli", icon: Users, exact: false }],
   },
   {
     label: "Yardım",

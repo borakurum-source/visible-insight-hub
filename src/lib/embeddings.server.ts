@@ -156,6 +156,8 @@ function normalizeFloatVector(values: number[]): number[] {
 }
 
 async function requestEmbeddings(batch: string[]): Promise<number[][]> {
+  const { recordApiUsage } = await import("./observability.server");
+  const startedAt = Date.now();
   const key = process.env["PERPLEXITY_API_KEY"];
   if (!key) throw new Error("PERPLEXITY_API_KEY tanımlı değil");
   const res = await fetch("https://api.perplexity.ai/v1/embeddings", {
@@ -166,6 +168,12 @@ async function requestEmbeddings(batch: string[]): Promise<number[][]> {
   if (!res.ok) {
     const body = await res.text();
     console.error("Perplexity embedding error", res.status, body);
+    recordApiUsage({
+      provider: "perplexity", operation: "embeddings", model: EMBEDDING_MODEL,
+      durationMs: Date.now() - startedAt,
+      status: res.status === 429 ? "rate_limited" : "error",
+      error: `${res.status} ${body.slice(0, 400)}`,
+    });
     if (res.status === 401 && body.includes("insufficient_quota")) {
       throw new Error(
         "Perplexity API kredisi tükendi. https://console.perplexity.ai adresinden kredi yükleyin.",
@@ -175,7 +183,13 @@ async function requestEmbeddings(batch: string[]): Promise<number[][]> {
   }
   const json = (await res.json()) as {
     data?: Array<{ index: number; embedding: string | number[] }>;
+    usage?: { prompt_tokens?: number; total_tokens?: number };
   };
+  recordApiUsage({
+    provider: "perplexity", operation: "embeddings", model: EMBEDDING_MODEL,
+    durationMs: Date.now() - startedAt,
+    inputTokens: json.usage?.prompt_tokens ?? json.usage?.total_tokens ?? 0,
+  });
   const rows = (json.data ?? []).slice().sort((a, b) => a.index - b.index);
   return rows.map((row) =>
     typeof row.embedding === "string"

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DataProcessingRouteImport } from './routes/data-processing'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
@@ -31,6 +32,14 @@ import { Route as UcretsizYapayZekaGorunurlukRaporuRouteImport } from './routes/
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminApiRouteImport } from './routes/admin/api'
+import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
+import { Route as AdminEmailsRouteImport } from './routes/admin/emails'
+import { Route as AdminErrorsRouteImport } from './routes/admin/errors'
+import { Route as AdminPromptsRouteImport } from './routes/admin/prompts'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminSubscriptionsRouteImport } from './routes/admin/subscriptions'
 import { Route as MakalelerIndexRouteImport } from './routes/makaleler.index'
 import { Route as MakalelerSlugRouteImport } from './routes/makaleler.$slug'
 import { Route as PlatformIndexRouteImport } from './routes/platform.index'
@@ -43,7 +52,6 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authenticated/app.account'
-import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppCitationDiscoveryRouteImport } from './routes/_authenticated/app.citation-discovery'
 import { Route as AuthenticatedAppClaimsRouteImport } from './routes/_authenticated/app.claims'
 import { Route as AuthenticatedAppCompetitorsRouteImport } from './routes/_authenticated/app.competitors'
@@ -74,6 +82,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -179,6 +192,46 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminApiRoute = AdminApiRouteImport.update({
+  id: '/api',
+  path: '/api',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminEmailsRoute = AdminEmailsRouteImport.update({
+  id: '/emails',
+  path: '/emails',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminErrorsRoute = AdminErrorsRouteImport.update({
+  id: '/errors',
+  path: '/errors',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPromptsRoute = AdminPromptsRouteImport.update({
+  id: '/prompts',
+  path: '/prompts',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminSubscriptionsRoute = AdminSubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const MakalelerIndexRoute = MakalelerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -238,11 +291,6 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
 const AuthenticatedAppAccountRoute = AuthenticatedAppAccountRouteImport.update({
   id: '/account',
   path: '/account',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 const AuthenticatedAppCitationDiscoveryRoute =
@@ -373,6 +421,7 @@ const ApiPublicOauthGoogleCallbackRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/data-processing': typeof DataProcessingRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
@@ -393,18 +442,25 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/admin/api': typeof AdminApiRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/emails': typeof AdminEmailsRoute
+  '/admin/errors': typeof AdminErrorsRoute
+  '/admin/prompts': typeof AdminPromptsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
   '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
+  '/admin/': typeof AdminIndexRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/account': typeof AuthenticatedAppAccountRoute
-  '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/app/claims': typeof AuthenticatedAppClaimsRoute
   '/app/competitors': typeof AuthenticatedAppCompetitorsRoute
@@ -448,18 +504,25 @@ export interface FileRoutesByTo {
   '/ucretsiz-yapay-zeka-gorunurluk-raporu': typeof UcretsizYapayZekaGorunurlukRaporuRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/api': typeof AdminApiRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/emails': typeof AdminEmailsRoute
+  '/admin/errors': typeof AdminErrorsRoute
+  '/admin/prompts': typeof AdminPromptsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
   '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
+  '/admin': typeof AdminIndexRoute
   '/makaleler': typeof MakalelerIndexRoute
   '/platform': typeof PlatformIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/account': typeof AuthenticatedAppAccountRoute
-  '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/app/claims': typeof AuthenticatedAppClaimsRoute
   '/app/competitors': typeof AuthenticatedAppCompetitorsRoute
@@ -488,6 +551,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/admin': typeof AdminRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/data-processing': typeof DataProcessingRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
@@ -508,18 +572,25 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/admin/api': typeof AdminApiRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/emails': typeof AdminEmailsRoute
+  '/admin/errors': typeof AdminErrorsRoute
+  '/admin/prompts': typeof AdminPromptsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/subscriptions': typeof AdminSubscriptionsRoute
   '/makaleler/$slug': typeof MakalelerSlugRoute
   '/platform/citation-share': typeof PlatformCitationShareRoute
   '/platform/evidence-gaps': typeof PlatformEvidenceGapsRoute
   '/proof/filmfolk': typeof ProofFilmfolkRoute
   '/r/$token': typeof RTokenRoute
   '/solutions/agencies': typeof SolutionsAgenciesRoute
+  '/admin/': typeof AdminIndexRoute
   '/makaleler/': typeof MakalelerIndexRoute
   '/platform/': typeof PlatformIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/app/account': typeof AuthenticatedAppAccountRoute
-  '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/_authenticated/app/claims': typeof AuthenticatedAppClaimsRoute
   '/_authenticated/app/competitors': typeof AuthenticatedAppCompetitorsRoute
@@ -548,6 +619,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/data-processing'
     | '/fiyatlandirma'
@@ -568,18 +640,25 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/app'
+    | '/admin/api'
+    | '/admin/customers'
+    | '/admin/emails'
+    | '/admin/errors'
+    | '/admin/prompts'
+    | '/admin/settings'
+    | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
     | '/proof/filmfolk'
     | '/r/$token'
     | '/solutions/agencies'
+    | '/admin/'
     | '/makaleler/'
     | '/platform/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/app/account'
-    | '/app/admin'
     | '/app/citation-discovery'
     | '/app/claims'
     | '/app/competitors'
@@ -623,18 +702,25 @@ export interface FileRouteTypes {
     | '/ucretsiz-yapay-zeka-gorunurluk-raporu'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/api'
+    | '/admin/customers'
+    | '/admin/emails'
+    | '/admin/errors'
+    | '/admin/prompts'
+    | '/admin/settings'
+    | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
     | '/proof/filmfolk'
     | '/r/$token'
     | '/solutions/agencies'
+    | '/admin'
     | '/makaleler'
     | '/platform'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/app/account'
-    | '/app/admin'
     | '/app/citation-discovery'
     | '/app/claims'
     | '/app/competitors'
@@ -662,6 +748,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin'
     | '/auth'
     | '/data-processing'
     | '/fiyatlandirma'
@@ -682,18 +769,25 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/app'
+    | '/admin/api'
+    | '/admin/customers'
+    | '/admin/emails'
+    | '/admin/errors'
+    | '/admin/prompts'
+    | '/admin/settings'
+    | '/admin/subscriptions'
     | '/makaleler/$slug'
     | '/platform/citation-share'
     | '/platform/evidence-gaps'
     | '/proof/filmfolk'
     | '/r/$token'
     | '/solutions/agencies'
+    | '/admin/'
     | '/makaleler/'
     | '/platform/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/app/account'
-    | '/_authenticated/app/admin'
     | '/_authenticated/app/citation-discovery'
     | '/_authenticated/app/claims'
     | '/_authenticated/app/competitors'
@@ -722,6 +816,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DataProcessingRoute: typeof DataProcessingRoute
   FiyatlandirmaRoute: typeof FiyatlandirmaRoute
@@ -766,6 +861,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -908,6 +1010,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/api': {
+      id: '/admin/api'
+      path: '/api'
+      fullPath: '/admin/api'
+      preLoaderRoute: typeof AdminApiRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/emails': {
+      id: '/admin/emails'
+      path: '/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AdminEmailsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/errors': {
+      id: '/admin/errors'
+      path: '/errors'
+      fullPath: '/admin/errors'
+      preLoaderRoute: typeof AdminErrorsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/prompts': {
+      id: '/admin/prompts'
+      path: '/prompts'
+      fullPath: '/admin/prompts'
+      preLoaderRoute: typeof AdminPromptsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/subscriptions': {
+      id: '/admin/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/admin/subscriptions'
+      preLoaderRoute: typeof AdminSubscriptionsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/makaleler/': {
       id: '/makaleler/'
       path: '/'
@@ -990,13 +1148,6 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/app/account'
       preLoaderRoute: typeof AuthenticatedAppAccountRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/admin': {
-      id: '/_authenticated/app/admin'
-      path: '/admin'
-      fullPath: '/app/admin'
-      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/citation-discovery': {
@@ -1158,7 +1309,6 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAccountRoute: typeof AuthenticatedAppAccountRoute
-  AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppCitationDiscoveryRoute: typeof AuthenticatedAppCitationDiscoveryRoute
   AuthenticatedAppClaimsRoute: typeof AuthenticatedAppClaimsRoute
   AuthenticatedAppCompetitorsRoute: typeof AuthenticatedAppCompetitorsRoute
@@ -1182,7 +1332,6 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAccountRoute: AuthenticatedAppAccountRoute,
-  AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppCitationDiscoveryRoute:
     AuthenticatedAppCitationDiscoveryRoute,
   AuthenticatedAppClaimsRoute: AuthenticatedAppClaimsRoute,
@@ -1219,6 +1368,32 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AdminRouteRouteChildren {
+  AdminApiRoute: typeof AdminApiRoute
+  AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminEmailsRoute: typeof AdminEmailsRoute
+  AdminErrorsRoute: typeof AdminErrorsRoute
+  AdminPromptsRoute: typeof AdminPromptsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSubscriptionsRoute: typeof AdminSubscriptionsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminApiRoute: AdminApiRoute,
+  AdminCustomersRoute: AdminCustomersRoute,
+  AdminEmailsRoute: AdminEmailsRoute,
+  AdminErrorsRoute: AdminErrorsRoute,
+  AdminPromptsRoute: AdminPromptsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminSubscriptionsRoute: AdminSubscriptionsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 interface MakalelerRouteChildren {
   MakalelerSlugRoute: typeof MakalelerSlugRoute
   MakalelerIndexRoute: typeof MakalelerIndexRoute
@@ -1252,6 +1427,7 @@ const PlatformRouteWithChildren = PlatformRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DataProcessingRoute: DataProcessingRoute,
   FiyatlandirmaRoute: FiyatlandirmaRoute,

@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_id: string
+          created_at: string
+          detail: Json
+          id: string
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_id: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_id?: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
+      admin_notes: {
+        Row: {
+          admin_id: string
+          created_at: string
+          id: string
+          note: string
+          user_id: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          id?: string
+          note: string
+          user_id: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_cache: {
         Row: {
           cache_key: string
@@ -75,6 +132,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      api_usage_log: {
+        Row: {
+          brand_id: string | null
+          cached: boolean
+          cost_usd: number
+          created_at: string
+          duration_ms: number
+          error: string | null
+          id: string
+          input_tokens: number
+          model: string | null
+          operation: string
+          output_tokens: number
+          provider: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          brand_id?: string | null
+          cached?: boolean
+          cost_usd?: number
+          created_at?: string
+          duration_ms?: number
+          error?: string | null
+          id?: string
+          input_tokens?: number
+          model?: string | null
+          operation: string
+          output_tokens?: number
+          provider: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          brand_id?: string | null
+          cached?: boolean
+          cost_usd?: number
+          created_at?: string
+          duration_ms?: number
+          error?: string | null
+          id?: string
+          input_tokens?: number
+          model?: string | null
+          operation?: string
+          output_tokens?: number
+          provider?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       bing_webmaster_accounts: {
         Row: {
@@ -505,6 +613,129 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json
+          status: string
+          subject: string
+          template_key: string | null
+          to_email: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          subject: string
+          template_key?: string | null
+          to_email: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          subject?: string
+          template_key?: string | null
+          to_email?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      email_templates: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          key: string
+          subject: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          key: string
+          subject: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          key?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
+      error_logs: {
+        Row: {
+          brand_id: string | null
+          context: Json
+          created_at: string
+          fingerprint: string | null
+          id: string
+          level: string
+          message: string
+          path: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          source: string
+          stack: string | null
+          user_id: string | null
+        }
+        Insert: {
+          brand_id?: string | null
+          context?: Json
+          created_at?: string
+          fingerprint?: string | null
+          id?: string
+          level?: string
+          message: string
+          path?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          source?: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          brand_id?: string | null
+          context?: Json
+          created_at?: string
+          fingerprint?: string | null
+          id?: string
+          level?: string
+          message?: string
+          path?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          source?: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       geo_tasks: {
         Row: {
           brand_id: string
@@ -920,32 +1151,44 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_note: string | null
           avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
           plan: string
+          plan_expires_at: string | null
+          plan_source: string
+          suspended: boolean
           trial_ends_at: string
           updated_at: string
         }
         Insert: {
+          admin_note?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
           plan?: string
+          plan_expires_at?: string | null
+          plan_source?: string
+          suspended?: boolean
           trial_ends_at?: string
           updated_at?: string
         }
         Update: {
+          admin_note?: string | null
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
           plan?: string
+          plan_expires_at?: string | null
+          plan_source?: string
+          suspended?: boolean
           trial_ends_at?: string
           updated_at?: string
         }
