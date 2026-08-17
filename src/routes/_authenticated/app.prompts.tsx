@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -246,6 +246,8 @@ function PromptsPage() {
 function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string }) {
   const fetchInsight = useServerFn(getPromptInsight);
   const addTask = useServerFn(createGeoTask);
+  const navigate = useNavigate();
+  const [addedTasks, setAddedTasks] = useState<string[]>([]);
   const { data, isLoading } = useQuery({
     queryKey: ["prompt-insight", promptId],
     queryFn: () => fetchInsight({ data: { brandId, promptId } }),
@@ -266,7 +268,10 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
           done,
         },
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["prompt-insight", promptId] }),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["prompt-insight", promptId] });
+      toast.success(variables.done ? "Adım tamamlandı olarak işaretlendi." : "İşaret kaldırıldı.");
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -275,7 +280,13 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
   const taskMutation = useMutation({
     mutationFn: (input: { title: string; description: string; priority: string }) =>
       addTask({ data: { brandId, ...input } }),
-    onSuccess: () => toast.success("Görev, Görevler listenize eklendi."),
+    onSuccess: (_result, variables) => {
+      setAddedTasks((prev) => [...prev, variables.title]);
+      toast.success("Görev eklendi", {
+        description: `“${variables.title}” Görevler listenize eklendi.`,
+        action: { label: "Görevlere git", onClick: () => navigate({ to: "/app/geo-tasks" }) },
+      });
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -335,7 +346,7 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
           <div className="flex items-center gap-1.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Bu soruda görünmek için</p>
             <Hint title="Kontrol listesi">
-              <p>Bu adımları tamamladıkça kutucukları işaretleyin; işaretleriniz kaydedilir.</p>
+              <p><strong>Tamamlandı</strong> düğmesi adımı bitirdiğinizi işaretler; işaretiniz kaydedilir.</p>
               <p><strong>Göreve ekle</strong> ile adımı Görevler listenize taşıyıp ekibinizle takip edebilirsiniz.</p>
             </Hint>
             <span className="ml-auto font-mono text-[11px] text-muted-foreground">
@@ -344,26 +355,24 @@ function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string
           </div>
           {data.actions.map((action) => (
             <div key={action.key} className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5">
-              <Checkbox
-                id={`action-${promptId}-${action.key}`}
-                className="mt-0.5"
-                checked={action.done}
-                disabled={toggleMutation.isPending}
-                onCheckedChange={(checked) => toggleMutation.mutate({ action, done: checked === true })}
-              />
               <div className="min-w-0 flex-1">
-                <label
-                  htmlFor={`action-${promptId}-${action.key}`}
-                  className={`cursor-pointer text-xs font-medium ${action.done ? "text-muted-foreground line-through" : ""}`}
-                >
+                <p className={`text-xs font-medium ${action.done ? "text-muted-foreground line-through" : ""}`}>
                   {action.title}
-                </label>
+                </p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">{action.description}</p>
               </div>
               <div className="flex gap-1.5">
-                <Button size="sm" variant="outline" disabled={taskMutation.isPending}
+                <Button
+                  size="sm"
+                  variant={action.done ? "secondary" : "ghost"}
+                  disabled={toggleMutation.isPending}
+                  onClick={() => toggleMutation.mutate({ action, done: !action.done })}
+                >
+                  <Check className="mr-1.5 h-3.5 w-3.5" /> {action.done ? "Tamamlandı" : "Tamamlandı işaretle"}
+                </Button>
+                <Button size="sm" variant="outline" disabled={taskMutation.isPending || addedTasks.includes(action.title)}
                   onClick={() => taskMutation.mutate(action)}>
-                  <ListTodo className="mr-1.5 h-3.5 w-3.5" /> Göreve ekle
+                  <ListTodo className="mr-1.5 h-3.5 w-3.5" /> {addedTasks.includes(action.title) ? "Göreve eklendi" : "Göreve ekle"}
                 </Button>
                 <Button size="sm" variant="ghost" asChild>
                   <Link to="/app/content">İçerik üret</Link>
