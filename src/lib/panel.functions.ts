@@ -749,6 +749,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
   .inputValidator((input: { batchId: string; brandId: string; promptIds: string[] }) => input)
   .handler(async ({ data, context }) => {
     const { measurePrompt } = await import("./measurement.server");
+    const { normalizeCompetitors, competitorMatches, competitorNames } = await import("./competitors");
     const { resolveSystemPrompt } = await import("./system-prompts.server");
     const systemPrompt = await resolveSystemPrompt(context.supabase, "measurement_answer");
     const [{ data: brand }, { data: intel }, { data: prompts }] = await Promise.all([
@@ -757,13 +758,13 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
       context.supabase.from("prompts").select("id, text").in("id", data.promptIds),
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
-    const competitors = ((intel?.competitors as string[] | null) ?? []).map((c) => String(c).toLowerCase());
+    const competitors = normalizeCompetitors(intel?.competitors);
 
     for (const prompt of prompts ?? []) {
       const measured = await measurePrompt({
         brandName: brand.name,
         brandDomain: brand.domain,
-        competitors: (intel?.competitors as string[] | null) ?? [],
+        competitors: competitorNames(competitors),
         promptText: prompt.text,
         systemPrompt,
       });
@@ -784,7 +785,10 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
           unique.map((source) => {
             const isOwn = source.domain.includes(brand.domain) || brand.domain.includes(source.domain);
             const isCompetitor =
-              !isOwn && competitors.some((c) => c.length > 2 && (source.domain.includes(c.replace(/\s+/g, "")) || source.title.toLowerCase().includes(c)));
+              !isOwn &&
+              competitors.some((competitor) =>
+                competitorMatches(competitor, { answer: source.title, domains: [source.domain] }),
+              );
             return {
               brand_id: data.brandId,
               run_id: run?.id ?? null,
