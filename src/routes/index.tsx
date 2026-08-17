@@ -20,10 +20,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { faqs } from "@/lib/faqData";
 import {
   AUTHORITY_BADGES,
+  CASE_RESULTS,
+  COMMITMENT_FAQ,
   COMMITMENT_CONDITIONS,
-  COMMITMENT_MILESTONES,
+  COMMITMENT_STEPS,
   TRUST_CARDS,
 } from "@/lib/trustSignals";
+import { CASE_LOGOS } from "@/lib/caseLogos";
 import { ClientLogoStrip, ClientLogoWall } from "@/components/site/client-logos";
 import { formatUsd, pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
@@ -64,12 +67,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Landing,
 });
-
-const HERO_PROOF = [
-  { value: "+28,1 puan", label: "6 ayda ağırlıklı AI kaynak payı artışı" },
-  { value: "41", label: "Satın alma niyetli soru" },
-  { value: "286", label: "Ölçüm tekrarı" },
-];
 
 const MEASURED_ENGINES = ["ChatGPT", "Perplexity", "Gemini", "Copilot", "Claude"];
 
@@ -135,17 +132,6 @@ function Hero() {
               ))}
             </div>
           </div>
-          <dl className="grid w-full grid-cols-3 gap-4 border-t border-white/10 pt-8 text-center sm:gap-8" data-testid="hero-proof-strip">
-            {HERO_PROOF.map((item) => (
-              <div key={item.label} className="min-w-0">
-                <dt className="font-mono text-lg font-bold text-white sm:text-2xl md:text-3xl">{item.value}</dt>
-                <dd className="mx-auto mt-1.5 max-w-[16ch] text-[10px] uppercase tracking-wider leading-4 text-slate-400 sm:text-[11px]">
-                  {item.label}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <p className="w-full text-center text-[11px] text-slate-500">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
           <div className="grid w-full gap-2 border-t border-white/10 pt-6 sm:grid-cols-2 lg:grid-cols-4" data-testid="hero-authority-strip">
             {AUTHORITY_BADGES.map((badge) => {
               const inner = (
@@ -246,14 +232,46 @@ function GorunurlukTaahhudu() {
               sayfasına bakın.
             </p>
           </div>
-          <ol className="space-y-3">
-            {COMMITMENT_MILESTONES.map((item) => (
-              <li key={item.day} className="flex gap-4 rounded-xl border border-border bg-secondary p-4 md:p-5">
-                <span className="font-mono text-xs font-semibold text-primary">{item.day}</span>
-                <p className="text-sm leading-6 text-muted-foreground">{item.body}</p>
+          <ol className="relative space-y-4 before:absolute before:bottom-6 before:left-[15px] before:top-6 before:w-px before:bg-border">
+            {COMMITMENT_STEPS.map((item, index) => (
+              <li key={item.day} className="relative flex gap-4">
+                <span className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary bg-background font-mono text-xs font-bold text-primary">
+                  {index + 1}
+                </span>
+                <div className="min-w-0 flex-1 rounded-xl border border-border bg-secondary p-4 md:p-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs font-semibold text-primary">{item.day}</span>
+                    <span className="rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {item.owner}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm font-bold text-foreground">{item.title}</p>
+                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{item.body}</p>
+                  <ul className="mt-3 flex flex-wrap gap-1.5">
+                    {item.outputs.map((output) => (
+                      <li
+                        key={output}
+                        className="rounded-md bg-background px-2 py-1 text-[11px] leading-4 text-muted-foreground"
+                      >
+                        {output}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </li>
             ))}
           </ol>
+        </div>
+        <div className="mt-12 border-t border-border pt-10">
+          <h3 className="text-lg font-bold text-foreground">Taahhüt hakkında sık sorulanlar</h3>
+          <Accordion type="single" collapsible className="mt-4 max-w-3xl">
+            {COMMITMENT_FAQ.map((item) => (
+              <AccordionItem key={item.q} value={item.q}>
+                <AccordionTrigger className="text-left text-sm font-semibold">{item.q}</AccordionTrigger>
+                <AccordionContent className="text-sm leading-6 text-muted-foreground">{item.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </div>
     </section>
