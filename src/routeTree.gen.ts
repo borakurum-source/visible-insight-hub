@@ -71,6 +71,7 @@ import { Route as AuthenticatedAppReportRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedAppSystemPromptsRouteImport } from './routes/_authenticated/app.system-prompts'
 import { Route as AuthenticatedAppTrafficMetricRouteImport } from './routes/_authenticated/app.traffic.$metric'
+import { Route as ApiPublicBlogMediaSplatRouteImport } from './routes/api/public/blog-media.$'
 import { Route as ApiPublicCronSyncAnalyticsRouteImport } from './routes/api/public/cron/sync-analytics'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -400,6 +401,11 @@ const AuthenticatedAppTrafficMetricRoute =
     path: '/traffic/$metric',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const ApiPublicBlogMediaSplatRoute = ApiPublicBlogMediaSplatRouteImport.update({
+  id: '/api/public/blog-media/$',
+  path: '/api/public/blog-media/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCronSyncAnalyticsRoute =
   ApiPublicCronSyncAnalyticsRouteImport.update({
     id: '/api/public/cron/sync-analytics',
@@ -487,6 +493,7 @@ export interface FileRoutesByFullPath {
   '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
+  '/api/public/blog-media/$': typeof ApiPublicBlogMediaSplatRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -550,6 +557,7 @@ export interface FileRoutesByTo {
   '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
+  '/api/public/blog-media/$': typeof ApiPublicBlogMediaSplatRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -619,6 +627,7 @@ export interface FileRoutesById {
   '/_authenticated/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
+  '/api/public/blog-media/$': typeof ApiPublicBlogMediaSplatRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -688,6 +697,7 @@ export interface FileRouteTypes {
     | '/app/system-prompts'
     | '/app/'
     | '/app/traffic/$metric'
+    | '/api/public/blog-media/$'
     | '/api/public/cron/sync-analytics'
     | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
@@ -751,6 +761,7 @@ export interface FileRouteTypes {
     | '/app/system-prompts'
     | '/app'
     | '/app/traffic/$metric'
+    | '/api/public/blog-media/$'
     | '/api/public/cron/sync-analytics'
     | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
@@ -819,6 +830,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/system-prompts'
     | '/_authenticated/app/'
     | '/_authenticated/app/traffic/$metric'
+    | '/api/public/blog-media/$'
     | '/api/public/cron/sync-analytics'
     | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
@@ -853,6 +865,7 @@ export interface RootRouteChildren {
   SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicBlogMediaSplatRoute: typeof ApiPublicBlogMediaSplatRoute
   ApiPublicCronSyncAnalyticsRoute: typeof ApiPublicCronSyncAnalyticsRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -1295,6 +1308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTrafficMetricRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/api/public/blog-media/$': {
+      id: '/api/public/blog-media/$'
+      path: '/api/public/blog-media/$'
+      fullPath: '/api/public/blog-media/$'
+      preLoaderRoute: typeof ApiPublicBlogMediaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/sync-analytics': {
       id: '/api/public/cron/sync-analytics'
       path: '/api/public/cron/sync-analytics'
@@ -1475,6 +1495,7 @@ const rootRouteChildren: RootRouteChildren = {
   SolutionsAgenciesRoute: SolutionsAgenciesRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicBlogMediaSplatRoute: ApiPublicBlogMediaSplatRoute,
   ApiPublicCronSyncAnalyticsRoute: ApiPublicCronSyncAnalyticsRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
