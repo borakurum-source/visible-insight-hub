@@ -663,10 +663,13 @@ export type Database = {
           content_hash: string
           created_at: string
           embedding: string | null
+          heading: string | null
           id: string
           source_id: string | null
           source_type: string
           source_weight: number
+          token_estimate: number
+          tsv: unknown
           updated_at: string
           x: number | null
           y: number | null
@@ -679,10 +682,13 @@ export type Database = {
           content_hash?: string
           created_at?: string
           embedding?: string | null
+          heading?: string | null
           id?: string
           source_id?: string | null
           source_type?: string
           source_weight?: number
+          token_estimate?: number
+          tsv?: unknown
           updated_at?: string
           x?: number | null
           y?: number | null
@@ -695,10 +701,13 @@ export type Database = {
           content_hash?: string
           created_at?: string
           embedding?: string | null
+          heading?: string | null
           id?: string
           source_id?: string | null
           source_type?: string
           source_weight?: number
+          token_estimate?: number
+          tsv?: unknown
           updated_at?: string
           x?: number | null
           y?: number | null
@@ -728,9 +737,12 @@ export type Database = {
           content: string | null
           content_hash: string | null
           created_at: string
+          excluded: boolean
           id: string
           index_status: string
           indexed_at: string | null
+          noise_ratio: number
+          quality_score: number
           source_type: string
           status: string
           title: string
@@ -743,9 +755,12 @@ export type Database = {
           content?: string | null
           content_hash?: string | null
           created_at?: string
+          excluded?: boolean
           id?: string
           index_status?: string
           indexed_at?: string | null
+          noise_ratio?: number
+          quality_score?: number
           source_type?: string
           status?: string
           title: string
@@ -758,9 +773,12 @@ export type Database = {
           content?: string | null
           content_hash?: string | null
           created_at?: string
+          excluded?: boolean
           id?: string
           index_status?: string
           indexed_at?: string | null
+          noise_ratio?: number
+          quality_score?: number
           source_type?: string
           status?: string
           title?: string
@@ -1188,14 +1206,52 @@ export type Database = {
         Args: { _brand_id: string; _user_id: string }
         Returns: boolean
       }
-      match_kb_chunks: {
+      match_kb_chunks:
+        | {
+            Args: {
+              _brand_id: string
+              match_count?: number
+              query_embedding: string
+            }
+            Returns: {
+              content: string
+              id: string
+              score: number
+              similarity: number
+              source_id: string
+              source_type: string
+            }[]
+          }
+        | {
+            Args: {
+              _brand_id: string
+              match_count?: number
+              min_similarity?: number
+              per_source_limit?: number
+              query_embedding: string
+            }
+            Returns: {
+              content: string
+              heading: string
+              id: string
+              score: number
+              similarity: number
+              source_id: string
+              source_type: string
+            }[]
+          }
+      match_kb_hybrid: {
         Args: {
           _brand_id: string
           match_count?: number
+          min_similarity?: number
+          per_source_limit?: number
           query_embedding: string
+          query_text: string
         }
         Returns: {
           content: string
+          heading: string
           id: string
           score: number
           similarity: number

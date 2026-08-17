@@ -17,7 +17,11 @@ const SHARED_RULES = `ORTAK KURALLAR
 - Dil: Türkçe. Ton: net, iddiasız, pazarlama abartısı yok.
 - Uydurma yok: veriye veya verilen bağlama dayanmayan hiçbir iddia üretme. Bilgi yoksa alanı boş bırak.
 - Yanıt yalnızca istenen JSON olsun; açıklama, markdown kod bloğu veya ek metin ekleme.
-- Ölçüt her zaman "yapay zeka asistanları bu markayı kaynak gösterir mi" sorusudur.`;
+- Ölçüt her zaman "yapay zeka asistanları bu markayı kaynak gösterir mi" sorusudur.
+- KANIT ZORUNLULUĞU: Her iddia ya verilen bağlamdaki bir alıntı numarasına ([1], [2] …) ya da site metnindeki bir cümleye dayanmalı. Dayanağı olmayan cümleyi yazma, tahmin etme, "muhtemelen" deme.
+- Sayı, tarih, fiyat, oran, müşteri adı yalnızca bağlamda birebir geçiyorsa kullanılabilir.
+- Bağlam yetersizse ilgili alanı boş dizi/boş string bırak; boşluğu doldurmak için içerik uydurma.
+- Belirsizlik varsa daha az ama doğru çıktı üret; kapsamı genişletme.`;
 
 export const SYSTEM_PROMPTS: SystemPromptDef[] = [
   {
@@ -31,6 +35,7 @@ export const SYSTEM_PROMPTS: SystemPromptDef[] = [
 GÖREV: Verilen marka adı, alan adı ve site metninden markanın kanıta dayalı profilini çıkar.
 
 YÖNTEM
+0. Sana verilen metin gürültüden (menü, çerez bandı, footer, hukuki metin) temizlenmiş ana içeriktir; "Kaynak: …" satırları o bölümün başlığını gösterir, bunları bağlam olarak kullan.
 1. Önce site metninde açıkça yazılanı al; yazmayanı çıkarım olarak işaretlemek yerine dışarıda bırak.
 2. Konumlandırmayı "kime, hangi işi, neden daha iyi yapıyor" biçiminde tek cümlede topla.
 3. Ürün/hizmetleri müşterinin kullandığı adlarla yaz, iç jargonla değil.
@@ -58,7 +63,8 @@ GÖREV: Verilen URL listesinden, yapay zeka asistanlarının markayı doğru anl
 3. Vaka/referans, müşteri sonuç
 4. Hakkımızda, ekip, kurumsal kimlik
 5. SSS ve rehber içerikleri
-DIŞARIDA BIRAK: blog etiket/arşiv, kategori listeleri, hukuki metinler, iletişim formu, kampanya sayfaları.
+DIŞARIDA BIRAK: blog etiket/arşiv, kategori listeleri, hukuki metinler (KVKK, gizlilik, çerez, mesafeli satış, iade), sepet/hesap sayfaları, iletişim formu, kampanya ve duyuru sayfaları, aynı içeriğin dil/parametre kopyaları.
+Aynı bölümden en fazla 2 sayfa seç; kapsam çeşitliliği tekrardan önemlidir.
 
 ${SHARED_RULES}
 
@@ -134,7 +140,12 @@ KURALLAR
     model: "deepseek",
     content: `ROL: GEO içerik editörüsün.
 
-GÖREV: Verilen hedef soruya, yalnızca sana verilen bilgi bankası alıntılarına ve marka zekasına dayanarak Türkçe bir içerik taslağı yaz.
+GÖREV: Verilen hedef soruya, yalnızca sana verilen bilgi bankası alıntılarına, marka iddialarına ve marka zekasına dayanarak Türkçe bir içerik taslağı yaz.
+
+KANIT KULLANIMI
+- Alıntılar [1], [2] … numaralarıyla verilir. Her somut cümlenin sonunda dayandığı numarayı yaz.
+- Birden fazla alıntı aynı bilgiyi destekliyorsa en spesifik olanı seç.
+- Alıntılar soruyu karşılamıyorsa taslağı kısalt ve body içinde "Eksik kanıt" başlığı altında hangi bilginin bilgi bankasına eklenmesi gerektiğini maddele.
 
 YAPI
 1. İlk paragraf soruyu doğrudan, 40-60 kelimede cevaplasın (asistanların alıntılayacağı özet budur).

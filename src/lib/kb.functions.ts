@@ -146,14 +146,18 @@ export const searchKnowledge = createServerFn({ method: "POST" })
     const vector = await embedOne(query);
     if (!vector) throw new Error("Sorgu vektöre çevrilemedi");
 
-    const { data: matches, error } = await context.supabase.rpc("match_kb_chunks", {
+    // Hibrit getirme: vektor benzerligi + tam metin araması, kaynak cesitliligi ile.
+    const { data: matches, error } = await (context.supabase.rpc as any)("match_kb_hybrid", {
       _brand_id: data.brandId,
       query_embedding: JSON.stringify(vector) as unknown as string,
+      query_text: query,
       match_count: 6,
+      min_similarity: 0.18,
+      per_source_limit: 2,
     });
     if (error) throw new Error(error.message);
 
-    const rows = (matches ?? []) as Array<{ id: string; content: string; source_id: string | null; similarity: number }>;
+    const rows = (matches ?? []) as Array<{ id: string; content: string; heading: string | null; source_id: string | null; similarity: number }>;
     const sourceIds = Array.from(new Set(rows.map((r) => r.source_id).filter(Boolean) as string[]));
     const { data: sources } = sourceIds.length
       ? await context.supabase.from("knowledge_sources").select("id, title, url").in("id", sourceIds)
@@ -163,6 +167,7 @@ export const searchKnowledge = createServerFn({ method: "POST" })
     return rows.map((row) => ({
       id: row.id,
       content: row.content.slice(0, 400),
+      heading: row.heading ?? null,
       similarity: Math.round(row.similarity * 100),
       sourceTitle: row.source_id ? (byId.get(row.source_id)?.title ?? "Kaynak") : "Manuel not",
       sourceUrl: row.source_id ? (byId.get(row.source_id)?.url ?? null) : null,
@@ -330,10 +335,13 @@ export const listContentGaps = createServerFn({ method: "POST" })
       try {
         const vector = await embedOne(candidate.text);
         if (vector) {
-          const { data: matches } = await supabase.rpc("match_kb_chunks", {
+          const { data: matches } = await (supabase.rpc as any)("match_kb_hybrid", {
             _brand_id: data.brandId,
             query_embedding: JSON.stringify(vector) as unknown as string,
+            query_text: candidate.text,
             match_count: 5,
+            min_similarity: 0.15,
+            per_source_limit: 2,
           });
           const rows = (matches ?? []) as Array<{ similarity: number }>;
           coverage = rows.length ? Math.max(0, Math.min(1, rows.reduce((s, r) => s + r.similarity, 0) / rows.length)) : 0;
@@ -382,10 +390,13 @@ export const generateDraft = createServerFn({ method: "POST" })
     let evidence: Array<{ content: string; source_id: string | null }> = [];
     const vector = await embedOne(prompt.text);
     if (vector) {
-      const { data: matches } = await supabase.rpc("match_kb_chunks", {
+      const { data: matches } = await (supabase.rpc as any)("match_kb_hybrid", {
         _brand_id: data.brandId,
         query_embedding: JSON.stringify(vector) as unknown as string,
+        query_text: prompt.text,
         match_count: 8,
+        min_similarity: 0.15,
+        per_source_limit: 3,
       });
       evidence = ((matches ?? []) as Array<{ content: string; source_id: string | null }>).slice(0, 8);
     }

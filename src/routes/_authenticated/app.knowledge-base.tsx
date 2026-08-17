@@ -234,6 +234,24 @@ function KnowledgeBasePage() {
                   <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
                     {source.index_status === "hazir" ? `${source.chunk_count} parça indeksli` : source.index_status === "hata" ? "İçerik alınamadı" : "İndeks bekliyor"}
                   </Badge>
+                  {source.index_status === "hazir" ? (
+                    <>
+                      <Badge
+                        variant="outline"
+                        title="Parçaların ortalama kanıt değeri: sayı, tarih, fiyat gibi doğrulanabilir sinyaller puanı yükseltir."
+                        className="shrink-0 text-[10px] font-normal"
+                      >
+                        Kanıt {(source as { quality_score?: number }).quality_score ?? 0}/100
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        title="Sayfadan atılan menü, çerez bandı, footer gibi gürültünün oranı."
+                        className="shrink-0 text-[10px] font-normal text-muted-foreground"
+                      >
+                        Temizlenen %{Math.round(((source as { noise_ratio?: number }).noise_ratio ?? 0) * 100)}
+                      </Badge>
+                    </>
+                  ) : null}
                   <Button
                     size="icon"
                     variant="ghost"

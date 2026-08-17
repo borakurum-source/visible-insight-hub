@@ -3,13 +3,40 @@
 const EMBEDDING_MODEL = "pplx-embed-v1-4b";
 const EMBEDDING_DIMS = 2560;
 
+// Kaynak tipine gore temel agirlik. Kanit degeri yuksek icerik daha yukari ciksin.
 export const SOURCE_WEIGHTS: Record<string, number> = {
-  manual: 1.5,
+  claim: 1.6,
+  manual: 1.6,
+  structured: 1.4,
   sss: 1.3,
+  urun: 1.25,
+  fiyat: 1.25,
+  vaka: 1.15,
   url: 1.0,
   sitemap: 1.0,
+  blog: 1.0,
   pdf: 0.9,
+  hukuki: 0.4,
 };
+
+// URL kalibindan icerik sinifi cikarir; agirligi buna gore belirleriz.
+export function classifyUrl(url?: string | null): string {
+  const path = (url ?? "").toLowerCase();
+  if (!path) return "url";
+  if (/(kvkk|gizlilik|privacy|cerez|çerez|cookie|kullanim-kosullari|terms|mesafeli|iade|refund)/.test(path)) return "hukuki";
+  if (/(sss|faq|sikca-sorulan|sıkça)/.test(path)) return "sss";
+  if (/(fiyat|price|pricing|paket|plan)/.test(path)) return "fiyat";
+  if (/(urun|ürün|product|hizmet|service|cozum|çözüm|solution)/.test(path)) return "urun";
+  if (/(vaka|case|referans|basari|başarı|musteri|müşteri|testimonial)/.test(path)) return "vaka";
+  if (/(blog|haber|news|makale|article)/.test(path)) return "blog";
+  return "url";
+}
+
+export function weightFor(sourceType: string, url?: string | null): number {
+  const explicit = SOURCE_WEIGHTS[sourceType];
+  if (explicit && sourceType !== "url" && sourceType !== "sitemap") return explicit;
+  return SOURCE_WEIGHTS[classifyUrl(url)] ?? 1.0;
+}
 
 export function hashText(input: string): string {
   let hash = 5381;
@@ -19,42 +46,90 @@ export function hashText(input: string): string {
   return (hash >>> 0).toString(16);
 }
 
-export function chunkText(text: string, size = 1000, overlap = 150): string[] {
-  const clean = text.replace(/\s+/g, " ").trim();
+export type Chunk = { content: string; heading: string };
+
+// Cumle sinirindan bolerek uzun bir bolumu parcalar.
+function splitBySentence(text: string, size: number, overlap: number): string[] {
+  const clean = text.replace(/[ \t]+/g, " ").trim();
   if (!clean) return [];
-  const chunks: string[] = [];
+  if (clean.length <= size) return [clean];
+  const pieces: string[] = [];
   let start = 0;
   while (start < clean.length) {
-    const end = Math.min(start + size, clean.length);
-    chunks.push(clean.slice(start, end));
+    let end = Math.min(start + size, clean.length);
+    if (end < clean.length) {
+      const window = clean.slice(start, end);
+      const boundary = Math.max(window.lastIndexOf(". "), window.lastIndexOf("! "), window.lastIndexOf("? "), window.lastIndexOf("\n"));
+      if (boundary > size * 0.5) end = start + boundary + 1;
+    }
+    pieces.push(clean.slice(start, end).trim());
     if (end >= clean.length) break;
-    start = end - overlap;
+    start = Math.max(end - overlap, start + 1);
   }
-  return chunks.slice(0, 40);
+  return pieces.filter(Boolean);
+}
+
+/**
+ * Baslik-farkinda parcalama: metin once "## Baslik" bloklarina bolunur,
+ * uzun bloklar cumle sinirindan kirpilir, cok kisa parcalar birlestirilir.
+ */
+export function chunkStructured(
+  text: string,
+  options: { size?: number; overlap?: number; maxChunks?: number; minChars?: number } = {},
+): Chunk[] {
+  const size = options.size ?? 1100;
+  const overlap = options.overlap ?? 180;
+  const maxChunks = options.maxChunks ?? 120;
+  const minChars = options.minChars ?? 180;
+  if (!text.trim()) return [];
+
+  const sections: Array<{ heading: string; body: string[] }> = [{ heading: "", body: [] }];
+  for (const line of text.split("\n")) {
+    const headingMatch = line.match(/^#{2,3}\s*(.+)$/);
+    if (headingMatch) sections.push({ heading: (headingMatch[1] ?? "").trim().slice(0, 160), body: [] });
+    else if (line.trim()) sections[sections.length - 1]!.body.push(line.trim());
+  }
+
+  const raw: Chunk[] = [];
+  for (const section of sections) {
+    const body = section.body.join("\n").trim();
+    if (!body) continue;
+    for (const piece of splitBySentence(body, size, overlap)) {
+      raw.push({ content: piece, heading: section.heading });
+    }
+  }
+
+  // Cok kisa parcalari bir sonrakiyle birlestir.
+  const merged: Chunk[] = [];
+  for (const chunk of raw) {
+    const previous = merged[merged.length - 1];
+    if (previous && previous.content.length < minChars && previous.content.length + chunk.content.length <= size * 1.4) {
+      previous.content = `${previous.content}\n${chunk.content}`;
+      if (!previous.heading) previous.heading = chunk.heading;
+      continue;
+    }
+    merged.push({ ...chunk });
+  }
+
+  return merged.filter((chunk) => chunk.content.trim().length >= 60).slice(0, maxChunks);
+}
+
+/** Parcanin basina kaynak baglami ekler; embedding "bu metin ne hakkinda" bilsin. */
+export function withContext(chunk: Chunk, sourceTitle: string): string {
+  const header = [sourceTitle, chunk.heading].filter(Boolean).join(" — ");
+  return header ? `Kaynak: ${header}\n${chunk.content}` : chunk.content;
+}
+
+// Geriye donuk uyumluluk: duz metin parcalayici.
+export function chunkText(text: string, size = 1100, overlap = 180): string[] {
+  return chunkStructured(text, { size, overlap }).map((chunk) => chunk.content);
 }
 
 export async function fetchPageText(url: string): Promise<string> {
-  try {
-    const target = url.startsWith("http") ? url : `https://${url}`;
-    const res = await fetch(target, {
-      headers: { "user-agent": "Mozilla/5.0 (compatible; OneCiteBot/1.0)" },
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!res.ok) return "";
-    const html = await res.text();
-    return html
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<nav[\s\S]*?<\/nav>/gi, " ")
-      .replace(/<footer[\s\S]*?<\/footer>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 40000);
-  } catch {
-    return "";
-  }
+  const { fetchAndExtract } = await import("./extract.server");
+  const page = await fetchAndExtract(url);
+  if (!page) return "";
+  return [page.structured, page.text].filter(Boolean).join("\n\n");
 }
 
 function decodeInt8Base64(b64: string): number[] {
