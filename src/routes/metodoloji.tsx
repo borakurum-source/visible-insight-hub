@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { MarketingShell } from "@/components/site/MarketingShell";
-import { Reveal } from "@/components/site/marketing-motion";
 import { Button } from "@/components/ui/button";
 
 const TITLE = "Ölçüm Metodolojisi | OneCite";
@@ -159,7 +158,7 @@ function MetodolojiPage() {
       <section className="bg-background py-16 md:py-24">
         <div className="marketing-container space-y-14 md:space-y-20">
           {SECTIONS.map((section) => (
-            <Reveal key={section.id} id={section.id} className="scroll-mt-24 border-t border-border pt-8 first:border-t-0 first:pt-0">
+            <div key={section.id} id={section.id} className="scroll-mt-24 border-t border-border pt-8 first:border-t-0 first:pt-0">
               <p className="editorial-eyebrow text-primary">{section.eyebrow}</p>
               <h2 className="mt-4 max-w-2xl text-2xl font-extrabold tracking-[-0.03em] text-foreground md:text-3xl">
                 {section.title}
@@ -172,7 +171,7 @@ function MetodolojiPage() {
                   </li>
                 ))}
               </ul>
-            </Reveal>
+            </div>
           ))}
 
           <div className="border-t border-border pt-8">
