@@ -302,10 +302,6 @@ const deepFeatures = [
   },
 ];
 
-const integrations = [
-  "Google Search Console",
-];
-
 const workModel = [
   {
     number: "01",
@@ -323,14 +319,14 @@ const workModel = [
   },
   {
     number: "03",
-    icon: Goal,
+    icon: Target,
     label: "Uygulama",
     title: "Doğru kanıtı önce üretin",
     body: "Eksik kanıt; içerik, vaka çalışması, üçüncü taraf otorite veya teknik iyileştirme görevine bağlanır.",
   },
 ];
 
-const integrationsList = [
+const integrations = [
   "Google Search Console",
   "Google Analytics 4",
   "Bing Webmaster Tools",
