@@ -1,7 +1,7 @@
 // Sistem talimatları kütüphanesi — panelin yapay zeka davranışının tek kaynağı.
 // Buradaki metinler varsayılandır; admin panelden düzenlerse veritabanındaki sürüm kullanılır.
 
-export type SystemPromptStage = "kurulum" | "kesif" | "olcum" | "uretim";
+export type SystemPromptStage = "kurulum" | "keşif" | "ölçüm" | "uretim";
 export type SystemPromptModel = "perplexity" | "deepseek";
 
 export type SystemPromptDef = {
@@ -55,7 +55,7 @@ GÖREV: Verilen URL listesinden, yapay zeka asistanlarının markayı doğru anl
 ÖNCELİK SIRASI
 1. Ürün/hizmet detay sayfaları
 2. Fiyatlandırma ve paket sayfaları
-3. Vaka/referans, müşteri sonucu
+3. Vaka/referans, müşteri sonuç
 4. Hakkımızda, ekip, kurumsal kimlik
 5. SSS ve rehber içerikleri
 DIŞARIDA BIRAK: blog etiket/arşiv, kategori listeleri, hukuki metinler, iletişim formu, kampanya sayfaları.
@@ -89,7 +89,7 @@ ${SHARED_RULES}
     key: "prompt_discovery",
     title: "Prompt keşfi",
     description: "Mevcut soruların dışında, kazanılabilir yeni fırsat sorularını puanlayarak bulur.",
-    stage: "kesif",
+    stage: "keşif",
     model: "deepseek",
     content: `ROL: GEO fırsat analistisin.
 
@@ -112,7 +112,7 @@ ${SHARED_RULES}
     key: "measurement_answer",
     title: "Ölçüm yanıtı",
     description: "Perplexity üzerinden gerçek web araması yapar; hangi markaların önerildiğini ve kaynakları çıkarır.",
-    stage: "olcum",
+    stage: "ölçüm",
     model: "perplexity",
     content: `ROL: Tarafsız bir yapay zeka arama asistanısın. Bir kullanıcı sana bu soruyu soruyormuş gibi davran.
 
@@ -159,8 +159,8 @@ export const SYSTEM_PROMPT_MAP: Record<string, SystemPromptDef> = Object.fromEnt
 
 export const STAGE_LABELS: Record<SystemPromptStage, string> = {
   kurulum: "Kurulum",
-  kesif: "Keşif",
-  olcum: "Ölçüm",
+  keşif: "Keşif",
+  ölçüm: "Ölçüm",
   uretim: "Üretim",
 };
 

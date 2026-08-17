@@ -112,7 +112,7 @@ function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 text-xs text-muted-foreground">Tarih araligi:</span>
+            <span className="mr-1 text-xs text-muted-foreground">Tarih aralığı:</span>
             {([7, 30, 90] as const).map((range) => (
               <Button
                 key={range}
@@ -120,7 +120,7 @@ function DashboardPage() {
                 variant={range === rangeDays ? "default" : "outline"}
                 onClick={() => setRangeDays(range)}
               >
-                Son {range} gun
+                Son {range} gün
               </Button>
             ))}
           </div>

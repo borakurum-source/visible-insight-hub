@@ -88,7 +88,7 @@ export const connectGscProperty = createServerFn({ method: "POST" })
         {
           brand_id: data.brandId,
           provider: "gsc",
-          status: "bagli",
+          status: "bağlı",
           property_id: data.siteUrl,
           last_error: null,
         },
@@ -128,7 +128,7 @@ export const syncGsc = createServerFn({ method: "POST" })
       );
       await context.supabase
         .from("integration_connections")
-        .update({ status: "bagli", last_sync_at: new Date().toISOString(), last_error: null })
+        .update({ status: "bağlı", last_sync_at: new Date().toISOString(), last_error: null })
         .eq("brand_id", data.brandId)
         .eq("provider", "gsc");
       return { ok: true, queries: payload.queries.length };
@@ -178,7 +178,7 @@ export const connectGa4Property = createServerFn({ method: "POST" })
       {
         brand_id: data.brandId,
         provider: "ga4",
-        status: "bagli",
+        status: "bağlı",
         property_id: data.propertyId,
         last_error: null,
       },
@@ -216,7 +216,7 @@ export const syncGa4 = createServerFn({ method: "POST" })
       );
       await context.supabase
         .from("integration_connections")
-        .update({ status: "bagli", last_sync_at: new Date().toISOString(), last_error: null })
+        .update({ status: "bağlı", last_sync_at: new Date().toISOString(), last_error: null })
         .eq("brand_id", data.brandId)
         .eq("provider", "ga4");
       return { ok: true, sessions: payload.totals.sessions };
@@ -355,7 +355,7 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
     return {
       rangeDays,
       gsc: {
-        connected: gscConnection?.status === "bagli",
+        connected: gscConnection?.status === "bağlı",
         status: gscConnection?.status ?? null,
         property: gscConnection?.property_id ?? null,
         lastSyncAt: gscConnection?.last_sync_at ?? null,
@@ -366,7 +366,7 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         queries: (payload?.queries ?? []).slice(0, 10),
       },
       ga4: {
-        connected: ga4Connection?.status === "bagli",
+        connected: ga4Connection?.status === "bağlı",
         property: ga4Connection?.property_id ?? null,
         lastSyncAt: ga4Connection?.last_sync_at ?? null,
         totals: ga4Totals,
@@ -387,7 +387,7 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
     };
   });
 
-// --- Musteri bazli Google hesabi baglantisi ---
+// --- Musteri bazli Google hesabı bağlantısı ---
 
 export const getGoogleAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -395,20 +395,20 @@ export const getGoogleAccount = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: member } = await context.supabase
       .from("brands").select("id").eq("id", data.brandId).maybeSingle();
-    if (!member) throw new Error("Marka bulunamadi");
+    if (!member) throw new Error("Marka bulunamadı");
     const { hasGoogleAccount, isGoogleOAuthConfigured } = await import("./google-oauth.server");
     const account = await hasGoogleAccount(data.brandId);
     return { ...account, configured: isGoogleOAuthConfigured() };
   });
 
-// Kullanicinin kendi Google hesabini baglamasi icin izin adresini uretir.
+// Kullanicinin kendi Google hesabini baglamasi için izin adresini uretir.
 export const startGoogleConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; origin: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: brand } = await context.supabase
       .from("brands").select("id").eq("id", data.brandId).maybeSingle();
-    if (!brand) throw new Error("Marka bulunamadi");
+    if (!brand) throw new Error("Marka bulunamadı");
     const { buildAuthorizeUrl, encodeState } = await import("./google-oauth.server");
     const state = encodeState({ brandId: data.brandId, userId: context.userId });
     return { url: buildAuthorizeUrl(state, data.origin) };
@@ -420,7 +420,7 @@ export const disconnectGoogleAccount = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: brand } = await context.supabase
       .from("brands").select("id").eq("id", data.brandId).maybeSingle();
-    if (!brand) throw new Error("Marka bulunamadi");
+    if (!brand) throw new Error("Marka bulunamadı");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("google_oauth_accounts").delete().eq("brand_id", data.brandId);
     await context.supabase

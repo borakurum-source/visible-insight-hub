@@ -7,21 +7,21 @@ import { Hint } from "@/components/app/hint";
 import type { ScoreComponent } from "@/lib/score-model";
 
 function grade(total: number) {
-  if (total >= 75) return { label: "Guclu", tone: "text-chart-2" };
-  if (total >= 45) return { label: "Gelismekte", tone: "text-foreground" };
-  return { label: "Zayif", tone: "text-destructive" };
+  if (total >= 75) return { label: "Ğüçlü", tone: "text-chart-2" };
+  if (total >= 45) return { label: "Ğelişmekte", tone: "text-foreground" };
+  return { label: "Zayıf", tone: "text-destructive" };
 }
 
-// Skoru dusuk kalan her baslik icin gidilecek sayfa.
+// Skoru düşük kalan her başlık için gidilecek sayfa.
 const FIX: Record<string, { to: string; label: string; tip: string }> = {
-  mention: { to: "/app/prompts", label: "Promptlari duzenle", tip: "Markanizin gecmedigi sorulara odaklanin ve icerik uretin." },
-  citation: { to: "/app/knowledge-base", label: "Bilgi bankasini guclendir", tip: "Kendi sayfalariniz kaynak gosterilmiyor; kanit sayfalari ekleyin." },
-  position: { to: "/app/content", label: "Icerik uret", tip: "Listelerde ust sirada cikmak icin karsilastirma ve rehber icerigi gerekir." },
-  knowledge: { to: "/app/knowledge-base", label: "Kaynak ekle", tip: "Hedef 10 kaynak. Site haritanizdan onemli sayfalari ekleyin." },
-  claims: { to: "/app/claims", label: "Iddia kanitla", tip: "Her iddiaya kaynak baglantisi ekleyin." },
+  mention: { to: "/app/prompts", label: "Promptları düzenle", tip: "Markanızın geçmediği sorulara odaklanın ve içerik üretin." },
+  citation: { to: "/app/knowledge-base", label: "Bilgi bankasını güçlendir", tip: "Kendi sayfalarınız kaynak gösterilmiyor; kanıt sayfaları ekleyin." },
+  position: { to: "/app/content", label: "İçerik üret", tip: "Listelerde üst sırada çıkmak için karşılaştırma ve rehber içeriği gerekir." },
+  knowledge: { to: "/app/knowledge-base", label: "Kaynak ekle", tip: "Hedef 10 kaynak. Site haritanızdan önemli sayfaları ekleyin." },
+  claims: { to: "/app/claims", label: "Iddia kanıtla", tip: "Her iddiaya kaynak bağlantısı ekleyin." },
 };
 
-// Gorunurluk skoru + kirilimi tek kompakt kart: "OneCite Score".
+// Ğörünürlük skoru + kırılımı tek kompakt kart: "OneCite Score".
 export function ScoreBreakdown({
   total, components, runs, lastRunAt,
 }: {
@@ -39,12 +39,12 @@ export function ScoreBreakdown({
         <CardTitle className="flex items-center gap-1.5 text-sm">
           OneCite Score
           <Hint title="OneCite Score">
-            <p>Markanizin yapay zeka yanitlarindaki genel gorunurlugunu 0–100 arasinda ozetler.</p>
+            <p>Markanızın yapay zeka yanıtlarındaki genel görünürlüğünü 0–100 arasında özetler.</p>
             <p>
-              Bes baslik toplanir: yanitlarda anilma (40), kendi sitenizin kaynak gosterilme payi (25),
-              yanit icindeki sira kaliteniz (15), bilgi bankasi kapsaminiz (10) ve kanitli iddialariniz (10).
+              Bes başlık toplanir: yanıtlarda anilma (40), kendi sitenizin kaynak gosterilme payi (25),
+              yanıt icindeki sira kaliteniz (15), bilgi bankasi kapsaminiz (10) ve kanitli iddialariniz (10).
             </p>
-            <p>75+ guclu, 45–74 gelismekte, 45 alti zayif. En dusuk baslik en hizli kazanctir.</p>
+            <p>75+ güçlü, 45–74 gelişmekte, 45 altı zayıf. En düşük başlık en hızlı kazançtır.</p>
           </Hint>
         </CardTitle>
       </CardHeader>
@@ -54,14 +54,14 @@ export function ScoreBreakdown({
           <span className="text-xs text-muted-foreground">/ 100</span>
           <span className={`text-xs font-medium ${g.tone}`}>{g.label}</span>
           <p className="ml-auto text-[11px] text-muted-foreground">
-            {runs} yanit uzerinden{lastRunAt ? ` · ${new Date(lastRunAt).toLocaleDateString("tr-TR")}` : ""}
+            {runs} yanıt uzerinden{lastRunAt ? ` · ${new Date(lastRunAt).toLocaleDateString("tr-TR")}` : ""}
           </p>
         </div>
         <Progress value={total} className="h-1.5" />
 
         {weakest ? (
           <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground">
-            En zayif alaniniz <strong className="text-foreground">{weakest.label}</strong>:{" "}
+            En zayıf alaniniz <strong className="text-foreground">{weakest.label}</strong>:{" "}
             {FIX[weakest.key]?.tip ?? weakest.detail}
           </p>
         ) : null}

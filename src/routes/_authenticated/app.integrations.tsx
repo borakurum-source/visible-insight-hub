@@ -74,8 +74,8 @@ function IntegrationsPage() {
     const status = params.get("google");
     if (!status) return;
     const message = params.get("message") ?? "";
-    if (status === "connected") toast.success(message || "Google hesabiniz baglandi");
-    else toast.error(message || "Google baglantisi tamamlanamadi");
+    if (status === "connected") toast.success(message || "Google hesabınız bağlandı");
+    else toast.error(message || "Google bağlantısı tamamlanamadı");
     window.history.replaceState({}, "", window.location.pathname);
     void googleAccount.refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,7 +92,7 @@ function IntegrationsPage() {
   const unlinkGoogle = useMutation({
     mutationFn: () => removeGoogleAccount({ data: { brandId: brand!.id } }),
     onSuccess: async () => {
-      toast.success("Google hesabi kaldirildi.");
+      toast.success("Google hesabı kaldırıldı.");
       await googleAccount.refetch();
       await queryClient.invalidateQueries({ queryKey: ["integrations", brand?.id] });
     },
@@ -188,18 +188,18 @@ function IntegrationsPage() {
               <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
                 <LogIn className="h-4.5 w-4.5" />
               </div>
-              <CardTitle className="text-sm">Google hesabi</CardTitle>
+              <CardTitle className="text-sm">Google hesabı</CardTitle>
             </div>
             {googleAccount.data?.connected ? (
               <Badge variant="outline" className="gap-1 border-success/40 text-success">
-                <CheckCircle2 className="h-3 w-3" /> {googleAccount.data.email ?? "Bagli"}
+                <CheckCircle2 className="h-3 w-3" /> {googleAccount.data.email ?? "Bağlı"}
               </Badge>
             ) : (
-              <Badge variant="secondary">Bagli degil</Badge>
+              <Badge variant="secondary">Bağlı değil</Badge>
             )}
           </div>
           <CardDescription className="pt-1">
-            Search Console ve Analytics verileri bu markaya baglanan Google hesabindan okunur. Her marka kendi hesabini baglar.
+            Search Console ve Analytics verileri bu markaya bağlanan Google hesabından okunur. Her marka kendi hesabini baglar.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
@@ -209,12 +209,12 @@ function IntegrationsPage() {
                 Yeniden yetkilendir
               </Button>
               <Button variant="ghost" size="sm" disabled={unlinkGoogle.isPending} onClick={() => unlinkGoogle.mutate()}>
-                <Unplug className="mr-1.5 h-3.5 w-3.5" /> Baglantiyi kaldir
+                <Unplug className="mr-1.5 h-3.5 w-3.5" /> Bağlantıyı kaldir
               </Button>
             </>
           ) : (
             <Button size="sm" disabled={!brand || connectGoogle.isPending} onClick={() => connectGoogle.mutate()}>
-              {connectGoogle.isPending ? "Yonlendiriliyor…" : "Google hesabimi bagla"}
+              {connectGoogle.isPending ? "Yonlendiriliyor…" : "Google hesabımı bağla"}
             </Button>
           )}
         </CardContent>
@@ -230,7 +230,7 @@ function IntegrationsPage() {
                 </div>
                 <CardTitle className="text-sm">Google Search Console</CardTitle>
               </div>
-              {gsc?.status === "bagli" ? (
+              {gsc?.status === "bağlı" ? (
                 <Badge variant="outline" className="gap-1 border-success/40 text-success"><CheckCircle2 className="h-3 w-3" /> Bağlı</Badge>
               ) : gsc?.status === "hata" ? (
                 <Badge variant="destructive">Hata</Badge>
@@ -288,7 +288,7 @@ function IntegrationsPage() {
                 </div>
                 <CardTitle className="text-sm">Google Analytics 4</CardTitle>
               </div>
-              {ga4?.status === "bagli" ? (
+              {ga4?.status === "bağlı" ? (
                 <Badge variant="outline" className="gap-1 border-success/40 text-success"><CheckCircle2 className="h-3 w-3" /> Bağlı</Badge>
               ) : ga4?.status === "hata" ? (
                 <Badge variant="destructive">Hata</Badge>

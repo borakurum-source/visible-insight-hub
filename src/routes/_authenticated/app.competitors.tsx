@@ -14,9 +14,9 @@ export const Route = createFileRoute("/_authenticated/app/competitors")({
   head: () => ({
     meta: [
       { title: "Rakip Takibi — OneCite Paneli" },
-      { name: "description", content: "Yapay zeka yanitlarinda sizin yerinize cikan markalari bulun ve takip edin." },
+      { name: "description", content: "Yapay zeka yanıtlarında sizin yerinize çıkan markaları bulun ve takip edin." },
       { property: "og:title", content: "Rakip Takibi — OneCite Paneli" },
-      { property: "og:description", content: "Yanitlarda one cikan rakipleri izleyin." },
+      { property: "og:description", content: "Yanıtlarda one çıkan rakipleri izleyin." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -35,7 +35,7 @@ function CompetitorsPage() {
   if (!brand) {
     return (
       <>
-        <PanelPageHeading meta={{ title: "Rakip Takibi", description: "Once bir marka ekleyin.", icon: Swords }} />
+        <PanelPageHeading meta={{ title: "Rakip Takibi", description: "Önce bir marka ekleyin.", icon: Swords }} />
         <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markani ekle</Link></Button></CardContent></Card>
       </>
     );
@@ -46,13 +46,13 @@ function CompetitorsPage() {
       <PanelPageHeading
         hint={
           <>
-            <p>Yapay zeka yanitlarinda markaniz yerine hangi firmalarin kaynak gosterildigini burada gorursunuz.</p>
-            <p>Asagidaki listeden bir alan adini takibe alin; sonraki olcumlerde bu markalarla karsilastirilirsiniz.</p>
+            <p>Yapay zeka yanıtlarında markanız yerine hangi firmaların kaynak gösterildiğini burada görürsünüz.</p>
+            <p>Aşağıdaki listeden bir alan adını takibe alın; sonraki ölçümlerde bu markalarla karşılaştırılırsınız.</p>
           </>
         }
         meta={{
           title: "Rakip Takibi",
-          description: "Olcum sonuclarinda one cikan markalari kesfedin, takibe alin ve karsilastirin.",
+          description: "Ölçüm sonuçlarında one çıkan markaları keşfedin, takibe alın ve karşılaştırın.",
           icon: Swords,
         }}
       />
@@ -62,7 +62,7 @@ function CompetitorsPage() {
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Sorgu sonuclarindan cikan adaylar</CardTitle>
+          <CardTitle className="text-sm">Sorgu sonuclarindan çıkan adaylar</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {data?.suggestions.length ? (
@@ -81,7 +81,7 @@ function CompetitorsPage() {
             </ul>
           ) : (
             <p className="px-4 py-6 text-center text-xs text-muted-foreground">
-              Henuz olcum kaynagi yok. Olcumu calistirdiginizda yanitlarda gecen siteler burada listelenir.
+              Henüz ölçüm kaynağı yok. Ölçümü calistirdiginizda yanıtlarda geçen siteler burada listelenir.
             </p>
           )}
         </CardContent>

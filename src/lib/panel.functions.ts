@@ -665,7 +665,7 @@ export const startMeasurement = createServerFn({ method: "POST" })
     const ids = (prompts ?? []).map((p) => p.id);
     if (!ids.length) throw new Error("Önce en az bir prompt onaylayın.");
 
-    // Yarım kalmış bir tur varsa onu sürdür: aynı turda ölçülen promptları tekrar ölçme.
+    // Yarım kalmış bir tür varsa onu sürdür: aynı turda ölçülen promptları tekrar ölçme.
     const { data: openBatch } = await context.supabase
       .from("measurement_batches")
       .select("*")
@@ -689,7 +689,7 @@ export const startMeasurement = createServerFn({ method: "POST" })
       }
       await context.supabase
         .from("measurement_batches")
-        .update({ status: "failed", error: "Tur yarıda kaldı", finished_at: new Date().toISOString() })
+        .update({ status: "failed", error: "Tür yarıda kaldı", finished_at: new Date().toISOString() })
         .eq("id", openBatch.id);
     }
 
@@ -888,7 +888,7 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       actions.push({
         key: "measure",
         title: `"${(prompt?.text ?? "").slice(0, 80)}" sorusunu ölçün`,
-        description: "Bu soru henüz hiç ölçülmedi. Ölçüm & Skor ekranından bir tur başlatın.",
+        description: "Bu soru henüz hiç ölçülmedi. Ölçüm & Skor ekranından bir tür başlatın.",
         priority: "medium",
       });
     } else if (!run.brand_mentioned) {
@@ -1013,7 +1013,7 @@ export const searchCompetitors = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            "Sen bir pazar araştırmacısısın. Verilen markayla aynı işi yapan gerçek rakip firmaları bul. Uydurma. Yalnızca var olduğunu doğrulayabildiğin firmaları döndür, en fazla 8 tane. domain alanına sadece alan adını yaz (ör. ornek.com).",
+            "Sen bir pazar araştırmacısısın. Verilen markayla aynı işi yapan gerçek rakip firmaları bul. Uydurma. Yalnızca var olduğunu doğrulayabildiğin firmaları döndür, en fazla 8 tane. domain alanına sadece alan adını yaz (ör. örnek.com).",
         },
         {
           role: "user",
@@ -1086,7 +1086,7 @@ export const suggestGeoTasks = createServerFn({ method: "POST" })
     return { created };
   });
 
-// Olcum sonuclarindaki kaynaklardan potansiyel rakip adaylari cikarir.
+// Ölçüm sonuclarindaki kaynaklardan potansiyel rakip adaylari cikarir.
 export const getCompetitorInsights = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)

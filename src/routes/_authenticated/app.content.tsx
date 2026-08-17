@@ -27,9 +27,9 @@ export const Route = createFileRoute("/_authenticated/app/content")({
 });
 
 const impactTone: Record<string, string> = {
-  yuksek: "text-destructive border-destructive/40",
+  yüksek: "text-destructive border-destructive/40",
   orta: "text-amber-600 dark:text-amber-400 border-amber-500/40",
-  dusuk: "text-muted-foreground border-border",
+  düşük: "text-muted-foreground border-border",
 };
 
 const statusLabel: Record<string, string> = { taslak: "Taslak", incelemede: "İncelemede", yayinlandi: "Yayınlandı" };

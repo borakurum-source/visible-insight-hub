@@ -28,8 +28,8 @@ export const Route = createFileRoute("/_authenticated/app/system-prompts")({
 
 const STAGE_LABEL: Record<string, string> = {
   kurulum: "Kurulum",
-  kesif: "Keşif",
-  olcum: "Ölçüm",
+  keşif: "Keşif",
+  ölçüm: "Ölçüm",
   uretim: "Üretim",
 };
 
