@@ -110,7 +110,7 @@ function Hero() {
           <div className="flex items-center gap-3"><span className="visual-source-label text-cyan">AI CITATION INTELLIGENCE</span><span className="h-px w-10 bg-cyan/70" /></div>
           <div className="space-y-5">
             <h1 className="text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] text-white md:text-[48px] lg:text-[58px]" data-testid="text-hero-headline">
-              ChatGPT, Perplexity ve Gemini cevaplarında markanızın <span className="text-cyan">AI kaynak payını</span> ölçün ve artırın.
+              Yapay zeka cevaplarında markanızın <span className="text-cyan">kaynak gösterim payını</span> ölçün ve artırın.
             </h1>
             <p className="mx-auto max-w-2xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">
               OneCite, satın alma niyetli sorularda hangi markanın kaynak olarak seçildiğini ölçer, eksik kanıtı gösterir ve önce hangi içeriği üretmeniz gerektiğini söyler.
