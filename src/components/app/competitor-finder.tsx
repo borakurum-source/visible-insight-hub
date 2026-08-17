@@ -90,7 +90,7 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
       explainQuota();
       return;
     }
-    save.mutate([...list, { name: clean || cleanedDomain, domain: cleanedDomain }]);
+    save.mutate([...list, { name: clean || cleanedDomain, domain: cleanedDomain, type: "direct" as const }]);
     setManualName("");
     setManualDomain("");
   }
