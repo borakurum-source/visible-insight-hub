@@ -138,6 +138,13 @@ export function MarketingShell({ children }: { children: ReactNode }) {
                 </Link>
               ))}
               <Link
+                to="/proof/filmfolk"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-lg px-3 py-2.5 pl-6 text-sm text-muted-foreground hover:bg-secondary"
+              >
+                FilmFolk vakası
+              </Link>
+              <Link
                 to="/auth"
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 block w-full rounded-lg border border-border px-3 py-2.5 text-left text-sm font-semibold text-foreground"
