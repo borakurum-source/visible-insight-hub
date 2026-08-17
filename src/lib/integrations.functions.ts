@@ -269,6 +269,7 @@ export type TrafficOverview = {
     rate: number;
     daily: Array<{ date: string; mentioned: number; total: number }>;
   };
+  bing: BingOverview;
 };
 
 export type BingOverview = {
@@ -288,7 +289,7 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
     // Tarih aralığı filtresi: 7 / 30 / 90 gün.
     const rangeDays = [7, 30, 90].includes(data.days ?? 30) ? (data.days ?? 30) : 30;
     const since = new Date(Date.now() - rangeDays * 86400000).toISOString();
-    const [{ data: connections }, { data: snapshot }, { data: ga4Snapshot }, { data: citations }, { data: runs }] = await Promise.all([
+    const [{ data: connections }, { data: snapshot }, { data: ga4Snapshot }, { data: bingSnapshot }, { data: citations }, { data: runs }] = await Promise.all([
       context.supabase
         .from("integration_connections")
         .select("provider, status, property_id, last_sync_at")
@@ -310,6 +311,14 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         .limit(1)
         .maybeSingle(),
       context.supabase
+        .from("analytics_snapshots")
+        .select("payload")
+        .eq("brand_id", data.brandId)
+        .eq("provider", "bing")
+        .order("snapshot_date", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      context.supabase
         .from("citations")
         .select("created_at, is_own_domain")
         .eq("brand_id", data.brandId)
@@ -325,6 +334,13 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
 
     const gscConnection = (connections ?? []).find((c) => c.provider === "gsc") ?? null;
     const ga4Connection = (connections ?? []).find((c) => c.provider === "ga4") ?? null;
+    const bingConnection = (connections ?? []).find((c) => c.provider === "bing") ?? null;
+    const bingPayload = (bingSnapshot?.payload ?? null) as null | {
+      siteUrl: string;
+      totals: { clicks: number; impressions: number };
+      daily: Array<{ date: string; clicks: number; impressions: number }>;
+      queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+    };
     const ga4Payload = (ga4Snapshot?.payload ?? null) as null | {
       totals: { sessions: number; users: number };
       daily: Array<{ date: string; sessions: number; users: number }>;
@@ -419,6 +435,20 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         rate: runRows.length ? Math.round((mentioned / runRows.length) * 100) : 0,
         daily: aiOverviewDaily,
       },
+      bing: (() => {
+        const bingDaily = (bingPayload?.daily ?? []).filter((row) => row.date >= rangeStart);
+        return {
+          connected: bingConnection?.status === "bağlı",
+          site: bingConnection?.property_id ?? null,
+          lastSyncAt: bingConnection?.last_sync_at ?? null,
+          totals: bingDaily.reduce(
+            (acc, row) => ({ clicks: acc.clicks + row.clicks, impressions: acc.impressions + row.impressions }),
+            { clicks: 0, impressions: 0 },
+          ),
+          daily: bingDaily,
+          queries: (bingPayload?.queries ?? []).slice(0, 10),
+        };
+      })(),
     };
   });
 
