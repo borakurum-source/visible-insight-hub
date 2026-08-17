@@ -118,7 +118,7 @@ function MetricDetailPage() {
         meta={{ title: config.title, description: `Son ${days} günlük günlük seri ve kaynak kırılımı.`, icon: LineChart }}
         action={
           <Button asChild variant="outline" size="sm">
-            <Link to="/app"><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Komuta Merkezi</Link>
+            <Link to="/app"><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Dashboard</Link>
           </Button>
         }
       />

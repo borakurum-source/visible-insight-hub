@@ -16,7 +16,7 @@ function AdminOverviewPage() {
   const overview = useQuery({ queryKey: ["admin", "overview"], queryFn: () => fetchOverview() });
   const providers = useQuery({ queryKey: ["admin", "providers"], queryFn: () => fetchProviders() });
 
-  if (overview.isLoading) return <Loader2 className="h-5 w-5 animate-spin text-cyan" />;
+  if (overview.isLoading) return <Loader2 className="h-5 w-5 animate-spin text-sky-600" />;
   const totals = overview.data?.totals;
 
   return (
@@ -39,15 +39,15 @@ function AdminOverviewPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <AdminCard title="Sağlayıcı durumu" action={<Link to="/admin/api" className="text-xs text-cyan">Detay</Link>}>
+        <AdminCard title="Sağlayıcı durumu" action={<Link to="/admin/api" className="text-xs text-sky-600">Detay</Link>}>
           <div className="space-y-2">
             {providers.data?.map((p) => (
-              <div key={p.key} className="flex items-center justify-between gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2">
+              <div key={p.key} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                 <div className="min-w-0">
-                  <div className="text-sm text-white">{p.label}</div>
+                  <div className="text-sm text-slate-900">{p.label}</div>
                   <div className="truncate text-xs text-slate-500">{p.usage}</div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-xs text-slate-500">
                   <span className="tabular-nums">{p.calls7d} çağrı</span>
                   <Pill tone={p.health === "ok" ? "good" : p.health === "missing" ? "bad" : "warn"}>
                     {p.health === "ok" ? "Aktif" : p.health === "missing" ? "Anahtar yok" : "Sorunlu"}
@@ -58,15 +58,15 @@ function AdminOverviewPage() {
           </div>
         </AdminCard>
 
-        <AdminCard title="Son hatalar" action={<Link to="/admin/errors" className="text-xs text-cyan">Tümü</Link>}>
+        <AdminCard title="Son hatalar" action={<Link to="/admin/errors" className="text-xs text-sky-600">Tümü</Link>}>
           <div className="space-y-2">
             {(overview.data?.recentErrors ?? []).map((e: any) => (
-              <div key={e.id} className="rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2">
+              <div key={e.id} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
                   <Pill tone={e.level === "error" || e.level === "fatal" ? "bad" : "warn"}>{e.level}</Pill>
                   <span className="text-[11px] text-slate-500">{dateTime(e.created_at)}</span>
                 </div>
-                <div className="mt-1 line-clamp-2 text-xs text-slate-300">{e.message}</div>
+                <div className="mt-1 line-clamp-2 text-xs text-slate-600">{e.message}</div>
               </div>
             ))}
             {(overview.data?.recentErrors ?? []).length === 0 ? (
@@ -76,16 +76,16 @@ function AdminOverviewPage() {
         </AdminCard>
       </div>
 
-      <AdminCard title="Yeni kayıtlar" action={<Link to="/admin/customers" className="text-xs text-cyan">Tüm müşteriler</Link>}>
+      <AdminCard title="Yeni kayıtlar" action={<Link to="/admin/customers" className="text-xs text-sky-600">Tüm müşteriler</Link>}>
         <Table head={["Hesap", "Plan", "Kayıt"]}>
           {(overview.data?.recentUsers ?? []).map((u: any) => (
             <tr key={u.id}>
               <td className="px-3 py-2">
-                <div className="text-white">{u.full_name || "—"}</div>
+                <div className="text-slate-900">{u.full_name || "—"}</div>
                 <div className="text-xs text-slate-500">{u.email}</div>
               </td>
               <td className="px-3 py-2"><Pill tone={u.plan === "trial" ? "info" : "good"}>{PLAN_LABEL[u.plan] ?? u.plan}</Pill></td>
-              <td className="px-3 py-2 text-xs text-slate-400">{dateTime(u.created_at)}</td>
+              <td className="px-3 py-2 text-xs text-slate-500">{dateTime(u.created_at)}</td>
             </tr>
           ))}
           {(overview.data?.recentUsers ?? []).length === 0 ? <EmptyRow colSpan={3}>Kayıt yok.</EmptyRow> : null}

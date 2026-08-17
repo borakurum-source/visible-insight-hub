@@ -1,5 +1,20 @@
 type ChatMessage = { role: "system" | "user"; content: string };
 
+const NO_CIRCUMFLEX_RULE =
+  "Yaz\u0131m kural\u0131: \u00e2 ve \u00c2 karakterlerini asla kullanma; her zaman a ve A yaz.";
+
+/** Uretilen tum metinlerden duzeltme isaretli a karakterini temizler. */
+export function stripCircumflex<T>(value: T): T {
+  if (typeof value === "string") return value.replace(/\u00e2/g, "a").replace(/\u00c2/g, "A") as unknown as T;
+  if (Array.isArray(value)) return value.map((item) => stripCircumflex(item)) as unknown as T;
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = stripCircumflex(v);
+    return out as unknown as T;
+  }
+  return value;
+}
+
 export async function aiJson<T>(messages: ChatMessage[], fallback: T): Promise<T> {
   // Üretim ve analiz işlemleri yalnızca DeepSeek üzerinden çalışır (önbellekli).
   if (!process.env["DEEPSEEK_API_KEY"]) {
@@ -8,7 +23,11 @@ export async function aiJson<T>(messages: ChatMessage[], fallback: T): Promise<T
   }
   try {
     const { deepseekJson } = await import("./deepseek.server");
-    return await deepseekJson<T>(messages, fallback);
+    const withRule: ChatMessage[] = messages.map((m, i) =>
+      i === 0 && m.role === "system" ? { ...m, content: `${m.content}\n${NO_CIRCUMFLEX_RULE}` } : m,
+    );
+    if (!withRule.some((m) => m.role === "system")) withRule.unshift({ role: "system", content: NO_CIRCUMFLEX_RULE });
+    return stripCircumflex(await deepseekJson<T>(withRule, fallback));
   } catch (error) {
     console.error("DeepSeek failure", error);
     return fallback;

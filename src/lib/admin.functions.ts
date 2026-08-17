@@ -61,19 +61,32 @@ export const adminListCustomers = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { assertAdmin } = await import("./admin.server");
     const { supabaseAdmin } = await assertAdmin(context);
-    const [{ data: profiles }, { data: brands }, { data: members }, { data: subs }] = await Promise.all([
+    const monthAgo = new Date(Date.now() - 30 * 24 * 3600_000).toISOString();
+    const [{ data: profiles }, { data: brands }, { data: members }, { data: subs }, { data: usage }] = await Promise.all([
       supabaseAdmin.from("profiles").select("id, email, full_name, plan, plan_source, plan_expires_at, trial_ends_at, suspended, created_at").order("created_at", { ascending: false }),
       supabaseAdmin.from("brands").select("id, created_by"),
       supabaseAdmin.from("brand_members").select("brand_id, user_id"),
       supabaseAdmin.from("subscriptions").select("user_id, status, current_period_end"),
+      supabaseAdmin.from("api_usage_log").select("user_id, brand_id, cost_usd, created_at").gte("created_at", monthAgo),
     ]);
     const brandCount = new Map<string, number>();
     for (const m of members ?? []) brandCount.set(m.user_id, (brandCount.get(m.user_id) ?? 0) + 1);
     for (const b of brands ?? []) if (!brandCount.has(b.created_by)) brandCount.set(b.created_by, 1);
+    // Marka -> sahibi eslesmesi: brand_id uzerinden gelen maliyetleri de musteriye yaz.
+    const brandOwner = new Map<string, string>();
+    for (const b of brands ?? []) brandOwner.set(b.id, b.created_by);
+    for (const m of members ?? []) if (!brandOwner.has(m.brand_id)) brandOwner.set(m.brand_id, m.user_id);
+    const cost30d = new Map<string, number>();
+    for (const row of usage ?? []) {
+      const owner = row.user_id ?? (row.brand_id ? brandOwner.get(row.brand_id) : null);
+      if (!owner) continue;
+      cost30d.set(owner, (cost30d.get(owner) ?? 0) + Number(row.cost_usd ?? 0));
+    }
     const subMap = new Map((subs ?? []).map((s) => [s.user_id, s]));
     return (profiles ?? []).map((p) => ({
       ...p,
       brandCount: brandCount.get(p.id) ?? 0,
+      apiCost30d: cost30d.get(p.id) ?? 0,
       subscriptionStatus: subMap.get(p.id)?.status ?? null,
       periodEnd: subMap.get(p.id)?.current_period_end ?? null,
     }));
@@ -118,11 +131,30 @@ export const adminCustomerDetail = createServerFn({ method: "POST" })
       supabaseAdmin.from("subscriptions").select("*").eq("user_id", data.userId).order("created_at", { ascending: false }),
       supabaseAdmin.from("admin_notes").select("id, note, admin_id, created_at").eq("user_id", data.userId).order("created_at", { ascending: false }),
       supabaseAdmin.from("error_logs").select("id, level, message, path, created_at").eq("user_id", data.userId).order("created_at", { ascending: false }).limit(10),
-      brandIds.length ? supabaseAdmin.from("api_usage_log").select("provider, cost_usd").in("brand_id", brandIds) : Promise.resolve({ data: [] as any[] }),
+      supabaseAdmin.from("api_usage_log").select("provider, cost_usd, created_at, brand_id, user_id").or(
+        brandIds.length ? `user_id.eq.${data.userId},brand_id.in.(${brandIds.join(",")})` : `user_id.eq.${data.userId}`,
+      ),
     ]);
     const integrations = brandIds.length
       ? (await supabaseAdmin.from("integration_connections").select("brand_id, provider, status, last_sync_at").in("brand_id", brandIds)).data ?? []
       : [];
+
+    // Saglayici kirilimi ve son 30 gunun gunluk maliyet trendi.
+    const usageRows = (usage.data ?? []) as any[];
+    const monthAgoMs = Date.now() - 30 * 24 * 3600_000;
+    const byProvider = new Map<string, { provider: string; cost: number; calls: number }>();
+    const byDay = new Map<string, number>();
+    for (const row of usageRows) {
+      const entry = byProvider.get(row.provider) ?? { provider: row.provider, cost: 0, calls: 0 };
+      entry.cost += Number(row.cost_usd ?? 0);
+      entry.calls += 1;
+      byProvider.set(row.provider, entry);
+      const ts = new Date(row.created_at).getTime();
+      if (ts >= monthAgoMs) {
+        const day = new Date(row.created_at).toISOString().slice(0, 10);
+        byDay.set(day, (byDay.get(day) ?? 0) + Number(row.cost_usd ?? 0));
+      }
+    }
 
     return {
       profile,
@@ -133,8 +165,12 @@ export const adminCustomerDetail = createServerFn({ method: "POST" })
         promptsTotal: (prompts.data ?? []).length,
         competitors: (competitors.data ?? []).filter((c: any) => c.status === "approved").length,
         content: (content.data ?? []).length,
-        apiCost: (usage.data ?? []).reduce((sum: number, r: any) => sum + Number(r.cost_usd ?? 0), 0),
+        apiCost: usageRows.reduce((sum: number, r: any) => sum + Number(r.cost_usd ?? 0), 0),
+        apiCost30d: [...byDay.values()].reduce((s, v) => s + v, 0),
+        apiCalls: usageRows.length,
       },
+      apiByProvider: [...byProvider.values()].sort((a, b) => b.cost - a.cost),
+      apiDaily: [...byDay.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([day, cost]) => ({ day, cost })),
       subscriptions: subs.data ?? [],
       notes: notes.data ?? [],
       errors: errors.data ?? [],
@@ -247,7 +283,7 @@ export const adminApiUsage = createServerFn({ method: "POST" })
     const since = new Date(Date.now() - days * 24 * 3600_000).toISOString();
     const { data: rows } = await supabaseAdmin
       .from("api_usage_log")
-      .select("provider, operation, model, brand_id, duration_ms, input_tokens, output_tokens, cost_usd, cached, status, error, created_at")
+      .select("provider, operation, model, brand_id, user_id, duration_ms, input_tokens, output_tokens, cost_usd, cached, status, error, created_at")
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(5000);
@@ -279,6 +315,11 @@ export const adminApiUsage = createServerFn({ method: "POST" })
       ? await supabaseAdmin.from("brands").select("id, name").in("id", brandIds)
       : { data: [] as any[] };
     const brandNames = new Map((brands ?? []).map((b: any) => [b.id, b.name]));
+    const brandOwners = new Map<string, string>();
+    if (brandIds.length) {
+      const { data: ownerRows } = await supabaseAdmin.from("brands").select("id, created_by").in("id", brandIds);
+      for (const b of ownerRows ?? []) brandOwners.set(b.id, b.created_by);
+    }
     const byBrand = new Map<string, { brand: string; calls: number; cost: number }>();
     for (const row of list) {
       if (!row.brand_id) continue;
@@ -289,6 +330,31 @@ export const adminApiUsage = createServerFn({ method: "POST" })
       byBrand.set(key, b);
     }
 
+    // Musteri bazinda maliyet: dogrudan user_id ya da markanin sahibi uzerinden.
+    const byUser = new Map<string, { userId: string; calls: number; cost: number }>();
+    for (const row of list) {
+      const owner = (row as any).user_id ?? (row.brand_id ? brandOwners.get(row.brand_id) : null);
+      if (!owner) continue;
+      const u = byUser.get(owner) ?? { userId: owner, calls: 0, cost: 0 };
+      u.calls += 1;
+      u.cost += Number(row.cost_usd ?? 0);
+      byUser.set(owner, u);
+    }
+    const userIds = [...byUser.keys()];
+    const { data: customerRows } = userIds.length
+      ? await supabaseAdmin.from("profiles").select("id, email, full_name, plan").in("id", userIds)
+      : { data: [] as any[] };
+    const customerMap = new Map((customerRows ?? []).map((c: any) => [c.id, c]));
+    const customers = [...byUser.values()]
+      .map((u) => ({
+        ...u,
+        email: customerMap.get(u.userId)?.email ?? "—",
+        fullName: customerMap.get(u.userId)?.full_name ?? null,
+        plan: customerMap.get(u.userId)?.plan ?? "—",
+      }))
+      .sort((a, b) => b.cost - a.cost)
+      .slice(0, 25);
+
     return {
       days,
       providers: Array.from(byProvider.values())
@@ -296,6 +362,7 @@ export const adminApiUsage = createServerFn({ method: "POST" })
         .sort((a, b) => b.cost - a.cost),
       daily: Array.from(byDay.values()).sort((a, b) => a.day.localeCompare(b.day)),
       brands: Array.from(byBrand.values()).sort((a, b) => b.cost - a.cost).slice(0, 15),
+      customers,
       failures: list.filter((r) => r.status !== "ok").slice(0, 40),
       slowest: [...list].sort((a, b) => (b.duration_ms ?? 0) - (a.duration_ms ?? 0)).slice(0, 10),
       totals: {
@@ -549,4 +616,95 @@ export const adminAuditLog = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await assertAdmin(context);
     const { data } = await supabaseAdmin.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(200);
     return data ?? [];
+  });
+
+// ---- Blog yonetimi ----
+export const adminListPosts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { assertAdmin } = await import("./admin.server");
+    const { supabaseAdmin } = await assertAdmin(context);
+    const { data } = await supabaseAdmin
+      .from("blog_posts")
+      .select("id, slug, title, description, category, status, published_at, updated_at, read_minutes, cover_image_url")
+      .order("updated_at", { ascending: false });
+    return data ?? [];
+  });
+
+export const adminGetPost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { assertAdmin } = await import("./admin.server");
+    const { supabaseAdmin } = await assertAdmin(context);
+    const { data: row, error } = await supabaseAdmin.from("blog_posts").select("*").eq("id", data.id).maybeSingle();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export type AdminPostInput = {
+  id?: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  body: string;
+  answerSummary: string;
+  faq: Array<{ question: string; answer: string }>;
+  sources: Array<{ label: string; url: string }>;
+  coverImageUrl?: string | null;
+  ogImageUrl?: string | null;
+  canonicalUrl?: string | null;
+  author?: string;
+  status: "draft" | "published";
+};
+
+export const adminSavePost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: AdminPostInput) => input)
+  .handler(async ({ data, context }) => {
+    const { assertAdmin, audit } = await import("./admin.server");
+    const session = await assertAdmin(context);
+    const { supabaseAdmin } = session;
+    const words = data.body.split(/\s+/).filter(Boolean).length;
+    const payload = {
+      slug: data.slug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, ""),
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      tags: data.tags,
+      body: data.body,
+      answer_summary: data.answerSummary,
+      faq: JSON.parse(JSON.stringify(data.faq)),
+      sources: JSON.parse(JSON.stringify(data.sources)),
+      cover_image_url: data.coverImageUrl || null,
+      og_image_url: data.ogImageUrl || null,
+      canonical_url: data.canonicalUrl || null,
+      author: data.author || "OneCite",
+      status: data.status,
+      read_minutes: Math.max(1, Math.round(words / 200)),
+      published_at: data.status === "published" ? new Date().toISOString() : null,
+      created_by: context.userId,
+      updated_at: new Date().toISOString(),
+    };
+    const query = data.id
+      ? supabaseAdmin.from("blog_posts").update(payload).eq("id", data.id).select("id").single()
+      : supabaseAdmin.from("blog_posts").insert(payload).select("id").single();
+    const { data: saved, error } = await query;
+    if (error) throw new Error(error.message);
+    await audit(session, data.id ? "blog.update" : "blog.create", { type: "blog_post", id: saved.id }, { slug: payload.slug, status: payload.status });
+    return { id: saved.id };
+  });
+
+export const adminDeletePost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { assertAdmin, audit } = await import("./admin.server");
+    const session = await assertAdmin(context);
+    const { error } = await session.supabaseAdmin.from("blog_posts").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await audit(session, "blog.delete", { type: "blog_post", id: data.id }, {});
+    return { ok: true };
   });

@@ -34,7 +34,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "İzle",
     items: [
-      { to: "/app", label: "Komuta Merkezi", icon: LayoutDashboard, exact: true },
+      { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
       {
         to: "/app/prompts",
         label: "Görünürlük",

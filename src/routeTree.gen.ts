@@ -34,6 +34,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminApiRouteImport } from './routes/admin/api'
+import { Route as AdminBlogRouteImport } from './routes/admin/blog'
 import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
 import { Route as AdminEmailsRouteImport } from './routes/admin/emails'
 import { Route as AdminErrorsRouteImport } from './routes/admin/errors'
@@ -200,6 +201,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminApiRoute = AdminApiRouteImport.update({
   id: '/api',
   path: '/api',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminBlogRoute = AdminBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
@@ -443,6 +449,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/admin/api': typeof AdminApiRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
@@ -505,6 +512,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/api': typeof AdminApiRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
@@ -573,6 +581,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/admin/api': typeof AdminApiRoute
+  '/admin/blog': typeof AdminBlogRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/emails': typeof AdminEmailsRoute
   '/admin/errors': typeof AdminErrorsRoute
@@ -641,6 +650,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/app'
     | '/admin/api'
+    | '/admin/blog'
     | '/admin/customers'
     | '/admin/emails'
     | '/admin/errors'
@@ -703,6 +713,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/api'
+    | '/admin/blog'
     | '/admin/customers'
     | '/admin/emails'
     | '/admin/errors'
@@ -770,6 +781,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/app'
     | '/admin/api'
+    | '/admin/blog'
     | '/admin/customers'
     | '/admin/emails'
     | '/admin/errors'
@@ -1022,6 +1034,13 @@ declare module '@tanstack/react-router' {
       path: '/api'
       fullPath: '/admin/api'
       preLoaderRoute: typeof AdminApiRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/blog': {
+      id: '/admin/blog'
+      path: '/blog'
+      fullPath: '/admin/blog'
+      preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/customers': {
@@ -1370,6 +1389,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface AdminRouteRouteChildren {
   AdminApiRoute: typeof AdminApiRoute
+  AdminBlogRoute: typeof AdminBlogRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminEmailsRoute: typeof AdminEmailsRoute
   AdminErrorsRoute: typeof AdminErrorsRoute
@@ -1381,6 +1401,7 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminApiRoute: AdminApiRoute,
+  AdminBlogRoute: AdminBlogRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminEmailsRoute: AdminEmailsRoute,
   AdminErrorsRoute: AdminErrorsRoute,

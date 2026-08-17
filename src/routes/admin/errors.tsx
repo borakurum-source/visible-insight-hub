@@ -90,10 +90,10 @@ function ErrorsPage() {
           </Select>
         </div>
 
-        {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-cyan" /> : (
+        {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-sky-600" /> : (
           <div className="space-y-2">
             {(data ?? []).map((row: any) => (
-              <div key={row.id} className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
+              <div key={row.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <Pill tone={row.level === "warn" ? "warn" : "bad"}>{row.level}</Pill>
@@ -108,11 +108,11 @@ function ErrorsPage() {
                     </Button>
                   </div>
                 </div>
-                <button type="button" className="mt-2 block w-full text-left text-sm text-slate-200" onClick={() => setExpanded(expanded === row.id ? null : row.id)}>
+                <button type="button" className="mt-2 block w-full text-left text-sm text-slate-700" onClick={() => setExpanded(expanded === row.id ? null : row.id)}>
                   {row.message}
                 </button>
                 {expanded === row.id ? (
-                  <pre className="mt-2 max-h-64 overflow-auto rounded bg-black/40 p-3 text-[11px] leading-5 text-slate-400">
+                  <pre className="mt-2 max-h-64 overflow-auto rounded bg-black/40 p-3 text-[11px] leading-5 text-slate-500">
 {row.stack || "Stack yok"}
 {row.context ? `\n\ncontext: ${JSON.stringify(row.context, null, 2)}` : ""}
                   </pre>

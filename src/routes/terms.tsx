@@ -148,7 +148,7 @@ function TermsPage() {
       <Section title="10. Sorumluluğun sınırı">
         <p>
           Toplam sorumluluğumuz, talebin doğduğu tarihten önceki 12 ay içinde tarafımıza ödediğiniz ücretlerle
-          sınırlıdır. Kâr kaybı, veri kaybı veya itibar kaybı gibi dolaylı ve netice kabilinden zararlardan
+          sınırlıdır. Kar kaybı, veri kaybı veya itibar kaybı gibi dolaylı ve netice kabilinden zararlardan
           sorumlu değiliz. Kasıt, ağır kusur, ölüm ve bedensel zarar halleri ile mevzuatın sınırlamaya izin
           vermediği durumlar bu kapsamın dışındadır.
         </p>

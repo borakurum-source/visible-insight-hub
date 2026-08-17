@@ -48,16 +48,16 @@ function SettingsPage() {
             <ShieldPlus className="mr-1 h-3.5 w-3.5" /> Yönetici yap
           </Button>
         </div>
-        {admins.isLoading ? <Loader2 className="h-5 w-5 animate-spin text-cyan" /> : (
+        {admins.isLoading ? <Loader2 className="h-5 w-5 animate-spin text-sky-600" /> : (
           <Table head={["Hesap", "Rol", "Tarih", ""]}>
             {adminRows.map((row) => (
               <tr key={`${row.user_id}-${row.role}`}>
                 <td className="px-3 py-2">
-                  <div className="text-white">{row.fullName || "—"}</div>
+                  <div className="text-slate-900">{row.fullName || "—"}</div>
                   <div className="text-xs text-slate-500">{row.email}</div>
                 </td>
                 <td className="px-3 py-2"><Pill tone="info">{row.role}</Pill></td>
-                <td className="px-3 py-2 text-xs text-slate-400">{dateTime(row.created_at)}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{dateTime(row.created_at)}</td>
                 <td className="px-3 py-2 text-right">
                   <Button size="sm" variant="ghost" onClick={() => row.email && roleMutation.mutate({ email: row.email, grant: false })}>
                     <ShieldMinus className="mr-1 h-3.5 w-3.5" /> Kaldır
@@ -71,12 +71,12 @@ function SettingsPage() {
       </AdminCard>
 
       <AdminCard title="Denetim kaydı">
-        {audit.isLoading ? <Loader2 className="h-5 w-5 animate-spin text-cyan" /> : (
+        {audit.isLoading ? <Loader2 className="h-5 w-5 animate-spin text-sky-600" /> : (
           <Table head={["Zaman", "Yönetici", "İşlem", "Hedef", "Detay"]}>
             {(audit.data ?? []).map((row: any) => (
               <tr key={row.id}>
-                <td className="px-3 py-2 text-xs text-slate-400">{dateTime(row.created_at)}</td>
-                <td className="px-3 py-2 text-xs text-slate-300">{row.admin_email ?? row.admin_id}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{dateTime(row.created_at)}</td>
+                <td className="px-3 py-2 text-xs text-slate-600">{row.admin_email ?? row.admin_id}</td>
                 <td className="px-3 py-2"><Pill>{row.action}</Pill></td>
                 <td className="px-3 py-2 text-xs text-slate-500">{row.target_type ?? "—"}</td>
                 <td className="px-3 py-2 text-[11px] text-slate-500">{row.detail ? JSON.stringify(row.detail) : "—"}</td>
