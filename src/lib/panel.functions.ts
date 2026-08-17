@@ -1065,13 +1065,24 @@ export const saveCompetitors = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; competitors: string[] }) => input)
   .handler(async ({ data, context }) => {
-    const { assertCompetitorQuota } = await import("./plan.server");
-    await assertCompetitorQuota(context.supabase, context.userId, data.competitors.length);
+    const { data: current } = await context.supabase
+      .from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle();
+    const previous = ((current?.competitors as string[] | null) ?? []).length;
+    // Liste küçülüyorsa (rakip kaldırma) kota kontrolü yapılmaz.
+    if (data.competitors.length > previous) {
+      const { assertCompetitorQuota } = await import("./plan.server");
+      try {
+        await assertCompetitorQuota(context.supabase, context.userId, data.competitors.length);
+      } catch (error) {
+        // Kota aşımı bir hata değil, kullanıcıya gösterilecek bir durumdur.
+        return { ok: false as const, message: error instanceof Error ? error.message : "Plan limiti aşıldı." };
+      }
+    }
     const { error } = await context.supabase
       .from("brand_intelligence")
       .upsert({ brand_id: data.brandId, competitors: data.competitors }, { onConflict: "brand_id" });
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return { ok: true as const, message: "" };
   });
 
 // Ölçüm sonuçlarından öncelikli görev üretir (Görevler ekranındaki buton).
