@@ -291,6 +291,17 @@ function FilmFolkOrnegi() {
             <span className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-semibold text-primary">Vaka çalışması · FilmFolk</span>
             <h2 className="mt-5 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Atıf payı %30,7’den %58,9’a nasıl çıktı?</h2>
             <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">Sonuç tek bir içerik hamlesinden gelmedi. Hangi soruda hangi kaynağın seçildiği ölçüldü, eksik kanıt sıraya kondu ve yalnızca en yüksek etkili varlıklar üretildi.</p>
+            <div className="mt-8 flex items-end gap-5" data-testid="case-before-after">
+              <div>
+                <p className="editorial-eyebrow text-muted-foreground">Önce</p>
+                <p className="mt-1 font-mono text-3xl font-medium text-muted-foreground md:text-4xl">%30,7</p>
+              </div>
+              <ArrowRight className="mb-2 h-6 w-6 text-primary" aria-hidden="true" />
+              <div>
+                <p className="editorial-eyebrow text-primary">Sonra</p>
+                <p className="mt-1 font-mono text-4xl font-medium text-foreground md:text-5xl">%58,9</p>
+              </div>
+            </div>
             <Link to="/proof/filmfolk" className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-foreground underline decoration-cyan decoration-2 underline-offset-4 transition-colors hover:text-primary">Vaka çalışmasının tamamını inceleyin <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <ol className="space-y-3">
