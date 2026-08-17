@@ -27,12 +27,12 @@ function mentions(answer: string, name: string) {
 export function buildCompetitorTrend(
   rows: CompetitorRunRow[],
   ownName: string,
-  competitors: string[],
+  competitors: CompetitorEntry[],
   days: number,
 ): CompetitorTrendResult {
   const brands = [
-    { key: "own", name: ownName || "Markanız", isOwn: true, match: ownName },
-    ...competitors.slice(0, 6).map((name, index) => ({ key: `c${index}`, name, isOwn: false, match: name })),
+    { key: "own", name: ownName || "Markanız", isOwn: true, match: { name: ownName, domain: "" } },
+    ...competitors.slice(0, 6).map((entry, index) => ({ key: `c${index}`, name: entry.name, isOwn: false, match: entry })),
   ];
 
   const bucketDays = days <= 14 ? 1 : days <= 45 ? 7 : 14;
@@ -54,7 +54,9 @@ export function buildCompetitorTrend(
     const bucket = buckets.get(keys[index]!)!;
     bucket.total += 1;
     for (const brand of brands) {
-      const hit = brand.isOwn ? row.brand_mentioned : mentions(row.raw_answer ?? "", brand.match);
+      const hit = brand.isOwn
+        ? row.brand_mentioned
+        : competitorMatches(brand.match, { answer: row.raw_answer ?? "" });
       if (hit) bucket.hits.set(brand.key, (bucket.hits.get(brand.key) ?? 0) + 1);
     }
   }
