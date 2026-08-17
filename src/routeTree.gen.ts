@@ -49,6 +49,7 @@ import { Route as AuthenticatedAppCompetitorsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppContentRouteImport } from './routes/_authenticated/app.content'
 import { Route as AuthenticatedAppGeoTasksRouteImport } from './routes/_authenticated/app.geo-tasks'
 import { Route as AuthenticatedAppGraphRouteImport } from './routes/_authenticated/app.graph'
+import { Route as AuthenticatedAppHelpRouteImport } from './routes/_authenticated/app.help'
 import { Route as AuthenticatedAppIntegrationsRouteImport } from './routes/_authenticated/app.integrations'
 import { Route as AuthenticatedAppKnowledgeBaseRouteImport } from './routes/_authenticated/app.knowledge-base'
 import { Route as AuthenticatedAppMeasurementRouteImport } from './routes/_authenticated/app.measurement'
@@ -271,6 +272,11 @@ const AuthenticatedAppGraphRoute = AuthenticatedAppGraphRouteImport.update({
   path: '/graph',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppHelpRoute = AuthenticatedAppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppIntegrationsRoute =
   AuthenticatedAppIntegrationsRouteImport.update({
     id: '/integrations',
@@ -398,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/app/content': typeof AuthenticatedAppContentRoute
   '/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/app/graph': typeof AuthenticatedAppGraphRoute
+  '/app/help': typeof AuthenticatedAppHelpRoute
   '/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
   '/app/measurement': typeof AuthenticatedAppMeasurementRoute
@@ -451,6 +458,7 @@ export interface FileRoutesByTo {
   '/app/content': typeof AuthenticatedAppContentRoute
   '/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/app/graph': typeof AuthenticatedAppGraphRoute
+  '/app/help': typeof AuthenticatedAppHelpRoute
   '/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
   '/app/measurement': typeof AuthenticatedAppMeasurementRoute
@@ -509,6 +517,7 @@ export interface FileRoutesById {
   '/_authenticated/app/content': typeof AuthenticatedAppContentRoute
   '/_authenticated/app/geo-tasks': typeof AuthenticatedAppGeoTasksRoute
   '/_authenticated/app/graph': typeof AuthenticatedAppGraphRoute
+  '/_authenticated/app/help': typeof AuthenticatedAppHelpRoute
   '/_authenticated/app/integrations': typeof AuthenticatedAppIntegrationsRoute
   '/_authenticated/app/knowledge-base': typeof AuthenticatedAppKnowledgeBaseRoute
   '/_authenticated/app/measurement': typeof AuthenticatedAppMeasurementRoute
@@ -567,6 +576,7 @@ export interface FileRouteTypes {
     | '/app/content'
     | '/app/geo-tasks'
     | '/app/graph'
+    | '/app/help'
     | '/app/integrations'
     | '/app/knowledge-base'
     | '/app/measurement'
@@ -620,6 +630,7 @@ export interface FileRouteTypes {
     | '/app/content'
     | '/app/geo-tasks'
     | '/app/graph'
+    | '/app/help'
     | '/app/integrations'
     | '/app/knowledge-base'
     | '/app/measurement'
@@ -677,6 +688,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/content'
     | '/_authenticated/app/geo-tasks'
     | '/_authenticated/app/graph'
+    | '/_authenticated/app/help'
     | '/_authenticated/app/integrations'
     | '/_authenticated/app/knowledge-base'
     | '/_authenticated/app/measurement'
@@ -1009,6 +1021,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppGraphRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/help': {
+      id: '/_authenticated/app/help'
+      path: '/help'
+      fullPath: '/app/help'
+      preLoaderRoute: typeof AuthenticatedAppHelpRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/integrations': {
       id: '/_authenticated/app/integrations'
       path: '/integrations'
@@ -1126,6 +1145,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppContentRoute: typeof AuthenticatedAppContentRoute
   AuthenticatedAppGeoTasksRoute: typeof AuthenticatedAppGeoTasksRoute
   AuthenticatedAppGraphRoute: typeof AuthenticatedAppGraphRoute
+  AuthenticatedAppHelpRoute: typeof AuthenticatedAppHelpRoute
   AuthenticatedAppIntegrationsRoute: typeof AuthenticatedAppIntegrationsRoute
   AuthenticatedAppKnowledgeBaseRoute: typeof AuthenticatedAppKnowledgeBaseRoute
   AuthenticatedAppMeasurementRoute: typeof AuthenticatedAppMeasurementRoute
@@ -1150,6 +1170,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppContentRoute: AuthenticatedAppContentRoute,
   AuthenticatedAppGeoTasksRoute: AuthenticatedAppGeoTasksRoute,
   AuthenticatedAppGraphRoute: AuthenticatedAppGraphRoute,
+  AuthenticatedAppHelpRoute: AuthenticatedAppHelpRoute,
   AuthenticatedAppIntegrationsRoute: AuthenticatedAppIntegrationsRoute,
   AuthenticatedAppKnowledgeBaseRoute: AuthenticatedAppKnowledgeBaseRoute,
   AuthenticatedAppMeasurementRoute: AuthenticatedAppMeasurementRoute,
