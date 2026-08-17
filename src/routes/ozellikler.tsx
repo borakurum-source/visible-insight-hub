@@ -42,6 +42,36 @@ export const Route = createFileRoute("/ozellikler")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://1cite.com/ozellikler" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "OneCite",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          url: "https://1cite.com/ozellikler",
+          description: DESCRIPTION,
+          brand: { "@type": "Brand", name: "OneCite" },
+          featureList: [
+            "Yapay zeka yanıtlarında atıf payı ölçümü",
+            "Prompt keşfi ve takibi",
+            "Rakip karşılaştırmalı görünürlük trendi",
+            "Marka zekası (RAG) ve bilgi bankası",
+            "GEO görev listesi ve içerik üretimi",
+            "GSC, GA4 ve Bing Webmaster raporlaması",
+          ],
+          offers: {
+            "@type": "Offer",
+            price: 69,
+            priceCurrency: "USD",
+            url: "https://1cite.com/fiyatlandirma",
+            availability: "https://schema.org/InStock",
+          },
+        }),
+      },
+    ],
   }),
   component: FeaturesPage,
 });

@@ -97,14 +97,27 @@ export const Route = createFileRoute("/fiyatlandirma")({
           name: "OneCite",
           description: "Yapay zeka cevaplarında atıf payı ölçümü ve GEO optimizasyon platformu.",
           brand: { "@type": "Brand", name: "OneCite" },
-          offers: pricingPlans.map((plan) => ({
-            "@type": "Offer",
-            name: plan.label,
-            price: plan.monthly,
+          url: "https://1cite.com/fiyatlandirma",
+          offers: {
+            "@type": "AggregateOffer",
             priceCurrency: "USD",
-            category: "Aylık abonelik",
-            availability: "https://schema.org/InStock",
-          })),
+            lowPrice: 0,
+            highPrice: 189,
+            offerCount: pricingPlans.filter((plan) => plan.monthly !== null).length,
+            url: "https://1cite.com/fiyatlandirma",
+            offers: pricingPlans
+              .filter((plan) => plan.monthly !== null)
+              .map((plan) => ({
+                "@type": "Offer",
+                name: plan.label,
+                description: plan.desc,
+                price: plan.monthly,
+                priceCurrency: "USD",
+                category: "Aylık abonelik",
+                url: "https://1cite.com/fiyatlandirma",
+                availability: "https://schema.org/InStock",
+              })),
+          },
         }),
       },
       {
