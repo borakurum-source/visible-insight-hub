@@ -60,6 +60,14 @@ function IntegrationsPage() {
   const fetchGoogleAccount = useServerFn(getGoogleAccount);
   const beginGoogleConnect = useServerFn(startGoogleConnect);
   const removeGoogleAccount = useServerFn(disconnectGoogleAccount);
+  const fetchBing = useServerFn(getBingStatus);
+  const storeBingKey = useServerFn(saveBingApiKey);
+  const fetchBingSites = useServerFn(listBingSiteOptions);
+  const saveBingSite = useServerFn(connectBingSite);
+  const runBingSync = useServerFn(syncBing);
+  const removeBing = useServerFn(disconnectBing);
+  const [bingKey, setBingKey] = useState("");
+  const [bingCandidates, setBingCandidates] = useState<string[] | null>(null);
   const [candidates, setCandidates] = useState<string[] | null>(null);
   const [ga4Candidates, setGa4Candidates] = useState<Array<{ propertyId: string; displayName: string; account: string }> | null>(null);
 
