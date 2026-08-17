@@ -86,7 +86,7 @@ function ClaimsPage() {
         hint={
           <>
             <p>İddia, yapay zekanın markanız hakkında tekrar etmesini istediğiniz tek cümlelik, kanıtlanabilir bir bilgidir.</p>
-            <p>Her iddiaya bir kaynak bağlantısı ekleyin; kanıtsız iddialar alıntılanmaz.</p>
+            <p>Her iddiaya bir kaynak bağlantısı ekleyin; kanıtsız iddialar kaynak gösterilmez.</p>
           </>
         }
         meta={{
@@ -116,7 +116,7 @@ function ClaimsPage() {
 
       <Card>
         <CardContent className="space-y-3 pt-6">
-          <Textarea value={statement} onChange={(event) => setStatement(event.target.value)} rows={2} placeholder="Örn. OneCite, Türkçe yapay zeka cevaplarında marka alıntılarını takip eder." />
+          <Textarea value={statement} onChange={(event) => setStatement(event.target.value)} rows={2} placeholder="Örn. OneCite, Türkçe yapay zeka cevaplarında marka kaynak gösterimlerini takip eder." />
           <div className="flex flex-wrap gap-2">
             <Input value={evidenceUrl} onChange={(event) => setEvidenceUrl(event.target.value)} placeholder="Kanıt bağlantısı (opsiyonel)" className="max-w-md" />
             <Button onClick={() => createMutation.mutate()} disabled={!statement.trim() || createMutation.isPending}>
@@ -175,7 +175,7 @@ function ClaimsPage() {
                         {claim.echoes > 0 ? `${claim.echoes} yanıtta tekrar edildi` : "AI yanıtlarında henüz görülmedi"}
                       </Badge>
                       {claim.evidenceCited ? (
-                        <Badge variant="secondary" className="text-[11px]">Kanıt bağlantısı atıf aldı</Badge>
+                        <Badge variant="secondary" className="text-[11px]">Kanıt bağlantısı kaynak gösterildi</Badge>
                       ) : null}
                     </span>
                   </span>

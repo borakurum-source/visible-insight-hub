@@ -529,7 +529,7 @@ function IntegrationsPage() {
               </div>
             ) : null}
             <p className="text-[10px] text-muted-foreground">
-              Not: Bing’in “AI Performance / Copilot atıfları” raporu şu an API ile paylaşılmıyor; Copilot trafiği GA4 kırılımında gösteriliyor.
+              Not: Bing’in “AI Performance / Copilot kaynak gösterimleri” raporu şu an API ile paylaşılmıyor; Copilot trafiği GA4 kırılımında gösteriliyor.
             </p>
           </CardContent>
         </Card>

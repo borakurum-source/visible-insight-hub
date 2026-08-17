@@ -41,8 +41,8 @@ export async function createPriorityTasks(
   }
   if (ownShare < 30) {
     candidates.push({
-      title: "Kendi sitenizden alıntı payını yükseltin",
-      description: `Atıfların yalnızca %${ownShare} kadarı sizin alan adınızdan. Rakiplerin alıntılandığı konularda karşılaştırma ve veri sayfası yayımlayın.`,
+      title: "Kendi sitenizden AI kaynak payını yükseltin",
+      description: `Kaynak gösterimlerinin yalnızca %${ownShare} kadarı sizin alan adınızdan. Rakiplerin kaynak gösterildiğı konularda karşılaştırma ve veri sayfası yayımlayın.`,
       priority: ownShare < 15 ? "high" : "medium",
     });
   }

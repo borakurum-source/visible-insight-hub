@@ -44,7 +44,7 @@ const NAV_GROUPS: NavGroup[] = [
           { to: "/app/prompts", label: "Promptlar" },
           { to: "/app/prompt-discovery", label: "Prompt Keşfi" },
           { to: "/app/measurement", label: "Ölçüm & Skor" },
-          { to: "/app/citation-discovery", label: "Atıf Kaynakları" },
+          { to: "/app/citation-discovery", label: "Seçilen Kaynaklar" },
           { to: "/app/competitors", label: "Rakip Takibi" },
           { to: "/app/report", label: "Rapor" },
         ],

@@ -82,13 +82,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "1cite — AI Görünürlük Platformu" },
       {
         name: "description",
-        content: "AI yanıtlarında markanızın alıntılanma performansını ölçün ve artırın.",
+        content: "AI yanıtlarında markanızın kaynak gösterilme performansını ölçün ve artırın.",
       },
       { name: "author", content: "1cite" },
       { property: "og:title", content: "1cite — AI Görünürlük Platformu" },
       {
         property: "og:description",
-        content: "AI yanıtlarında markanızın alıntılanma performansını ölçün ve artırın.",
+        content: "AI yanıtlarında markanızın kaynak gösterilme performansını ölçün ve artırın.",
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "OneCite" },
@@ -111,7 +111,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           url: "https://1cite.com",
           logo: "https://1cite.com/favicon.png",
           description:
-            "Yapay zeka asistanlarının cevaplarında marka atıf payını ölçen ve artıran yapay zeka görünürlük (GEO) platformu.",
+            "Yapay zeka asistanlarının cevaplarında marka AI kaynak payını ölçen ve artıran yapay zeka görünürlük (GEO) platformu.",
         }),
       },
     ],

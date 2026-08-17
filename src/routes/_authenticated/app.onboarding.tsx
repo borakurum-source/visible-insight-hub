@@ -54,7 +54,7 @@ const TOTAL_STEPS = 6;
 const LANGUAGES = ["Türkçe", "English", "Deutsch", "Français", "Español"];
 
 const ENGINES = [
-  { key: "perplexity", name: "Perplexity", description: "Canlı web araması ve atıf kaynaklarıyla ölçüm." },
+  { key: "perplexity", name: "Perplexity", description: "Canlı web araması ve seçilen kaynaklaryla ölçüm." },
   { key: "deepseek", name: "DeepSeek", description: "Üretken yanıt simülasyonu ve içerik analizi." },
 ] as const;
 
@@ -504,7 +504,7 @@ function OnboardingPage() {
         step={5}
         total={TOTAL_STEPS}
         title="Rakiplerinizi gözden geçirin ✨"
-        subtitle="Bu rakipler pazar konumunuzu karşılaştırmak için kullanılır. Alan adı girmeniz atıf eşleşmesini güçlendirir."
+        subtitle="Bu rakipler pazar konumunuzu karşılaştırmak için kullanılır. Alan adı girmeniz kaynak eşleşmesini güçlendirir."
         footer={
           <>
             <Button variant="outline" onClick={() => setStep(4)} disabled={busy}><ArrowLeft className="mr-1.5 h-4 w-4" /> Geri</Button>
@@ -637,7 +637,7 @@ function OnboardingPage() {
         })}
       </div>
       <p className="text-center text-xs text-muted-foreground">
-        Kurulumu tamamladığınızda ilk ölçümünüz otomatik başlar ve skorunuz, atıf kaynaklarınız ve ilk görevleriniz oluşur.
+        Kurulumu tamamladığınızda ilk ölçümünüz otomatik başlar ve skorunuz, seçilen kaynaklarnız ve ilk görevleriniz oluşur.
       </p>
     </WizardFrame>
   );

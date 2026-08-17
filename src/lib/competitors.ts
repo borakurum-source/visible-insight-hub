@@ -54,7 +54,7 @@ function fold(value: string) {
     .trim();
 }
 
-/** Bir rakip; yanıt metninde ya da atıf verilen alan adlarında geçiyor mu? */
+/** Bir rakip; yanıt metninde ya da kaynak gösterilen alan adlarında geçiyor mu? */
 export function competitorMatches(
   entry: CompetitorEntry,
   input: { answer?: string | null; domains?: string[] },

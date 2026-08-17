@@ -26,7 +26,7 @@ export const mockKbSources: MockKbSource[] = [
 ];
 
 export const mockBrandFacts = {
-  brandSummary: "OneCite, markaların AI sohbet motorlarında (ChatGPT, Perplexity, Gemini) ne sıklıkla anıldığını ve alıntılandığını ölçen bir GEO platformudur.",
+  brandSummary: "OneCite, markaların AI sohbet motorlarında (ChatGPT, Perplexity, Gemini) ne sıklıkla anıldığını ve kaynak gösterildiğını ölçen bir GEO platformudur.",
   services: ["AI görünürlük ölçümü", "Kanıt/bilgi bankası yönetimi", "GEO görev takibi", "Rakip analizi"],
   usp: "Tek platformda ölçüm + kanıt yönetimi + aksiyon döngüsü.",
   targetAudience: "SaaS şirketleri, ajanslar, kurumsal pazarlama ekipleri",

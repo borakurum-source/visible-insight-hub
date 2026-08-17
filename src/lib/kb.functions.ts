@@ -70,7 +70,7 @@ export const refreshStaleSources = createServerFn({ method: "POST" })
     return { checked: (sources ?? []).length, updated, unchanged, failed };
   });
 
-// Ölçümde çıkan atıf kaynaklarından bilgi bankasına aday olanlar.
+// Ölçümde çıkan seçilen kaynaklarndan bilgi bankasına aday olanlar.
 export const listCitationCandidates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
@@ -110,7 +110,7 @@ export const listCitationCandidates = createServerFn({ method: "POST" })
       .slice(0, 20);
   });
 
-// Aday atıf kaynağını bilgi bankasına ekler ve hemen indeksler.
+// Aday seçilen kaynaknı bilgi bankasına ekler ve hemen indeksler.
 export const promoteCitationToSource = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; url: string; title: string }) => input)
@@ -437,7 +437,7 @@ export const generateDraft = createServerFn({ method: "POST" })
     const context_text = evidence.map((e, i) => `[${i + 1}] ${e.content}`).join("\n\n") || "(bilgi bankasında ilgili içerik bulunamadı)";
 
     const formatLabel: Record<string, string> = {
-      blog: "alıntılanabilir blog yazısı",
+      blog: "kaynak gösterilebilir blog yazısı",
       faq: "soru-cevap (SSS) formatı",
       comparison: "karşılaştırma tablosu ağırlıklı içerik",
       landing: "hizmet/çözüm sayfası metni",

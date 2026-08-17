@@ -71,7 +71,7 @@ function DashboardPage() {
     { label: "Onaylı prompt", value: data?.approvedPrompts ?? 0, icon: ListChecks, to: "/app/prompts" },
     { label: "Bilgi kaynağı", value: data?.knowledgeSources ?? 0, icon: BookOpen, to: "/app/knowledge-base" },
     { label: "Marka iddiası", value: data?.claims ?? 0, icon: ShieldCheck, to: "/app/claims" },
-    { label: "Alıntı", value: data?.citations ?? 0, icon: Quote, to: "/app/measurement" },
+    { label: "Kaynak gösterimi", value: data?.citations ?? 0, icon: Quote, to: "/app/measurement" },
   ] as const;
 
   return (

@@ -56,7 +56,7 @@ export const Route = createFileRoute("/ozellikler")({
           description: DESCRIPTION,
           brand: { "@type": "Brand", name: "OneCite" },
           featureList: [
-            "Yapay zeka yanıtlarında atıf payı ölçümü",
+            "Yapay zeka yanıtlarında AI kaynak payı ölçümü",
             "Prompt keşfi ve takibi",
             "Rakip karşılaştırmalı görünürlük trendi",
             "Marka zekası (RAG) ve bilgi bankası",
@@ -97,17 +97,17 @@ const mainFeatures: MainFeature[] = [
     icon: BarChart3,
     eyebrow: "AI Görünürlük Takibi",
     title: "Markanızın yapay zeka cevaplarında tam olarak nerede geçtiğini görün",
-    body: "Satın alma niyetli sorularda hangi modelin sizi seçtiğini, hangisinin görmezden geldiğini tek skorda okuyun. OneCite Score, atıf payınızı beş bileşene bölerek nerede kaybettiğinizi söyler.",
+    body: "Satın alma niyetli sorularda hangi modelin sizi seçtiğini, hangisinin görmezden geldiğini tek skorda okuyun. OneCite Score, AI kaynak payınızı beş bileşene bölerek nerede kaybettiğinizi söyler.",
     points: [
       "Perplexity ve DeepSeek üzerinde düzenli prompt ölçümü",
-      "OneCite Score: bahsedilme, alıntı payı, sıralama kalitesi, kanıt kapsamı, iddia kanıtı",
+      "OneCite Score: bahsedilme, AI kaynak payı, sıralama kalitesi, kanıt kapsamı, iddia kanıtı",
       "Zaman içindeki görünürlük trendi ve zayıf bileşen için doğrudan aksiyon butonu",
     ],
     shot: shotDashboard.url,
     alt: "OneCite komuta merkezi: OneCite Score kırılımı ve görünürlük metrikleri",
     caption: "Komuta Merkezi — OneCite Score ve görünürlük kırılımı",
     href: "/platform/citation-share",
-    hrefLabel: "Atıf payını incele",
+    hrefLabel: "AI Kaynak Payını incele",
   },
   {
     id: "promptlar",
@@ -117,7 +117,7 @@ const mainFeatures: MainFeature[] = [
     body: "Marka profilinizden yola çıkarak gerçek satın alma sorularını üretiriz. Her prompt için yanıtın tamamını, kullanılan kaynakları ve 'bu soruda görünmek için' adımlarını görürsünüz.",
     points: [
       "Huni aşamasına göre etiketlenmiş prompt seti (üst, orta, alt huni)",
-      "Yanıtın tamamı ve atıf kaynakları tek ekranda",
+      "Yanıtın tamamı ve seçilen kaynaklar tek ekranda",
       "Görünmediğiniz sorular için tek tıkla görev oluşturma",
     ],
     shot: shotPrompts.url,
@@ -133,7 +133,7 @@ const mainFeatures: MainFeature[] = [
     title: "Rakibinizin göründüğü, sizin görünmediğiniz soruları bulun",
     body: "Aynı promptlarda kimin seçildiğini alan adı bazında sayarız. Karşılaştırmalı trend grafiği, kaybettiğiniz payı ve kapatmanız gereken boşluğu net gösterir.",
     points: [
-      "Alan adı bazlı rakip eşleştirme — isim benzerliğine değil, gerçek atıflara bakar",
+      "Alan adı bazlı rakip eşleştirme — isim benzerliğine değil, gerçek kaynak gösterimlerine bakar",
       "Rakiplerle karşılaştırmalı görünürlük trendi",
       "Sorgu sonuçlarından çıkan yeni rakip adaylarını tek tıkla takibe alma",
     ],
@@ -151,7 +151,7 @@ const mainFeatures: MainFeature[] = [
     body: "Site içeriğiniz, SSS'leriniz, PDF'leriniz ve marka iddialarınız vektörlenir. Yakın noktalar benzer konuları, seyrek bölgeler kanıt boşluklarını gösterir — bu katman tüm ölçüm ve içerik üretiminin beslendiği yerdir.",
     points: [
       "3D vektör haritasında canlı bilgi grafiği",
-      "Marka iddiaları ve kanıt bağlantıları ile alıntılanabilirlik",
+      "Marka iddiaları ve kanıt bağlantıları ile kaynak gösterilebilirlik",
       "RAG altyapısı: her içerik ve analiz kendi bilgi bankanızdan beslenir",
     ],
     shot: shotGraph.url,
@@ -164,7 +164,7 @@ const mainFeatures: MainFeature[] = [
     id: "icerik",
     icon: PenSquare,
     eyebrow: "İçerik Üretimi",
-    title: "Kanıt boşluğunu kapatan, alıntılanabilir içerik üretin",
+    title: "Kanıt boşluğunu kapatan, kaynak gösterilebilir içerik üretin",
     body: "Görünürlük verinize dayanarak brief üretir, ardından kendi bilgi bankanız ve marka iddialarınızla desteklenmiş taslağı yazarız. Genel yapay zeka metni değil, kaynak gösterilebilir içerik.",
     points: [
       "Görünürlük boşluğuna göre otomatik içerik brief'i",
@@ -173,7 +173,7 @@ const mainFeatures: MainFeature[] = [
     ],
     shot: shotContent.url,
     alt: "OneCite içerik üretimi ekranı: taslak oluşturma ve kaynaklar",
-    caption: "İçerik Üretimi — brief'ten alıntılanabilir taslağa",
+    caption: "İçerik Üretimi — brief'ten kaynak gösterilebilir taslağa",
     href: "/makaleler",
     hrefLabel: "Örnek içerikleri oku",
   },
@@ -241,7 +241,7 @@ const deepFeatures = [
   },
   {
     icon: Quote,
-    title: "Atıf kaynakları",
+    title: "Seçilen kaynaklar",
     body: "Yanıtı besleyen her kaynağı listeleyin; kendi domaininiz mi, üçüncü taraf mı görün.",
     mock: (
       <MockRows
@@ -256,7 +256,7 @@ const deepFeatures = [
   {
     icon: ShieldCheck,
     title: "Marka iddiaları",
-    body: "Kanıtsız iddia alıntılanmaz. Her iddiayı kanıt bağlantısıyla eşleştirin.",
+    body: "Kanıtsız iddia kaynak gösterilmez. Her iddiayı kanıt bağlantısıyla eşleştirin.",
     mock: (
       <MockRows
         rows={[
@@ -285,7 +285,7 @@ const deepFeatures = [
     icon: LineChart,
     title: "Trend analizi",
     body: "Görünürlüğünüzün zaman içindeki değişimini ve yaptığınız işin etkisini ölçün.",
-    mock: <MockSpark label="Son 90 gün · atıf payı" points={[6, 8, 7, 11, 14, 13, 18, 22, 27, 31]} />,
+    mock: <MockSpark label="Son 90 gün · AI kaynak payı" points={[6, 8, 7, 11, 14, 13, 18, 22, 27, 31]} />,
   },
   {
     icon: KanbanSquare,

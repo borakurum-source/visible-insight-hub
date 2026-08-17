@@ -5,16 +5,16 @@ const CONTENT = `# OneCite (1cite.com)
 > OneCite, markaların yapay zeka asistanlarının (ChatGPT, Gemini, Perplexity, Copilot) cevaplarında kaynak olarak seçilip seçilmediğini ölçen ve bunu artırmak için kanıt üreten bir yapay zeka görünürlük (GEO) platformudur.
 
 ## Ne yapar
-- Atıf payı ölçümü: Tanımlı sorularda markanın anılma oranı, sıralaması ve gösterilen kaynak alan adları ölçülür.
-- Skor kırılımı: Anılma oranı (%40), atıf payı (%25), konum kalitesi (%15), bilgi kapsamı (%10), iddia kanıtı (%10).
-- Eksik kanıt (evidence gap) analizi: Yapay zekanın alıntılayabileceği kanıtın hangi konularda eksik olduğunu gösterir.
+- AI Kaynak Payı ölçümü: Tanımlı sorularda markanın anılma oranı, sıralaması ve gösterilen kaynak alan adları ölçülür.
+- Skor kırılımı: Anılma oranı (%40), AI kaynak payı (%25), konum kalitesi (%15), bilgi kapsamı (%10), iddia kanıtı (%10).
+- Eksik kanıt (evidence gap) analizi: Yapay zekanın kaynak gösterebileceği kanıtın hangi konularda eksik olduğunu gösterir.
 - Uygulama: Eksik kanıtı içerik ve bilgi bankası görevlerine dönüştürür.
 
 ## Önemli sayfalar
 - Ana sayfa: https://1cite.com/
 - Ücretsiz yapay zeka hazırlık raporu: https://1cite.com/ucretsiz-yapay-zeka-gorunurluk-raporu
 - Platform: https://1cite.com/platform
-- Atıf payı: https://1cite.com/platform/citation-share
+- AI Kaynak Payı: https://1cite.com/platform/citation-share
 - Eksik kanıtlar: https://1cite.com/platform/evidence-gaps
 - Ajanslar için: https://1cite.com/solutions/agencies
 - Fiyatlandırma (USD): https://1cite.com/fiyatlandirma

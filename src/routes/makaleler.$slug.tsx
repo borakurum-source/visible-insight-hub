@@ -161,7 +161,7 @@ function FilmFolkCaseStudy() {
       <article>
         <VisualHero
           eyebrow="VAKA İNCELEMESİ · FILMFOLK / 41 SORU"
-          title={<>Atıf payı <span className="text-cyan">%30,7’den %58,9’a</span> nasıl taşındı?</>}
+          title={<>AI Kaynak Payı <span className="text-cyan">%30,7’den %58,9’a</span> nasıl taşındı?</>}
           description="Aynı satın alma niyetli soru havuzunda yapılan ilk ve son ölçüm karşılaştırması. Bu vaka tek bir yanıtı değil; hangi niyetlerde kaynak olarak daha sık seçildiğini gösterir."
           image={heroEvidenceGap}
           imageAlt="Eksik parçası olan ışıklı cam köprü; FilmFolk vaka incelemesinde kanıt boşluğunu temsil eden OneCite görseli"
@@ -235,8 +235,8 @@ function FilmFolkCaseStudy() {
             <Reveal>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Arama görünürlüğü bağlamı</p>
-                <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Search Console, atıf sonucunu kanıtlamaz; bağlamı zenginleştirir.</h2>
-                <p className="mt-5 text-base leading-7 text-muted-foreground">18 Mayıs–12 Ağustos 2026 tarihleri arasındaki 87 günlük Google Search Console exportu yalnızca <strong>Web</strong> arama türünü kapsar. Bu veri yapay zeka atıf payının nedeni veya sonucu değildir.</p>
+                <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Search Console, kaynak gösterimi sonucunu kanıtlamaz; bağlamı zenginleştirir.</h2>
+                <p className="mt-5 text-base leading-7 text-muted-foreground">18 Mayıs–12 Ağustos 2026 tarihleri arasındaki 87 günlük Google Search Console exportu yalnızca <strong>Web</strong> arama türünü kapsar. Bu veri yapay zeka AI kaynak payının nedeni veya sonucu değildir.</p>
                 <div className="mt-7 grid gap-3 text-sm">
                   <p className="flex items-center gap-3 font-semibold text-foreground"><FileSearch className="h-4 w-4 text-primary" />Canlı yayın hizmeti: 3.377 gösterim</p>
                   <p className="flex items-center gap-3 font-semibold text-foreground"><FileSearch className="h-4 w-4 text-primary" />Serbest videograf hizmeti: 3.276 gösterim</p>
@@ -262,7 +262,7 @@ function FilmFolkCaseStudy() {
             <div className="rounded-3xl bg-ink px-7 py-12 text-center text-white md:px-12">
               <ListChecks className="mx-auto h-6 w-6 text-cyan" />
               <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-cyan">Vakanın çıkarımı</p>
-              <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">Atıf payı artabilir; her satın alma niyetinde aynı anda artmayabilir.</h2>
+              <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">AI Kaynak Payı artabilir; her satın alma niyetinde aynı anda artmayabilir.</h2>
               <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300">Düzenli soru takibi, güçlü artışları ve kaybedilen niyet alanlarını aynı ölçüm çerçevesinde görünür kılar. Amaç garanti vermek değil, bir sonraki kanıt üretim kararını daha doğru almaktır.</p>
               <MotionPress className="mt-8 inline-block">
                 <Button size="lg" className="bg-cyan text-foreground hover:bg-[#B8F4FF]" asChild>

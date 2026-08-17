@@ -42,11 +42,11 @@ export const articles: Article[] = [
     slug: "yapay-zeka-gorunurlugu-nedir", category: "Yapay zeka arama rehberleri", title: "Yapay Zeka Görünürlüğü Nedir? Kapsamlı Rehber", description: "Markanızın ChatGPT, Perplexity ve diğer AI yanıtlarında nasıl göründüğünü ölçmek için kapsamlı rehber.", readingTime: "14 dk okuma", date: "16 Ağustos 2026", sections: [], markdown: aiVisibilityArticle,
   },
   {
-    slug: "yapay-zeka-atif-payini-olcmek", category: "Atıf ve kaynak analizi", title: "Yapay zeka atıf payı nasıl ölçülür?", description: "Marka adının geçmesinden fazlasını ölçmek için arama sorusu, seçilen kaynak ve sonuç bağlamını birlikte okuyun.", readingTime: "6 dk okuma", date: "14 Ağustos 2026",
+    slug: "yapay-zeka-atif-payini-olcmek", category: "Kaynak gösterimi analizi", title: "AI kaynak payı nasıl ölçülür?", description: "Marka adının geçmesinden fazlasını ölçmek için arama sorusu, seçilen kaynak ve sonuç bağlamını birlikte okuyun.", readingTime: "6 dk okuma", date: "14 Ağustos 2026",
     sections: [
-      { heading: "Atıf payı nedir?", paragraphs: ["Atıf payı, seçilen bir arama sorusu setinde yapay zeka yanıtlarının markanızı kaynak olarak seçme oranıdır. Bu oran, yalnızca marka adının geçtiği yanıtları değil; yanıtı destekleyen kaynak bağlantılarını ve kaynak türünü dikkate alır.", "Bu nedenle atıf payı, klasik sıralama metriklerinin birebir karşılığı değildir. Aynı marka bir yanıtta olumlu biçimde anılabilir ancak kaynak olarak seçilmeyebilir. OneCite bu iki durumu ayrı sinyaller olarak ele alır."] },
+      { heading: "AI Kaynak Payı nedir?", paragraphs: ["AI Kaynak Payı, seçilen bir arama sorusu setinde yapay zeka yanıtlarının markanızı kaynak olarak seçme oranıdır. Bu oran, yalnızca marka adının geçtiği yanıtları değil; yanıtı destekleyen kaynak bağlantılarını ve kaynak türünü dikkate alır.", "Bu nedenle AI kaynak payı, klasik sıralama metriklerinin birebir karşılığı değildir. Aynı marka bir yanıtta olumlu biçimde anılabilir ancak kaynak olarak seçilmeyebilir. OneCite bu iki durumu ayrı sinyaller olarak ele alır."] },
       { heading: "Ölçüm için doğru soru seti", paragraphs: ["Anlamlı bir başlangıç ölçümü, müşterinin karar anına yakın sorulardan oluşur. Sorular; problem araştırması, çözüm değerlendirmesi, karşılaştırma ve satın alma niyeti gibi farklı aşamaları temsil etmelidir.", "Soru seti sabit kalmalıdır. Aksi halde zaman içindeki değişimin içerikten mi, soru kapsamından mı kaynaklandığını ayırmak zorlaşır."] },
-      { heading: "Oranın arkasındaki kanıt", paragraphs: ["Atıf payı tek başına bir karar verdirmez. Hangi soruda kaynak seçildiği, hangi sayfanın seçildiği, rakibin hangi kaynakla öne çıktığı ve yanıtın kullandığı kanıt türü birlikte okunmalıdır.", "Bir sonraki uygulama buradan çıkar: eksik olan şey yeni bir sayfa mı, daha iyi bir vaka çalışması mı, güncellenmiş teknik bilgi mi yoksa üçüncü taraf otorite mi? Doğru cevap, ölçüm bağlamında görünür olur."] },
+      { heading: "Oranın arkasındaki kanıt", paragraphs: ["AI Kaynak Payı tek başına bir karar verdirmez. Hangi soruda kaynak seçildiği, hangi sayfanın seçildiği, rakibin hangi kaynakla öne çıktığı ve yanıtın kullandığı kanıt türü birlikte okunmalıdır.", "Bir sonraki uygulama buradan çıkar: eksik olan şey yeni bir sayfa mı, daha iyi bir vaka çalışması mı, güncellenmiş teknik bilgi mi yoksa üçüncü taraf otorite mi? Doğru cevap, ölçüm bağlamında görünür olur."] },
     ],
   },
   {
@@ -75,7 +75,7 @@ export const articles: Article[] = [
     slug: "icerik-ekipleri-icin-ai-arama-optimizasyon-araclari", category: "Kanıt ve içerik", title: "İçerik Ekipleri İçin En İyi 8 AI Arama Optimizasyon Aracı 2026", description: "İçerik araştırması, citation gap, teknik denetim ve AI arama uygulama akışlarını karşılaştırın.", readingTime: "15 dk okuma", date: "15 Ağustos 2026", sections: [], markdown: contentTeamAiSearchArticle,
   },
   {
-    slug: "filmfolk-vaka-incelemesi", category: "Vaka incelemesi", title: "FilmFolk: Atıf payında +28,1 puan", description: "41 satın alma niyetli soru ve 286 ölçüm tekrarı üzerinden atıf payı değişimini, kazanan ve gerileyen niyetleri birlikte inceleyin.", readingTime: "12 dk vaka incelemesi", date: "14 Ağustos 2026",
+    slug: "filmfolk-vaka-incelemesi", category: "Vaka incelemesi", title: "FilmFolk: AI Kaynak Payında +28,1 puan", description: "41 satın alma niyetli soru ve 286 ölçüm tekrarı üzerinden AI kaynak payı değişimini, kazanan ve gerileyen niyetleri birlikte inceleyin.", readingTime: "12 dk vaka incelemesi", date: "14 Ağustos 2026",
     sections: [],
   },
 ];
@@ -92,9 +92,9 @@ export const Route = createFileRoute("/makaleler/")({
   head: () => ({
     meta: [
       { title: "Makaleler | OneCite Kaynak Merkezi" },
-      { name: "description", content: "Yapay zeka arama, atıf payı, eksik kanıt ve GEO hakkında Türkçe OneCite rehberleri." },
+      { name: "description", content: "Yapay zeka arama, AI kaynak payı, eksik kanıt ve GEO hakkında Türkçe OneCite rehberleri." },
       { property: "og:title", content: "Makaleler | OneCite Kaynak Merkezi" },
-      { property: "og:description", content: "Atıf payı, eksik kanıt, kaynak seçimi ve GEO hakkında Türkçe rehberler." },
+      { property: "og:description", content: "AI Kaynak Payı, eksik kanıt, kaynak seçimi ve GEO hakkında Türkçe rehberler." },
       { property: "og:url", content: "https://1cite.com/makaleler" },
     ],
     links: [{ rel: "canonical", href: "https://1cite.com/makaleler" }],
@@ -193,7 +193,7 @@ function ArticlesPage() {
       <VisualHero
         eyebrow="SOURCE LIBRARY · ONECITE INSIGHTS"
         title={<>Yapay zeka arama için <span className="text-cyan">ölçülebilir bilgi.</span></>}
-        description="Atıf payı, eksik kanıt, kaynak seçimi ve GEO hakkında karar vermeyi kolaylaştıran Türkçe rehberler."
+        description="AI Kaynak Payı, eksik kanıt, kaynak seçimi ve GEO hakkında karar vermeyi kolaylaştıran Türkçe rehberler."
         image={heroCitationOrb}
         imageAlt="Citation ağı taşıyan cam küre; OneCite kaynak merkezi için editorial görsel"
         visualLabel="KAYNAK KÜTÜPHANESİ"

@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     q: "Ücretsiz rapor tam olarak neyi ölçüyor?",
-    a: "Rapor, herkese açık web sinyallerinizi tarar: sitenizin yapısal netliği, hizmet ve konu kapsamı, kanıtlanabilir iddialar, kaynak gösterilebilirlik ve yapay zekanın alıntılayabileceği içerik biçimleri. Sonuçta bir hazırlık çerçevesi ve öncelikli eksik kanıt listesi çıkar.",
+    a: "Rapor, herkese açık web sinyallerinizi tarar: sitenizin yapısal netliği, hizmet ve konu kapsamı, kanıtlanabilir iddialar, kaynak gösterilebilirlik ve yapay zekanın kaynak gösterebileceği içerik biçimleri. Sonuçta bir hazırlık çerçevesi ve öncelikli eksik kanıt listesi çıkar.",
   },
   {
     q: "Rapor ne kadar sürede hazır oluyor?",
@@ -28,7 +28,7 @@ const faqs = [
   },
   {
     q: "GEO ile SEO arasındaki fark ne?",
-    a: "SEO, arama sonuç sayfasındaki sıranızı hedefler. GEO (üreten motor optimizasyonu) ise yapay zekanın ürettiği cevabın içinde kaynak olarak seçilmeyi hedefler. GEO'da belirleyici olan bağlantı sayısı değil; net, doğrulanabilir ve alıntılanabilir kanıttır.",
+    a: "SEO, arama sonuç sayfasındaki sıranızı hedefler. GEO (üreten motor optimizasyonu) ise yapay zekanın ürettiği cevabın içinde kaynak olarak seçilmeyi hedefler. GEO'da belirleyici olan bağlantı sayısı değil; net, doğrulanabilir ve kaynak gösterilebilir kanıttır.",
   },
   {
     q: "Ücretsiz rapordan sonra ne oluyor?",
@@ -42,8 +42,8 @@ const faqs = [
 
 const reportContents = [
   { icon: FileSearch, title: "Yapay zeka hazırlık özeti", body: "Sitenizin yapay zeka asistanları tarafından okunabilirlik, konu kapsamı ve kanıt netliği açısından ilk değerlendirmesi." },
-  { icon: Network, title: "Atıf bağlamı", body: "Marka adınızın hangi konu ve hizmet bağlamlarıyla ilişkilendiğini, hangi kaynakların sizi temsil ettiğini görün." },
-  { icon: ListChecks, title: "Eksik kanıt listesi", body: "Yapay zekanın sizi alıntılaması için gereken ama sitenizde bulunmayan kanıt başlıkları önceliklendirilir." },
+  { icon: Network, title: "Kaynak bağlamı", body: "Marka adınızın hangi konu ve hizmet bağlamlarıyla ilişkilendiğini, hangi kaynakların sizi temsil ettiğini görün." },
+  { icon: ListChecks, title: "Eksik kanıt listesi", body: "Yapay zekanın sizi kaynak göstermesi için gereken ama sitenizde bulunmayan kanıt başlıkları önceliklendirilir." },
   { icon: ShieldCheck, title: "Öncelikli sonraki adımlar", body: "Her düzeltmeyi değil, görünürlüğe en çok etki edecek üç uygulamayı önce görün." },
 ];
 
@@ -56,7 +56,7 @@ const steps = [
 const questionsAnswered = [
   "ChatGPT bir kullanıcıya sektörümde öneri verirken markamı anıyor mu?",
   "Perplexity cevaplarında hangi kaynak alan adları benim yerime seçiliyor?",
-  "Hangi hizmet veya konu başlığında yapay zekanın alıntılayacağı kanıtım yok?",
+  "Hangi hizmet veya konu başlığında yapay zekanın kaynak göstereceği kanıtım yok?",
   "Rakiplerim hangi kanıt türleriyle (vaka, karşılaştırma, veri) öne çıkıyor?",
   "Görünürlüğü artırmak için önce hangi içeriği üretmeliyim?",
 ];
@@ -142,7 +142,7 @@ function FreeReportPage() {
       <VisualHero
         eyebrow="ÜCRETSİZ YAPAY ZEKA GÖRÜNÜRLÜK TESTİ"
         title={<>Markanız yapay zeka cevaplarında <span className="text-cyan">kaynak olarak çıkıyor mu?</span></>}
-        description="Web sitenizi girin; OneCite herkese açık sinyalleri tarayıp ChatGPT, Gemini ve Perplexity gibi asistanlarda alıntılanmaya ne kadar hazır olduğunuzu gösteren ücretsiz hazırlık raporunu çıkarsın."
+        description="Web sitenizi girin; OneCite herkese açık sinyalleri tarayıp ChatGPT, Gemini ve Perplexity gibi asistanlarda kaynak gösterilmeya ne kadar hazır olduğunuzu gösteren ücretsiz hazırlık raporunu çıkarsın."
         image={heroSignalAction}
         imageAlt="Üç ışıklı yolun şeffaf bir prizma içinde tek kaynak noktasında birleşmesi"
         visualLabel="AI GÖRÜNÜRLÜK RAPORU"
@@ -173,7 +173,7 @@ function FreeReportPage() {
           </p>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
             Ücretsiz hazırlık raporu, bu yüzeyde nerede durduğunuzu görmenin en hızlı yoludur: hangi kanıtınız yeterli, hangi
-            konu başlığında yapay zekanın alıntılayacağı bir şey bırakmamışsınız, önce neyi düzeltmelisiniz.
+            konu başlığında yapay zekanın kaynak göstereceği bir şey bırakmamışsınız, önce neyi düzeltmelisiniz.
           </p>
         </div>
 
@@ -227,7 +227,7 @@ function FreeReportPage() {
               </div>
               <div>
                 <dt className="font-bold text-foreground">OneCite paneli</dt>
-                <dd className="mt-1 leading-6 text-muted-foreground">Soru bazlı periyodik ölçüm, atıf payı trendi, rakip karşılaştırması, bilgi bankası ve içerik görevleri.</dd>
+                <dd className="mt-1 leading-6 text-muted-foreground">Soru bazlı periyodik ölçüm, AI kaynak payı trendi, rakip karşılaştırması, bilgi bankası ve içerik görevleri.</dd>
               </div>
             </dl>
             <div className="mt-7 flex flex-wrap gap-2">
@@ -293,7 +293,7 @@ function FreeReportPage() {
             Daha derine inmek isterseniz{" "}
             <Link to="/makaleler/$slug" params={{ slug: "yapay-zeka-gorunurlugu-nedir" }} className="font-semibold text-primary underline-offset-4 hover:underline">yapay zeka görünürlüğü nedir</Link>,{" "}
             <Link to="/platform/evidence-gaps" className="font-semibold text-primary underline-offset-4 hover:underline">eksik kanıt analizi</Link> ve{" "}
-            <Link to="/platform/citation-share" className="font-semibold text-primary underline-offset-4 hover:underline">atıf payı ölçümü</Link> sayfalarına göz atın.
+            <Link to="/platform/citation-share" className="font-semibold text-primary underline-offset-4 hover:underline">AI kaynak payı ölçümü</Link> sayfalarına göz atın.
           </p>
         </div>
       </section>

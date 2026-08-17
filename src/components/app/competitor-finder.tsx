@@ -196,7 +196,7 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
           </Button>
         </div>
         <p className="-mt-1 text-[11px] text-muted-foreground">
-          Alan adı girmek eşleşmeyi güçlendirir: yapay zeka yanıtlarındaki atıf kaynakları alan adına göre de sayılır.
+          Alan adı girmek eşleşmeyi güçlendirir: yapay zeka yanıtlarındaki seçilen kaynaklar alan adına göre de sayılır.
         </p>
 
         <div className="space-y-1.5">

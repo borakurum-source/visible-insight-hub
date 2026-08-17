@@ -42,7 +42,7 @@ const PROVIDERS: Row[] = [
   {
     provider: "Perplexity AI",
     purpose:
-      "Takip edilen promptların yapay zeka yanıtlarında ölçülmesi, atıf/kaynak listelerinin çıkarılması ve metin embedding üretimi.",
+      "Takip edilen promptların yapay zeka yanıtlarında ölçülmesi, kaynak gösterimi listelerinin çıkarılması ve metin embedding üretimi.",
     data: "Prompt metinleri, marka ve rakip adları, taranan sayfa içerikleri (kişisel veri içermemesi hedeflenir), hesap kimliği içermeyen teknik meta veriler.",
     role: "Veri işleyen (OneCite talimatıyla çalışır)",
     location: "ABD",
@@ -74,7 +74,7 @@ const PROVIDERS: Row[] = [
   {
     provider: "Bing Webmaster Tools (Microsoft)",
     purpose:
-      "Bing organik performansı ile Copilot ve iş ortağı atıf kaynaklarının okunması.",
+      "Bing organik performansı ile Copilot ve iş ortağı seçilen kaynaklarnın okunması.",
     data: "API anahtarı, site kimliği, sorgu ve tıklama metrikleri.",
     role: "Bağımsız veri sorumlusu (Microsoft) + OneCite yönünden veri işleyen ilişkisi",
     location: "AB / ABD",
@@ -109,7 +109,7 @@ const PURPOSES = [
   },
   {
     title: "Yapay zeka görünürlük ölçümü",
-    body: "Promptların yapay zeka motorlarına gönderilmesi, atıf ve kaynak analizinin yapılması, skor üretilmesi.",
+    body: "Promptların yapay zeka motorlarına gönderilmesi, kaynak gösterimi analizinin yapılması, skor üretilmesi.",
     basis: "Sözleşmenin ifası ve meşru menfaat",
   },
   {
@@ -207,7 +207,7 @@ function DataProcessingPage() {
           <Section title="4. Saklama süreleri">
             <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
               <li>Hesap ve marka kayıtları: hesap aktif olduğu sürece, kapanıştan sonra 90 gün.</li>
-              <li>Ölçüm sonuçları ve atıf kayıtları: 24 ay.</li>
+              <li>Ölçüm sonuçları ve kaynak gösterimi kayıtları: 24 ay.</li>
               <li>Bilgi bankası içerikleri ve embedding vektörleri: siz silene kadar.</li>
               <li>Önbelleğe alınan yapay zeka yanıtları: 30 gün.</li>
               <li>Fatura kayıtları: mevzuat gereği 10 yıl (Paddle nezdinde).</li>

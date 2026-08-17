@@ -75,7 +75,7 @@ function ReportPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Alan adı</TableHead>
-                    <TableHead className="text-right">Alıntı</TableHead>
+                    <TableHead className="text-right">Kaynak gösterimi</TableHead>
                     <TableHead className="text-right">Tür</TableHead>
                   </TableRow>
                 </TableHeader>

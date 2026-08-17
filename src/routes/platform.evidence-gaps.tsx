@@ -44,9 +44,9 @@ function EvidenceGapsPage() {
         imageAlt="Bir parçası eksik olan ışıklı cam köprü; evidence gap kavramının görsel metaforu"
         visualLabel="KANIT BOŞLUĞU"
         secondaryHref="/platform/citation-share"
-        secondaryLabel="Atıf payını incele"
+        secondaryLabel="AI Kaynak Payını incele"
       >
-        <p className="text-sm text-slate-400">Soru → atıf → eksik kanıt → uygulama</p>
+        <p className="text-sm text-slate-400">Soru → kaynak gösterimi → eksik kanıt → uygulama</p>
       </VisualHero>
 
       <section className="marketing-container py-16 md:py-24">
@@ -81,7 +81,7 @@ function EvidenceGapsPage() {
 
       <MarketingCta
         title="Önce hangi kanıtın eksik olduğunu görün."
-        description="Ücretsiz ölçüm, herkese açık site verisiyle ilk atıf ve eksik kanıt çerçevenizi oluşturur."
+        description="Ücretsiz ölçüm, herkese açık site verisiyle ilk kaynak gösterimi ve eksik kanıt çerçevenizi oluşturur."
       />
     </MarketingShell>
   );

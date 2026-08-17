@@ -111,7 +111,7 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
     <>
     <SectionTitle
       title="Yapay zeka görünürlüğü"
-      description="Önce yapay zeka: asistan yanıtlarındaki görünürlüğünüz, atıflarınız ve GA4'ten gelen gerçek yapay zeka trafiği."
+      description="Önce yapay zeka: asistan yanıtlarındaki görünürlüğünüz, kaynak gösterimlerininız ve GA4'ten gelen gerçek yapay zeka trafiği."
     />
     <div className="grid gap-4 md:grid-cols-3">
       <MetricCard
@@ -141,9 +141,9 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
         icon={Bot}
         days={data.rangeDays}
         metric="ai-citations"
-        title="AI Atıf Trafiği"
+        title="AI Kaynak Trafiği"
         value={fmt(data.aiReferral.total)}
-        caption={`atıf · ${fmt(data.aiReferral.ownDomain)} tanesi kendi siteniz (30 gün)`}
+        caption={`kaynak · ${fmt(data.aiReferral.ownDomain)} tanesi kendi siteniz (30 gün)`}
       >
         {data.aiReferral.total ? (
           <ResponsiveContainer width="100%" height="100%">
@@ -156,12 +156,12 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
               </defs>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
               <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} allowDecimals={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [fmt(value), "Atıf"]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [fmt(value), "Kaynak gösterimi"]} />
               <Area type="monotone" dataKey="citations" stroke="var(--chart-5)" strokeWidth={2} fill="url(#refFill)" />
             </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <Empty label="Henüz atıf kaydı yok." cta={{ to: "/app/measurement", text: "Ölçümü başlat" }} />
+          <Empty label="Henüz kaynak gösterimi kaydı yok." cta={{ to: "/app/measurement", text: "Ölçümü başlat" }} />
         )}
       </MetricCard>
 

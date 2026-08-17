@@ -9,9 +9,9 @@ import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 export const Route = createFileRoute("/solutions/agencies")({
   head: () => ({
     meta: [
-      { title: "Ajanslar için OneCite | Paylaşılabilir atıf zekası" },
-      { name: "description", content: "Ajanslar için müşteri bazlı yapay zeka atıf ölçümü, eksik kanıt analizi ve paylaşılabilir GEO raporlama iş akışı." },
-      { property: "og:title", content: "Ajanslar için OneCite | Paylaşılabilir atıf zekası" },
+      { title: "Ajanslar için OneCite | Paylaşılabilir AI Citation Intelligence" },
+      { name: "description", content: "Ajanslar için müşteri bazlı yapay zeka kaynak gösterimi ölçümü, eksik kanıt analizi ve paylaşılabilir GEO raporlama iş akışı." },
+      { property: "og:title", content: "Ajanslar için OneCite | Paylaşılabilir AI Citation Intelligence" },
       { property: "og:description", content: "Müşteri bazlı ölçüm, eksik kanıt ve GEO iş akışını tek platformda yönetin." },
       { property: "og:url", content: "https://1cite.com/solutions/agencies" },
     ],
@@ -22,10 +22,10 @@ export const Route = createFileRoute("/solutions/agencies")({
 
 const workflow = [
   { icon: Layers3, step: "01", title: "Her müşteri için ölçüm kapsamı", body: "Marka, rakip, soru seti ve hedef pazarları müşteri bazında düzenleyin." },
-  { icon: BarChart3, step: "02", title: "Sinyali açıklanabilir rapora çevirin", body: "Atıf payının arkasındaki kaynak ve eksik kanıt bağlamını müşteriye taşıyın." },
+  { icon: BarChart3, step: "02", title: "Sinyali açıklanabilir rapora çevirin", body: "AI Kaynak Payının arkasındaki kaynak ve eksik kanıt bağlamını müşteriye taşıyın." },
   { icon: BriefcaseBusiness, step: "03", title: "GEO işini önceliklendirin", body: "Kısa vadeli içerik üretimi ile uzun vadeli otorite varlıklarını tek iş listesinde yönetin." },
 ];
-const outcomes = ["Müşteri bazında soru ve rakip bağlamı", "Paylaşılabilir atıf kanıtı", "İçerik, halkla ilişkiler ve teknik GEO için tek öncelik listesi"];
+const outcomes = ["Müşteri bazında soru ve rakip bağlamı", "Paylaşılabilir kaynak kanıtı", "İçerik, halkla ilişkiler ve teknik GEO için tek öncelik listesi"];
 
 function AgenciesPage() {
   return (

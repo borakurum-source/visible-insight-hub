@@ -81,7 +81,7 @@ function PrivacyPolicyPage() {
         <ul className="list-disc pl-5 space-y-1">
           <li><strong>Paddle.com Market Ltd.</strong> — Kayıtlı Satıcı (Merchant of Record): satış işlemi, abonelik yönetimi, ödeme alma, vergi uyumu ve faturalandırma. Paddle bu verileri kendi gizlilik politikası kapsamında bağımsız veri sorumlusu olarak da işler.</li>
           <li><strong>Supabase / Lovable Cloud (PostgreSQL, AB bölgesi)</strong> — kimlik doğrulama, oturum yönetimi ve uygulama veritabanının barındırılması.</li>
-          <li><strong>Perplexity ve DeepSeek API'leri</strong> — izlemek istediğiniz prompt metinleri, marka bahsi/atıf ölçümü ve içerik üretimi amacıyla bu API'lere gönderilir ve analiz edilir.</li>
+          <li><strong>Perplexity ve DeepSeek API'leri</strong> — izlemek istediğiniz prompt metinleri, marka bahsi/kaynak gösterimi ölçümü ve içerik üretimi amacıyla bu API'lere gönderilir ve analiz edilir.</li>
           <li><strong>E-posta altyapısı (notify.1cite.com)</strong> — işlemsel bildirim e-postalarının gönderimi.</li>
           <li><strong>Profesyonel danışmanlar ve yetkili kamu kurumları</strong> — hukuki/mali danışmanlık veya mevzuatın gerektirdiği hallerde.</li>
           <li><strong>Firecrawl (opsiyonel)</strong> — yalnızca JavaScript ile yüklenen sayfaların okunabilir metne dönüştürülmesi gerektiğinde ilgili sayfa adresi bu servise iletilir.</li>

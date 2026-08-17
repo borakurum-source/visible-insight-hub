@@ -50,7 +50,7 @@ function AboutPage() {
           </div>
           <div className="space-y-5 text-base leading-8 text-muted-foreground">
             <p>Google’da iyi sıralanan bir sayfa, bir yapay zeka cevabında otomatik olarak kaynak seçilmez. AI sistemleri sorunun bağlamını, kaynağın güven sinyallerini ve web’deki kanıt ilişkilerini birlikte yorumlar.</p>
-            <p>OneCite bu belirsizliği tek bir skorla kapatmaya çalışmaz. Sabit soru seti, pazar, dil ve tekrar bağlamında gözlenen atıf sinyalini; seçilen kaynak ve eksik kanıtla birlikte okur.</p>
+            <p>OneCite bu belirsizliği tek bir skorla kapatmaya çalışmaz. Sabit soru seti, pazar, dil ve tekrar bağlamında gözlenen kaynak gösterimi sinyalini; seçilen kaynak ve eksik kanıtla birlikte okur.</p>
             <blockquote className="border-l-2 border-cyan pl-5 text-xl font-semibold leading-8 text-foreground">“Bir markanın AI cevaplarında nerede durduğunu tahmin etmeyin. Soruyu, kaynağı ve eksik kanıtı aynı anda görün.”</blockquote>
           </div>
         </div>
@@ -64,7 +64,7 @@ function AboutPage() {
           </div>
           <div className="mt-12 grid gap-4 md:grid-cols-3">
             <article className="rounded-2xl border border-border bg-background p-6"><Network className="h-5 w-5 text-primary" /><p className="mt-7 font-mono text-xs text-muted-foreground">01 / CONTEXT</p><h3 className="mt-3 text-xl font-extrabold text-foreground">Bağlamı kur</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">Marka, domain, hedef pazar, dil ve satın alma niyetli soruları aynı çalışma çerçevesinde tanımla.</p></article>
-            <article className="rounded-2xl border border-border bg-background p-6"><CircleDotDashed className="h-5 w-5 text-cyan" /><p className="mt-7 font-mono text-xs text-muted-foreground">02 / EVIDENCE</p><h3 className="mt-3 text-xl font-extrabold text-foreground">Kaynak sinyalini gör</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">AI cevabında seçilen kaynakları, atıf payını ve görünürlüğü kesen evidence gap’leri ilişkilendir.</p></article>
+            <article className="rounded-2xl border border-border bg-background p-6"><CircleDotDashed className="h-5 w-5 text-cyan" /><p className="mt-7 font-mono text-xs text-muted-foreground">02 / EVIDENCE</p><h3 className="mt-3 text-xl font-extrabold text-foreground">Kaynak sinyalini gör</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">AI cevabında seçilen kaynakları, AI kaynak payını ve görünürlüğü kesen evidence gap’leri ilişkilendir.</p></article>
             <article className="rounded-2xl border border-border bg-background p-6"><Sparkles className="h-5 w-5 text-primary" /><p className="mt-7 font-mono text-xs text-muted-foreground">03 / ACTION</p><h3 className="mt-3 text-xl font-extrabold text-foreground">Sonraki kararı seç</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">Eksik kanıtı içerik, kaynak veya ölçüm aksiyonuna çevir; sonucu aynı soru bağlamında yeniden izle.</p></article>
           </div>
         </div>

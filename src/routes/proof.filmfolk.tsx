@@ -10,9 +10,9 @@ export const Route = createFileRoute("/proof/filmfolk")({
   head: () => ({
     meta: [
       { title: "FilmFolk Vaka Çalışması | OneCite" },
-      { name: "description", content: "FilmFolk için 41 satın alma niyetli soruda, 286 ölçüm tekrarında gözlenen yapay zeka atıf payı değişimini ve Search Console bağlamını inceleyin." },
+      { name: "description", content: "FilmFolk için 41 satın alma niyetli soruda, 286 ölçüm tekrarında gözlenen yapay zeka AI kaynak payı değişimini ve Search Console bağlamını inceleyin." },
       { property: "og:title", content: "FilmFolk Vaka Çalışması | OneCite" },
-      { property: "og:description", content: "41 soru, 286 tekrar: FilmFolk'ün atıf payı değişimi." },
+      { property: "og:description", content: "41 soru, 286 tekrar: FilmFolk'ün AI kaynak payı değişimi." },
       { property: "og:url", content: "https://1cite.com/proof/filmfolk" },
     ],
     links: [{ rel: "canonical", href: "https://1cite.com/proof/filmfolk" }],
@@ -62,7 +62,7 @@ function FilmFolkPage() {
     <MarketingShell>
       <VisualHero
         eyebrow="ÖRNEK ÇALIŞMA · FILMFOLK / 41 SORU"
-        title={<>41 satın alma niyetli soruda atıf payındaki <span className="text-cyan">değişimi</span> görün.</>}
+        title={<>41 satın alma niyetli soruda AI kaynak payındaki <span className="text-cyan">değişimi</span> görün.</>}
         description="FilmFolk için ilk ve son ölçüm sonuçları, aynı soru havuzundaki 286 tekrar üzerinden karşılaştırıldı. Bu bir nedensellik veya performans garantisi değildir; gözlenen kaynak seçimi değişiminin bağlamlı bir okumasıdır."
         image={heroEvidenceGap}
         imageAlt="Eksik parçası olan ışıklı cam köprü; ölçüm ve kanıt arasındaki kopukluğu temsil eden OneCite görseli"
@@ -82,12 +82,12 @@ function FilmFolkPage() {
         <div className="marketing-copy">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Metodoloji</p>
           <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-5xl">Değişimi tekil yanıtla değil, sabit soru havuzuyla okuyun.</h2>
-          <p className="mt-5 text-base leading-7 text-muted-foreground">FilmFolk’in London ve Birleşik Krallık odaklı video prodüksiyonu, etkinlik, canlı yayın, fotoğraf ve düzenleme hizmetleri için satın alma niyetine yakın sorular izlendi. Her prompt için ilk ve en güncel atıf oranı, tekrar sayısı ile birlikte kaydedildi.</p>
+          <p className="mt-5 text-base leading-7 text-muted-foreground">FilmFolk’in London ve Birleşik Krallık odaklı video prodüksiyonu, etkinlik, canlı yayın, fotoğraf ve düzenleme hizmetleri için satın alma niyetine yakın sorular izlendi. Her prompt için ilk ve en güncel kaynak gösterimi oranı, tekrar sayısı ile birlikte kaydedildi.</p>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <article className="rounded-2xl border border-border bg-background p-6"><Target className="h-5 w-5 text-primary" /><p className="mt-7 font-mono text-4xl text-foreground">41</p><h3 className="mt-2 font-bold text-foreground">Sabit soru</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">Satın alma niyeti taşıyan sorgu havuzu.</p></article>
           <article className="rounded-2xl border border-border bg-background p-6"><LineChart className="h-5 w-5 text-primary" /><p className="mt-7 font-mono text-4xl text-foreground">286</p><h3 className="mt-2 font-bold text-foreground">Ölçüm tekrarı</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">İlk ve son durum karşılaştırmasında kullanılan kayıt.</p></article>
-          <article className="rounded-2xl border border-border bg-background p-6"><TrendingUp className="h-5 w-5 text-emerald-700" /><p className="mt-7 font-mono text-4xl text-foreground">32 / 41</p><h3 className="mt-2 font-bold text-foreground">Yükselen soru</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">Son ölçümde ilk ölçüme göre daha yüksek atıf oranı.</p></article>
+          <article className="rounded-2xl border border-border bg-background p-6"><TrendingUp className="h-5 w-5 text-emerald-700" /><p className="mt-7 font-mono text-4xl text-foreground">32 / 41</p><h3 className="mt-2 font-bold text-foreground">Yükselen soru</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">Son ölçümde ilk ölçüme göre daha yüksek kaynak gösterimi oranı.</p></article>
           <article className="rounded-2xl border border-border bg-background p-6"><CircleDotDashed className="h-5 w-5 text-amber-600" /><p className="mt-7 font-mono text-4xl text-foreground">7 / 41</p><h3 className="mt-2 font-bold text-foreground">Gerileyen soru</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">Takipte kalması gereken hizmet veya niyet alanı.</p></article>
         </div>
       </section>
@@ -125,7 +125,7 @@ function FilmFolkPage() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Search Console bağlamı</p>
             <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Organik arama yüzeyi, prompt ölçümünün yerine geçmez; onu bağlama oturtur.</h2>
-            <p className="mt-5 text-base leading-7 text-muted-foreground">Ekteki Google Search Console exportu 18 Mayıs–12 Ağustos 2026 arasındaki 87 günü ve <strong>Web</strong> arama türünü içeriyor. Bu veriyi yapay zeka atıf sonucunun kanıtı olarak değil, FilmFolk’in hangi hizmet sayfalarında görünür bir organik yüzeye sahip olduğunu anlamak için kullanıyoruz.</p>
+            <p className="mt-5 text-base leading-7 text-muted-foreground">Ekteki Google Search Console exportu 18 Mayıs–12 Ağustos 2026 arasındaki 87 günü ve <strong>Web</strong> arama türünü içeriyor. Bu veriyi yapay zeka kaynak gösterimi sonucunun kanıtı olarak değil, FilmFolk’in hangi hizmet sayfalarında görünür bir organik yüzeye sahip olduğunu anlamak için kullanıyoruz.</p>
             <div className="mt-7 space-y-3 text-sm font-semibold text-foreground">
               <p className="flex items-center gap-3"><FileSearch className="h-4 w-4 text-primary" />Canlı yayın hizmeti: 3.377 gösterim</p>
               <p className="flex items-center gap-3"><FileSearch className="h-4 w-4 text-primary" />Serbest videograf hizmeti: 3.276 gösterim</p>

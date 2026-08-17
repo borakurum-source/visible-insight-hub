@@ -9,9 +9,9 @@ import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 export const Route = createFileRoute("/platform/citation-share")({
   head: () => ({
     meta: [
-      { title: "Atıf Payı | OneCite" },
-      { name: "description", content: "Yapay zeka cevaplarında markanızın ne kadar sık kaynak olarak seçildiğini soru, atıf ve rakip bağlamıyla ölçün." },
-      { property: "og:title", content: "Atıf Payı | OneCite" },
+      { title: "AI Kaynak Payı | OneCite" },
+      { name: "description", content: "Yapay zeka cevaplarında markanızın ne kadar sık kaynak olarak seçildiğini soru, kaynak gösterimi ve rakip bağlamıyla ölçün." },
+      { property: "og:title", content: "AI Kaynak Payı | OneCite" },
       { property: "og:description", content: "Yapay zeka cevaplarında markanızın kaynak olarak seçilme oranını ölçün." },
       { property: "og:url", content: "https://1cite.com/platform/citation-share" },
     ],
@@ -32,7 +32,7 @@ function CitationSharePage() {
       <VisualHero
         eyebrow="ATIF PAYI · SORU → KAYNAK → PAY"
         title={<>Yapay zekanın sizi ne kadar sık <span className="text-cyan">kaynak seçtiğini</span> ölçün.</>}
-        description="Atıf payı, görünürlükten daha dar ve daha yararlı bir sinyaldir: Yapay zeka cevaplarında markanızın kaynak olarak seçildiği soru payını gösterir."
+        description="AI Kaynak Payı, görünürlükten daha dar ve daha yararlı bir sinyaldir: Yapay zeka cevaplarında markanızın kaynak olarak seçildiği soru payını gösterir."
         image={heroCitationOrb}
         imageAlt="Üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre"
         visualLabel="ATIF PAYI"
@@ -46,7 +46,7 @@ function CitationSharePage() {
         <div className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Metrik anatomisi</p>
           <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-5xl">Bir yüzde değil, karar verdiren bir bağlam.</h2>
-          <p className="mt-5 text-base leading-7 text-muted-foreground">Atıf payı tek başına “iyi” ya da “kötü” değildir. OneCite metrikle birlikte hangi soru, kaynak ve rakip bağlamının sonucu oluşturduğunu gösterir.</p>
+          <p className="mt-5 text-base leading-7 text-muted-foreground">AI Kaynak Payı tek başına “iyi” ya da “kötü” değildir. OneCite metrikle birlikte hangi soru, kaynak ve rakip bağlamının sonucu oluşturduğunu gösterir.</p>
         </div>
         <div className="mt-12 grid gap-4 md:grid-cols-3">
           {anatomy.map(({ icon: Icon, title, body }) => (
@@ -67,7 +67,7 @@ function CitationSharePage() {
             <p className="mt-5 text-base leading-7 text-muted-foreground">Bir yapay zeka cevabında marka adınızın geçmesi yeterli değildir. OneCite, seçilen URL’leri ve kaynak tipini yanıt bağlamıyla birlikte izler.</p>
           </div>
           <div className="rounded-2xl border border-border bg-secondary p-5">
-            <div className="flex items-center justify-between border-b border-border pb-4"><span className="font-mono text-xs text-primary">PROMPT-18</span><span className="text-xs font-bold text-emerald-700">Atıflandı</span></div>
+            <div className="flex items-center justify-between border-b border-border pb-4"><span className="font-mono text-xs text-primary">PROMPT-18</span><span className="text-xs font-bold text-emerald-700">Kaynak gösterildi</span></div>
             <p className="mt-5 font-mono text-sm leading-6 text-foreground">“B2B ürün lansmanı için video prodüksiyon ajansı nasıl seçilir?”</p>
             <div className="mt-5 space-y-3">
               <div className="rounded-xl bg-background p-3 text-sm"><span className="text-muted-foreground">Seçilen kaynak</span><p className="mt-1 font-semibold text-foreground">FilmFolk — vaka çalışması</p></div>
@@ -82,11 +82,11 @@ function CitationSharePage() {
           <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Sinyalden aksiyona</p>
-              <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Sadece takip etmeyin; hangi atıf payı artışının gerçek büyüme potansiyeli taşıdığını anlayın.</h2>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">Atıf payı düştüğünde soru “hangi içerik yazılmalı?” değildir. Önce Yapay zekanın hangi kanıtı seçtiği veya görmediği belirlenir; aksiyon bunun ardından gelir.</p>
+              <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Sadece takip etmeyin; hangi AI kaynak payı artışının gerçek büyüme potansiyeli taşıdığını anlayın.</h2>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">AI Kaynak Payı düştüğünde soru “hangi içerik yazılmalı?” değildir. Önce Yapay zekanın hangi kanıtı seçtiği veya görmediği belirlenir; aksiyon bunun ardından gelir.</p>
             </div>
             <div className="space-y-3">
-              {["Soru bazında ölçüm", "Görünür atıf kanıtı", "Önceliklendirilmiş eksik kanıt"].map((item) => (
+              {["Soru bazında ölçüm", "Görünür kaynak kanıtı", "Önceliklendirilmiş eksik kanıt"].map((item) => (
                 <div key={item} className="flex items-center gap-3 rounded-xl border border-border bg-background p-4 text-sm font-bold text-foreground"><CheckCircle2 className="h-5 w-5 text-primary" />{item}</div>
               ))}
             </div>
@@ -94,7 +94,7 @@ function CitationSharePage() {
         </div>
       </section>
       <MarketingCta
-        title="Atıf payınızı bugün ölçün."
+        title="AI Kaynak Payınızı bugün ölçün."
         description="Soru bazında kaynak olarak seçilme oranınızı ve rakip kaynakları ilk ölçümde görün."
       />
     </MarketingShell>

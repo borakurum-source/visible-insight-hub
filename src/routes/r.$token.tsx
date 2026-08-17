@@ -138,7 +138,7 @@ function PublicReportPage() {
             <div className="flex items-start gap-2.5">
               <Quote className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div>
-                <h2 className="text-lg font-semibold">Canlı atıf kontrolü</h2>
+                <h2 className="text-lg font-semibold">Canlı kaynak gösterimi kontrolü</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Perplexity'ye şu soru soruldu: “{report.citation.question}”</p>
                 <p className="mt-3 text-sm">
                   {report.citation.cited
