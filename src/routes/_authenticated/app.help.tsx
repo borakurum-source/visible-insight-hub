@@ -87,9 +87,11 @@ function HelpPage() {
   return (
     <div className="space-y-6">
       <PanelPageHeading
-        eyebrow="Yardım"
-        title="Yardım & Rehber"
-        description="OneCite'ı ilk kez kullanıyorsan bu sıra ile ilerle. Her adım bir sonrakini besler."
+        meta={{
+          title: "Yardım & Rehber",
+          description: "OneCite'ı ilk kez kullanıyorsan bu sıra ile ilerle. Her adım bir sonrakini besler.",
+          icon: LifeBuoy,
+        }}
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
