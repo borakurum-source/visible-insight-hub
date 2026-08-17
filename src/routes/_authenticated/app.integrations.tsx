@@ -445,17 +445,93 @@ function IntegrationsPage() {
           </CardContent>
         </Card>
 
-        <Card className="opacity-70">
+        <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
-                <Globe2 className="h-4.5 w-4.5" />
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/50">
+                  <Globe2 className="h-4.5 w-4.5" />
+                </div>
+                <CardTitle className="text-sm">Bing Webmaster Tools</CardTitle>
               </div>
-              <CardTitle className="text-sm">Webhook</CardTitle>
+              {bing?.status === "bağlı" ? (
+                <Badge variant="outline" className="gap-1 border-success/40 text-success"><CheckCircle2 className="h-3 w-3" /> Bağlı</Badge>
+              ) : bing?.status === "hata" ? (
+                <Badge variant="destructive">Hata</Badge>
+              ) : (
+                <Badge variant="secondary">Bağlı değil</Badge>
+              )}
             </div>
-            <CardDescription className="pt-1">Otomasyon bağlantısı için planlandı.</CardDescription>
+            <CardDescription className="pt-1">
+              {bing?.property_id
+                ? `Site ${bing.property_id}`
+                : "API anahtarınızla bağlanın: Bing organik trafiğinizi ve Copilot ekosistemindeki aramaları görün."}
+            </CardDescription>
           </CardHeader>
-          <CardContent><Badge variant="secondary">Yakında</Badge></CardContent>
+          <CardContent className="space-y-2">
+            {bing?.last_error ? <p className="text-xs text-destructive">{bing.last_error}</p> : null}
+            {!bingStatus.data?.hasKey ? (
+              <>
+                <p className="text-[11px] text-muted-foreground">
+                  Bing Webmaster Tools → Ayarlar → API erişimi ekranından API anahtarınızı kopyalayın.
+                </p>
+                <Input
+                  value={bingKey}
+                  onChange={(event) => setBingKey(event.target.value)}
+                  placeholder="Bing Webmaster API anahtarı"
+                  aria-label="Bing Webmaster API anahtarı"
+                  autoComplete="off"
+                />
+                <Button
+                  size="sm"
+                  className="w-full"
+                  disabled={!brand || !bingKey.trim() || saveKey.isPending}
+                  onClick={() => saveKey.mutate()}
+                >
+                  {saveKey.isPending ? "Doğrulanıyor…" : "Anahtarı kaydet"}
+                </Button>
+              </>
+            ) : bing?.property_id ? (
+              <>
+                <p className="text-xs text-muted-foreground">
+                  Son senkronizasyon: {bing.last_sync_at ? new Date(bing.last_sync_at).toLocaleString("tr-TR") : "—"}
+                  {bingStatus.data?.snapshot
+                    ? ` · ${bingStatus.data.snapshot.totals.clicks} tıklama / ${bingStatus.data.snapshot.totals.impressions} gösterim`
+                    : ""}
+                </p>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1" disabled={bingSync.isPending} onClick={() => bingSync.mutate()}>
+                    <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${bingSync.isPending ? "animate-spin" : ""}`} /> Senkronize et
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => unlinkBing.mutate()}><Unplug className="h-3.5 w-3.5" /></Button>
+                </div>
+              </>
+            ) : (
+              <Button size="sm" className="w-full" disabled={loadBingSites.isPending} onClick={() => loadBingSites.mutate()}>
+                {loadBingSites.isPending ? "Siteler alınıyor…" : "Site seç"}
+              </Button>
+            )}
+            {bingCandidates ? (
+              <div className="space-y-1.5 rounded-md border border-border p-2">
+                <p className="text-xs text-muted-foreground">Kullanılacak Bing sitesini seçin:</p>
+                {bingCandidates.map((siteUrl) => (
+                  <Button
+                    key={siteUrl}
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start text-xs"
+                    disabled={chooseBing.isPending}
+                    onClick={() => chooseBing.mutate(siteUrl)}
+                  >
+                    {siteUrl}
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+            <p className="text-[10px] text-muted-foreground">
+              Not: Bing’in “AI Performance / Copilot atıfları” raporu şu an API ile paylaşılmıyor; Copilot trafiği GA4 kırılımında gösteriliyor.
+            </p>
+          </CardContent>
         </Card>
       </div>
 
