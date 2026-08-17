@@ -2,15 +2,15 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { HeroVisual } from "@/components/site/hero-visual";
 import BrandLogo from "@/components/site/BrandLogo";
 
 type VisualHeroProps = {
   eyebrow: string;
   title: ReactNode;
   description: string;
-  image: string;
-  imageAlt: string;
+  /** Geriye donuk uyumluluk icin korunuyor; merkezi hero duzeninde gorsel render edilmez. */
+  image?: string;
+  imageAlt?: string;
   visualLabel?: string;
   visualCaption?: string;
   primaryHref?: string;
@@ -26,10 +26,6 @@ export function VisualHero({
   eyebrow,
   title,
   description,
-  image,
-  imageAlt,
-  visualLabel = "EVIDENCE LAYER",
-  visualCaption = "Görünmek ile kaynak olarak seçilmek aynı şey değil.",
   primaryHref = "/ucretsiz-yapay-zeka-gorunurluk-raporu",
   primaryLabel = "Ücretsiz ölçüm başlat",
   secondaryHref,
@@ -41,17 +37,17 @@ export function VisualHero({
   return (
     <section className="visual-hero-surface relative isolate overflow-hidden border-b border-white/10 text-white">
       <div className="visual-hero-grid pointer-events-none absolute inset-0 -z-10 opacity-40" aria-hidden="true" />
-      <div className="pointer-events-none absolute -left-24 top-24 -z-10 h-64 w-64 rounded-full bg-cyan/10 blur-3xl" aria-hidden="true" />
-      <div className="marketing-container grid min-w-0 items-center gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,1.04fr)_minmax(400px,.96fr)] lg:gap-14 lg:py-24">
-        <div>
+      <div className="hero-ambient-glow" aria-hidden="true" />
+      <div className="marketing-container relative flex min-w-0 flex-col items-center py-16 text-center md:py-20 lg:py-24">
+        <div className="flex w-full max-w-4xl flex-col items-center">
           <BrandLogo variant="horizontal" tone="dark" size="sm" linkTo="/" className="mb-8 opacity-95" />
           <div className="flex items-center gap-3">
             <span className="visual-source-label text-cyan">{eyebrow}</span>
             <span className="h-px w-10 bg-cyan/70" />
           </div>
-          <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.03] tracking-[-0.05em] md:text-5xl lg:text-[60px]">{title}</h1>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">{description}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] md:text-5xl lg:text-[58px]">{title}</h1>
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">{description}</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild className="bg-cyan text-foreground hover:bg-[#B8F4FF]">
               <Link to={primaryHref}>
                 {primaryLabel} <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -64,27 +60,17 @@ export function VisualHero({
             ) : null}
           </div>
           {proof?.length ? (
-            <dl className="mt-8 grid max-w-xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/15 bg-white/10">
+            <dl className="mt-12 grid w-full grid-cols-1 gap-8 border-t border-white/10 pt-10 text-left sm:grid-cols-3">
               {proof.map((item) => (
-                <div key={item.label} className="bg-ink/70 px-4 py-4">
-                  <dt className="font-mono text-xl font-medium text-white md:text-2xl">{item.value}</dt>
-                  <dd className="mt-1 text-[11px] leading-4 text-slate-400">{item.label}</dd>
+                <div key={item.label}>
+                  <dt className="font-mono text-2xl font-bold text-white md:text-3xl">{item.value}</dt>
+                  <dd className="mt-1.5 text-[11px] uppercase tracking-wider leading-4 text-slate-500">{item.label}</dd>
                 </div>
               ))}
             </dl>
           ) : null}
-          {note ? <p className="mt-4 text-[11px] text-slate-500">{note}</p> : null}
-          {children ? <div className="mt-7">{children}</div> : null}
-        </div>
-        <div className="flex items-center">
-          <HeroVisual
-            image={image}
-            imageAlt={imageAlt}
-            label={visualLabel}
-            caption={visualCaption}
-            priority
-            className="w-full"
-          />
+          {note ? <p className="mt-6 text-[10px] text-slate-600">{note}</p> : null}
+          {children ? <div className="mt-8 w-full">{children}</div> : null}
         </div>
       </div>
     </section>

@@ -203,6 +203,21 @@
   box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08) inset;
 }
 
+/* Merkezi hero duzeninde icerigin arkasinda duran yumusak cyan parlama. */
+@utility hero-ambient-glow {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -10;
+  width: min(600px, 90vw);
+  height: min(600px, 90vw);
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background: rgb(63 191 178 / 0.1);
+  filter: blur(120px);
+}
+
 @utility feature-shot-surface {
   background:
     radial-gradient(circle at 18% 12%, rgb(63 191 178 / 0.18), transparent 46%),

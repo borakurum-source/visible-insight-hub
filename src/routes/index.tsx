@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { MarketingShell } from "@/components/site/MarketingShell";
 import { Reveal } from "@/components/site/marketing-motion";
-import { HeroVisual } from "@/components/site/hero-visual";
 import { PublicReportAnalyzer } from "@/components/site/public-report-analyzer";
 import { MetricRise } from "@/components/site/citation-motion";
 import { ProductTabs, type ProductTab } from "@/components/site/product-tabs";
@@ -26,7 +25,6 @@ import shotContent from "@/assets/landing/shot-content.webp";
 import shotDashboard from "@/assets/features/dashboard.webp.asset.json";
 import shotCompetitors from "@/assets/features/competitors.webp.asset.json";
 import shotTasks from "@/assets/features/tasks.webp.asset.json";
-import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 import heroEvidenceGap from "@/assets/landing/hero-evidence-gap.webp";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
 
@@ -102,26 +100,26 @@ function Hero() {
   return (
     <section id="olcum" className="visual-hero-surface relative isolate overflow-hidden border-b border-[#26302E] scroll-mt-16" data-testid="section-hero">
       <div className="visual-hero-grid pointer-events-none absolute inset-0 -z-10 opacity-40" aria-hidden="true" />
-      <div className="pointer-events-none absolute -left-24 top-24 -z-10 h-64 w-64 rounded-full bg-cyan/10 blur-3xl" aria-hidden="true" />
-      <div className="marketing-container grid min-w-0 items-stretch gap-12 py-16 md:py-20 lg:grid-cols-[minmax(0,1.04fr)_minmax(400px,.96fr)] lg:gap-14 lg:py-24">
-        <div className="flex flex-col justify-center space-y-6 text-white md:space-y-7">
+      <div className="hero-ambient-glow" aria-hidden="true" />
+      <div className="marketing-container relative flex min-w-0 flex-col items-center py-16 text-center md:py-20 lg:py-24">
+        <div className="flex w-full max-w-4xl flex-col items-center space-y-6 text-white md:space-y-7">
           <div className="flex items-center gap-3"><span className="visual-source-label text-cyan">AI CITATION INTELLIGENCE</span><span className="h-px w-10 bg-cyan/70" /></div>
           <div className="space-y-5">
-            <h1 className="max-w-2xl text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] text-white md:text-[44px] lg:text-[52px]" data-testid="text-hero-headline">
+            <h1 className="text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] text-white md:text-[48px] lg:text-[58px]" data-testid="text-hero-headline">
               ChatGPT, Perplexity ve Gemini cevaplarında markanızın <span className="text-cyan">atıf payını</span> ölçün ve artırın.
             </h1>
-            <p className="max-w-xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">
+            <p className="mx-auto max-w-2xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">
               OneCite, satın alma niyetli sorularda hangi markanın kaynak olarak seçildiğini ölçer, eksik kanıtı gösterir ve önce hangi içeriği üretmeniz gerektiğini söyler.
             </p>
           </div>
-          <div className="max-w-xl rounded-xl border border-white/15 bg-background/[0.08] p-4 backdrop-blur-md md:p-5" data-testid="hero-report-cta">
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white"><Target className="h-4 w-4 text-cyan" /> İlk ölçümü başlatın</div>
+          <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left shadow-2xl backdrop-blur-xl md:p-4" data-testid="hero-report-cta">
+            <div className="mb-3 flex items-center gap-2 px-1 text-sm font-semibold text-white"><Target className="h-4 w-4 text-cyan" /> İlk ölçümü başlatın</div>
             <PublicReportAnalyzer />
-            <p className="mt-3 text-xs leading-5 text-slate-400">Kredi kartı gerekmez. İlk ölçüm herkese açık web verileriyle başlar.</p>
+            <p className="mt-3 px-1 text-[11px] leading-5 text-slate-400">Kredi kartı gerekmez. İlk ölçüm herkese açık web verileriyle başlar.</p>
           </div>
           <div className="space-y-3">
             <p className="text-xs text-slate-400">Kredi kartı yok · 2 dakikada rapor · Kurulum 5 dakika</p>
-            <div className="flex flex-wrap items-center gap-2" data-testid="hero-engine-strip">
+            <div className="flex flex-wrap items-center justify-center gap-2" data-testid="hero-engine-strip">
               <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500">Ölçülen motorlar</span>
               {MEASURED_ENGINES.map((engine) => (
                 <span key={engine} className="rounded-full border border-white/15 px-2.5 py-1 font-mono text-[11px] text-slate-300">
@@ -130,28 +128,17 @@ function Hero() {
               ))}
             </div>
           </div>
-          <dl className="grid max-w-xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/15 bg-white/10" data-testid="hero-proof-strip">
+          <dl className="grid w-full grid-cols-1 gap-8 border-t border-white/10 pt-10 text-left sm:grid-cols-3" data-testid="hero-proof-strip">
             {HERO_PROOF.map((item) => (
-              <div key={item.label} className="bg-ink/70 px-4 py-4">
-                <dt className="font-mono text-xl font-medium text-white md:text-2xl">
+              <div key={item.label}>
+                <dt className="font-mono text-2xl font-bold text-white md:text-3xl">
                   <MetricRise value={item.value} suffix={item.suffix} />
                 </dt>
-                <dd className="mt-1 text-[11px] leading-4 text-slate-400">{item.label}</dd>
+                <dd className="mt-1.5 text-[11px] uppercase tracking-wider leading-4 text-slate-500">{item.label}</dd>
               </div>
             ))}
           </dl>
-          <p className="text-[11px] text-slate-500">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
-        </div>
-        <div className="flex items-center" data-testid="hero-visual-panel">
-          <HeroVisual
-            image={heroCitationOrb}
-            imageAlt="Karanlık bir yüzey üzerinde, üç kaynak noktasını birleştiren ışıklı citation ağı taşıyan cam küre"
-            label="EVIDENCE LAYER"
-            caption="Görünmek ile kaynak olarak seçilmek aynı şey değil."
-            meta="AI CITATION INTELLIGENCE"
-            priority
-            className="w-full"
-          />
+          <p className="w-full text-left text-[10px] text-slate-600">FilmFolk markası için altı aylık gerçek ölçüm sonuçları.</p>
         </div>
       </div>
     </section>
