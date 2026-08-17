@@ -158,6 +158,27 @@ function Hero() {
   );
 }
 
+function NeGoreceksiniz() {
+  return (
+    <section className="border-b border-border bg-background py-16 md:py-24" data-testid="section-product-preview">
+      <div className="marketing-container">
+        <div className="max-w-2xl">
+          <p className="editorial-eyebrow text-primary">Ne göreceksiniz</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">
+            İlk ölçümden sonra paneliniz böyle görünür.
+          </h2>
+          <p className="mt-4 max-w-prose text-base leading-7 text-muted-foreground">
+            Üç ekran; skorunuz, rakiplerinizle karşılaştırmanız ve bu hafta yapılacaklar listeniz.
+          </p>
+        </div>
+        <div className="mt-10">
+          <ProductTabs tabs={PRODUCT_TABS} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Problem() {
   const items = [
     { icon: Search, title: "SEO görünürlüğü atıf payı değildir", body: "Google’da sıralanmanız, bir yapay zeka cevabında kaynak olarak seçileceğiniz anlamına gelmez." },
