@@ -28,4 +28,12 @@ export const faqs: FaqItem[] = [
     q: "Mevcut planımı değiştirmek veya iptal etmek istersem ne olur?",
     a: "Hesabım sayfasından bize doğrudan ulaşabilirsiniz; plan değişikliği ve faturalandırma talepleri ekibimiz tarafından elle yönetilir.",
   },
+  {
+    q: "90 Gün Görünürlük Taahhüdü tam olarak neyi kapsıyor?",
+    a: "Başlangıçta sabitlenen prompt seti değiştirilmeden takip edilir, panelde üretilen öncelikli görevler uygulanır ve tüm ölçümler OneCite üzerinden alınırsa, 90. gündeki toplam görünürlük 0. gün ölçümünün üzerine çıkar. Çıkmazsa dönem ücretini iade ederiz. Taahhüt tek tek cevapları değil, takip edilen prompt setinin toplam görünürlüğünü kapsar.",
+  },
+  {
+    q: "Ölçüm metodolojiniz açık mı?",
+    a: "Evet. Prompt evreninin nasıl kurulduğu, tekrar sayısı, varyans kontrolü, OneCite Score'un beş bileşeni ve Marka Zekası RAG mimarisinin tamamı Metodoloji sayfasında yayınlanıyor. Yöntemin sınırlarını da aynı sayfada açıkça belirtiyoruz.",
+  },
 ];

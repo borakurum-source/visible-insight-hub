@@ -7,6 +7,7 @@ import BrandLogo from "@/components/site/BrandLogo";
 const primaryLinks = [
   { href: "/ozellikler", label: "Ürün" },
   { href: "/solutions/agencies", label: "Çözümler" },
+  { href: "/metodoloji", label: "Metodoloji" },
   { href: "/fiyatlandirma", label: "Fiyatlandırma" },
   { href: "/makaleler", label: "Kaynaklar" },
 ];
@@ -21,6 +22,7 @@ const footerGroups = [
     title: "Ürün",
     links: [
       { href: "/ozellikler", label: "Özellikler ve çalışma modeli" },
+      { href: "/metodoloji", label: "Ölçüm metodolojisi" },
       { href: "/platform/citation-share", label: "AI Kaynak Payı" },
       { href: "/platform/evidence-gaps", label: "Eksik Kanıtlar" },
       { href: "/ucretsiz-yapay-zeka-gorunurluk-raporu", label: "Ücretsiz rapor" },
