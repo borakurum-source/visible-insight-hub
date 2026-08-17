@@ -19,6 +19,7 @@ import { Route as KvkkRouteImport } from './routes/kvkk'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as MakalelerRouteImport } from './routes/makaleler'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OzelliklerRouteImport } from './routes/ozellikler'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
@@ -111,6 +112,11 @@ const MakalelerRoute = MakalelerRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OzelliklerRoute = OzelliklerRouteImport.update({
+  id: '/ozellikler',
+  path: '/ozellikler',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformRoute = PlatformRouteImport.update({
@@ -363,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/makaleler': typeof MakalelerRouteWithChildren
   '/mcp': typeof McpRoute
+  '/ozellikler': typeof OzelliklerRoute
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
@@ -417,6 +424,7 @@ export interface FileRoutesByTo {
   '/kvkk': typeof KvkkRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/mcp': typeof McpRoute
+  '/ozellikler': typeof OzelliklerRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -472,6 +480,7 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/makaleler': typeof MakalelerRouteWithChildren
   '/mcp': typeof McpRoute
+  '/ozellikler': typeof OzelliklerRoute
   '/platform': typeof PlatformRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
@@ -529,6 +538,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/makaleler'
     | '/mcp'
+    | '/ozellikler'
     | '/platform'
     | '/privacy'
     | '/refund-policy'
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/kvkk'
     | '/llms.txt'
     | '/mcp'
+    | '/ozellikler'
     | '/privacy'
     | '/refund-policy'
     | '/sitemap.xml'
@@ -637,6 +648,7 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/makaleler'
     | '/mcp'
+    | '/ozellikler'
     | '/platform'
     | '/privacy'
     | '/refund-policy'
@@ -694,6 +706,7 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   MakalelerRoute: typeof MakalelerRouteWithChildren
   McpRoute: typeof McpRoute
+  OzelliklerRoute: typeof OzelliklerRoute
   PlatformRoute: typeof PlatformRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
@@ -784,6 +797,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ozellikler': {
+      id: '/ozellikler'
+      path: '/ozellikler'
+      fullPath: '/ozellikler'
+      preLoaderRoute: typeof OzelliklerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform': {
@@ -1199,6 +1219,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   MakalelerRoute: MakalelerRouteWithChildren,
   McpRoute: McpRoute,
+  OzelliklerRoute: OzelliklerRoute,
   PlatformRoute: PlatformRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
