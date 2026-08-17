@@ -47,7 +47,7 @@ function MetricDetailPage() {
     "gsc-impressions": { title: "Arama Gösterimleri", key: "impressions", label: "Gösterim" },
     "ga4-sessions": { title: "Site Trafiği (GA4)", key: "sessions", label: "Oturum" },
     "ga4-ai": { title: "AI Referral Trafiği (GA4)", key: "sessions", label: "Oturum" },
-    "ai-citations": { title: "AI Atıf Trafiği", key: "citations", label: "Atıf" },
+    "ai-citations": { title: "AI Kaynak Trafiği", key: "citations", label: "Atıf" },
     "ai-visibility": { title: "Yapay Zeka Görünürlüğü", key: "mentioned", label: "Markanın geçtiği yanıt" },
   }[metric as string] ?? { title: "Metrik", key: "value", label: "Deger" };
 
@@ -77,7 +77,7 @@ function MetricDetailPage() {
     });
     sections.push({
       title: "Kaynak sayfalar",
-      hint: "Yapay zeka asistanlarının alıntıladığı içerikler genelde bu sayfalardır.",
+      hint: "Yapay zeka asistanlarının kaynak gösterdiği içerikler genelde bu sayfalardır.",
       rows: data.gsc.pages.map((p) => ({
         label: p.page,
         value: useClicks ? p.clicks : p.impressions,

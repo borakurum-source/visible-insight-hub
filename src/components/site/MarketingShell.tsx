@@ -13,7 +13,7 @@ const primaryLinks = [
 
 const solutionsMenu = [
   { href: "/solutions/agencies", label: "Ajanslar için", desc: "Birden fazla markayı tek panelden yönetin." },
-  { href: "/proof/filmfolk", label: "FilmFolk vakası", desc: "Atıf payı %30,7 → %58,9." },
+  { href: "/proof/filmfolk", label: "FilmFolk vakası", desc: "AI Kaynak Payı %30,7 → %58,9." },
 ];
 
 const footerGroups = [
@@ -21,7 +21,7 @@ const footerGroups = [
     title: "Ürün",
     links: [
       { href: "/ozellikler", label: "Özellikler ve çalışma modeli" },
-      { href: "/platform/citation-share", label: "Atıf Payı" },
+      { href: "/platform/citation-share", label: "AI Kaynak Payı" },
       { href: "/platform/evidence-gaps", label: "Eksik Kanıtlar" },
       { href: "/ucretsiz-yapay-zeka-gorunurluk-raporu", label: "Ücretsiz rapor" },
     ],
@@ -162,7 +162,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
             <div>
               <BrandLogo variant="horizontal" size="sm" linkTo="/" />
               <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">
-                Yapay zeka cevaplarında atıf payınızı ölçün, eksik kanıtı görün ve doğru içeriği önce üretin.
+                Yapay zeka cevaplarında AI kaynak payınızı ölçün, eksik kanıtı görün ve doğru içeriği önce üretin.
               </p>
             </div>
             {footerGroups.map((group) => (

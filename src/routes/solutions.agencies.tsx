@@ -22,7 +22,7 @@ export const Route = createFileRoute("/solutions/agencies")({
 
 const workflow = [
   { icon: Layers3, step: "01", title: "Her müşteri için ölçüm kapsamı", body: "Marka, rakip, soru seti ve hedef pazarları müşteri bazında düzenleyin." },
-  { icon: BarChart3, step: "02", title: "Sinyali açıklanabilir rapora çevirin", body: "Atıf payının arkasındaki kaynak ve eksik kanıt bağlamını müşteriye taşıyın." },
+  { icon: BarChart3, step: "02", title: "Sinyali açıklanabilir rapora çevirin", body: "AI Kaynak Payının arkasındaki kaynak ve eksik kanıt bağlamını müşteriye taşıyın." },
   { icon: BriefcaseBusiness, step: "03", title: "GEO işini önceliklendirin", body: "Kısa vadeli içerik üretimi ile uzun vadeli otorite varlıklarını tek iş listesinde yönetin." },
 ];
 const outcomes = ["Müşteri bazında soru ve rakip bağlamı", "Paylaşılabilir atıf kanıtı", "İçerik, halkla ilişkiler ve teknik GEO için tek öncelik listesi"];

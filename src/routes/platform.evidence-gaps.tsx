@@ -44,7 +44,7 @@ function EvidenceGapsPage() {
         imageAlt="Bir parçası eksik olan ışıklı cam köprü; evidence gap kavramının görsel metaforu"
         visualLabel="KANIT BOŞLUĞU"
         secondaryHref="/platform/citation-share"
-        secondaryLabel="Atıf payını incele"
+        secondaryLabel="AI Kaynak Payını incele"
       >
         <p className="text-sm text-slate-400">Soru → atıf → eksik kanıt → uygulama</p>
       </VisualHero>

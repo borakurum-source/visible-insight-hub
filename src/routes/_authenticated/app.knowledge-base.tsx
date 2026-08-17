@@ -337,7 +337,7 @@ function KnowledgeBasePage() {
               Ölçümden gelen aday kaynaklar
             </div>
             <p className="text-xs text-muted-foreground">
-              Yapay zekanın cevaplarında alıntıladığı, bilgi bankanızda henüz olmayan sayfalar. Ekleyince marka zekasına dahil olur.
+              Yapay zekanın cevaplarında kaynak gösterdiği, bilgi bankanızda henüz olmayan sayfalar. Ekleyince marka zekasına dahil olur.
             </p>
             <ul className="divide-y divide-border">
               {candidates.map((candidate) => (

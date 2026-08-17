@@ -5,7 +5,7 @@ export const mockReportSummary = {
   mentionRate: 0.42,
   citedRate: 0.184,
   topWins: [
-    "GEO nedir makalesi 3 yeni promptta alıntılandı",
+    "GEO nedir makalesi 3 yeni promptta kaynak gösterildi",
     "Fiyatlandırma cluster'ında mention oranı %11 arttı",
   ],
   topRisks: [

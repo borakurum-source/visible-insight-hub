@@ -25,8 +25,8 @@ const pricingFaqs = [
     a: "Ajans planı teklife göre kurgulanır. Müşteri sayısı, prompt limiti ve içerik üretim kotası ihtiyacınıza göre belirlenir; her müşteri için ayrı bilgi bankası, prompt seti ve white-label rapor yönetirsiniz. Fiyat için iletişime geçin.",
   },
   {
-    q: "AI atıf görünürlük içeriği ne demek?",
-    a: "Ölçümde kanıt boşluğu çıkan sorular için, kendi bilgi bankanıza dayanarak üretilen alıntılanabilir içerik taslaklarıdır. Başlangıç planında ayda 3, Büyüme planında ayda 10 taslak üretebilirsiniz.",
+    q: "AI kaynak görünürlük içeriği ne demek?",
+    a: "Ölçümde kanıt boşluğu çıkan sorular için, kendi bilgi bankanıza dayanarak üretilen kaynak gösterilebilir içerik taslaklarıdır. Başlangıç planında ayda 3, Büyüme planında ayda 10 taslak üretebilirsiniz.",
   },
   {
     q: "Kurulum ücreti var mı?",
@@ -38,7 +38,7 @@ const comparisonRows = [
   { label: "Marka", values: ["1", "1", "3", "Özel"] },
   { label: "Prompt sayısı", values: ["5", "15", "45", "Özel"] },
   { label: "Rakip takibi", values: ["1", "2", "5", "Sınırsız"] },
-  { label: "Aylık AI atıf görünürlük içeriği", values: ["—", "3", "10", "Özel"] },
+  { label: "Aylık AI kaynak görünürlük içeriği", values: ["—", "3", "10", "Özel"] },
   { label: "Ölçüm & skor kırılımı", values: [true, true, true, true] },
   { label: "4 farklı LLM üzerinde kontrol", values: [false, false, true, true] },
   { label: "Bilgi Bankası", values: [false, true, true, true] },
@@ -98,7 +98,7 @@ export const Route = createFileRoute("/fiyatlandirma")({
           "@context": "https://schema.org",
           "@type": "Product",
           name: "OneCite",
-          description: "Yapay zeka cevaplarında atıf payı ölçümü ve GEO optimizasyon platformu.",
+          description: "Yapay zeka cevaplarında AI kaynak payı ölçümü ve GEO optimizasyon platformu.",
           brand: { "@type": "Brand", name: "OneCite" },
           url: "https://1cite.com/fiyatlandirma",
           offers: {
@@ -312,7 +312,7 @@ function PricingPage() {
 
       <MarketingCta
         title="Önce ücretsiz ölçün, sonra planı seçin."
-        description="İlk ölçüm markanızın yapay zeka cevaplarındaki atıf payını ve eksik kanıtlarını gösterir. Plan kararını veriye bakarak verin."
+        description="İlk ölçüm markanızın yapay zeka cevaplarındaki AI kaynak payını ve eksik kanıtlarını gösterir. Plan kararını veriye bakarak verin."
         secondaryHref="/ozellikler"
         secondaryLabel="Platformu incele"
       />

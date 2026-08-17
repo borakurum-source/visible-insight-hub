@@ -108,7 +108,7 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <EmptyChart label="Henüz atıf kaydı yok." />
+          <EmptyChart label="Henüz kaynak gösterimi kaydı yok." />
         )}
       </ChartCard>
 

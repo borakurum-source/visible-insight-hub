@@ -35,7 +35,7 @@
       {
         "name": "get_visibility",
         "title": "Görünürlük özeti",
-        "description": "Bir markanın yapay zeka görünürlük skorunu, ölçülen prompt sayısını ve son atıf kaynaklarını döner.",
+        "description": "Bir markanın yapay zeka görünürlük skorunu, ölçülen prompt sayısını ve son seçilen kaynaklarnı döner.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,

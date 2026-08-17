@@ -45,14 +45,14 @@ const steps = [
   {
     icon: BookOpen,
     title: "4. Kanıt yükle",
-    body: "Bilgi bankasına dokümanlarını, SSS'lerini ve marka iddialarını ekle. Kanıtsız iddia yapay zeka cevaplarında alıntılanmaz.",
+    body: "Bilgi bankasına dokümanlarını, SSS'lerini ve marka iddialarını ekle. Kanıtsız iddia yapay zeka cevaplarında kaynak gösterilmez.",
     to: "/app/knowledge-base",
     cta: "Bilgi bankası",
   },
   {
     icon: Waypoints,
     title: "5. Ölçümü çalıştır",
-    body: "Ölçüm & Skor ekranından çalıştır. OneCite Score, atıf payını beş bileşene bölerek nerede kaybettiğini söyler.",
+    body: "Ölçüm & Skor ekranından çalıştır. OneCite Score, AI kaynak payını beş bileşene bölerek nerede kaybettiğini söyler.",
     to: "/app/measurement",
     cta: "Ölçüm & Skor",
   },
@@ -66,8 +66,8 @@ const steps = [
 ];
 
 const glossary = [
-  { term: "OneCite Score", desc: "Bahsedilme, atıf payı, sıralama kalitesi, kanıt kapsamı ve iddia kanıtından oluşan 0–100 arası görünürlük skoru." },
-  { term: "Atıf (citation)", desc: "Yapay zeka cevabında kaynak olarak gösterilen bağlantı. Kendi alan adın geçiyorsa atıf payın artar." },
+  { term: "OneCite Score", desc: "Bahsedilme, AI kaynak payı, sıralama kalitesi, kanıt kapsamı ve iddia kanıtından oluşan 0–100 arası görünürlük skoru." },
+  { term: "Kaynak gösterimi (citation)", desc: "Yapay zeka cevabında kaynak olarak gösterilen bağlantı. Kendi alan adın geçiyorsa AI kaynak payın artar." },
   { term: "Prompt", desc: "Takip ettiğin soru. Her ölçümde bu soru gerçek yapay zeka motorlarına sorulur ve yanıt kaydedilir." },
   { term: "GEO", desc: "Generative Engine Optimization — üreten motor optimizasyonu. Klasik SEO'nun yapay zeka cevapları için karşılığı." },
   { term: "Kanıt boşluğu", desc: "Yapay zekanın seni önermesi için ihtiyaç duyduğu ama sitende bulamadığı bilgi." },

@@ -129,7 +129,7 @@ function BlogAdminPage() {
             </div>
             <div className="space-y-1.5"><Label className="text-xs">Meta açıklama (160 karaktere kadar)</Label>
               <Textarea rows={2} value={form.description} onChange={(e) => set({ description: e.target.value })} /></div>
-            <div className="space-y-1.5"><Label className="text-xs">GEO cevap özeti (yapay zekanın alıntılayacağı 2-3 cümle)</Label>
+            <div className="space-y-1.5"><Label className="text-xs">GEO cevap özeti (yapay zekanın kaynak göstereceği 2-3 cümle)</Label>
               <Textarea rows={3} value={form.answerSummary} onChange={(e) => set({ answerSummary: e.target.value })} /></div>
             <div className="grid gap-3 md:grid-cols-3">
               <div className="space-y-1.5"><Label className="text-xs">Kategori</Label><Input value={form.category} onChange={(e) => set({ category: e.target.value })} /></div>

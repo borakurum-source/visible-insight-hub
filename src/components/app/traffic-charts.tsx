@@ -111,7 +111,7 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
     <>
     <SectionTitle
       title="Yapay zeka görünürlüğü"
-      description="Önce yapay zeka: asistan yanıtlarındaki görünürlüğünüz, atıflarınız ve GA4'ten gelen gerçek yapay zeka trafiği."
+      description="Önce yapay zeka: asistan yanıtlarındaki görünürlüğünüz, kaynak gösterimlerininız ve GA4'ten gelen gerçek yapay zeka trafiği."
     />
     <div className="grid gap-4 md:grid-cols-3">
       <MetricCard
@@ -141,7 +141,7 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
         icon={Bot}
         days={data.rangeDays}
         metric="ai-citations"
-        title="AI Atıf Trafiği"
+        title="AI Kaynak Trafiği"
         value={fmt(data.aiReferral.total)}
         caption={`atıf · ${fmt(data.aiReferral.ownDomain)} tanesi kendi siteniz (30 gün)`}
       >
@@ -161,7 +161,7 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
             </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <Empty label="Henüz atıf kaydı yok." cta={{ to: "/app/measurement", text: "Ölçümü başlat" }} />
+          <Empty label="Henüz kaynak gösterimi kaydı yok." cta={{ to: "/app/measurement", text: "Ölçümü başlat" }} />
         )}
       </MetricCard>
 

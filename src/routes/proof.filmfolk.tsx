@@ -10,9 +10,9 @@ export const Route = createFileRoute("/proof/filmfolk")({
   head: () => ({
     meta: [
       { title: "FilmFolk Vaka Çalışması | OneCite" },
-      { name: "description", content: "FilmFolk için 41 satın alma niyetli soruda, 286 ölçüm tekrarında gözlenen yapay zeka atıf payı değişimini ve Search Console bağlamını inceleyin." },
+      { name: "description", content: "FilmFolk için 41 satın alma niyetli soruda, 286 ölçüm tekrarında gözlenen yapay zeka AI kaynak payı değişimini ve Search Console bağlamını inceleyin." },
       { property: "og:title", content: "FilmFolk Vaka Çalışması | OneCite" },
-      { property: "og:description", content: "41 soru, 286 tekrar: FilmFolk'ün atıf payı değişimi." },
+      { property: "og:description", content: "41 soru, 286 tekrar: FilmFolk'ün AI kaynak payı değişimi." },
       { property: "og:url", content: "https://1cite.com/proof/filmfolk" },
     ],
     links: [{ rel: "canonical", href: "https://1cite.com/proof/filmfolk" }],
@@ -62,7 +62,7 @@ function FilmFolkPage() {
     <MarketingShell>
       <VisualHero
         eyebrow="ÖRNEK ÇALIŞMA · FILMFOLK / 41 SORU"
-        title={<>41 satın alma niyetli soruda atıf payındaki <span className="text-cyan">değişimi</span> görün.</>}
+        title={<>41 satın alma niyetli soruda AI kaynak payındaki <span className="text-cyan">değişimi</span> görün.</>}
         description="FilmFolk için ilk ve son ölçüm sonuçları, aynı soru havuzundaki 286 tekrar üzerinden karşılaştırıldı. Bu bir nedensellik veya performans garantisi değildir; gözlenen kaynak seçimi değişiminin bağlamlı bir okumasıdır."
         image={heroEvidenceGap}
         imageAlt="Eksik parçası olan ışıklı cam köprü; ölçüm ve kanıt arasındaki kopukluğu temsil eden OneCite görseli"

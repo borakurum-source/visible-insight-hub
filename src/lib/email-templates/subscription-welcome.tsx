@@ -23,7 +23,7 @@ export function SubscriptionWelcomeEmail({ name = '', planLabel = 'Başlangıç'
             <Text style={{ fontSize: 15, lineHeight: '24px', color: '#334155', margin: 0 }}>
               Sıradaki adımlar:
               <br />1. Markanızı ve prompt listenizi genişletin.
-              <br />2. Yeni bir ölçüm başlatın ve atıf payınızı görün.
+              <br />2. Yeni bir ölçüm başlatın ve AI kaynak payınızı görün.
               <br />3. Kanıt boşluklarını görevlere dönüştürün.
             </Text>
           </Section>

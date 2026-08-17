@@ -30,10 +30,10 @@ import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OneCite | Yapay Zeka Atıf Zekası" },
-      { name: "description", content: "Yapay zeka cevaplarında markanızın atıf payını ölçün, eksik kanıtları görün ve doğru GEO uygulamasını önceliklendirin." },
-      { property: "og:title", content: "OneCite | Yapay Zeka Atıf Zekası" },
-      { property: "og:description", content: "Yapay zeka cevaplarında markanızın atıf payını, eksik kanıtları ve öncelikli uygulamalarını görün." },
+      { title: "OneCite | AI Citation Intelligence" },
+      { name: "description", content: "Yapay zeka cevaplarında markanızın AI kaynak payını ölçün, eksik kanıtları görün ve doğru GEO uygulamasını önceliklendirin." },
+      { property: "og:title", content: "OneCite | AI Citation Intelligence" },
+      { property: "og:description", content: "Yapay zeka cevaplarında markanızın AI kaynak payını, eksik kanıtları ve öncelikli uygulamalarını görün." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "https://1cite.com" },
@@ -58,7 +58,7 @@ export const Route = createFileRoute("/")({
 });
 
 const HERO_PROOF = [
-  { value: "+28,1 puan", label: "6 ayda ağırlıklı atıf payı artışı" },
+  { value: "+28,1 puan", label: "6 ayda ağırlıklı AI kaynak payı artışı" },
   { value: "41", label: "Satın alma niyetli soru" },
   { value: "286", label: "Ölçüm tekrarı" },
 ];
@@ -70,8 +70,8 @@ const PRODUCT_TABS: ProductTab[] = [
     id: "skor",
     label: "OneCite Score",
     headline: "Tek skorda: yapay zeka cevaplarında neredesiniz?",
-    body: "Bahsedilme, alıntı payı, sıralama kalitesi, kanıt kapsamı ve iddia kanıtı olarak beş bileşene bölünür. Zayıf bileşenin yanında ne yapmanız gerektiği yazar.",
-    highlight: "Atıf payı %58,9",
+    body: "Bahsedilme, AI kaynak payı, sıralama kalitesi, kanıt kapsamı ve iddia kanıtı olarak beş bileşene bölünür. Zayıf bileşenin yanında ne yapmanız gerektiği yazar.",
+    highlight: "AI Kaynak Payı %58,9",
     shot: shotDashboard.url,
     alt: "OneCite komuta merkezi ekranı: OneCite Score ve görünürlük kırılımı",
   },
@@ -105,7 +105,7 @@ function Hero() {
           <div className="flex items-center gap-3"><span className="visual-source-label text-cyan">AI CITATION INTELLIGENCE</span><span className="h-px w-10 bg-cyan/70" /></div>
           <div className="space-y-5">
             <h1 className="text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] text-white md:text-[48px] lg:text-[58px]" data-testid="text-hero-headline">
-              ChatGPT, Perplexity ve Gemini cevaplarında markanızın <span className="text-cyan">atıf payını</span> ölçün ve artırın.
+              ChatGPT, Perplexity ve Gemini cevaplarında markanızın <span className="text-cyan">AI kaynak payını</span> ölçün ve artırın.
             </h1>
             <p className="mx-auto max-w-2xl text-base leading-7 text-slate-300 md:text-lg md:leading-8">
               OneCite, satın alma niyetli sorularda hangi markanın kaynak olarak seçildiğini ölçer, eksik kanıtı gösterir ve önce hangi içeriği üretmeniz gerektiğini söyler.
@@ -167,7 +167,7 @@ function NeGoreceksiniz() {
 
 function Problem() {
   const items = [
-    { icon: Search, title: "SEO görünürlüğü atıf payı değildir", body: "Google’da sıralanmanız, bir yapay zeka cevabında kaynak olarak seçileceğiniz anlamına gelmez." },
+    { icon: Search, title: "SEO görünürlüğü AI kaynak payı değildir", body: "Google’da sıralanmanız, bir yapay zeka cevabında kaynak olarak seçileceğiniz anlamına gelmez." },
     { icon: Users, title: "Rakibiniz neden seçiliyor?", body: "Hangi soruda, hangi kaynak türüyle ve hangi kanıt sayesinde öne çıktığını göremezsiniz." },
     { icon: ShieldCheck, title: "Tahminle içerik üretiliyor", body: "Her öneri ölçülen soruya, görünen kaynağa ve eksik kanıta bağlanmadığında bütçe boşa gider." },
   ];
@@ -215,9 +215,9 @@ function NasilCalisir() {
       icon: BarChart3,
       tag: "Sinyal",
       title: "Yapay zeka seçimlerini ölçün",
-      body: "Satın alma niyetli sorularda atıf payınızı, görünürlük trendini ve rakip kaynaklarını okuyun. Rakam tek başına kalmaz; soru bağlamı ve seçilen kaynakla birlikte gelir.",
+      body: "Satın alma niyetli sorularda AI kaynak payınızı, görünürlük trendini ve rakip kaynaklarını okuyun. Rakam tek başına kalmaz; soru bağlamı ve seçilen kaynakla birlikte gelir.",
       img: shotMetrics,
-      alt: "OneCite atıf payı paneli",
+      alt: "OneCite AI kaynak payı paneli",
     },
     {
       step: "03",
@@ -264,10 +264,10 @@ function NasilCalisir() {
 
 function FilmFolkOrnegi() {
   const timeline = [
-    { phase: "Başlangıç", body: "41 satın alma niyetli soru sabitlendi; ilk ölçümde ağırlıklı atıf payı %30,7 çıktı." },
+    { phase: "Başlangıç", body: "41 satın alma niyetli soru sabitlendi; ilk ölçümde ağırlıklı AI kaynak payı %30,7 çıktı." },
     { phase: "Eksik kanıt", body: "Rakiplerin seçildiği sorularda karşılaştırma sayfası, fiyat şeffaflığı ve vaka kanıtı eksikti." },
     { phase: "Uygulama", body: "Öncelik sırasına göre karşılaştırma içerikleri, SSS yapısı ve referans varlıkları üretildi." },
-    { phase: "Sonuç", body: "Son ölçümde ağırlıklı atıf payı %58,9’a çıktı; kazanım 286 tekrar üzerinden doğrulandı." },
+    { phase: "Sonuç", body: "Son ölçümde ağırlıklı AI kaynak payı %58,9’a çıktı; kazanım 286 tekrar üzerinden doğrulandı." },
   ];
   return (
     <section className="marketing-container px-4 py-16 md:px-6 md:py-24" data-testid="section-case-study">
@@ -275,7 +275,7 @@ function FilmFolkOrnegi() {
         <div className="grid gap-10 lg:grid-cols-[.95fr_1.05fr] lg:gap-16">
           <div>
             <span className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-semibold text-primary">Vaka çalışması · FilmFolk</span>
-            <h2 className="mt-5 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Atıf payı %30,7’den %58,9’a nasıl çıktı?</h2>
+            <h2 className="mt-5 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">AI Kaynak Payı %30,7’den %58,9’a nasıl çıktı?</h2>
             <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">Sonuç tek bir içerik hamlesinden gelmedi. Hangi soruda hangi kaynağın seçildiği ölçüldü, eksik kanıt sıraya kondu ve yalnızca en yüksek etkili varlıklar üretildi.</p>
             <div className="mt-8 flex items-end gap-5" data-testid="case-before-after">
               <div>

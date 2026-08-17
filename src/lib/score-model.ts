@@ -34,7 +34,7 @@ export function computeVisibilityScore(input: {
     },
     {
       key: "citation",
-      label: "Alıntı payı",
+      label: "AI Kaynak Payı",
       weight: 25,
       value: citationShare,
       detail: input.totalCitations

@@ -42,7 +42,7 @@ const PROVIDERS: Row[] = [
   {
     provider: "Perplexity AI",
     purpose:
-      "Takip edilen promptların yapay zeka yanıtlarında ölçülmesi, atıf/kaynak listelerinin çıkarılması ve metin embedding üretimi.",
+      "Takip edilen promptların yapay zeka yanıtlarında ölçülmesi, kaynak gösterimi listelerinin çıkarılması ve metin embedding üretimi.",
     data: "Prompt metinleri, marka ve rakip adları, taranan sayfa içerikleri (kişisel veri içermemesi hedeflenir), hesap kimliği içermeyen teknik meta veriler.",
     role: "Veri işleyen (OneCite talimatıyla çalışır)",
     location: "ABD",
@@ -74,7 +74,7 @@ const PROVIDERS: Row[] = [
   {
     provider: "Bing Webmaster Tools (Microsoft)",
     purpose:
-      "Bing organik performansı ile Copilot ve iş ortağı atıf kaynaklarının okunması.",
+      "Bing organik performansı ile Copilot ve iş ortağı seçilen kaynaklarnın okunması.",
     data: "API anahtarı, site kimliği, sorgu ve tıklama metrikleri.",
     role: "Bağımsız veri sorumlusu (Microsoft) + OneCite yönünden veri işleyen ilişkisi",
     location: "AB / ABD",
@@ -109,7 +109,7 @@ const PURPOSES = [
   },
   {
     title: "Yapay zeka görünürlük ölçümü",
-    body: "Promptların yapay zeka motorlarına gönderilmesi, atıf ve kaynak analizinin yapılması, skor üretilmesi.",
+    body: "Promptların yapay zeka motorlarına gönderilmesi, kaynak gösterimi analizinin yapılması, skor üretilmesi.",
     basis: "Sözleşmenin ifası ve meşru menfaat",
   },
   {
