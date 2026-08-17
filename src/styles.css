@@ -286,3 +286,22 @@
     animation: none;
   }
 }
+
+/* Musteri logo seridi */
+@keyframes logo-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.logo-marquee-track {
+  animation: logo-marquee-scroll 60s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-marquee {
+    overflow-x: auto;
+  }
+  .logo-marquee-track {
+    animation: none;
+  }
+}

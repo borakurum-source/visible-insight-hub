@@ -65,17 +65,3 @@ export const COMMITMENT_CONDITIONS = [
   "Tüm ölçümler OneCite paneli üzerinden alınır ve kayıt altında tutulur.",
 ];
 
-export type ReferenceBrand = {
-  name: string;
-  sector: string;
-};
-
-export const REFERENCE_BRANDS: ReferenceBrand[] = [
-  { name: "Benoplast", sector: "Plastik üretim · B2B ihracat" },
-  { name: "ABS Kör Kalıp", sector: "İnşaat kalıp sistemleri" },
-  { name: "ABS Void Formwork", sector: "Altyapı ve boşluk kalıbı" },
-  { name: "UEC Energy", sector: "Enerji ve yenilenebilir çözümler" },
-  { name: "Recfa", sector: "Endüstriyel çözümler" },
-  { name: "Secret Brokerage", sector: "Finans ve aracılık hizmetleri" },
-  { name: "Snacks for Party", sector: "Gıda ve e-ticaret" },
-];
