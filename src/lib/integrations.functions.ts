@@ -271,6 +271,15 @@ export type TrafficOverview = {
   };
 };
 
+export type BingOverview = {
+  connected: boolean;
+  site: string | null;
+  lastSyncAt: string | null;
+  totals: { clicks: number; impressions: number };
+  daily: Array<{ date: string; clicks: number; impressions: number }>;
+  queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+};
+
 // Komuta merkezi için GSC anlık görüntüsü + yapay zeka atıf/görünürlük trafiği.
 export const getTrafficOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
