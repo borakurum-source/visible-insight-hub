@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, CalendarDays, CircleAlert, Clock3, FileSearch, FileText, LineChart, ListChecks, SearchCheck, Target, TrendingDown, TrendingUp,
 } from "lucide-react";
@@ -9,16 +10,36 @@ import { MarketingShell } from "@/components/site/MarketingShell";
 import { VisualHero } from "@/components/site/visual-hero";
 import { AnimatedBar, MotionPress, Reveal } from "@/components/site/marketing-motion";
 import { MiniMarkdown } from "@/components/site/mini-markdown";
+import { adminGetBlogPost, getBlogPost } from "@/lib/blog.functions";
+import { dbToDetail, type BlogDetail } from "@/lib/blog-view";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 import heroEvidenceGap from "@/assets/landing/hero-evidence-gap.webp";
 import { articles, type Article } from "./makaleler.index";
 
 export const Route = createFileRoute("/makaleler/$slug")({
-  head: ({ params }) => {
-    const article = articles.find((item) => item.slug === params.slug);
-    const title = article ? `${article.title} | OneCite` : "Makale bulunamadı | OneCite";
-    const description = article?.description ?? "Aradığınız makale bulunamadı.";
-    const url = `https://1cite.com/makaleler/${params.slug}`;
+  validateSearch: (search: Record<string, unknown>) => {
+    const out: { taslak?: boolean } = {};
+    if (search["taslak"] === true || search["taslak"] === "true" || search["taslak"] === "1") out.taslak = true;
+    return out;
+  },
+  loaderDeps: ({ search }) => ({ taslak: search.taslak === true }),
+  loader: async ({ params, deps }) => {
+    const staticArticle = articles.find((item) => item.slug === params.slug);
+    if (staticArticle) return { kind: "static" as const, article: staticArticle };
+    const row = await getBlogPost({ data: { slug: params.slug } });
+    if (row) return { kind: "db" as const, post: dbToDetail(row as Record<string, unknown>) };
+    if (deps.taslak) return { kind: "draft" as const };
+    throw notFound();
+  },
+  head: ({ params, loaderData }) => {
+    const staticArticle = loaderData?.kind === "static" ? loaderData.article : undefined;
+    const post = loaderData?.kind === "db" ? loaderData.post : undefined;
+    const found = staticArticle ?? post;
+    const title = found ? `${found.title} | OneCite` : "Makale bulunamadı | OneCite";
+    const description = found?.description ?? "Aradığınız makale bulunamadı.";
+    const url = post?.canonicalUrl ?? `https://1cite.com/makaleler/${params.slug}`;
+    const image = post?.ogImageUrl ?? post?.coverImageUrl ?? null;
+    const absoluteImage = image && /^https?:\/\//.test(image) ? image : null;
     return {
       meta: [
         { title },
@@ -28,21 +49,30 @@ export const Route = createFileRoute("/makaleler/$slug")({
         { property: "og:url", content: url },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },
-        ...(article ? [] : [{ name: "robots", content: "noindex" }]),
+        ...(absoluteImage
+          ? [
+              { property: "og:image", content: absoluteImage },
+              { name: "twitter:image", content: absoluteImage },
+            ]
+          : []),
+        ...(found ? [] : [{ name: "robots", content: "noindex" }]),
       ],
       links: [{ rel: "canonical", href: url }],
-      scripts: article
+      scripts: found
         ? [
             {
               type: "application/ld+json",
               children: JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "Article",
-                headline: article.title,
-                description: article.description,
+                headline: found.title,
+                description: found.description,
                 inLanguage: "tr-TR",
                 mainEntityOfPage: url,
-                author: { "@type": "Organization", name: "OneCite" },
+                ...(absoluteImage ? { image: absoluteImage } : {}),
+                ...(post?.publishedAt ? { datePublished: post.publishedAt } : {}),
+                ...(post?.updatedAt ? { dateModified: post.updatedAt } : {}),
+                author: { "@type": "Organization", name: post?.author ?? "OneCite" },
                 publisher: { "@type": "Organization", name: "OneCite" },
               }),
             },
@@ -54,14 +84,32 @@ export const Route = createFileRoute("/makaleler/$slug")({
                 itemListElement: [
                   { "@type": "ListItem", position: 1, name: "Ana sayfa", item: "https://1cite.com" },
                   { "@type": "ListItem", position: 2, name: "Makaleler", item: "https://1cite.com/makaleler" },
-                  { "@type": "ListItem", position: 3, name: article.title, item: url },
+                  { "@type": "ListItem", position: 3, name: found.title, item: url },
                 ],
               }),
             },
+            ...(post && post.faq.length
+              ? [
+                  {
+                    type: "application/ld+json",
+                    children: JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "FAQPage",
+                      mainEntity: post.faq.map((item) => ({
+                        "@type": "Question",
+                        name: item.question,
+                        acceptedAnswer: { "@type": "Answer", text: item.answer },
+                      })),
+                    }),
+                  },
+                ]
+              : []),
           ]
         : [],
     };
   },
+  notFoundComponent: ArticleNotFound,
+  errorComponent: ArticleNotFound,
   component: ArticleDetailPage,
 });
 
