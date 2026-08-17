@@ -131,6 +131,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { CookieBanner } from "@/components/site/cookie-banner";
+import { useGoogleAnalytics } from "@/lib/analytics";
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -148,6 +149,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useGoogleAnalytics();
 
   return (
     <QueryClientProvider client={queryClient}>
