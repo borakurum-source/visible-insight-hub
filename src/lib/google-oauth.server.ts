@@ -29,8 +29,22 @@ export const CANONICAL_GOOGLE_REDIRECT_URI = "https://www.1cite.com/api/public/o
 export function redirectUri(origin: string) {
   const override = process.env["GOOGLE_OAUTH_REDIRECT_URI"];
   if (override) return override;
-  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-    return `${origin}/api/public/oauth/google/callback`;
+  try {
+    const url = new URL(origin);
+    const host = url.hostname;
+    // Apex alan adi Google Console'da kayitli degil; www'ye normalize et.
+    if (host === "1cite.com") return CANONICAL_GOOGLE_REDIRECT_URI;
+    const allowed =
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".lovable.app") ||
+      host === "1cite.com" ||
+      host.endsWith(".1cite.com");
+    if (allowed) {
+      return `${url.origin}/api/public/oauth/google/callback`;
+    }
+  } catch {
+    // gecersiz origin -> canonical
   }
   return CANONICAL_GOOGLE_REDIRECT_URI;
 }
