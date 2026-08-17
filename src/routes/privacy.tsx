@@ -4,7 +4,7 @@ import BrandLogo from "@/components/site/BrandLogo";
 const CONTROLLER_NAME = "OneCite adına Bora Kurum";
 const CONTROLLER_ADDRESS = "Kozyatağı Mah., Kaya Sultan Sok., Hayriye İş Merkezi No:83/3, Kadıköy, İstanbul, TR";
 const CONTACT_EMAIL = "info@ragsignal.com";
-const LAST_UPDATED = "16 Ağustos 2026";
+const LAST_UPDATED = "17 Ağustos 2026";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -65,6 +65,8 @@ function PrivacyPolicyPage() {
         <ul className="list-disc pl-5 space-y-1">
           <li>Hesap bilgileri: ad, e-posta adresi, organizasyon/şirket adı — hesap oluştururken alınır.</li>
           <li>Müşteri/marka verisi: Hizmete eklediğiniz müşteri firmaların web sitesi adresi, sektör bilgisi ve izlemek istediğiniz sorgu (prompt) metinleri.</li>
+          <li>Bilgi bankası verisi: belirttiğiniz web sitesinin herkese açık sayfalarından taranan metinler ve bunlardan üretilen vektör (embedding) kayıtları. Yalnızca herkese açık, giriş gerektirmeyen sayfalar taranır.</li>
+          <li>Entegrasyon verisi: kendi hesabınızla bağladığınız Google Search Console/Analytics 4 ve Bing Webmaster Tools performans verileri ve bu bağlantılar için saklanan erişim anahtarları.</li>
           <li>Kullanım verisi: hangi sayfaları ziyaret ettiğiniz, hangi özellikleri kullandığınız (ürünü iyileştirmek için, reklam amaçlı değil).</li>
           <li>
             Fatura/plan bilgisi: hangi plana kayıtlı olduğunuz ve abonelik durumunuz. Kredi kartı bilgilerinizi
@@ -82,14 +84,15 @@ function PrivacyPolicyPage() {
           <li><strong>Perplexity ve DeepSeek API'leri</strong> — izlemek istediğiniz prompt metinleri, marka bahsi/atıf ölçümü ve içerik üretimi amacıyla bu API'lere gönderilir ve analiz edilir.</li>
           <li><strong>E-posta altyapısı (notify.1cite.com)</strong> — işlemsel bildirim e-postalarının gönderimi.</li>
           <li><strong>Profesyonel danışmanlar ve yetkili kamu kurumları</strong> — hukuki/mali danışmanlık veya mevzuatın gerektirdiği hallerde.</li>
-          <li><strong>Google (opsiyonel)</strong> — Search Console/Analytics entegrasyonunu kendi hesabınızla bağlarsanız, yalnızca kendi sitenize ait arama performansı verisi okunur.</li>
+          <li><strong>Firecrawl (opsiyonel)</strong> — yalnızca JavaScript ile yüklenen sayfaların okunabilir metne dönüştürülmesi gerektiğinde ilgili sayfa adresi bu servise iletilir.</li>
+          <li><strong>Google ve Microsoft (opsiyonel)</strong> — Search Console/Analytics 4 veya Bing Webmaster Tools entegrasyonunu kendi hesabınızla bağlarsanız, yalnızca kendi sitenize ait arama/trafik performansı verisi okunur.</li>
         </ul>
         <p>Verileriniz hiçbir şekilde reklam ağlarına satılmaz veya pazarlama amacıyla üçüncü taraflarla paylaşılmaz.</p>
       </Section>
 
       <Section title="4. Yurt dışına veri aktarımı">
         <p>
-          Yukarıda sayılan alt yükleniciler (Paddle, Supabase/Lovable Cloud, Perplexity, DeepSeek) altyapılarını Türkiye dışında (AB ve/veya ABD)
+          Yukarıda sayılan alt yükleniciler (Paddle, Supabase/Lovable Cloud, Perplexity, DeepSeek, Firecrawl, Google, Microsoft) altyapılarını Türkiye dışında (AB ve/veya ABD)
           barındırabilir. Hizmeti kullanarak verilerinizin bu kapsamda yurt dışına aktarılmasına onay verirsiniz.
           Bu aktarımlar, ilgili alt yüklenicilerin kendi veri koruma taahhütleri çerçevesinde yürütülür.
         </p>

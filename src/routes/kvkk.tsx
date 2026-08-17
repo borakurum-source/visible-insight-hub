@@ -4,7 +4,7 @@ import BrandLogo from "@/components/site/BrandLogo";
 const CONTROLLER_NAME = "OneCite adına Bora Kurum";
 const CONTROLLER_ADDRESS = "Kozyatağı Mah., Kaya Sultan Sok., Hayriye İş Merkezi No:83/3, Kadıköy, İstanbul, TR";
 const CONTACT_EMAIL = "info@ragsignal.com";
-const LAST_UPDATED = "12 Ağustos 2026";
+const LAST_UPDATED = "17 Ağustos 2026";
 
 export const Route = createFileRoute("/kvkk")({
   head: () => ({
@@ -69,7 +69,12 @@ function KvkkPage() {
         <ul className="list-disc pl-5 space-y-1">
           <li>Kimlik ve iletişim verisi: ad, e-posta adresi.</li>
           <li>Müşteri ilişkisi verisi: temsil ettiğiniz şirket adı, plan/abonelik bilgisi.</li>
-          <li>İşlem güvenliği verisi: oturum ve giriş kayıtları (Clerk üzerinden).</li>
+          <li>İşlem güvenliği verisi: oturum ve giriş kayıtları (Lovable Cloud kimlik doğrulama altyapısı üzerinden).</li>
+          <li>
+            Entegrasyon verisi: kendi isteğinizle bağladığınız Google Search Console / Google Analytics 4 ve Bing
+            Webmaster Tools hesaplarından okunan, yalnızca kendi sitenize ait performans verileri ve bu bağlantılar
+            için saklanan erişim anahtarları.
+          </li>
           <li>
             Not: Hizmete girdiğiniz müşteri marka/prompt verisi genellikle kurumsal niteliktedir; ancak marka adı
             veya prompt içeriği dolaylı olarak bir gerçek kişiyle ilişkilendirilebilirse (örn. serbest çalışan adı),
@@ -82,6 +87,8 @@ function KvkkPage() {
         <ul className="list-disc pl-5 space-y-1">
           <li>Hizmetin sunulması: hesabınızın oluşturulması, oturum açma, plan/yetki yönetimi.</li>
           <li>AI görünürlük ölçümü: tanımladığınız promptların Perplexity Sonar API'si üzerinden çalıştırılması ve sonuçların panelinizde raporlanması.</li>
+          <li>Marka zekası ve bilgi bankası: belirttiğiniz web sitesinin herkese açık sayfalarının taranması, metne dönüştürülmesi ve vektör (embedding) olarak saklanması.</li>
+          <li>İçerik ve aksiyon önerisi üretimi: ölçüm sonuçlarının DeepSeek API'si ile analiz edilip öneriye dönüştürülmesi.</li>
           <li>Faturalandırma ve plan takibi.</li>
           <li>Destek taleplerinin yanıtlanması.</li>
           <li>Hizmetin güvenliğinin ve sürekliliğinin sağlanması.</li>
@@ -97,11 +104,17 @@ function KvkkPage() {
       </Section>
 
       <Section title="5. Kişisel Verilerin Aktarıldığı Taraflar">
-        <p>
-          Verileriniz, hizmetin sunulması amacıyla sınırlı olarak Clerk (kimlik doğrulama/faturalandırma), Neon
-          (veritabanı barındırma) ve Perplexity (Sonar API — prompt işleme) alt yüklenicileriyle paylaşılır.
-          Verileriniz pazarlama amacıyla üçüncü taraflara satılmaz veya kiralanmaz.
-        </p>
+        <p>Verileriniz, hizmetin sunulması amacıyla sınırlı olarak aşağıdaki alt yüklenicilerle paylaşılır:</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Lovable Cloud / Supabase — kimlik doğrulama, oturum yönetimi ve veritabanı barındırma (AB bölgesi).</li>
+          <li>Paddle.com Market Ltd. — Kayıtlı Satıcı (Merchant of Record): abonelik, ödeme, vergi ve faturalandırma.</li>
+          <li>Perplexity — Sonar API ile prompt çalıştırma ve embedding üretimi.</li>
+          <li>DeepSeek — ölçüm sonuçlarının analizi ve içerik/aksiyon önerisi üretimi.</li>
+          <li>Firecrawl — yalnızca JavaScript ile yüklenen sayfaların okunabilir metne dönüştürülmesi (gerektiğinde).</li>
+          <li>Google ve Microsoft (Bing) — yalnızca sizin bağladığınız hesaplar üzerinden kendi sitenizin performans verisinin okunması.</li>
+          <li>E-posta altyapısı (notify.1cite.com) — işlemsel bildirim gönderimi.</li>
+        </ul>
+        <p>Verileriniz pazarlama amacıyla üçüncü taraflara satılmaz veya kiralanmaz.</p>
       </Section>
 
       <Section title="6. Yurt Dışına Aktarım">
