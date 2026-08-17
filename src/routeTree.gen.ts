@@ -52,7 +52,6 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppAccountRouteImport } from './routes/_authenticated/app.account'
-import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppCitationDiscoveryRouteImport } from './routes/_authenticated/app.citation-discovery'
 import { Route as AuthenticatedAppClaimsRouteImport } from './routes/_authenticated/app.claims'
 import { Route as AuthenticatedAppCompetitorsRouteImport } from './routes/_authenticated/app.competitors'
@@ -294,11 +293,6 @@ const AuthenticatedAppAccountRoute = AuthenticatedAppAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
 const AuthenticatedAppCitationDiscoveryRoute =
   AuthenticatedAppCitationDiscoveryRouteImport.update({
     id: '/citation-discovery',
@@ -467,7 +461,6 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/account': typeof AuthenticatedAppAccountRoute
-  '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/app/claims': typeof AuthenticatedAppClaimsRoute
   '/app/competitors': typeof AuthenticatedAppCompetitorsRoute
@@ -530,7 +523,6 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/app/account': typeof AuthenticatedAppAccountRoute
-  '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/app/claims': typeof AuthenticatedAppClaimsRoute
   '/app/competitors': typeof AuthenticatedAppCompetitorsRoute
@@ -599,7 +591,6 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/app/account': typeof AuthenticatedAppAccountRoute
-  '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/citation-discovery': typeof AuthenticatedAppCitationDiscoveryRoute
   '/_authenticated/app/claims': typeof AuthenticatedAppClaimsRoute
   '/_authenticated/app/competitors': typeof AuthenticatedAppCompetitorsRoute
@@ -668,7 +659,6 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/app/account'
-    | '/app/admin'
     | '/app/citation-discovery'
     | '/app/claims'
     | '/app/competitors'
@@ -731,7 +721,6 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/app/account'
-    | '/app/admin'
     | '/app/citation-discovery'
     | '/app/claims'
     | '/app/competitors'
@@ -799,7 +788,6 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/app/account'
-    | '/_authenticated/app/admin'
     | '/_authenticated/app/citation-discovery'
     | '/_authenticated/app/claims'
     | '/_authenticated/app/competitors'
@@ -1162,13 +1150,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAccountRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/admin': {
-      id: '/_authenticated/app/admin'
-      path: '/admin'
-      fullPath: '/app/admin'
-      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
     '/_authenticated/app/citation-discovery': {
       id: '/_authenticated/app/citation-discovery'
       path: '/citation-discovery'
@@ -1328,7 +1309,6 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAccountRoute: typeof AuthenticatedAppAccountRoute
-  AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppCitationDiscoveryRoute: typeof AuthenticatedAppCitationDiscoveryRoute
   AuthenticatedAppClaimsRoute: typeof AuthenticatedAppClaimsRoute
   AuthenticatedAppCompetitorsRoute: typeof AuthenticatedAppCompetitorsRoute
@@ -1352,7 +1332,6 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAccountRoute: AuthenticatedAppAccountRoute,
-  AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppCitationDiscoveryRoute:
     AuthenticatedAppCitationDiscoveryRoute,
   AuthenticatedAppClaimsRoute: AuthenticatedAppClaimsRoute,
