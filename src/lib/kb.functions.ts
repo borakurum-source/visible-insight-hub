@@ -366,12 +366,18 @@ export const generateDraft = createServerFn({ method: "POST" })
     const { resolveSystemPrompt } = await import("./system-prompts.server");
     const { supabase } = context;
 
-    const [{ data: prompt }, { data: brand }, { data: intel }] = await Promise.all([
+    const [{ data: prompt }, { data: brand }, { data: intel }, { data: claimRows }] = await Promise.all([
       supabase.from("prompts").select("id, text").eq("id", data.promptId).single(),
       supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
       supabase.from("brand_intelligence").select("summary, positioning, tone, products").eq("brand_id", data.brandId).maybeSingle(),
+      supabase.from("claims").select("statement, evidence_url").eq("brand_id", data.brandId).limit(20),
     ]);
     if (!prompt || !brand) throw new Error("Prompt veya marka bulunamadı");
+
+    // Marka iddialari taslakta birebir tekrar edilmeli: alintilanabilirligin cekirdegi bu cumleler.
+    const claimsText = (claimRows ?? [])
+      .map((c: { statement: string; evidence_url: string | null }) => `- ${c.statement}${c.evidence_url ? ` (kaynak: ${c.evidence_url})` : ""}`)
+      .join("\n");
 
     let evidence: Array<{ content: string; source_id: string | null }> = [];
     const vector = await embedOne(prompt.text);
@@ -412,7 +418,11 @@ export const generateDraft = createServerFn({ method: "POST" })
         },
         {
           role: "user",
-          content: `Marka: ${brand.name} (${brand.domain})\nKonumlandırma: ${intel?.positioning ?? "-"}\nTon: ${intel?.tone ?? "-"}\nÖzet: ${intel?.summary ?? "-"}\n\n${briefing}\n\nHedef soru: ${prompt.text}\n\nBilgi bankası alıntıları:\n${context_text}`,
+          content: `Marka: ${brand.name} (${brand.domain})\nKonumlandırma: ${intel?.positioning ?? "-"}\nTon: ${intel?.tone ?? "-"}\nÖzet: ${intel?.summary ?? "-"}\n\n${briefing}\n\nHedef soru: ${prompt.text}\n\nBilgi bankası alıntıları:\n${context_text}${
+            claimsText
+              ? `\n\nMarka iddiaları (metinde birebir veya çok yakın biçimde geçmeli, varsa kaynak bağlantısını referans göster):\n${claimsText}`
+              : ""
+          }`,
         },
       ],
       { title: prompt.text, body: "" },
