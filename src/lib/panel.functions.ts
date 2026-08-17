@@ -101,7 +101,7 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: {
     brandId: string; summary: string; positioning: string; tone: string;
-    products: string[]; audiences: string[]; competitors?: unknown; keywords: string[];
+    products: string[]; audiences: string[]; competitors?: Array<{ name: string; domain?: string; type?: string }>; keywords: string[];
     industry?: string; language?: string; location?: string; detailedDescription?: string; keyFeatures?: string[];
     brandName?: string;
   }) => input)
@@ -113,7 +113,7 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
       tone: data.tone,
       products: data.products,
       audiences: data.audiences,
-      ...(data.competitors === undefined ? {} : { competitors: data.competitors }),
+      ...(data.competitors ? { competitors: data.competitors as unknown as Json } : {}),
       keywords: data.keywords,
       industry: data.industry ?? null,
       language: data.language ?? null,
