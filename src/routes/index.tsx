@@ -119,10 +119,17 @@ function Hero() {
             <PublicReportAnalyzer />
             <p className="mt-3 text-xs leading-5 text-slate-400">Kredi kartı gerekmez. İlk ölçüm herkese açık web verileriyle başlar.</p>
           </div>
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
-            <span>Kredi kartı yok · 2 dakikada rapor · Ölçülen yüzeyler:</span>
-            <EngineRotator className="font-mono text-cyan" />
-          </p>
+          <div className="space-y-3">
+            <p className="text-xs text-slate-400">Kredi kartı yok · 2 dakikada rapor · Kurulum 5 dakika</p>
+            <div className="flex flex-wrap items-center gap-2" data-testid="hero-engine-strip">
+              <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500">Ölçülen motorlar</span>
+              {MEASURED_ENGINES.map((engine) => (
+                <span key={engine} className="rounded-full border border-white/15 px-2.5 py-1 font-mono text-[11px] text-slate-300">
+                  {engine}
+                </span>
+              ))}
+            </div>
+          </div>
           <dl className="grid max-w-xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/15 bg-white/10" data-testid="hero-proof-strip">
             {HERO_PROOF.map((item) => (
               <div key={item.label} className="bg-ink/70 px-4 py-4">
