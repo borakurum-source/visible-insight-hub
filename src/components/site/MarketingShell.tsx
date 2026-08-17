@@ -1,24 +1,26 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/site/BrandLogo";
 
 const primaryLinks = [
-  { href: "/ozellikler", label: "Özellikler" },
-  { href: "/platform", label: "Platform" },
-  { href: "/solutions/agencies", label: "Ajanslar" },
-  { href: "/proof/filmfolk", label: "Vaka" },
+  { href: "/ozellikler", label: "Ürün" },
+  { href: "/solutions/agencies", label: "Çözümler" },
   { href: "/fiyatlandirma", label: "Fiyatlandırma" },
   { href: "/makaleler", label: "Kaynaklar" },
 ];
 
+const solutionsMenu = [
+  { href: "/solutions/agencies", label: "Ajanslar için", desc: "Birden fazla markayı tek panelden yönetin." },
+  { href: "/proof/filmfolk", label: "FilmFolk vakası", desc: "Atıf payı %30,7 → %58,9." },
+];
+
 const footerGroups = [
   {
-    title: "Platform",
+    title: "Ürün",
     links: [
-      { href: "/ozellikler", label: "Özellikler" },
-      { href: "/platform", label: "Genel bakış" },
+      { href: "/ozellikler", label: "Özellikler ve çalışma modeli" },
       { href: "/platform/citation-share", label: "Atıf Payı" },
       { href: "/platform/evidence-gaps", label: "Eksik Kanıtlar" },
       { href: "/ucretsiz-yapay-zeka-gorunurluk-raporu", label: "Ücretsiz rapor" },
@@ -61,15 +63,41 @@ export function MarketingShell({ children }: { children: ReactNode }) {
         <div className="marketing-container flex h-16 items-center justify-between">
           <BrandLogo variant="horizontal" size="sm" linkTo="/" />
           <nav className="hidden items-center gap-7 text-[13px] font-medium tracking-[-0.01em] text-muted-foreground lg:flex" aria-label="Pazarlama navigasyonu">
-            {primaryLinks.map((link) => (
-              <Link
+            {primaryLinks.map((link) =>
+              link.label === "Çözümler" ? (
+                <div key={link.href} className="group relative">
+                  <Link
+                    to={link.href}
+                    className="inline-flex items-center gap-1 whitespace-nowrap transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    {link.label}
+                    <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Link>
+                  <div className="invisible absolute left-1/2 top-full z-50 w-72 -translate-x-1/2 pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                    <div className="rounded-xl border border-border bg-background p-2 shadow-lg">
+                      {solutionsMenu.map((item) => (
+                        <Link
+                          key={item.href}
+                          to={item.href}
+                          className="block rounded-lg px-3 py-2.5 hover:bg-secondary"
+                        >
+                          <span className="block text-[13px] font-semibold text-foreground">{item.label}</span>
+                          <span className="mt-0.5 block text-xs text-muted-foreground">{item.desc}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Link
                 key={link.href}
                 to={link.href}
                 className="whitespace-nowrap transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 {link.label}
-              </Link>
-            ))}
+                </Link>
+              ),
+            )}
           </nav>
           <div className="hidden items-center gap-2 md:flex">
             <Button variant="ghost" asChild>
@@ -109,6 +137,13 @@ export function MarketingShell({ children }: { children: ReactNode }) {
                   {link.label}
                 </Link>
               ))}
+              <Link
+                to="/proof/filmfolk"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-lg px-3 py-2.5 pl-6 text-sm text-muted-foreground hover:bg-secondary"
+              >
+                FilmFolk vakası
+              </Link>
               <Link
                 to="/auth"
                 onClick={() => setMobileOpen(false)}

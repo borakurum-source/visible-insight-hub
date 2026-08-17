@@ -14,7 +14,8 @@ import { MarketingShell } from "@/components/site/MarketingShell";
 import { Reveal } from "@/components/site/marketing-motion";
 import { HeroVisual } from "@/components/site/hero-visual";
 import { PublicReportAnalyzer } from "@/components/site/public-report-analyzer";
-import { EngineRotator, MetricRise } from "@/components/site/citation-motion";
+import { MetricRise } from "@/components/site/citation-motion";
+import { ProductTabs, type ProductTab } from "@/components/site/product-tabs";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { faqs } from "@/lib/faqData";
@@ -22,6 +23,9 @@ import { formatUsd, pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
 import shotKb from "@/assets/landing/shot-kb.webp";
 import shotContent from "@/assets/landing/shot-content.webp";
+import shotDashboard from "@/assets/features/dashboard.webp.asset.json";
+import shotCompetitors from "@/assets/features/competitors.webp.asset.json";
+import shotTasks from "@/assets/features/tasks.webp.asset.json";
 import heroCitationOrb from "@/assets/landing/hero-citation-orb.webp";
 import heroEvidenceGap from "@/assets/landing/hero-evidence-gap.webp";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
@@ -62,6 +66,38 @@ const HERO_PROOF = [
   { value: 286, suffix: "", label: "Ölçüm tekrarı" },
 ];
 
+const MEASURED_ENGINES = ["ChatGPT", "Perplexity", "Gemini", "Copilot", "Claude"];
+
+const PRODUCT_TABS: ProductTab[] = [
+  {
+    id: "skor",
+    label: "OneCite Score",
+    headline: "Tek skorda: yapay zeka cevaplarında neredesiniz?",
+    body: "Bahsedilme, alıntı payı, sıralama kalitesi, kanıt kapsamı ve iddia kanıtı olarak beş bileşene bölünür. Zayıf bileşenin yanında ne yapmanız gerektiği yazar.",
+    highlight: "Atıf payı %58,9",
+    shot: shotDashboard.url,
+    alt: "OneCite komuta merkezi ekranı: OneCite Score ve görünürlük kırılımı",
+  },
+  {
+    id: "rakip",
+    label: "Rakip trendi",
+    headline: "Aynı sorularda rakibiniz seçiliyorsa bunu görürsünüz",
+    body: "Takip ettiğiniz her soruda hangi alan adının kaynak olarak seçildiğini sayar, karşılaştırmalı trend çizgisiyle kaybettiğiniz payı gösteririz.",
+    highlight: "3 rakip, tek grafik",
+    shot: shotCompetitors.url,
+    alt: "OneCite rakip takibi ekranı: karşılaştırmalı görünürlük trendi",
+  },
+  {
+    id: "gorevler",
+    label: "Görev listesi",
+    headline: "Ölçüm biter bitmez sıradaki iş listeniz hazır",
+    body: "Görünmediğiniz her soru; içerik, kanıt veya teknik iyileştirme görevine dönüşür. Tamamladıkça skorun nasıl değiştiğini izlersiniz.",
+    highlight: "Bu hafta 3 öncelik",
+    shot: shotTasks.url,
+    alt: "OneCite görev listesi ekranı: öncelikli aksiyonlar",
+  },
+];
+
 function Hero() {
   return (
     <section id="olcum" className="visual-hero-surface relative isolate overflow-hidden border-b border-[#26302E] scroll-mt-16" data-testid="section-hero">
@@ -83,10 +119,17 @@ function Hero() {
             <PublicReportAnalyzer />
             <p className="mt-3 text-xs leading-5 text-slate-400">Kredi kartı gerekmez. İlk ölçüm herkese açık web verileriyle başlar.</p>
           </div>
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
-            <span>Kredi kartı yok · 2 dakikada rapor · Ölçülen yüzeyler:</span>
-            <EngineRotator className="font-mono text-cyan" />
-          </p>
+          <div className="space-y-3">
+            <p className="text-xs text-slate-400">Kredi kartı yok · 2 dakikada rapor · Kurulum 5 dakika</p>
+            <div className="flex flex-wrap items-center gap-2" data-testid="hero-engine-strip">
+              <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500">Ölçülen motorlar</span>
+              {MEASURED_ENGINES.map((engine) => (
+                <span key={engine} className="rounded-full border border-white/15 px-2.5 py-1 font-mono text-[11px] text-slate-300">
+                  {engine}
+                </span>
+              ))}
+            </div>
+          </div>
           <dl className="grid max-w-xl grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/15 bg-white/10" data-testid="hero-proof-strip">
             {HERO_PROOF.map((item) => (
               <div key={item.label} className="bg-ink/70 px-4 py-4">
@@ -109,6 +152,27 @@ function Hero() {
             priority
             className="w-full"
           />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NeGoreceksiniz() {
+  return (
+    <section className="border-b border-border bg-background py-16 md:py-24" data-testid="section-product-preview">
+      <div className="marketing-container">
+        <div className="max-w-2xl">
+          <p className="editorial-eyebrow text-primary">Ne göreceksiniz</p>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">
+            İlk ölçümden sonra paneliniz böyle görünür.
+          </h2>
+          <p className="mt-4 max-w-prose text-base leading-7 text-muted-foreground">
+            Üç ekran; skorunuz, rakiplerinizle karşılaştırmanız ve bu hafta yapılacaklar listeniz.
+          </p>
+        </div>
+        <div className="mt-10">
+          <ProductTabs tabs={PRODUCT_TABS} />
         </div>
       </div>
     </section>
@@ -205,7 +269,7 @@ function NasilCalisir() {
           ))}
         </div>
         <div className="mt-14 flex justify-center">
-          <Button asChild><Link to="/platform">Platformu inceleyin <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
+          <Button asChild><Link to="/ozellikler">Ürünün tamamını inceleyin <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
         </div>
       </div>
     </section>
@@ -227,6 +291,17 @@ function FilmFolkOrnegi() {
             <span className="inline-flex items-center rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-semibold text-primary">Vaka çalışması · FilmFolk</span>
             <h2 className="mt-5 text-3xl font-extrabold tracking-[-0.035em] text-foreground md:text-4xl">Atıf payı %30,7’den %58,9’a nasıl çıktı?</h2>
             <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">Sonuç tek bir içerik hamlesinden gelmedi. Hangi soruda hangi kaynağın seçildiği ölçüldü, eksik kanıt sıraya kondu ve yalnızca en yüksek etkili varlıklar üretildi.</p>
+            <div className="mt-8 flex items-end gap-5" data-testid="case-before-after">
+              <div>
+                <p className="editorial-eyebrow text-muted-foreground">Önce</p>
+                <p className="mt-1 font-mono text-3xl font-medium text-muted-foreground md:text-4xl">%30,7</p>
+              </div>
+              <ArrowRight className="mb-2 h-6 w-6 text-primary" aria-hidden="true" />
+              <div>
+                <p className="editorial-eyebrow text-primary">Sonra</p>
+                <p className="mt-1 font-mono text-4xl font-medium text-foreground md:text-5xl">%58,9</p>
+              </div>
+            </div>
             <Link to="/proof/filmfolk" className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-foreground underline decoration-cyan decoration-2 underline-offset-4 transition-colors hover:text-primary">Vaka çalışmasının tamamını inceleyin <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <ol className="space-y-3">
@@ -317,7 +392,7 @@ function SonCagri() {
       <img src={heroSignalAction} alt="Üç ışıklı yolun şeffaf bir prizma içinde tek kaynak noktasında birleşmesi" className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-45" loading="lazy" />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-ink/55 via-ink/60 to-ink" aria-hidden="true" />
       <div className="mx-auto max-w-3xl rounded-2xl border border-white/15 bg-ink/70 px-7 py-12 text-center text-white backdrop-blur-md md:px-12">
-        <p className="visual-source-label text-cyan">SIGNAL → EVIDENCE → ACTION</p>
+        <p className="visual-source-label text-cyan">SİNYAL → KANIT → AKSİYON</p>
         <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">Markanızın yapay zeka cevaplarında nerede durduğunu tahmin etmeyin.</h2>
         <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-slate-300">İlk ölçümle soru, kaynak ve eksik kanıt zincirini görün. Sonra yalnızca en yüksek etkili uygulamaya odaklanın.</p>
         <Button size="lg" className="mt-8 bg-cyan text-foreground hover:bg-[#B8F4FF]" asChild>
@@ -332,6 +407,7 @@ function Landing() {
   return (
     <MarketingShell>
       <Hero />
+      <NeGoreceksiniz />
       <Problem />
       <NasilCalisir />
       <FilmFolkOrnegi />
