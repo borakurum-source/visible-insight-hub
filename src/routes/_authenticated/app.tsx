@@ -99,11 +99,6 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "Yönetim",
-    adminOnly: true,
-    items: [{ to: "/app/admin", label: "Admin", icon: Users, exact: false }],
-  },
-  {
     label: "Yardım",
     items: [{ to: "/app/help", label: "Yardım & Rehber", icon: LifeBuoy, exact: false }],
   },
