@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Save, Eye } from "lucide-react";
+import { Loader2, Plus, Trash2, Save, Eye, Search } from "lucide-react";
 import { adminDeletePost, adminGetPost, adminListPosts, adminSavePost } from "@/lib/admin.functions";
 import { AdminCard, AdminHeading, dateTime, EmptyRow, Pill, Table } from "@/components/admin/ui";
+import { ImageField } from "@/components/admin/image-upload";
+import { MarkdownEditor } from "@/components/admin/markdown-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,9 +47,23 @@ function BlogAdminPage() {
   const save = useServerFn(adminSavePost);
   const remove = useServerFn(adminDeletePost);
   const [form, setForm] = useState<FormState | null>(null);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
 
   const posts = useQuery({ queryKey: ["admin", "posts"], queryFn: () => list() });
   const invalidate = () => void queryClient.invalidateQueries({ queryKey: ["admin", "posts"] });
+
+  const visiblePosts = useMemo(() => {
+    const rows = posts.data ?? [];
+    const needle = query.trim().toLocaleLowerCase("tr");
+    return rows.filter((post) => {
+      const statusOk = statusFilter === "all" || post.status === statusFilter;
+      const textOk =
+        !needle ||
+        `${post.title} ${post.slug} ${post.category ?? ""}`.toLocaleLowerCase("tr").includes(needle);
+      return statusOk && textOk;
+    });
+  }, [posts.data, query, statusFilter]);
 
   const openMutation = useMutation({
     mutationFn: (id: string) => load({ data: { id } }),
@@ -120,16 +136,29 @@ function BlogAdminPage() {
               <div className="space-y-1.5"><Label className="text-xs">Etiketler (virgülle)</Label><Input value={form.tags} onChange={(e) => set({ tags: e.target.value })} /></div>
               <div className="space-y-1.5"><Label className="text-xs">Yazar</Label><Input value={form.author} onChange={(e) => set({ author: e.target.value })} /></div>
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="space-y-1.5"><Label className="text-xs">Kapak görseli URL</Label><Input value={form.coverImageUrl} onChange={(e) => set({ coverImageUrl: e.target.value })} /></div>
-              <div className="space-y-1.5"><Label className="text-xs">Sosyal önizleme (OG) görseli</Label><Input value={form.ogImageUrl} onChange={(e) => set({ ogImageUrl: e.target.value })} /></div>
-              <div className="space-y-1.5"><Label className="text-xs">Canonical URL (opsiyonel)</Label><Input value={form.canonicalUrl} onChange={(e) => set({ canonicalUrl: e.target.value })} /></div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <ImageField
+                label="Kapak görseli"
+                value={form.coverImageUrl}
+                onChange={(url) => set({ coverImageUrl: url, ogImageUrl: form.ogImageUrl || url })}
+                hint="Liste ve makale başında görünür. 16:9 önerilir."
+              />
+              <ImageField
+                label="Sosyal önizleme (paylaşım) görseli"
+                value={form.ogImageUrl}
+                onChange={(url) => set({ ogImageUrl: url })}
+                hint="Boş bırakılırsa kapak görseli kullanılır."
+              />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">İçerik (Markdown)</Label>
-              <Textarea rows={18} className="font-mono text-xs" value={form.body} onChange={(e) => set({ body: e.target.value })} />
+              <Label className="text-xs">Canonical URL (opsiyonel)</Label>
+              <Input value={form.canonicalUrl} onChange={(e) => set({ canonicalUrl: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">İçerik</Label>
+              <MarkdownEditor value={form.body} onChange={(body) => set({ body })} />
               <p className="text-[11px] text-slate-500">
-                Görsel: ![açıklama](https://...) · Video: satır başında https://www.youtube.com/watch?v=... bağlantısını yazın, gömülü oynatıcı olarak gösterilir.
+                Araç çubuğuyla başlık, liste, tablo, bağlantı ve görsel ekleyin. Önizleme sekmesi yayındaki görünümü gösterir.
               </p>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
@@ -149,14 +178,52 @@ function BlogAdminPage() {
         </AdminCard>
       ) : null}
 
-      <AdminCard title="Yazılar">
+      <AdminCard
+        title="Yazılar"
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Başlık veya URL ara"
+                className="h-8 w-52 pl-7 text-xs"
+              />
+            </div>
+            {([
+              ["all", "Tümü"],
+              ["published", "Yayında"],
+              ["draft", "Taslak"],
+            ] as const).map(([value, label]) => (
+              <Button
+                key={value}
+                size="sm"
+                variant={statusFilter === value ? "default" : "outline"}
+                onClick={() => setStatusFilter(value)}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+        }
+      >
         {posts.isLoading ? <Loader2 className="h-5 w-5 animate-spin text-sky-600" /> : (
           <Table head={["Başlık", "Durum", "Kategori", "Güncelleme", ""]}>
-            {(posts.data ?? []).map((post) => (
+            {visiblePosts.map((post) => (
               <tr key={post.id}>
                 <td className="px-3 py-2">
-                  <div className="text-slate-900">{post.title}</div>
-                  <div className="text-xs text-slate-500">/makaleler/{post.slug}</div>
+                  <div className="flex items-center gap-3">
+                    {post.cover_image_url ? (
+                      <img src={post.cover_image_url} alt="" className="h-10 w-16 shrink-0 rounded border border-slate-200 object-cover" />
+                    ) : (
+                      <div className="h-10 w-16 shrink-0 rounded border border-dashed border-slate-200 bg-slate-50" />
+                    )}
+                    <div>
+                      <div className="text-slate-900">{post.title}</div>
+                      <div className="text-xs text-slate-500">/makaleler/{post.slug}</div>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-3 py-2"><Pill tone={post.status === "published" ? "good" : "warn"}>{post.status === "published" ? "Yayında" : "Taslak"}</Pill></td>
                 <td className="px-3 py-2 text-xs text-slate-500">{post.category}</td>
@@ -172,7 +239,7 @@ function BlogAdminPage() {
                 </td>
               </tr>
             ))}
-            {(posts.data ?? []).length === 0 ? <EmptyRow colSpan={5}>Henüz yazı yok.</EmptyRow> : null}
+            {visiblePosts.length === 0 ? <EmptyRow colSpan={5}>Kayıt bulunamadı.</EmptyRow> : null}
           </Table>
         )}
       </AdminCard>
