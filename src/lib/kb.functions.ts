@@ -15,7 +15,7 @@ export const indexPendingSources = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; limit?: number }) => input)
   .handler(async ({ data, context }) => {
-    const { indexSource } = await import("./kb.server");
+    const { indexSource, runPool } = await import("./kb.server");
     const { data: sources } = await context.supabase
       .from("knowledge_sources")
       .select("id")
@@ -26,7 +26,7 @@ export const indexPendingSources = createServerFn({ method: "POST" })
     let indexed = 0;
     let failed = 0;
     let chunks = 0;
-    for (const source of sources ?? []) {
+    await runPool(sources ?? [], 4, async (source) => {
       try {
         const result = await indexSource(context.supabase, source.id);
         if (result.ok) { indexed += 1; chunks += result.chunks; } else { failed += 1; }
@@ -34,7 +34,7 @@ export const indexPendingSources = createServerFn({ method: "POST" })
         console.error("İndeksleme hatası", error);
         failed += 1;
       }
-    }
+    });
     return { indexed, failed, chunks, remaining: Math.max(0, (sources ?? []).length - indexed - failed) };
   });
 
@@ -43,7 +43,7 @@ export const refreshStaleSources = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; maxAgeDays?: number; limit?: number }) => input)
   .handler(async ({ data, context }) => {
-    const { indexSource } = await import("./kb.server");
+    const { indexSource, runPool } = await import("./kb.server");
     const cutoff = new Date(Date.now() - (data.maxAgeDays ?? 7) * 86400000).toISOString();
     const { data: sources } = await context.supabase
       .from("knowledge_sources")
@@ -56,7 +56,7 @@ export const refreshStaleSources = createServerFn({ method: "POST" })
     let updated = 0;
     let unchanged = 0;
     let failed = 0;
-    for (const source of sources ?? []) {
+    await runPool(sources ?? [], 4, async (source) => {
       try {
         const result = await indexSource(context.supabase, source.id);
         if (!result.ok) failed += 1;
@@ -66,7 +66,7 @@ export const refreshStaleSources = createServerFn({ method: "POST" })
         console.error("Yeniden indeksleme hatası", error);
         failed += 1;
       }
-    }
+    });
     return { checked: (sources ?? []).length, updated, unchanged, failed };
   });
 
