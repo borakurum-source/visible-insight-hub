@@ -737,10 +737,14 @@ export type Database = {
           content: string | null
           content_hash: string | null
           created_at: string
+          etag: string | null
           excluded: boolean
+          extract_method: string | null
           id: string
           index_status: string
           indexed_at: string | null
+          last_checked_at: string | null
+          last_modified: string | null
           noise_ratio: number
           quality_score: number
           source_type: string
@@ -755,10 +759,14 @@ export type Database = {
           content?: string | null
           content_hash?: string | null
           created_at?: string
+          etag?: string | null
           excluded?: boolean
+          extract_method?: string | null
           id?: string
           index_status?: string
           indexed_at?: string | null
+          last_checked_at?: string | null
+          last_modified?: string | null
           noise_ratio?: number
           quality_score?: number
           source_type?: string
@@ -773,10 +781,14 @@ export type Database = {
           content?: string | null
           content_hash?: string | null
           created_at?: string
+          etag?: string | null
           excluded?: boolean
+          extract_method?: string | null
           id?: string
           index_status?: string
           indexed_at?: string | null
+          last_checked_at?: string | null
+          last_modified?: string | null
           noise_ratio?: number
           quality_score?: number
           source_type?: string
