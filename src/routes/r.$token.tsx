@@ -1,8 +1,8 @@
-import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReportTeaser } from "@/components/site/report-teaser";
+import { getPublicReport } from "@/lib/public-report.functions";
 
 export const Route = createFileRoute("/r/$token")({
   head: () => ({
@@ -14,6 +14,13 @@ export const Route = createFileRoute("/r/$token")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  loader: ({ params }) => getPublicReport({ data: { token: params.token } }),
+  errorComponent: ({ error }) => (
+    <main className="mx-auto max-w-2xl px-4 py-20 text-center">
+      <h1 className="text-2xl font-semibold">Rapor yüklenemedi</h1>
+      <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+    </main>
+  ),
   component: PublicReportPage,
 });
 
@@ -39,21 +46,6 @@ function scoreTone(score: number): Severity {
   return "good";
 }
 const scoreToneClass: Record<Severity, string> = { critical: "text-destructive", attention: "text-amber-500", good: "text-emerald-500" };
-
-// Backend henüz bağlı değil; bu sayfa mock bir rapor gösterir.
-function buildMockReport(token: string) {
-  return {
-    normalizedDomain: token.replace(/-/g, "."),
-    score: 74,
-    categoryScores: { technical: 21, structured_data: 14, ai_bot_compatibility: 18, content_readability: 19 },
-    findings: [
-      { key: "robots", category: "technical", state: "good" as Severity, title: "robots.txt AI botlarını engellemiyor", description: "GPTBot, PerplexityBot ve ClaudeBot erişimi açık.", recommendation: "Mevcut yapılandırmayı koruyun." },
-      { key: "jsonld", category: "structured_data", state: "attention" as Severity, title: "JSON-LD şeması eksik", description: "Organizasyon ve ürün şeması bulunamadı.", recommendation: "schema.org Organization ve Product/Service şemalarını ekleyin." },
-      { key: "sitemap", category: "technical", state: "good" as Severity, title: "Sitemap erişilebilir", description: "sitemap.xml düzgün biçimde yayınlanıyor.", recommendation: "Güncel tutmaya devam edin." },
-      { key: "readability", category: "content_readability", state: "critical" as Severity, title: "İçerik JS render'a bağımlı", description: "Ana içerik yalnızca istemci tarafı render sonrası görünüyor.", recommendation: "Kritik içeriği sunucu tarafında render edin veya statik HTML olarak sunun." },
-    ],
-  };
-}
 
 function FindingsSeverityBanner({ criticalCount, attentionCount }: { criticalCount: number; attentionCount: number }) {
   if (criticalCount > 0) {
@@ -83,18 +75,29 @@ function FindingsSeverityBanner({ criticalCount, attentionCount }: { criticalCou
 }
 
 function PublicReportPage() {
-  const { token } = Route.useParams();
-  const report = useMemo(() => buildMockReport(token), [token]);
+  const report = Route.useLoaderData();
+
+  if (!report) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-20 text-center">
+        <h1 className="text-2xl font-semibold">Rapor bulunamadı</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Bağlantı geçersiz olabilir. Yeni bir ücretsiz analiz başlatabilirsiniz.</p>
+        <Button className="mt-5" asChild><Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">Ücretsiz analiz başlat</Link></Button>
+      </main>
+    );
+  }
+
   const tone = scoreTone(report.score);
   const criticalCount = report.findings.filter((finding) => finding.state === "critical").length;
   const attentionCount = report.findings.filter((finding) => finding.state === "attention").length;
   const sortedFindings = [...report.findings].sort((a, b) => severityRank[a.state] - severityRank[b.state]);
+  const scannedAt = new Intl.DateTimeFormat("tr-TR", { dateStyle: "long", timeStyle: "short" }).format(new Date(report.createdAt));
 
   return (
     <main className="min-h-screen bg-background px-4 py-10 text-foreground">
       <div className="mx-auto max-w-4xl space-y-8">
         <header>
-          <p className="text-sm text-muted-foreground">{report.normalizedDomain}</p>
+          <p className="text-sm text-muted-foreground">{report.domain} · {scannedAt} tarihinde tarandı</p>
           <h1 className="text-3xl font-semibold">AI Hazırlık Skoru</h1>
           <p className={`mt-3 text-6xl font-bold ${scoreToneClass[tone]}`}>{report.score}</p>
           <p className="mt-2 text-sm text-muted-foreground">Bu skor teknik ve makine-okunabilirlik hazırlığını ölçer; AI cevaplarında görünürlüğünüzü ölçmez.</p>
@@ -129,6 +132,26 @@ function PublicReportPage() {
             );
           })}
         </section>
+
+        {report.citation.checked ? (
+          <section className="rounded-lg border border-border p-5">
+            <div className="flex items-start gap-2.5">
+              <Quote className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div>
+                <h2 className="text-lg font-semibold">Canlı atıf kontrolü</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Perplexity'ye şu soru soruldu: “{report.citation.question}”</p>
+                <p className="mt-3 text-sm">
+                  {report.citation.cited
+                    ? `Yanıtın kaynakları arasında ${report.domain} yer alıyor.`
+                    : `Yanıtın kaynakları arasında ${report.domain} yer almıyor.`}
+                </p>
+                {report.citation.citedDomains.length ? (
+                  <p className="mt-2 text-xs text-muted-foreground">Kullanılan kaynaklar: {report.citation.citedDomains.join(", ")}</p>
+                ) : null}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <div className="rounded-lg border border-border bg-card p-5">
           <ReportTeaser testId="report-teaser" />

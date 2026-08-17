@@ -1,8 +1,9 @@
-// İlk hero'daki inline domain analizörü. Backend henüz bağlı değil; bu bileşen
-// yerel bir simülasyon çalıştırıp kullanıcıyı /r/[token] sabit örnek raporuna
-// yönlendirir. Gerçek tarama servisi bağlandığında burası güncellenmelidir.
+// İlk hero'daki inline domain analizörü: girilen alan adını sunucuda gerçek zamanlı
+// tarar ve sonucu /r/[token] adresindeki canlı rapora yönlendirir.
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { startPublicReport } from "@/lib/public-report.functions";
 import { ArrowRight, CheckCircle2, Circle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,17 +26,9 @@ const STAGE_INTERVAL_MS = 650;
 
 type Phase = "idle" | "analyzing" | "locked";
 
-function slugifyDomain(url: string) {
-  return url
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "") || "ornek-com";
-}
-
 export function PublicReportAnalyzer() {
   const navigate = useNavigate();
+  const runReport = useServerFn(startPublicReport);
   const [url, setUrl] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [token, setToken] = useState<string | null>(null);
@@ -50,18 +43,15 @@ export function PublicReportAnalyzer() {
     stageIndexRef.current = 0;
     setStageIndex(0);
     const timer = window.setInterval(() => {
-      if (stageIndexRef.current < STAGES.length - 1) {
+      if (stageIndexRef.current < STAGES.length - 2) {
         stageIndexRef.current += 1;
         setStageIndex(stageIndexRef.current);
-      } else {
-        window.clearInterval(timer);
-        setPhase("locked");
       }
     }, STAGE_INTERVAL_MS);
     return () => window.clearInterval(timer);
   }, [phase]);
 
-  function handleStart(event: React.FormEvent) {
+  async function handleStart(event: React.FormEvent) {
     event.preventDefault();
     if (!hasConsent("processing")) {
       toast.info("Onayınız gerekiyor", {
@@ -72,14 +62,30 @@ export function PublicReportAnalyzer() {
       openConsentPreferences();
       return;
     }
-    setToken(slugifyDomain(url));
+    setToken(null);
     setPhase("analyzing");
+    try {
+      const result = await runReport({ data: { domain: url } });
+      setToken(result.token);
+      setStageIndex(STAGES.length - 1);
+      setPhase("locked");
+    } catch (error) {
+      setPhase("idle");
+      toast.error("Analiz tamamlanamadı", {
+        description: error instanceof Error ? error.message : "Alan adını kontrol edip tekrar deneyin.",
+      });
+    }
   }
 
-  function handleUnlock(event: React.FormEvent) {
+  async function handleUnlock(event: React.FormEvent) {
     event.preventDefault();
     if (!token || !consent) return;
     setUnlocking(true);
+    try {
+      await runReport({ data: { domain: url, email } });
+    } catch {
+      /* e-posta kaydedilemese de rapor gösterilir */
+    }
     navigate({ to: "/r/$token", params: { token } });
   }
 
