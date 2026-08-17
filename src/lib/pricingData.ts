@@ -40,7 +40,7 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       "Bilgi Bankası ve Marka İddiaları",
       "Aksiyon listesi ve görev takibi",
-      "Atıf kaynakları raporu",
+      "Seçilen kaynaklar raporu",
       "GSC entegrasyonu",
       "E-posta ile rapor paylaşımı",
     ],

@@ -95,7 +95,7 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
         )}
       </ChartCard>
 
-      <ChartCard title="Atıf kaynağı dağılımı" description="Yapay zekanın gösterdiği kaynaklar kimin sitesinden geliyor?">
+      <ChartCard title="Seçilen kaynak dağılımı" description="Yapay zekanın gösterdiği kaynaklar kimin sitesinden geliyor?">
         {mixData.length ? (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -104,7 +104,7 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
                   <Cell key={entry.name} fill={MIX_COLORS[index % MIX_COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name: string) => [`${value} atıf`, name]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name: string) => [`${value} kaynak gösterimi`, name]} />
             </PieChart>
           </ResponsiveContainer>
         ) : (

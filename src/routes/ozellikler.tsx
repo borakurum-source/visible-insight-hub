@@ -133,7 +133,7 @@ const mainFeatures: MainFeature[] = [
     title: "Rakibinizin göründüğü, sizin görünmediğiniz soruları bulun",
     body: "Aynı promptlarda kimin seçildiğini alan adı bazında sayarız. Karşılaştırmalı trend grafiği, kaybettiğiniz payı ve kapatmanız gereken boşluğu net gösterir.",
     points: [
-      "Alan adı bazlı rakip eşleştirme — isim benzerliğine değil, gerçek atıflara bakar",
+      "Alan adı bazlı rakip eşleştirme — isim benzerliğine değil, gerçek kaynak gösterimlerine bakar",
       "Rakiplerle karşılaştırmalı görünürlük trendi",
       "Sorgu sonuçlarından çıkan yeni rakip adaylarını tek tıkla takibe alma",
     ],
@@ -241,7 +241,7 @@ const deepFeatures = [
   },
   {
     icon: Quote,
-    title: "Atıf kaynakları",
+    title: "Seçilen kaynaklar",
     body: "Yanıtı besleyen her kaynağı listeleyin; kendi domaininiz mi, üçüncü taraf mı görün.",
     mock: (
       <MockRows

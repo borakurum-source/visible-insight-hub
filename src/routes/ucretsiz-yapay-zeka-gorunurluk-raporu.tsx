@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     q: "Ücretsiz rapor tam olarak neyi ölçüyor?",
-    a: "Rapor, herkese açık web sinyallerinizi tarar: sitenizin yapısal netliği, hizmet ve konu kapsamı, kanıtlanabilir iddialar, kaynak gösterilebilirlik ve yapay zekanın alıntılayabileceği içerik biçimleri. Sonuçta bir hazırlık çerçevesi ve öncelikli eksik kanıt listesi çıkar.",
+    a: "Rapor, herkese açık web sinyallerinizi tarar: sitenizin yapısal netliği, hizmet ve konu kapsamı, kanıtlanabilir iddialar, kaynak gösterilebilirlik ve yapay zekanın kaynak gösterebileceği içerik biçimleri. Sonuçta bir hazırlık çerçevesi ve öncelikli eksik kanıt listesi çıkar.",
   },
   {
     q: "Rapor ne kadar sürede hazır oluyor?",
@@ -42,7 +42,7 @@ const faqs = [
 
 const reportContents = [
   { icon: FileSearch, title: "Yapay zeka hazırlık özeti", body: "Sitenizin yapay zeka asistanları tarafından okunabilirlik, konu kapsamı ve kanıt netliği açısından ilk değerlendirmesi." },
-  { icon: Network, title: "Atıf bağlamı", body: "Marka adınızın hangi konu ve hizmet bağlamlarıyla ilişkilendiğini, hangi kaynakların sizi temsil ettiğini görün." },
+  { icon: Network, title: "Kaynak bağlamı", body: "Marka adınızın hangi konu ve hizmet bağlamlarıyla ilişkilendiğini, hangi kaynakların sizi temsil ettiğini görün." },
   { icon: ListChecks, title: "Eksik kanıt listesi", body: "Yapay zekanın sizi kaynak göstermesi için gereken ama sitenizde bulunmayan kanıt başlıkları önceliklendirilir." },
   { icon: ShieldCheck, title: "Öncelikli sonraki adımlar", body: "Her düzeltmeyi değil, görünürlüğe en çok etki edecek üç uygulamayı önce görün." },
 ];

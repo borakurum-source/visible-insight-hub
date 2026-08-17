@@ -47,7 +47,7 @@ function MetricDetailPage() {
     "gsc-impressions": { title: "Arama Gösterimleri", key: "impressions", label: "Gösterim" },
     "ga4-sessions": { title: "Site Trafiği (GA4)", key: "sessions", label: "Oturum" },
     "ga4-ai": { title: "AI Referral Trafiği (GA4)", key: "sessions", label: "Oturum" },
-    "ai-citations": { title: "AI Kaynak Trafiği", key: "citations", label: "Atıf" },
+    "ai-citations": { title: "AI Kaynak Trafiği", key: "citations", label: "Kaynak gösterimi" },
     "ai-visibility": { title: "Yapay Zeka Görünürlüğü", key: "mentioned", label: "Markanın geçtiği yanıt" },
   }[metric as string] ?? { title: "Metrik", key: "value", label: "Deger" };
 

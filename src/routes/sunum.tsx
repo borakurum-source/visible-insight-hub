@@ -8,7 +8,7 @@ export const Route = createFileRoute("/sunum")({
   head: () => ({
     meta: [
       { title: "OneCite Sunum | Görünürlük ve Kanıt" },
-      { name: "description", content: "OneCite'ın yapay zeka atıf zekası vizyonunu, ölçüm yaklaşımını ve FilmFolk vaka özetini slayt formatında keşfedin." },
+      { name: "description", content: "OneCite'ın yapay zeka AI Citation Intelligence vizyonunu, ölçüm yaklaşımını ve FilmFolk vaka özetini slayt formatında keşfedin." },
       { property: "og:title", content: "OneCite Sunum | Görünürlük ve Kanıt" },
       { property: "og:description", content: "OneCite'ın kısa sunumunu keşfedin: ölçüm, kanıt ve aksiyon." },
       { property: "og:url", content: "https://1cite.com/sunum" },

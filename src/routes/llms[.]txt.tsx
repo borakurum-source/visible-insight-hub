@@ -7,7 +7,7 @@ const CONTENT = `# OneCite (1cite.com)
 ## Ne yapar
 - AI Kaynak Payı ölçümü: Tanımlı sorularda markanın anılma oranı, sıralaması ve gösterilen kaynak alan adları ölçülür.
 - Skor kırılımı: Anılma oranı (%40), AI kaynak payı (%25), konum kalitesi (%15), bilgi kapsamı (%10), iddia kanıtı (%10).
-- Eksik kanıt (evidence gap) analizi: Yapay zekanın alıntılayabileceği kanıtın hangi konularda eksik olduğunu gösterir.
+- Eksik kanıt (evidence gap) analizi: Yapay zekanın kaynak gösterebileceği kanıtın hangi konularda eksik olduğunu gösterir.
 - Uygulama: Eksik kanıtı içerik ve bilgi bankası görevlerine dönüştürür.
 
 ## Önemli sayfalar

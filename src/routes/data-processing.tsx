@@ -207,7 +207,7 @@ function DataProcessingPage() {
           <Section title="4. Saklama süreleri">
             <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
               <li>Hesap ve marka kayıtları: hesap aktif olduğu sürece, kapanıştan sonra 90 gün.</li>
-              <li>Ölçüm sonuçları ve atıf kayıtları: 24 ay.</li>
+              <li>Ölçüm sonuçları ve kaynak gösterimi kayıtları: 24 ay.</li>
               <li>Bilgi bankası içerikleri ve embedding vektörleri: siz silene kadar.</li>
               <li>Önbelleğe alınan yapay zeka yanıtları: 30 gün.</li>
               <li>Fatura kayıtları: mevzuat gereği 10 yıl (Paddle nezdinde).</li>

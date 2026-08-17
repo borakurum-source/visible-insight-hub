@@ -235,7 +235,7 @@ function FilmFolkCaseStudy() {
             <Reveal>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Arama görünürlüğü bağlamı</p>
-                <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Search Console, atıf sonucunu kanıtlamaz; bağlamı zenginleştirir.</h2>
+                <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Search Console, kaynak gösterimi sonucunu kanıtlamaz; bağlamı zenginleştirir.</h2>
                 <p className="mt-5 text-base leading-7 text-muted-foreground">18 Mayıs–12 Ağustos 2026 tarihleri arasındaki 87 günlük Google Search Console exportu yalnızca <strong>Web</strong> arama türünü kapsar. Bu veri yapay zeka AI kaynak payının nedeni veya sonucu değildir.</p>
                 <div className="mt-7 grid gap-3 text-sm">
                   <p className="flex items-center gap-3 font-semibold text-foreground"><FileSearch className="h-4 w-4 text-primary" />Canlı yayın hizmeti: 3.377 gösterim</p>

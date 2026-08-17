@@ -143,7 +143,7 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
         metric="ai-citations"
         title="AI Kaynak Trafiği"
         value={fmt(data.aiReferral.total)}
-        caption={`atıf · ${fmt(data.aiReferral.ownDomain)} tanesi kendi siteniz (30 gün)`}
+        caption={`kaynak · ${fmt(data.aiReferral.ownDomain)} tanesi kendi siteniz (30 gün)`}
       >
         {data.aiReferral.total ? (
           <ResponsiveContainer width="100%" height="100%">
@@ -156,7 +156,7 @@ export function TrafficCharts({ data }: { data: TrafficOverview }) {
               </defs>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} />
               <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} width={34} allowDecimals={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [fmt(value), "Atıf"]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [fmt(value), "Kaynak gösterimi"]} />
               <Area type="monotone" dataKey="citations" stroke="var(--chart-5)" strokeWidth={2} fill="url(#refFill)" />
             </AreaChart>
           </ResponsiveContainer>

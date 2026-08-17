@@ -169,7 +169,7 @@ function KnowledgeBasePage() {
         hint={<><p>Buraya eklediğiniz sayfalar ve notlar, yapay zekanın markanız hakkında okuduğu <strong>kaynak dosyanızdır</strong>.</p><p>1) Site haritanızı veya önemli URL'leri ekleyin. 2) "İndeksle" deyin. 3) İçerik vektöre dönüşür ve ölçüm/üretim adımlarında kullanılır.</p></>}
         meta={{
           title: "Bilgi Bankası",
-          description: "Yapay zeka cevaplarında kaynak gösterilmesini istediğiniz sayfalar. Ne kadar net, o kadar çok alıntı.",
+          description: "Yapay zeka cevaplarında kaynak gösterilmesini istediğiniz sayfalar. Ne kadar net, o kadar çok kaynak gösterimi.",
           icon: BookOpen,
         }}
         action={
@@ -349,7 +349,7 @@ function KnowledgeBasePage() {
                     </a>
                   </span>
                   <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
-                    {candidate.type === "own" ? "Sizin siteniz" : candidate.type === "competitor" ? "Rakip" : "Tarafsız"} · {candidate.count} atıf
+                    {candidate.type === "own" ? "Sizin siteniz" : candidate.type === "competitor" ? "Rakip" : "Tarafsız"} · {candidate.count} kaynak gösterimi
                   </Badge>
                   <Button
                     size="sm"

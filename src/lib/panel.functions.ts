@@ -1112,7 +1112,7 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       if (sources.length) {
         actions.push({
           key: "cited-sources",
-          title: "Alıntılanan kaynaklarda yer alın",
+          title: "Seçilen kaynaklarda yer alın",
           description: `Bu yanıtta ${sources.slice(0, 3).map((s) => s.domain).join(", ")} kaynak gösterildi. Bu sayfalarda listelenmek, karşılaştırmaya girmek veya benzer kapsamda kendi sayfanızı üretmek için çalışın.`,
           priority: "medium",
         });

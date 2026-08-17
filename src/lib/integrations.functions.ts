@@ -292,7 +292,7 @@ export type BingOverview = {
   };
 };
 
-// Komuta merkezi için GSC anlık görüntüsü + yapay zeka atıf/görünürlük trafiği.
+// Komuta merkezi için GSC anlık görüntüsü + yapay zeka kaynak/görünürlük trafiği.
 export const getTrafficOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; days?: number }) => input)

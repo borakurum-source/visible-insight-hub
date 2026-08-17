@@ -66,7 +66,7 @@ function TermsPage() {
 
       <Section title="2. Hizmet tanımı">
         <p>
-          OneCite, markanızın yapay zeka yanıt motorlarındaki (LLM/AI arama) görünürlüğünü ölçen, atıf
+          OneCite, markanızın yapay zeka yanıt motorlarındaki (LLM/AI arama) görünürlüğünü ölçen, kaynak gösterimi
           kaynaklarını listeleyen, içerik ve aksiyon önerileri üreten bir SaaS platformudur. Seçtiğiniz plan
           kapsamında, sınırlı, münhasır olmayan ve devredilemez bir kullanım hakkı verilir.
         </p>
