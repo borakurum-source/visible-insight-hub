@@ -7,6 +7,7 @@ export type MeasuredAnswer = {
   brandMentioned: boolean;
   position: number | null;
   sources: MeasuredSource[];
+  mentionedBrands: string[];
 };
 
 export async function measurePrompt(input: {
@@ -51,11 +52,16 @@ export async function measurePrompt(input: {
   const idx = brands.findIndex((b) => b.includes(needle) || (domainRoot.length > 2 && b.includes(domainRoot)));
   const inText = (result.answer ?? "").toLowerCase().includes(needle);
 
+  const cleanBrands = (result.mentionedBrands ?? [])
+    .map((b) => String(b).trim())
+    .filter((b) => b.length > 1 && b.length < 80);
+
   return {
     answer: String(result.answer ?? ""),
     brandMentioned: idx >= 0 || inText,
     position: idx >= 0 ? idx + 1 : null,
     sources: sources.slice(0, 10),
+    mentionedBrands: cleanBrands,
   };
 }
 
