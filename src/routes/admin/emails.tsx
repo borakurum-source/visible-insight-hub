@@ -67,12 +67,12 @@ function TemplatesTab() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isLoading) return <Loader2 className="h-5 w-5 animate-spin text-cyan" />;
+  if (isLoading) return <Loader2 className="h-5 w-5 animate-spin text-sky-600" />;
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] p-3">
-        <Label className="text-xs text-slate-400">Test adresi</Label>
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <Label className="text-xs text-slate-500">Test adresi</Label>
         <Input value={testTo} onChange={(e) => setTestTo(e.target.value)} placeholder="ornek@1cite.com" className="max-w-xs" />
       </div>
       {(data ?? []).map((tpl) => {
@@ -166,15 +166,15 @@ function SendTab() {
 function LogsTab() {
   const fetchLogs = useServerFn(adminListEmailLogs);
   const { data, isLoading } = useQuery({ queryKey: ["admin", "email-logs"], queryFn: () => fetchLogs() });
-  if (isLoading) return <Loader2 className="h-5 w-5 animate-spin text-cyan" />;
+  if (isLoading) return <Loader2 className="h-5 w-5 animate-spin text-sky-600" />;
   return (
     <AdminCard>
       <Table head={["Zaman", "Alıcı", "Konu", "Şablon", "Durum"]}>
         {(data ?? []).map((row: any) => (
           <tr key={row.id}>
-            <td className="px-3 py-2 text-xs text-slate-400">{dateTime(row.created_at)}</td>
-            <td className="px-3 py-2 text-white">{row.to_email}</td>
-            <td className="px-3 py-2 text-xs text-slate-300">{row.subject}</td>
+            <td className="px-3 py-2 text-xs text-slate-500">{dateTime(row.created_at)}</td>
+            <td className="px-3 py-2 text-slate-900">{row.to_email}</td>
+            <td className="px-3 py-2 text-xs text-slate-600">{row.subject}</td>
             <td className="px-3 py-2 text-xs text-slate-500">{row.template_key ?? "—"}</td>
             <td className="px-3 py-2">
               <Pill tone={row.status === "sent" ? "good" : row.status === "suppressed" ? "warn" : "bad"}>{row.status}</Pill>

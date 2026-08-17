@@ -26,18 +26,18 @@ function SubscriptionsPage() {
         <StatCard label="Toplam kayıt" value={rows.length} />
       </div>
       <AdminCard>
-        {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-cyan" /> : (
+        {isLoading ? <Loader2 className="h-5 w-5 animate-spin text-sky-600" /> : (
           <Table head={["Hesap", "Durum", "Plan", "Ortam", "Dönem sonu", "Paddle ID"]}>
             {rows.map((row) => (
               <tr key={row.id}>
-                <td className="px-3 py-2 text-white">{row.email ?? row.user_id}</td>
+                <td className="px-3 py-2 text-slate-900">{row.email ?? row.user_id}</td>
                 <td className="px-3 py-2">
                   <Pill tone={row.status === "active" ? "good" : row.status === "canceled" ? "bad" : "warn"}>{row.status}</Pill>
                   {row.cancel_at_period_end ? <Pill tone="warn">iptal edilecek</Pill> : null}
                 </td>
-                <td className="px-3 py-2 text-xs text-slate-400">{PLAN_LABEL[row.profilePlan ?? ""] ?? row.profilePlan ?? "—"}</td>
-                <td className="px-3 py-2 text-xs text-slate-400">{row.environment}</td>
-                <td className="px-3 py-2 text-xs text-slate-400">{dateOnly(row.current_period_end)}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{PLAN_LABEL[row.profilePlan ?? ""] ?? row.profilePlan ?? "—"}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{row.environment}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{dateOnly(row.current_period_end)}</td>
                 <td className="px-3 py-2 text-[11px] text-slate-500">{row.paddle_subscription_id}</td>
               </tr>
             ))}

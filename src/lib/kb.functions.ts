@@ -136,6 +136,34 @@ export const promoteCitationToSource = createServerFn({ method: "POST" })
   });
 
 // RAG geri getirme testi: soruyu embed eder, en yakın bilgi parçalarını döner.
+export const discoverSitemapSources = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; limit?: number }) => input)
+  .handler(async ({ data, context }) => {
+    const { fetchSitemapUrls, normalizeDomain } = await import("./ai.server");
+    const { data: brand } = await context.supabase
+      .from("brands").select("domain").eq("id", data.brandId).maybeSingle();
+    if (!brand?.domain) return { urls: [] as { url: string; title: string }[] };
+
+    const { data: existing } = await context.supabase
+      .from("knowledge_sources").select("url").eq("brand_id", data.brandId);
+    const seen = new Set((existing ?? []).map((s) => (s.url ?? "").replace(/\/$/, "")));
+
+    // Dusuk degerli sayfalari (sepet, hesap, hukuki metin, etiket vb.) eleriz.
+    const NOISE = /(sepet|cart|checkout|odeme|payment|login|giris|uye|account|hesap|wishlist|favori|kvkk|gizlilik|privacy|cerez|cookie|kullanim-kosullari|terms|mesafeli|iade|refund|teslimat|shipping|iletisim|contact|sitemap|feed|\?|#|tag\/|etiket\/|author\/|yazar\/|\/page\/|\.(jpg|png|pdf|xml|json)$)/i;
+
+    const urls = await fetchSitemapUrls(normalizeDomain(brand.domain), Math.min(data.limit ?? 60, 120));
+    const filtered = urls
+      .filter((url) => !NOISE.test(url) && !seen.has(url.replace(/\/$/, "")))
+      .slice(0, 40)
+      .map((url) => {
+        const slug = url.replace(/\/$/, "").split("/").pop() ?? url;
+        const title = decodeURIComponent(slug).replace(/[-_]+/g, " ").replace(/\.(html?|php)$/i, "").trim();
+        return { url, title: (title ? title.charAt(0).toUpperCase() + title.slice(1) : url).slice(0, 120) };
+      });
+    return { urls: filtered };
+  });
+
 export const searchKnowledge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; query: string }) => input)

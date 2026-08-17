@@ -60,13 +60,13 @@ function CustomersPage() {
         </div>
 
         {isLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin text-cyan" />
+          <Loader2 className="h-5 w-5 animate-spin text-sky-600" />
         ) : (
-          <Table head={["Hesap", "Plan", "Abonelik", "Marka", "Deneme bitişi", "Kayıt", ""]}>
+          <Table head={["Hesap", "Plan", "Abonelik", "Marka", "API (30g)", "Deneme bitişi", "Kayıt", ""]}>
             {rows.map((row) => (
               <tr key={row.id} className={row.suspended ? "opacity-60" : ""}>
                 <td className="px-3 py-2">
-                  <div className="text-white">{row.full_name || "—"}</div>
+                  <div className="text-slate-900">{row.full_name || "—"}</div>
                   <div className="text-xs text-slate-500">{row.email}</div>
                 </td>
                 <td className="px-3 py-2">
@@ -76,10 +76,11 @@ function CustomersPage() {
                     {row.suspended ? <Pill tone="bad">Askıda</Pill> : null}
                   </div>
                 </td>
-                <td className="px-3 py-2 text-xs text-slate-400">{row.subscriptionStatus ?? "—"}</td>
-                <td className="px-3 py-2 text-xs tabular-nums text-slate-400">{row.brandCount}</td>
-                <td className="px-3 py-2 text-xs text-slate-400">{dateOnly(row.trial_ends_at)}</td>
-                <td className="px-3 py-2 text-xs text-slate-400">{dateOnly(row.created_at)}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{row.subscriptionStatus ?? "—"}</td>
+                <td className="px-3 py-2 text-xs tabular-nums text-slate-500">{row.brandCount}</td>
+                <td className="px-3 py-2 text-xs tabular-nums text-sky-600">{money(row.apiCost30d ?? 0)}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{dateOnly(row.trial_ends_at)}</td>
+                <td className="px-3 py-2 text-xs text-slate-500">{dateOnly(row.created_at)}</td>
                 <td className="px-3 py-2 text-right">
                   <Button size="sm" variant="outline" onClick={() => setSelected(row.id)}>
                     <UserCog className="mr-1 h-3.5 w-3.5" /> Yönet
@@ -87,13 +88,13 @@ function CustomersPage() {
                 </td>
               </tr>
             ))}
-            {rows.length === 0 ? <EmptyRow colSpan={7}>Kayıt bulunamadı.</EmptyRow> : null}
+            {rows.length === 0 ? <EmptyRow colSpan={8}>Kayıt bulunamadı.</EmptyRow> : null}
           </Table>
         )}
       </AdminCard>
 
       <Sheet open={Boolean(selected)} onOpenChange={(open) => !open && setSelected(null)}>
-        <SheetContent className="w-full overflow-y-auto border-white/10 bg-[#0B1220] text-slate-100 sm:max-w-xl">
+        <SheetContent className="w-full overflow-y-auto border-slate-200 bg-white text-slate-900 sm:max-w-xl">
           {selected ? <CustomerDetail userId={selected} onClose={() => setSelected(null)} /> : null}
         </SheetContent>
       </Sheet>
@@ -159,14 +160,14 @@ function CustomerDetail({ userId, onClose }: { userId: string; onClose: () => vo
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isLoading || !data) return <div className="p-6"><Loader2 className="h-5 w-5 animate-spin text-cyan" /></div>;
+  if (isLoading || !data) return <div className="p-6"><Loader2 className="h-5 w-5 animate-spin text-sky-600" /></div>;
   const profile = data.profile;
 
   return (
     <div className="space-y-5">
       <SheetHeader>
-        <SheetTitle className="text-white">{profile.full_name || profile.email}</SheetTitle>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+        <SheetTitle className="text-slate-900">{profile.full_name || profile.email}</SheetTitle>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
           <span>{profile.email}</span>
           <Pill tone={profile.plan === "expired" ? "bad" : "info"}>{PLAN_LABEL[profile.plan] ?? profile.plan}</Pill>
           {profile.suspended ? <Pill tone="bad">Askıda</Pill> : null}
@@ -181,9 +182,9 @@ function CustomerDetail({ userId, onClose }: { userId: string; onClose: () => vo
           { label: "Rakip", value: data.usage.competitors },
           { label: "API maliyeti", value: money(data.usage.apiCost) },
         ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-white/10 bg-white/[0.02] p-2">
+          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
             <div className="text-[10px] uppercase tracking-wider text-slate-500">{item.label}</div>
-            <div className="text-sm font-semibold text-white">{item.value}</div>
+            <div className="text-sm font-semibold text-slate-900">{item.value}</div>
           </div>
         ))}
       </div>
@@ -198,7 +199,7 @@ function CustomerDetail({ userId, onClose }: { userId: string; onClose: () => vo
             <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Gerekçe (opsiyonel)" className="min-w-[180px] flex-1" />
             <Button size="sm" onClick={() => planMutation.mutate()} disabled={planMutation.isPending}>Bedelsiz uygula</Button>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
             Deneme bitişi: {dateOnly(profile.trial_ends_at)}
             {[7, 14, 30].map((d) => (
               <Button key={d} size="sm" variant="outline" onClick={() => trialMutation.mutate(d)} disabled={trialMutation.isPending}>+{d} gün</Button>
@@ -211,10 +212,10 @@ function CustomerDetail({ userId, onClose }: { userId: string; onClose: () => vo
         {data.brands.length === 0 ? <p className="text-sm text-slate-500">Marka yok.</p> : (
           <div className="space-y-2">
             {data.brands.map((brand: any) => (
-              <div key={brand.id} className="rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2">
+              <div key={brand.id} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <div className="text-sm text-white">{brand.name}</div>
+                    <div className="text-sm text-slate-900">{brand.name}</div>
                     <div className="text-xs text-slate-500">{brand.domain}</div>
                   </div>
                   <Pill tone={brand.onboarding_completed ? "good" : "warn"}>{brand.onboarding_completed ? "Kurulum tamam" : "Kurulum yarım"}</Pill>
@@ -248,7 +249,7 @@ function CustomerDetail({ userId, onClose }: { userId: string; onClose: () => vo
         </div>
         <div className="mt-3 space-y-2">
           {data.notes.map((n: any) => (
-            <div key={n.id} className="rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 text-xs text-slate-300">
+            <div key={n.id} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
               <div className="text-[10px] text-slate-500">{dateTime(n.created_at)}</div>
               {n.note}
             </div>
@@ -263,7 +264,7 @@ function CustomerDetail({ userId, onClose }: { userId: string; onClose: () => vo
             {profile.suspended ? "Askıyı kaldır" : "Hesabı askıya al"}
           </Button>
           <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3">
-            <Label className="text-xs text-red-300">Hesabı kalıcı sil — onay için e-postayı yazın</Label>
+            <Label className="text-xs text-red-600">Hesabı kalıcı sil — onay için e-postayı yazın</Label>
             <div className="mt-2 flex gap-2">
               <Input value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} placeholder={profile.email ?? ""} />
               <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>

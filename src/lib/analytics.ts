@@ -15,8 +15,6 @@ declare global {
   }
 }
 
-let loaded = false;
-
 function ensureGtag() {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
@@ -27,18 +25,17 @@ function ensureGtag() {
   }
 }
 
-function loadGa() {
-  if (loaded || typeof document === "undefined" || !GA_MEASUREMENT_ID) return;
-  loaded = true;
+// Etiket HTML head icinde her zaman yuklu; burada yalnizca Consent Mode durumu guncellenir.
+function syncConsent() {
+  if (typeof window === "undefined") return;
   ensureGtag();
-
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-  document.head.appendChild(script);
-
-  window.gtag!("js", new Date());
-  window.gtag!("config", GA_MEASUREMENT_ID, { send_page_view: true });
+  const granted = hasConsent("analytics");
+  window.gtag!("consent", "update", {
+    analytics_storage: granted ? "granted" : "denied",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+  });
 }
 
 /** Onay verildiyse GA'yı yükler, sayfa değişimlerinde page_view gönderir. */
@@ -47,9 +44,7 @@ export function useGoogleAnalytics() {
   const search = useRouterState({ select: (s) => s.location.searchStr });
 
   useEffect(() => {
-    const sync = () => {
-      if (hasConsent("analytics")) loadGa();
-    };
+    const sync = () => syncConsent();
     sync();
     window.addEventListener(CONSENT_EVENT, sync);
     window.addEventListener("storage", sync);
@@ -60,7 +55,7 @@ export function useGoogleAnalytics() {
   }, []);
 
   useEffect(() => {
-    if (!loaded || !window.gtag) return;
+    if (typeof window === "undefined" || !window.gtag) return;
     window.gtag("event", "page_view", {
       page_path: `${pathname}${search || ""}`,
       page_location: window.location.href,
@@ -71,7 +66,7 @@ export function useGoogleAnalytics() {
 
 /** Özel olay gönderimi (onay yoksa sessizce yok sayılır). */
 export function trackEvent(name: string, params: Record<string, unknown> = {}) {
-  if (typeof window === "undefined" || !loaded || !window.gtag) return;
+  if (typeof window === "undefined" || !window.gtag) return;
   window.gtag("event", name, params);
 }
 

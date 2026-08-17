@@ -13,7 +13,7 @@ const shell = (inner: string) => `<div style="font-family:system-ui,-apple-syste
   <div style="max-width:560px;margin:0 auto;background:#111A2B;border:1px solid #1F2C42;border-radius:16px;padding:28px;color:#E6EDF7">
     <div style="font-size:18px;font-weight:700;color:#38E1D3;margin-bottom:16px">OneCite</div>
     ${inner}
-    <p style="margin-top:28px;font-size:12px;color:#7C8CA6">OneCite · Yapay zekâ görünürlük platformu<br/>1cite.com</p>
+    <p style="margin-top:28px;font-size:12px;color:#7C8CA6">OneCite · Yapay zeka görünürlük platformu<br/>1cite.com</p>
   </div>
 </div>`;
 

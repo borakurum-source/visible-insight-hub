@@ -35,11 +35,11 @@ function AdminPromptsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isLoading) return <Loader2 className="h-5 w-5 animate-spin text-cyan" />;
+  if (isLoading) return <Loader2 className="h-5 w-5 animate-spin text-sky-600" />;
 
   return (
     <div className="space-y-5">
-      <AdminHeading title="Sistem talimatları" description="Ölçüm, keşif ve içerik üretimini yöneten yapay zekâ talimatları." />
+      <AdminHeading title="Sistem talimatları" description="Ölçüm, keşif ve içerik üretimini yöneten yapay zeka talimatları." />
       {(data?.items ?? []).map((item) => {
         const value = drafts[item.key] ?? item.content;
         return (

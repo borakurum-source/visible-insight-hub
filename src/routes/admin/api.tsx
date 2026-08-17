@@ -45,11 +45,11 @@ function ApiPage() {
         <Table head={["Sağlayıcı", "Kullanım", "Anahtar", "7g çağrı", "7g hata", "Son çağrı"]}>
           {(providers.data ?? []).map((p) => (
             <tr key={p.key}>
-              <td className="px-3 py-2 text-white">{p.label}</td>
-              <td className="px-3 py-2 text-xs text-slate-400">{p.usage}</td>
+              <td className="px-3 py-2 text-slate-900">{p.label}</td>
+              <td className="px-3 py-2 text-xs text-slate-500">{p.usage}</td>
               <td className="px-3 py-2"><Pill tone={p.configured ? "good" : "bad"}>{p.configured ? "Tanımlı" : "Eksik"}</Pill></td>
-              <td className="px-3 py-2 tabular-nums text-slate-300">{p.calls7d}</td>
-              <td className="px-3 py-2 tabular-nums text-slate-300">{p.errors7d}</td>
+              <td className="px-3 py-2 tabular-nums text-slate-600">{p.calls7d}</td>
+              <td className="px-3 py-2 tabular-nums text-slate-600">{p.errors7d}</td>
               <td className="px-3 py-2 text-xs text-slate-500">{dateTime(p.lastCall)}</td>
             </tr>
           ))}
@@ -60,17 +60,17 @@ function ApiPage() {
       </AdminCard>
 
       <AdminCard title="Sağlayıcı bazında maliyet">
-        {usage.isLoading ? <Loader2 className="h-5 w-5 animate-spin text-cyan" /> : (
+        {usage.isLoading ? <Loader2 className="h-5 w-5 animate-spin text-sky-600" /> : (
           <Table head={["Sağlayıcı", "Çağrı", "Hata", "Token", "Ort. süre", "En yavaş", "Maliyet"]}>
             {(usage.data?.providers ?? []).map((p) => (
               <tr key={p.provider}>
-                <td className="px-3 py-2 text-white">{p.provider}</td>
-                <td className="px-3 py-2 tabular-nums text-slate-300">{p.calls}</td>
-                <td className="px-3 py-2 tabular-nums text-slate-300">{p.errors}</td>
-                <td className="px-3 py-2 tabular-nums text-slate-300">{p.tokens.toLocaleString("tr-TR")}</td>
-                <td className="px-3 py-2 tabular-nums text-slate-300">{p.avgMs} ms</td>
-                <td className="px-3 py-2 tabular-nums text-slate-300">{p.maxMs} ms</td>
-                <td className="px-3 py-2 tabular-nums text-cyan">{money(p.cost)}</td>
+                <td className="px-3 py-2 text-slate-900">{p.provider}</td>
+                <td className="px-3 py-2 tabular-nums text-slate-600">{p.calls}</td>
+                <td className="px-3 py-2 tabular-nums text-slate-600">{p.errors}</td>
+                <td className="px-3 py-2 tabular-nums text-slate-600">{p.tokens.toLocaleString("tr-TR")}</td>
+                <td className="px-3 py-2 tabular-nums text-slate-600">{p.avgMs} ms</td>
+                <td className="px-3 py-2 tabular-nums text-slate-600">{p.maxMs} ms</td>
+                <td className="px-3 py-2 tabular-nums text-sky-600">{money(p.cost)}</td>
               </tr>
             ))}
             {(usage.data?.providers ?? []).length === 0 ? <EmptyRow colSpan={7}>Bu aralıkta kayıt yok.</EmptyRow> : null}
@@ -94,9 +94,9 @@ function ApiPage() {
           <Table head={["Marka", "Çağrı", "Maliyet"]}>
             {(usage.data?.brands ?? []).map((b) => (
               <tr key={b.brand}>
-                <td className="px-3 py-2 text-white">{b.brand}</td>
-                <td className="px-3 py-2 tabular-nums text-slate-300">{b.calls}</td>
-                <td className="px-3 py-2 tabular-nums text-cyan">{money(b.cost)}</td>
+                <td className="px-3 py-2 text-slate-900">{b.brand}</td>
+                <td className="px-3 py-2 tabular-nums text-slate-600">{b.calls}</td>
+                <td className="px-3 py-2 tabular-nums text-sky-600">{money(b.cost)}</td>
               </tr>
             ))}
             {(usage.data?.brands ?? []).length === 0 ? <EmptyRow colSpan={3}>Veri yok.</EmptyRow> : null}
@@ -104,14 +104,31 @@ function ApiPage() {
         </AdminCard>
       </div>
 
+      <AdminCard title="Müşteri bazında API tüketimi">
+        <Table head={["Müşteri", "Plan", "Çağrı", "Maliyet"]}>
+          {(usage.data?.customers ?? []).map((c) => (
+            <tr key={c.userId}>
+              <td className="px-3 py-2">
+                <div className="text-slate-900">{c.fullName || c.email}</div>
+                <div className="text-xs text-slate-500">{c.email}</div>
+              </td>
+              <td className="px-3 py-2 text-xs text-slate-500">{c.plan}</td>
+              <td className="px-3 py-2 tabular-nums text-slate-600">{c.calls}</td>
+              <td className="px-3 py-2 tabular-nums text-sky-600">{money(c.cost)}</td>
+            </tr>
+          ))}
+          {(usage.data?.customers ?? []).length === 0 ? <EmptyRow colSpan={4}>Veri yok.</EmptyRow> : null}
+        </Table>
+      </AdminCard>
+
       <AdminCard title="Son hatalı çağrılar">
         <Table head={["Zaman", "Sağlayıcı", "İşlem", "Hata"]}>
           {(usage.data?.failures ?? []).map((f, index) => (
             <tr key={`${f.created_at}-${index}`}>
-              <td className="px-3 py-2 text-xs text-slate-400">{dateTime(f.created_at)}</td>
-              <td className="px-3 py-2 text-white">{f.provider}</td>
-              <td className="px-3 py-2 text-xs text-slate-400">{f.operation}</td>
-              <td className="px-3 py-2 text-xs text-red-300">{f.error}</td>
+              <td className="px-3 py-2 text-xs text-slate-500">{dateTime(f.created_at)}</td>
+              <td className="px-3 py-2 text-slate-900">{f.provider}</td>
+              <td className="px-3 py-2 text-xs text-slate-500">{f.operation}</td>
+              <td className="px-3 py-2 text-xs text-red-600">{f.error}</td>
             </tr>
           ))}
           {(usage.data?.failures ?? []).length === 0 ? <EmptyRow colSpan={4}>Hatalı çağrı yok.</EmptyRow> : null}

@@ -23,9 +23,9 @@ import { useActiveBrand } from "@/lib/use-panel";
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({
     meta: [
-      { title: "Komuta Merkezi — OneCite Paneli" },
+      { title: "Dashboard — OneCite Paneli" },
       { name: "description", content: "Marka görünürlüğünüzün, promptlarınızın ve kanıt varlıklarınızın canlı özeti." },
-      { property: "og:title", content: "Komuta Merkezi — OneCite Paneli" },
+      { property: "og:title", content: "Dashboard — OneCite Paneli" },
       { property: "og:description", content: "AI görünürlüğünüzün canlı özeti." },
       { name: "robots", content: "noindex" },
     ],
@@ -78,7 +78,7 @@ function DashboardPage() {
     <>
       <PanelPageHeading
         meta={{
-          title: "Komuta Merkezi",
+          title: "Dashboard",
           description: brand ? `${brand.name} · ${brand.domain}` : "Başlamak için bir marka ekleyin.",
           icon: LayoutDashboard,
         }}

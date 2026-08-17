@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BookOpen, ExternalLink, Loader2, Plus, RefreshCw, Sparkles, Trash2 } from "lucide-react";
+import { BookOpen, ExternalLink, Loader2, Plus, RefreshCw, Sparkles, Trash2, Map } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, KNOWLEDGE_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +19,7 @@ import {
   rebuildGraphEntities,
   rebuildVectorMap,
   refreshStaleSources,
+  discoverSitemapSources,
 } from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 
@@ -50,6 +51,9 @@ function KnowledgeBasePage() {
   const promoteCandidate = useServerFn(promoteCitationToSource);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
+  const discoverSitemap = useServerFn(discoverSitemapSources);
+  const [sitemapUrls, setSitemapUrls] = useState<{ url: string; title: string }[]>([]);
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
 
   const key = ["knowledge-sources", brand?.id];
   const { data = [], isLoading } = useQuery({
@@ -118,6 +122,30 @@ function KnowledgeBasePage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const sitemapMutation = useMutation({
+    mutationFn: () => discoverSitemap({ data: { brandId: brand!.id } }),
+    onSuccess: (result) => {
+      setSitemapUrls(result.urls);
+      setPicked(Object.fromEntries(result.urls.slice(0, 10).map((item) => [item.url, true])));
+      if (result.urls.length === 0) toast.info("Site haritasında eklenecek yeni sayfa bulunamadı.");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const bulkAddMutation = useMutation({
+    mutationFn: () => {
+      const items = sitemapUrls.filter((item) => picked[item.url]);
+      return addSources({ data: { brandId: brand!.id, items } });
+    },
+    onSuccess: () => {
+      toast.success("Seçilen sayfalar eklendi. Şimdi 'Bekleyenleri indeksle' diyebilirsiniz.");
+      setSitemapUrls([]);
+      setPicked({});
+      invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => removeSource({ data: { id } }),
     onSuccess: invalidate,
@@ -176,45 +204,58 @@ function KnowledgeBasePage() {
         </Button>
       </div>
 
-      {candidates.length > 0 ? (
-        <Card>
-          <CardContent className="space-y-3 p-4">
+
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Sparkles className="h-4 w-4 text-primary" />
-              Ölçümden gelen aday kaynaklar
+              <Map className="h-4 w-4 text-primary" /> Site haritasından hızlı ekleme
             </div>
-            <p className="text-xs text-muted-foreground">
-              Yapay zekanın cevaplarında alıntıladığı, bilgi bankanızda henüz olmayan sayfalar. Ekleyince marka zekasına dahil olur.
-            </p>
-            <ul className="divide-y divide-border">
-              {candidates.map((candidate) => (
-                <li key={candidate.url} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-medium">{candidate.title}</span>
-                    <a href={candidate.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-primary">
-                      {candidate.domain} <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </span>
-                  <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
-                    {candidate.type === "own" ? "Sizin siteniz" : candidate.type === "competitor" ? "Rakip" : "Tarafsız"} · {candidate.count} atıf
-                  </Badge>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={promoteMutation.isPending}
-                    onClick={() => promoteMutation.mutate({ url: candidate.url, title: candidate.title })}
-                  >
-                    <Plus className="mr-1.5 h-3.5 w-3.5" /> Bilgi bankasına ekle
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      ) : null}
+            <Button size="sm" variant="outline" disabled={sitemapMutation.isPending} onClick={() => sitemapMutation.mutate()}>
+              {sitemapMutation.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-1.5 h-4 w-4" />}
+              Site haritasını tara
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Sepet, giriş, hukuki metin ve etiket sayfaları otomatik elenir; yalnızca kanıt değeri olan sayfalar listelenir.
+          </p>
+          {sitemapUrls.length > 0 ? (
+            <>
+              <ul className="max-h-72 divide-y divide-border overflow-y-auto rounded-md border border-border">
+                {sitemapUrls.map((item) => (
+                  <li key={item.url} className="flex items-center gap-3 p-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-[var(--primary)]"
+                      checked={Boolean(picked[item.url])}
+                      onChange={(event) => setPicked((prev) => ({ ...prev, [item.url]: event.target.checked }))}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium">{item.title}</span>
+                      <span className="block truncate font-mono text-xs text-muted-foreground">{item.url}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                size="sm"
+                disabled={bulkAddMutation.isPending || !Object.values(picked).some(Boolean)}
+                onClick={() => bulkAddMutation.mutate()}
+              >
+                {bulkAddMutation.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Plus className="mr-1.5 h-4 w-4" />}
+                Seçilenleri ekle
+              </Button>
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="p-0">
+          <div className="flex items-center gap-2 border-b border-border p-3 text-sm font-medium">
+            <BookOpen className="h-4 w-4 text-primary" /> Sizin kaynaklarınız
+            <span className="text-xs font-normal text-muted-foreground">({data.length})</span>
+          </div>
           {isLoading ? (
             <p className="flex items-center gap-2 p-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Yükleniyor…</p>
           ) : data.length === 0 ? (
@@ -287,6 +328,43 @@ function KnowledgeBasePage() {
           )}
         </CardContent>
       </Card>
+
+      {candidates.length > 0 ? (
+        <Card>
+          <CardContent className="space-y-3 p-4">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Ölçümden gelen aday kaynaklar
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Yapay zekanın cevaplarında alıntıladığı, bilgi bankanızda henüz olmayan sayfalar. Ekleyince marka zekasına dahil olur.
+            </p>
+            <ul className="divide-y divide-border">
+              {candidates.map((candidate) => (
+                <li key={candidate.url} className="flex flex-wrap items-center gap-3 py-2 text-sm">
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-medium">{candidate.title}</span>
+                    <a href={candidate.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-primary">
+                      {candidate.domain} <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </span>
+                  <Badge variant="outline" className="shrink-0 text-[10px] font-normal">
+                    {candidate.type === "own" ? "Sizin siteniz" : candidate.type === "competitor" ? "Rakip" : "Tarafsız"} · {candidate.count} atıf
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={promoteMutation.isPending}
+                    onClick={() => promoteMutation.mutate({ url: candidate.url, title: candidate.title })}
+                  >
+                    <Plus className="mr-1.5 h-3.5 w-3.5" /> Bilgi bankasına ekle
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
     </>
   );
 }

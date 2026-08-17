@@ -216,6 +216,75 @@ export type Database = {
           },
         ]
       }
+      blog_posts: {
+        Row: {
+          answer_summary: string
+          author: string
+          body: string
+          canonical_url: string | null
+          category: string
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          faq: Json
+          id: string
+          og_image_url: string | null
+          published_at: string | null
+          read_minutes: number
+          slug: string
+          sources: Json
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          answer_summary?: string
+          author?: string
+          body?: string
+          canonical_url?: string | null
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          faq?: Json
+          id?: string
+          og_image_url?: string | null
+          published_at?: string | null
+          read_minutes?: number
+          slug: string
+          sources?: Json
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          answer_summary?: string
+          author?: string
+          body?: string
+          canonical_url?: string | null
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          faq?: Json
+          id?: string
+          og_image_url?: string | null
+          published_at?: string | null
+          read_minutes?: number
+          slug?: string
+          sources?: Json
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brand_domains: {
         Row: {
           brand_id: string

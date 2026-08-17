@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { EntityGraph } from "@/components/app/entity-graph";
 import { CompetitorFinder } from "@/components/app/competitor-finder";
+import { BrandFactSheet } from "@/components/app/brand-fact-sheet";
 import { getKnowledgeGraph, rebuildGraphEntities, rebuildVectorMap, searchKnowledge } from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
 import type { VectorPoint } from "@/components/app/vector-map-3d";
@@ -114,12 +115,17 @@ function GraphPage() {
         }
       />
 
-      <Tabs defaultValue="vector">
+      <Tabs defaultValue="facts">
         <TabsList>
+          <TabsTrigger value="facts">Bilgi Seti</TabsTrigger>
           <TabsTrigger value="vector">3D Vektör Haritası</TabsTrigger>
           <TabsTrigger value="entities">Varlık Ağı</TabsTrigger>
           <TabsTrigger value="retrieval">Geri Getirme Testi</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="facts" className="mt-4 space-y-4">
+          <BrandFactSheet brandId={brand.id} />
+        </TabsContent>
 
         <TabsContent value="vector" className="mt-4 space-y-4">
           <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
