@@ -240,7 +240,38 @@ export const listPrompts = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
       .from("prompts").select("*").eq("brand_id", data.brandId).order("created_at");
-    return rows ?? [];
+    const prompts = rows ?? [];
+    if (!prompts.length) return prompts.map((row) => ({ ...row, lastRun: null }));
+
+    const { data: runs } = await context.supabase
+      .from("prompt_runs")
+      .select("prompt_id, engine, created_at, brand_mentioned, position, visibility, run_index")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false })
+      .limit(2000);
+
+    const latest = new Map<string, { engine: string; createdAt: string; brandMentioned: boolean; position: number | null; visibility: number; runIndex: number | null }>();
+    for (const run of runs ?? []) {
+      if (!run.prompt_id || latest.has(run.prompt_id)) continue;
+      const visibility =
+        run.visibility === null || run.visibility === undefined
+          ? run.brand_mentioned
+            ? run.position
+              ? Math.max(40, 100 - (run.position - 1) * 10)
+              : 60
+            : 0
+          : Number(run.visibility);
+      latest.set(run.prompt_id, {
+        engine: run.engine,
+        createdAt: run.created_at,
+        brandMentioned: Boolean(run.brand_mentioned),
+        position: run.position,
+        visibility,
+        runIndex: run.run_index ?? null,
+      });
+    }
+
+    return prompts.map((row) => ({ ...row, lastRun: latest.get(row.id) ?? null }));
   });
 
 export type DiscoveredPrompt = {
@@ -826,6 +857,16 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         promptText: prompt.text,
         systemPrompt,
       });
+      const { count: previousRuns } = await context.supabase
+        .from("prompt_runs")
+        .select("id", { count: "exact", head: true })
+        .eq("prompt_id", prompt.id);
+      const runIndex = (previousRuns ?? 0) + 1;
+      const visibility = !measured.brandMentioned
+        ? 0
+        : measured.position
+          ? Math.max(40, 100 - (measured.position - 1) * 10)
+          : 60;
       const { data: run } = await context.supabase.from("prompt_runs").insert({
         brand_id: data.brandId,
         prompt_id: prompt.id,
@@ -834,7 +875,40 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         position: measured.position,
         raw_answer: measured.answer,
         answer_summary: measured.answer.slice(0, 280),
+        mentioned_brands: measured.mentionedBrands,
+        run_index: runIndex,
+        visibility,
       }).select("id").single();
+
+      // Yanıtta geçen, bilinmeyen markaları rakip adayı olarak biriktir.
+      const ownNeedle = brand.name.toLowerCase();
+      for (const rawName of measured.mentionedBrands) {
+        const name = rawName.trim();
+        const lower = name.toLowerCase();
+        if (!name || lower.includes(ownNeedle) || ownNeedle.includes(lower)) continue;
+        if (competitors.some((competitor) => competitorMatches(competitor, { answer: name, domains: [] }))) continue;
+        const { data: existing } = await context.supabase
+          .from("competitor_candidates")
+          .select("id, prompt_count, status")
+          .eq("brand_id", data.brandId)
+          .eq("name", name)
+          .maybeSingle();
+        if (existing) {
+          await context.supabase
+            .from("competitor_candidates")
+            .update({ prompt_count: (existing.prompt_count ?? 1) + 1, updated_at: new Date().toISOString() })
+            .eq("id", existing.id);
+        } else {
+          await context.supabase.from("competitor_candidates").insert({
+            brand_id: data.brandId,
+            name,
+            first_seen_run_id: run?.id ?? null,
+            first_seen_prompt_id: prompt.id,
+            prompt_count: 1,
+            status: "new",
+          });
+        }
+      }
 
       const seen = new Set<string>();
       const unique = measured.sources.filter((s) => (seen.has(s.url) ? false : seen.add(s.url)));
@@ -958,19 +1032,22 @@ export const getPlanUsage = createServerFn({ method: "POST" })
 // Prompt detayında: o soruya ait son ölçüm yanıtı, kaynakları ve önerilen aksiyonlar.
 export const getPromptInsight = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; promptId: string }) => input)
+  .inputValidator((input: { brandId: string; promptId: string; runId?: string }) => input)
   .handler(async ({ data, context }) => {
-    const [{ data: prompt }, { data: run }, { data: brand }] = await Promise.all([
+    const [{ data: prompt }, { data: runRows }, { data: brand }, { data: intel }] = await Promise.all([
       context.supabase.from("prompts").select("id, text, category").eq("id", data.promptId).single(),
       context.supabase
         .from("prompt_runs")
-        .select("id, brand_mentioned, position, raw_answer, answer_summary, engine, created_at")
+        .select("id, brand_mentioned, position, raw_answer, answer_summary, engine, created_at, mentioned_brands, run_index, visibility")
         .eq("prompt_id", data.promptId)
         .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+        .limit(20),
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
     ]);
+
+    const allRuns = runRows ?? [];
+    const run = (data.runId ? allRuns.find((row) => row.id === data.runId) : allRuns[0]) ?? allRuns[0] ?? null;
 
     const { data: citations } = run
       ? await context.supabase
@@ -986,6 +1063,35 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       type: c.citation_type ?? (c.is_own_domain ? "own" : "neutral"),
     }));
     const ownCited = sources.some((s) => s.type === "own");
+
+    // Yanıtta geçen markaları kendi markamız / takip edilen rakip / yeni olarak sınıflandır.
+    const { normalizeCompetitors, competitorMatches } = await import("./competitors");
+    const trackedCompetitors = normalizeCompetitors(intel?.competitors);
+    const ownNeedle = (brand?.name ?? "").toLowerCase();
+    const mentionedBrands = (Array.isArray(run?.mentioned_brands) ? (run?.mentioned_brands as unknown[]) : [])
+      .map((value) => String(value).trim())
+      .filter(Boolean)
+      .map((name, index) => {
+        const lower = name.toLowerCase();
+        const isOwn = Boolean(ownNeedle) && (lower.includes(ownNeedle) || ownNeedle.includes(lower));
+        const isTracked =
+          !isOwn && trackedCompetitors.some((competitor) => competitorMatches(competitor, { answer: name, domains: [] }));
+        return {
+          name,
+          rank: index + 1,
+          type: isOwn ? ("own" as const) : isTracked ? ("competitor" as const) : ("new" as const),
+        };
+      });
+
+    const { data: candidateRows } = await context.supabase
+      .from("competitor_candidates")
+      .select("id, name, domain, prompt_count, status")
+      .eq("brand_id", data.brandId)
+      .eq("status", "new")
+      .order("prompt_count", { ascending: false })
+      .limit(12);
+    const mentionedNames = new Set(mentionedBrands.map((item) => item.name.toLowerCase()));
+    const candidates = (candidateRows ?? []).filter((row) => mentionedNames.has(String(row.name).toLowerCase()));
 
     // Deterministik aksiyon önerileri — kullanıcı ne yapacağını net görsün.
     const actions: Array<{ key: string; title: string; description: string; priority: string }> = [];
@@ -1057,8 +1163,33 @@ export const getPromptInsight = createServerFn({ method: "POST" })
             answer: run.raw_answer ?? run.answer_summary ?? "",
             engine: run.engine,
             createdAt: run.created_at,
+            runIndex: run.run_index ?? null,
+            visibility: run.visibility === null || run.visibility === undefined ? null : Number(run.visibility),
           }
         : null,
+      runs: allRuns.map((row, index) => ({
+        id: row.id,
+        engine: row.engine,
+        createdAt: row.created_at,
+        brandMentioned: Boolean(row.brand_mentioned),
+        position: row.position,
+        runIndex: row.run_index ?? allRuns.length - index,
+        visibility:
+          row.visibility === null || row.visibility === undefined
+            ? row.brand_mentioned
+              ? row.position
+                ? Math.max(40, 100 - (row.position - 1) * 10)
+                : 60
+              : 0
+            : Number(row.visibility),
+      })),
+      mentionedBrands,
+      candidates: candidates.map((row) => ({
+        id: row.id,
+        name: row.name,
+        domain: row.domain ?? "",
+        promptCount: row.prompt_count ?? 1,
+      })),
       sources,
       actions: actions.map((action) => ({
         ...action,
@@ -1208,6 +1339,61 @@ export const saveCompetitors = createServerFn({ method: "POST" })
       .upsert({ brand_id: data.brandId, competitors: next }, { onConflict: "brand_id" });
     if (error) throw new Error(error.message);
     return { ok: true as const, message: "" };
+  });
+
+// Prompt sonuçlarından çıkan rakip adayını takip listesine ekler.
+export const promoteCompetitorCandidate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; candidateId: string; domain?: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { normalizeCompetitors } = await import("./competitors");
+    const [{ data: candidate }, { data: current }] = await Promise.all([
+      context.supabase
+        .from("competitor_candidates")
+        .select("id, name, domain")
+        .eq("id", data.candidateId)
+        .eq("brand_id", data.brandId)
+        .single(),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+    ]);
+    if (!candidate) return { ok: false as const, message: "Aday bulunamadı." };
+
+    const existing = normalizeCompetitors(current?.competitors);
+    const next = normalizeCompetitors([
+      ...existing,
+      { name: candidate.name, domain: data.domain ?? candidate.domain ?? "", type: "direct" },
+    ]);
+    if (next.length > existing.length) {
+      const { assertCompetitorQuota } = await import("./plan.server");
+      try {
+        await assertCompetitorQuota(context.supabase, context.userId, next.length);
+      } catch (error) {
+        return { ok: false as const, message: error instanceof Error ? error.message : "Plan limiti aşıldı." };
+      }
+    }
+    const { error } = await context.supabase
+      .from("brand_intelligence")
+      .upsert({ brand_id: data.brandId, competitors: next }, { onConflict: "brand_id" });
+    if (error) throw new Error(error.message);
+    await context.supabase
+      .from("competitor_candidates")
+      .update({ status: "tracked", updated_at: new Date().toISOString() })
+      .eq("id", candidate.id);
+    return { ok: true as const, message: `${candidate.name} rakip listesine eklendi.` };
+  });
+
+// Rakip adayını yoksayar; bir daha listelenmez.
+export const dismissCompetitorCandidate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; candidateId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("competitor_candidates")
+      .update({ status: "dismissed", updated_at: new Date().toISOString() })
+      .eq("id", data.candidateId)
+      .eq("brand_id", data.brandId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
   });
 
 // Ölçüm sonuçlarından öncelikli görev üretir (Görevler ekranındaki buton).

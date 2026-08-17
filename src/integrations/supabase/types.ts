@@ -387,6 +387,67 @@ export type Database = {
           },
         ]
       }
+      competitor_candidates: {
+        Row: {
+          brand_id: string
+          created_at: string
+          domain: string | null
+          first_seen_prompt_id: string | null
+          first_seen_run_id: string | null
+          id: string
+          name: string
+          prompt_count: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          domain?: string | null
+          first_seen_prompt_id?: string | null
+          first_seen_run_id?: string | null
+          id?: string
+          name: string
+          prompt_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          domain?: string | null
+          first_seen_prompt_id?: string | null
+          first_seen_run_id?: string | null
+          id?: string
+          name?: string
+          prompt_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_candidates_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitor_candidates_first_seen_prompt_id_fkey"
+            columns: ["first_seen_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitor_candidates_first_seen_run_id_fkey"
+            columns: ["first_seen_run_id"]
+            isOneToOne: false
+            referencedRelation: "prompt_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_drafts: {
         Row: {
           body: string
@@ -955,9 +1016,12 @@ export type Database = {
           created_at: string
           engine: string
           id: string
+          mentioned_brands: Json
           position: number | null
           prompt_id: string
           raw_answer: string | null
+          run_index: number | null
+          visibility: number | null
         }
         Insert: {
           answer_summary?: string | null
@@ -966,9 +1030,12 @@ export type Database = {
           created_at?: string
           engine?: string
           id?: string
+          mentioned_brands?: Json
           position?: number | null
           prompt_id: string
           raw_answer?: string | null
+          run_index?: number | null
+          visibility?: number | null
         }
         Update: {
           answer_summary?: string | null
@@ -977,9 +1044,12 @@ export type Database = {
           created_at?: string
           engine?: string
           id?: string
+          mentioned_brands?: Json
           position?: number | null
           prompt_id?: string
           raw_answer?: string | null
+          run_index?: number | null
+          visibility?: number | null
         }
         Relationships: [
           {

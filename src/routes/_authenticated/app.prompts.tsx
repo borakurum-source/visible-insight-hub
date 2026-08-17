@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, ChevronDown, ExternalLink, ListChecks, ListTodo, Loader2, Pause, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronDown, ListChecks, Loader2, Pause, Plus, Trash2 } from "lucide-react";
 import { Hint } from "@/components/app/hint";
+import { PromptResultCard } from "@/components/app/prompt-result-card";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,16 +15,12 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  createGeoTask,
   createPrompt,
   deletePrompt,
   getPlanUsage,
-  getPromptInsight,
   listPrompts,
-  setPromptActionDone,
   setPromptStatus,
 } from "@/lib/panel.functions";
-import { toPlainText } from "@/lib/plain-text";
 import { useActiveBrand } from "@/lib/use-panel";
 
 export const Route = createFileRoute("/_authenticated/app/prompts")({
@@ -219,6 +216,20 @@ function PromptsPage() {
                       aria-hidden="true"
                     />
                   </button>
+                  {prompt.lastRun ? (
+                    <Badge
+                      variant="outline"
+                      className={`font-mono text-[10px] ${
+                        prompt.lastRun.visibility >= 70
+                          ? "border-success/40 text-success"
+                          : prompt.lastRun.visibility > 0
+                            ? "border-warning/40 text-warning"
+                            : "border-border text-muted-foreground"
+                      }`}
+                    >
+                      %{Math.round(prompt.lastRun.visibility)}
+                    </Badge>
+                  ) : null}
                   {prompt.intent ? <Badge variant="secondary" className="text-[10px]">{prompt.intent}</Badge> : null}
                   <Badge variant="outline" className="text-[10px]">{prompt.category}</Badge>
                   {prompt.status !== "approved" ? (
@@ -232,7 +243,7 @@ function PromptsPage() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                   </div>
-                  {openPrompt === prompt.id ? <PromptDetail brandId={brand.id} promptId={prompt.id} /> : null}
+                  {openPrompt === prompt.id ? <PromptResultCard brandId={brand.id} promptId={prompt.id} /> : null}
                 </li>
               ))}
             </ul>
@@ -240,148 +251,5 @@ function PromptsPage() {
         </CardContent>
       </Card>
     </>
-  );
-}
-
-function PromptDetail({ brandId, promptId }: { brandId: string; promptId: string }) {
-  const fetchInsight = useServerFn(getPromptInsight);
-  const addTask = useServerFn(createGeoTask);
-  const navigate = useNavigate();
-  const [addedTasks, setAddedTasks] = useState<string[]>([]);
-  const { data, isLoading } = useQuery({
-    queryKey: ["prompt-insight", promptId],
-    queryFn: () => fetchInsight({ data: { brandId, promptId } }),
-  });
-
-  const toggleAction = useServerFn(setPromptActionDone);
-  const queryClient = useQueryClient();
-  const toggleMutation = useMutation({
-    mutationFn: ({ action, done }: { action: { key: string; title: string; description: string; priority: string }; done: boolean }) =>
-      toggleAction({
-        data: {
-          brandId,
-          promptId,
-          key: action.key,
-          title: action.title,
-          description: action.description,
-          priority: action.priority,
-          done,
-        },
-      }),
-    onSuccess: (_result, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["prompt-insight", promptId] });
-      toast.success(variables.done ? "Adım tamamlandı olarak işaretlendi." : "İşaret kaldırıldı.");
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  const doneCount = data?.actions?.filter((action) => action.done).length ?? 0;
-
-  const taskMutation = useMutation({
-    mutationFn: (input: { title: string; description: string; priority: string }) =>
-      addTask({ data: { brandId, ...input } }),
-    onSuccess: (_result, variables) => {
-      setAddedTasks((prev) => [...prev, variables.title]);
-      toast.success("Görev eklendi", {
-        description: `“${variables.title}” Görevler listenize eklendi.`,
-        action: { label: "Görevlere git", onClick: () => navigate({ to: "/app/geo-tasks" }) },
-      });
-    },
-    onError: (error: Error) => toast.error(error.message),
-  });
-
-  if (isLoading) {
-    return (
-      <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Son ölçüm yükleniyor…
-      </p>
-    );
-  }
-
-  return (
-    <div className="mt-3 space-y-3 rounded-lg border border-border bg-muted/20 p-3">
-      {data?.run ? (
-        <>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {data.run.brandMentioned ? (
-              <Badge variant="outline" className="border-success/40 text-success">
-                {data.run.position ? `${data.run.position}. sırada` : "Yanıtta geçiyor"}
-              </Badge>
-            ) : (
-              <Badge variant="secondary">Yanıtta geçmiyor</Badge>
-            )}
-            <span>{new Date(data.run.createdAt).toLocaleString("tr-TR")} · {data.run.engine}</span>
-          </div>
-          <div className="max-h-80 overflow-y-auto whitespace-pre-wrap rounded-md bg-background p-3 text-xs leading-relaxed text-muted-foreground">
-            {toPlainText(data.run.answer)}
-          </div>
-        </>
-      ) : (
-        <p className="text-xs text-muted-foreground">
-          Bu soru henüz ölçülmedi. <Link to="/app/measurement" className="underline">Ölçüm başlatın</Link>.
-        </p>
-      )}
-
-      {data?.sources?.length ? (
-        <div className="space-y-1.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Kullanılan kaynaklar</p>
-          {data.sources.map((source) => (
-            <a
-              key={source.url}
-              href={source.url}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="flex items-center justify-between gap-3 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs hover:text-primary"
-            >
-              <span className="min-w-0 flex-1 truncate">{source.title}</span>
-              <span className="font-mono text-[10px] text-muted-foreground">{source.domain}</span>
-              <ExternalLink className="h-3 w-3 shrink-0" aria-hidden="true" />
-            </a>
-          ))}
-        </div>
-      ) : null}
-
-      {data?.actions?.length ? (
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Bu soruda görünmek için</p>
-            <Hint title="Kontrol listesi">
-              <p><strong>Tamamlandı</strong> düğmesi adımı bitirdiğinizi işaretler; işaretiniz kaydedilir.</p>
-              <p><strong>Göreve ekle</strong> ile adımı Görevler listenize taşıyıp ekibinizle takip edebilirsiniz.</p>
-            </Hint>
-            <span className="ml-auto font-mono text-[11px] text-muted-foreground">
-              {doneCount} / {data.actions.length} tamam
-            </span>
-          </div>
-          {data.actions.map((action) => (
-            <div key={action.key} className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5">
-              <div className="min-w-0 flex-1">
-                <p className={`text-xs font-medium ${action.done ? "text-muted-foreground line-through" : ""}`}>
-                  {action.title}
-                </p>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">{action.description}</p>
-              </div>
-              <div className="flex gap-1.5">
-                <Button
-                  size="sm"
-                  variant={action.done ? "secondary" : "ghost"}
-                  disabled={toggleMutation.isPending}
-                  onClick={() => toggleMutation.mutate({ action, done: !action.done })}
-                >
-                  <Check className="mr-1.5 h-3.5 w-3.5" /> {action.done ? "Tamamlandı" : "Tamamlandı işaretle"}
-                </Button>
-                <Button size="sm" variant="outline" disabled={taskMutation.isPending || addedTasks.includes(action.title)}
-                  onClick={() => taskMutation.mutate(action)}>
-                  <ListTodo className="mr-1.5 h-3.5 w-3.5" /> {addedTasks.includes(action.title) ? "Göreve eklendi" : "Göreve ekle"}
-                </Button>
-                <Button size="sm" variant="ghost" asChild>
-                  <Link to="/app/content">İçerik üret</Link>
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : null}
-    </div>
   );
 }
