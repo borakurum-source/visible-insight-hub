@@ -382,6 +382,7 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
+    const { normalizeCompetitors, competitorMatches } = await import("./competitors");
     const [{ data: batches }, { data: runs }, { data: citations }, { data: intel }, { data: brand }] = await Promise.all([
       context.supabase
         .from("measurement_batches")
@@ -407,7 +408,7 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
     }));
 
     const runRows = runs ?? [];
-    const competitors = ((intel?.competitors as string[] | null) ?? []).slice(0, 6);
+    const competitors = normalizeCompetitors(intel?.competitors).slice(0, 6);
     const share = [
       {
         name: brand?.name ?? "Markanız",
@@ -415,8 +416,8 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
         isOwn: true,
       },
       ...competitors.map((competitor) => ({
-        name: competitor,
-        mentions: runRows.filter((r) => (r.raw_answer ?? "").toLowerCase().includes(competitor.toLowerCase())).length,
+        name: competitor.name,
+        mentions: runRows.filter((r) => competitorMatches(competitor, { answer: r.raw_answer })).length,
         isOwn: false,
       })),
     ].sort((a, b) => b.mentions - a.mentions);
