@@ -102,18 +102,42 @@ export const Route = createFileRoute("/makaleler/")({
   component: ArticlesPage,
 });
 
-function ArticleCard({ article, featured = false }: { article: Article; featured?: boolean }) {
+export function staticToListItem(article: Article): BlogListItem {
+  return {
+    slug: article.slug,
+    title: article.title,
+    description: article.description,
+    category: article.category,
+    tags: [],
+    coverImageUrl: null,
+    readingTime: article.readingTime,
+    dateLabel: article.date,
+    status: "published",
+    origin: "static",
+  };
+}
+
+const PAGE_SIZE = 9;
+
+function ArticleCard({ article, featured = false }: { article: BlogListItem; featured?: boolean }) {
   return (
     <MotionPress className="block h-full">
       <Link
         to="/makaleler/$slug"
         params={{ slug: article.slug }}
+        search={article.status === "draft" ? { taslak: true } : {}}
         className={`group flex h-full flex-col rounded-2xl border p-6 transition-[box-shadow,border-color] duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${featured ? "border-[#C9C5B6] bg-muted" : "border-border bg-background hover:border-[#C9C5B6] hover:shadow-[0_14px_32px_rgba(11,16,32,0.06)]"}`}
       >
         <div className="flex items-center justify-between gap-3">
-          <Badge variant="outline" className="border-border bg-background text-primary">{article.category}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-border bg-background text-primary">{article.category}</Badge>
+            {article.status === "draft" && <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">Taslak</Badge>}
+          </div>
           <BookOpen className="h-5 w-5 text-primary" />
         </div>
+        {article.coverImageUrl && (
+          <img src={article.coverImageUrl} alt={article.title} loading="lazy" className="mt-5 aspect-[16/9] w-full rounded-xl object-cover" />
+        )}
         <h2 className="mt-7 text-2xl font-extrabold tracking-[-0.03em] text-foreground">{article.title}</h2>
         <p className="mt-4 flex-1 text-sm leading-7 text-muted-foreground">{article.description}</p>
         <div className="mt-7 flex items-center justify-between border-t border-border pt-4 text-xs text-muted-foreground">
@@ -128,10 +152,41 @@ function ArticleCard({ article, featured = false }: { article: Article; featured
 }
 
 function ArticlesPage() {
+  const { posts } = Route.useLoaderData();
+  const { sayfa, durum } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const draftMode = durum === "taslak";
+  const page = sayfa ?? 1;
   const [selectedCategory, setSelectedCategory] = useState("Tümü");
-  const categories = useMemo(() => ["Tümü", ...articles.map((article) => article.category)], []);
-  const visibleArticles = selectedCategory === "Tümü" ? articles : articles.filter((article) => article.category === selectedCategory);
-  const featured = articles[0]!;
+
+  const draftQuery = useQuery({
+    queryKey: ["blog", "drafts"],
+    queryFn: () => adminListAllBlogPosts(),
+    enabled: draftMode,
+    retry: false,
+  });
+
+  const all = useMemo<BlogListItem[]>(() => {
+    const dbRows = draftMode && draftQuery.data ? draftQuery.data : posts;
+    const dbItems = (dbRows as Array<Record<string, unknown>>).map(dbToListItem);
+    const merged = [...dbItems, ...articles.map(staticToListItem)];
+    const seen = new Set<string>();
+    return merged.filter((item) => (seen.has(item.slug) ? false : (seen.add(item.slug), true)));
+  }, [posts, draftMode, draftQuery.data]);
+
+  const categories = useMemo(() => ["Tümü", ...Array.from(new Set(all.map((item) => item.category)))], [all]);
+  const filtered = selectedCategory === "Tümü" ? all : all.filter((item) => item.category === selectedCategory);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleArticles = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const featured = all[0] ?? staticToListItem(articles[0]!);
+
+  const goToPage = (next: number) => {
+    void navigate({
+      search: { ...(next > 1 ? { sayfa: next } : {}), ...(draftMode ? { durum: "taslak" as const } : {}) },
+      resetScroll: true,
+    });
+  };
 
   return (
     <MarketingShell>
@@ -144,7 +199,7 @@ function ArticlesPage() {
         visualLabel="KAYNAK KÜTÜPHANESİ"
       >
         <p className="text-sm text-slate-400">
-          Öne çıkan rehber: <Link className="font-semibold text-cyan hover:text-white" to="/makaleler/$slug" params={{ slug: featured.slug }}>{featured.title}</Link>
+          Öne çıkan rehber: <Link className="font-semibold text-cyan hover:text-white" to="/makaleler/$slug" params={{ slug: featured.slug }} search={{}}>{featured.title}</Link>
         </p>
       </VisualHero>
 
@@ -156,13 +211,18 @@ function ArticlesPage() {
           </div>
           <Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu" className="text-sm font-bold text-primary hover:text-foreground">Ücretsiz raporu başlat →</Link>
         </div>
+        {draftMode && (
+          <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Taslak önizleme modu açık. {draftQuery.isError ? "Taslakları görmek için yönetici hesabıyla giriş yapın." : "Bu görünüm yalnızca yöneticilere açıktır ve arama motorlarına kapalıdır."}
+          </p>
+        )}
         <div className="mt-8 flex flex-wrap gap-2" aria-label="Makale kategorileri">
           {categories.map((category) => (
             <button
               key={category}
               type="button"
               aria-pressed={selectedCategory === category}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => { setSelectedCategory(category); goToPage(1); }}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] motion-reduce:transition-none ${selectedCategory === category ? "border-primary bg-primary text-white" : "border-border bg-background text-muted-foreground hover:border-[#C9C5B6] hover:text-foreground"}`}
             >
               {category}
@@ -176,6 +236,27 @@ function ArticlesPage() {
             </Reveal>
           ))}
         </div>
+        {totalPages > 1 && (
+          <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Sayfalama">
+            <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => goToPage(currentPage - 1)}>
+              <ChevronLeft className="h-4 w-4" /> Önceki
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+              <Button
+                key={pageNumber}
+                size="sm"
+                variant={pageNumber === currentPage ? "default" : "outline"}
+                aria-current={pageNumber === currentPage ? "page" : undefined}
+                onClick={() => goToPage(pageNumber)}
+              >
+                {pageNumber}
+              </Button>
+            ))}
+            <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => goToPage(currentPage + 1)}>
+              Sonraki <ChevronRight className="h-4 w-4" />
+            </Button>
+          </nav>
+        )}
       </section>
 
       <MarketingCta
