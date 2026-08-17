@@ -94,6 +94,7 @@ export const adminCustomerDetail = createServerFn({ method: "POST" })
       // Profil satırı yoksa auth kaydından türet (blank screen yerine kullanılabilir detay)
       const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(data.userId);
       const u = authUser?.user;
+      const createdAt = u?.created_at ?? new Date().toISOString();
       profile = {
         id: data.userId,
         email: u?.email ?? null,
@@ -101,10 +102,10 @@ export const adminCustomerDetail = createServerFn({ method: "POST" })
         plan: "expired",
         plan_source: "manual",
         plan_expires_at: null,
-        trial_ends_at: null,
+        trial_ends_at: createdAt,
         suspended: false,
-        created_at: u?.created_at ?? new Date().toISOString(),
-      } as typeof profileRow;
+        created_at: createdAt,
+      };
     }
 
     const { data: memberships } = await supabaseAdmin.from("brand_members").select("brand_id, role").eq("user_id", data.userId);
