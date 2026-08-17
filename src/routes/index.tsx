@@ -543,7 +543,6 @@ function Landing() {
       <NasilCalisir />
       <FilmFolkOrnegi />
       <SonucVerenMarkalar />
-      <GorunurlukTaahhudu />
       <PlanlarVeKimIcin />
       <SSS />
       <SonCagri />
