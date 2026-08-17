@@ -1,0 +1,2 @@
+DROP FUNCTION IF EXISTS public.get_public_report(text);
+COMMENT ON TABLE public.reports IS 'Reports are readable only by brand members (RLS) or server-side service_role. Public sharing must go through a server function that validates the share token.';
