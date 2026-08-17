@@ -18,7 +18,7 @@ const FIX: Record<string, { to: string; label: string; tip: string }> = {
   citation: { to: "/app/knowledge-base", label: "Bilgi bankasını güçlendir", tip: "Kendi sayfalarınız kaynak gösterilmiyor; kanıt sayfaları ekleyin." },
   position: { to: "/app/content", label: "İçerik üret", tip: "Listelerde üst sırada çıkmak için karşılaştırma ve rehber içeriği gerekir." },
   knowledge: { to: "/app/knowledge-base", label: "Kaynak ekle", tip: "Hedef 10 kaynak. Site haritanızdan önemli sayfaları ekleyin." },
-  claims: { to: "/app/claims", label: "Iddia kanıtla", tip: "Her iddiaya kaynak bağlantısı ekleyin." },
+  claims: { to: "/app/claims", label: "İddia kanıtla", tip: "Her iddiaya kaynak bağlantısı ekleyin." },
 };
 
 // Görünürlük skoru + kırılımı tek kompakt kart: "OneCite Score".
