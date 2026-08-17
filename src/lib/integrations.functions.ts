@@ -251,6 +251,12 @@ export type TrafficOverview = {
     totals: { sessions: number; users: number };
     daily: Array<{ date: string; sessions: number; users: number }>;
     channels: Array<{ channel: string; sessions: number; users: number }>;
+    ai: {
+      sessions: number;
+      users: number;
+      share: number;
+      platforms: Array<{ platform: string; sessions: number; users: number; sources: string[] }>;
+    };
   };
   aiReferral: {
     total: number;
@@ -314,6 +320,11 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
       totals: { sessions: number; users: number };
       daily: Array<{ date: string; sessions: number; users: number }>;
       channels: Array<{ channel: string; sessions: number; users: number }>;
+      ai?: {
+        sessions: number;
+        users: number;
+        platforms: Array<{ platform: string; sessions: number; users: number; sources?: string[] }>;
+      };
     };
     const payload = (snapshot?.payload ?? null) as null | {
       startDate: string;
@@ -352,6 +363,10 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
       { sessions: 0, users: 0 },
     );
 
+    // GA4 anlik goruntusu 28 gunluk toplamdir; AI kirilimi de ayni pencereyi kullanir.
+    const ga4AiSessions = ga4Payload?.ai?.sessions ?? 0;
+    const ga4SnapshotSessions = ga4Payload?.totals?.sessions ?? 0;
+
     return {
       rangeDays,
       gsc: {
@@ -372,6 +387,17 @@ export const getTrafficOverview = createServerFn({ method: "POST" })
         totals: ga4Totals,
         daily: ga4Daily,
         channels: (ga4Payload?.channels ?? []).slice(0, 6),
+        ai: {
+          sessions: ga4AiSessions,
+          users: ga4Payload?.ai?.users ?? 0,
+          share: ga4SnapshotSessions ? Math.round((ga4AiSessions / ga4SnapshotSessions) * 1000) / 10 : 0,
+          platforms: (ga4Payload?.ai?.platforms ?? []).slice(0, 8).map((row) => ({
+            platform: row.platform,
+            sessions: row.sessions,
+            users: row.users,
+            sources: row.sources ?? [],
+          })),
+        },
       },
       aiReferral: {
         total: citationRows.length,
