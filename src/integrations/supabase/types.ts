@@ -1273,15 +1273,6 @@ export type Database = {
     }
     Functions: {
       expire_subscription_plans: { Args: never; Returns: undefined }
-      get_public_report: {
-        Args: { p_token: string }
-        Returns: {
-          created_at: string
-          id: string
-          payload: Json
-          title: string
-        }[]
-      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
