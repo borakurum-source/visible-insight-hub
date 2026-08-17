@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Loader2, Plus, Search, Swords, X } from "lucide-react";
+import { Loader2, Lock, Plus, Search, Sparkles, Swords, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { getCompetitors, saveCompetitors, searchCompetitors } from "@/lib/panel.
 // Rakibini bilmeyen kullanıcı için: sektörden gerçek rakip adayları bulan arama kartı.
 export function CompetitorFinder({ brandId }: { brandId: string }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const fetchSaved = useServerFn(getCompetitors);
   const runSearch = useServerFn(searchCompetitors);
   const persist = useServerFn(saveCompetitors);
@@ -22,7 +24,28 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
   const saved = useQuery({
     queryKey: ["competitors", brandId],
     queryFn: () => fetchSaved({ data: { brandId } }),
+    // Plan yükseltmesi baska bir sekmede/checkout'ta olabilir: odaga donunce kotayi tazele.
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
+
+  const list = saved.data?.competitors ?? [];
+  const maxCompetitors = saved.data?.maxCompetitors ?? 0;
+  const unlimited = saved.data?.unlimited ?? false;
+  const planLabel = saved.data?.planLabel ?? "";
+  const quotaFull = !unlimited && !!saved.data && list.length >= maxCompetitors;
+
+  // Limit dolduğunda: neyin neden engellendiğini ve nasıl çözüleceğini adım adım anlatır.
+  function explainQuota(message?: string) {
+    toast.error(message ?? `${planLabel} planınızın rakip takip limiti doldu (${list.length}/${maxCompetitors}).`, {
+      duration: 12000,
+      description:
+        `Engellenen işlem: yeni rakip ekleme. Nedeni: ${planLabel} planı marka başına ${maxCompetitors} rakip takibine izin veriyor.\n` +
+        "Çözüm: 1) Takip etmediğiniz bir rakibi listeden kaldırın, ya da 2) “Planı yükselt” ile Başlangıç (2 rakip), Büyüme (5 rakip) veya Ajans (sınırsız) planına geçin. " +
+        "Yükseltme tamamlandığında yeni hakkınız birkaç saniye içinde otomatik tanımlanır.",
+      action: { label: "Planı yükselt", onClick: () => navigate({ to: "/app/pricing" }) },
+    });
+  }
 
   const search = useMutation({
     mutationFn: () => runSearch({ data: { brandId, query } }),
@@ -37,19 +60,31 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
     mutationFn: (list: string[]) => persist({ data: { brandId, competitors: list } }),
     onSuccess: async (result) => {
       if (!result.ok) {
-        toast.error(result.message, {
-          description: "Planınızı yükselterek daha fazla rakip takip edebilirsiniz.",
-          action: { label: "Planlar", onClick: () => { window.location.href = "/app/pricing"; } },
-        });
+        await queryClient.invalidateQueries({ queryKey: ["competitors", brandId] });
+        explainQuota(result.message);
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ["competitors", brandId] });
+      await queryClient.invalidateQueries({ queryKey: ["plan-usage"] });
       toast.success("Rakip listesi güncellendi.");
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const list = saved.data ?? [];
+  // Sunucuya gitmeden once yerel validasyon: bos ad, tekrar ve kota kontrolu.
+  function addCompetitor(name: string) {
+    const clean = name.trim();
+    if (!clean) return;
+    if (list.some((item) => item.toLowerCase() === clean.toLowerCase())) {
+      toast.info(`${clean} zaten takip listenizde.`);
+      return;
+    }
+    if (quotaFull) {
+      explainQuota();
+      return;
+    }
+    save.mutate([...list, clean]);
+  }
 
   return (
     <Card>
@@ -61,18 +96,38 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
             <p>Rakiplerinizi bilmiyorsanız buradan arayın: sektörünüzü yazın, gerçek firmaları listeleyelim.</p>
             <p>Eklediğiniz rakipler, yapay zeka yanıtlarında <strong>sizin yerinize kimin çıktığını</strong> ölçmek için kullanılır.</p>
           </Hint>
+          {saved.data ? (
+            <Badge variant={quotaFull ? "destructive" : "secondary"} className="ml-auto text-[10px]">
+              {unlimited ? `${list.length} / sınırsız` : `${list.length} / ${maxCompetitors}`}
+            </Badge>
+          ) : null}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        {quotaFull ? (
+          <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-2.5">
+            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-destructive" aria-hidden="true" />
+            <div className="min-w-0 flex-1 space-y-1">
+              <p className="text-xs font-medium">Rakip ekleme kapalı — {planLabel} planı limiti dolu ({list.length}/{maxCompetitors})</p>
+              <p className="text-[11px] text-muted-foreground">
+                Yeni rakip eklemek için ya listeden bir rakibi kaldırın ya da planınızı yükseltin: Başlangıç 2, Büyüme 5, Ajans sınırsız rakip.
+              </p>
+              <Button size="sm" className="mt-1 h-7 text-xs" onClick={() => navigate({ to: "/app/pricing" })}>
+                <Sparkles className="mr-1 h-3 w-3" /> Planı yükselt
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex gap-2">
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => { if (event.key === "Enter") search.mutate(); }}
+            onKeyDown={(event) => { if (event.key === "Enter" && query.trim()) search.mutate(); }}
             placeholder="Örn. Türkiye'de abs kör kalıp üreticileri"
             aria-label="Rakip ara"
           />
-          <Button onClick={() => search.mutate()} disabled={search.isPending}>
+          <Button onClick={() => search.mutate()} disabled={search.isPending || !query.trim()}>
             {search.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             <span className="ml-1.5 hidden sm:inline">Ara</span>
           </Button>
@@ -86,14 +141,20 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
                   <p className="text-xs font-medium">{row.name} <span className="font-mono text-[10px] text-muted-foreground">{row.domain}</span></p>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">{row.reason}</p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={save.isPending || list.includes(row.name)}
-                  onClick={() => save.mutate([...list, row.name])}
-                >
-                  <Plus className="mr-1 h-3.5 w-3.5" /> Ekle
-                </Button>
+                {quotaFull ? (
+                  <Button size="sm" variant="outline" onClick={() => explainQuota()} title="Plan limiti dolu — planı yükseltin">
+                    <Lock className="mr-1 h-3.5 w-3.5" /> Limit dolu
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={save.isPending || saved.isLoading || list.some((item) => item.toLowerCase() === row.name.toLowerCase())}
+                    onClick={() => addCompetitor(row.name)}
+                  >
+                    <Plus className="mr-1 h-3.5 w-3.5" /> Ekle
+                  </Button>
+                )}
               </li>
             ))}
           </ul>

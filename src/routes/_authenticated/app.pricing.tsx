@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Check, CreditCard, ExternalLink, Loader2 } from "lucide-react";
@@ -48,6 +48,31 @@ function PricingPage() {
 
   const currentPlan = data?.plan ?? "free";
   const sub = data?.subscription ?? null;
+
+  // Odeme sonrasi Paddle webhook'u birkac saniye gecikebilir: plan degisene kadar
+  // kisa araliklarla tazeleyip kota bagimli ekranlari (rakip, prompt) guncelleriz.
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") !== "success") return;
+    let attempts = 0;
+    let cancelled = false;
+    const tick = async () => {
+      attempts += 1;
+      const result = await refetch();
+      await queryClient.invalidateQueries({ queryKey: ["competitors"] });
+      await queryClient.invalidateQueries({ queryKey: ["plan-usage"] });
+      if (cancelled) return;
+      if (result.data?.plan && result.data.plan !== "free") {
+        toast.success("Planınız güncellendi. Yeni limitleriniz aktif.");
+        window.history.replaceState({}, "", "/app/pricing");
+        return;
+      }
+      if (attempts < 10) setTimeout(tick, 3000);
+    };
+    void tick();
+    return () => { cancelled = true; };
+  }, [queryClient, refetch]);
 
   async function handleSelect(planSlug: string) {
     const priceIds = PLAN_PRICE_IDS[planSlug];

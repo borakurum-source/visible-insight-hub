@@ -1056,9 +1056,22 @@ export const getCompetitors = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
-    const { data: intel } = await context.supabase
-      .from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle();
-    return ((intel?.competitors as string[] | null) ?? []).map(String);
+    const { getUserPlan } = await import("./plan.server");
+    const { isUnlimited } = await import("./plan-limits");
+    const [{ data: intel }, limits] = await Promise.all([
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      getUserPlan(context.supabase, context.userId),
+    ]);
+    const competitors = ((intel?.competitors as string[] | null) ?? []).map(String);
+    const unlimited = isUnlimited(limits.maxCompetitors);
+    return {
+      competitors,
+      plan: limits.slug,
+      planLabel: limits.label,
+      maxCompetitors: limits.maxCompetitors,
+      unlimited,
+      remaining: unlimited ? Number.MAX_SAFE_INTEGER : Math.max(0, limits.maxCompetitors - competitors.length),
+    };
   });
 
 export const saveCompetitors = createServerFn({ method: "POST" })
