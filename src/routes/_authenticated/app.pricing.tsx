@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { pricingPlans, formatUsd } from "@/lib/pricingData";
 import { PLAN_PRICE_IDS } from "@/lib/plan-mapping";
+import { normalizePlan } from "@/lib/plan-limits";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { getMySubscription, createPortalSession } from "@/utils/payments.functions";
