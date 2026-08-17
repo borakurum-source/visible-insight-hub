@@ -1,3 +1,5 @@
+import { competitorMatches, type CompetitorEntry } from "./competitors";
+
 export type CompetitorRunRow = { created_at: string; brand_mentioned: boolean; raw_answer: string | null };
 
 export type CompetitorTrendPoint = { date: string } & Record<string, number | string>;
@@ -8,31 +10,16 @@ export type CompetitorTrendResult = {
   totalRuns: number;
 };
 
-function normalize(value: string) {
-  return value
-    .toLocaleLowerCase("tr")
-    .replace(/[çğıöşü]/g, (c) => ({ ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u" })[c] ?? c)
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function mentions(answer: string, name: string) {
-  const a = normalize(answer);
-  const n = normalize(name);
-  if (n.length < 3) return false;
-  return a.includes(n) || a.includes(n.replace(/\s+/g, ""));
-}
-
 /** Buckets prompt runs into weekly (or daily for short ranges) visibility rates per brand + competitors. */
 export function buildCompetitorTrend(
   rows: CompetitorRunRow[],
   ownName: string,
-  competitors: string[],
+  competitors: CompetitorEntry[],
   days: number,
 ): CompetitorTrendResult {
   const brands = [
-    { key: "own", name: ownName || "Markanız", isOwn: true, match: ownName },
-    ...competitors.slice(0, 6).map((name, index) => ({ key: `c${index}`, name, isOwn: false, match: name })),
+    { key: "own", name: ownName || "Markanız", isOwn: true, match: { name: ownName, domain: "" } },
+    ...competitors.slice(0, 6).map((entry, index) => ({ key: `c${index}`, name: entry.name, isOwn: false, match: entry })),
   ];
 
   const bucketDays = days <= 14 ? 1 : days <= 45 ? 7 : 14;
@@ -54,7 +41,9 @@ export function buildCompetitorTrend(
     const bucket = buckets.get(keys[index]!)!;
     bucket.total += 1;
     for (const brand of brands) {
-      const hit = brand.isOwn ? row.brand_mentioned : mentions(row.raw_answer ?? "", brand.match);
+      const hit = brand.isOwn
+        ? row.brand_mentioned
+        : competitorMatches(brand.match, { answer: row.raw_answer ?? "" });
       if (hit) bucket.hits.set(brand.key, (bucket.hits.get(brand.key) ?? 0) + 1);
     }
   }
@@ -75,7 +64,7 @@ export function buildCompetitorTrend(
       const current = values.length ? values[values.length - 1]! : 0;
       const first = values.find((v) => v > 0) ?? 0;
       const totalMentions = rows.filter((row) =>
-        brand.isOwn ? row.brand_mentioned : mentions(row.raw_answer ?? "", brand.match),
+        brand.isOwn ? row.brand_mentioned : competitorMatches(brand.match, { answer: row.raw_answer ?? "" }),
       ).length;
       return { key: brand.key, name: brand.name, isOwn: brand.isOwn, current, change: current - first, mentions: totalMentions };
     })

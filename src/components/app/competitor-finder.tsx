@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Hint } from "@/components/app/hint";
+import { cleanDomain, type CompetitorEntry } from "@/lib/competitors";
 import { getCompetitors, saveCompetitors, searchCompetitors } from "@/lib/panel.functions";
 
 // Rakibini bilmeyen kullanıcı için: sektörden gerçek rakip adayları bulan arama kartı.
@@ -19,6 +20,8 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
   const runSearch = useServerFn(searchCompetitors);
   const persist = useServerFn(saveCompetitors);
   const [query, setQuery] = useState("");
+  const [manualName, setManualName] = useState("");
+  const [manualDomain, setManualDomain] = useState("");
   const [results, setResults] = useState<Array<{ name: string; domain: string; reason: string }>>([]);
 
   const saved = useQuery({
@@ -57,7 +60,7 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
   });
 
   const save = useMutation({
-    mutationFn: (list: string[]) => persist({ data: { brandId, competitors: list } }),
+    mutationFn: (list: CompetitorEntry[]) => persist({ data: { brandId, competitors: list } }),
     onSuccess: async (result) => {
       if (!result.ok) {
         await queryClient.invalidateQueries({ queryKey: ["competitors", brandId] });
@@ -72,10 +75,14 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
   });
 
   // Sunucuya gitmeden once yerel validasyon: bos ad, tekrar ve kota kontrolu.
-  function addCompetitor(name: string) {
+  function addCompetitor(name: string, domain = "") {
     const clean = name.trim();
-    if (!clean) return;
-    if (list.some((item) => item.toLowerCase() === clean.toLowerCase())) {
+    const cleanedDomain = cleanDomain(domain);
+    if (!clean && !cleanedDomain) {
+      toast.info("Rakip adı veya alan adı girin.");
+      return;
+    }
+    if (list.some((item) => item.name.toLowerCase() === clean.toLowerCase() || (cleanedDomain && item.domain === cleanedDomain))) {
       toast.info(`${clean} zaten takip listenizde.`);
       return;
     }
@@ -83,7 +90,9 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
       explainQuota();
       return;
     }
-    save.mutate([...list, clean]);
+    save.mutate([...list, { name: clean || cleanedDomain, domain: cleanedDomain }]);
+    setManualName("");
+    setManualDomain("");
   }
 
   return (
@@ -149,8 +158,12 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={save.isPending || saved.isLoading || list.some((item) => item.toLowerCase() === row.name.toLowerCase())}
-                    onClick={() => addCompetitor(row.name)}
+                    disabled={
+                      save.isPending ||
+                      saved.isLoading ||
+                      list.some((item) => item.name.toLowerCase() === row.name.toLowerCase() || (!!row.domain && item.domain === cleanDomain(row.domain)))
+                    }
+                    onClick={() => addCompetitor(row.name, row.domain)}
                   >
                     <Plus className="mr-1 h-3.5 w-3.5" /> Ekle
                   </Button>
@@ -160,18 +173,45 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
           </ul>
         ) : null}
 
+        <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+          <Input
+            value={manualName}
+            onChange={(event) => setManualName(event.target.value)}
+            placeholder="Rakip adı (ör. Hipaş Plastik)"
+            aria-label="Rakip adı"
+          />
+          <Input
+            value={manualDomain}
+            onChange={(event) => setManualDomain(event.target.value)}
+            onKeyDown={(event) => { if (event.key === "Enter") addCompetitor(manualName, manualDomain); }}
+            placeholder="Alan adı (ör. rakip.com)"
+            aria-label="Rakip alan adı"
+          />
+          <Button
+            variant="outline"
+            disabled={save.isPending || (!manualName.trim() && !manualDomain.trim())}
+            onClick={() => (quotaFull ? explainQuota() : addCompetitor(manualName, manualDomain))}
+          >
+            <Plus className="mr-1 h-3.5 w-3.5" /> Elle ekle
+          </Button>
+        </div>
+        <p className="-mt-1 text-[11px] text-muted-foreground">
+          Alan adı girmek eşleşmeyi güçlendirir: yapay zeka yanıtlarındaki atıf kaynakları alan adına göre de sayılır.
+        </p>
+
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Takip edilen rakipler</p>
           {list.length ? (
             <div className="flex flex-wrap gap-1.5">
-              {list.map((name) => (
-                <Badge key={name} variant="secondary" className="gap-1 pr-1">
-                  {name}
+              {list.map((item) => (
+                <Badge key={`${item.name}-${item.domain}`} variant="secondary" className="gap-1 pr-1">
+                  {item.name}
+                  {item.domain ? <span className="font-mono text-[10px] opacity-70">{item.domain}</span> : null}
                   <button
                     type="button"
-                    aria-label={`${name} rakibini kaldır`}
+                    aria-label={`${item.name} rakibini kaldır`}
                     className="rounded p-0.5 text-muted-foreground hover:text-destructive"
-                    onClick={() => save.mutate(list.filter((item) => item !== name))}
+                    onClick={() => save.mutate(list.filter((row) => row !== item))}
                   >
                     <X className="h-3 w-3" />
                   </button>

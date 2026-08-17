@@ -382,6 +382,7 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
+    const { normalizeCompetitors, competitorMatches } = await import("./competitors");
     const [{ data: batches }, { data: runs }, { data: citations }, { data: intel }, { data: brand }] = await Promise.all([
       context.supabase
         .from("measurement_batches")
@@ -407,7 +408,7 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
     }));
 
     const runRows = runs ?? [];
-    const competitors = ((intel?.competitors as string[] | null) ?? []).slice(0, 6);
+    const competitors = normalizeCompetitors(intel?.competitors).slice(0, 6);
     const share = [
       {
         name: brand?.name ?? "Markanız",
@@ -415,8 +416,8 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
         isOwn: true,
       },
       ...competitors.map((competitor) => ({
-        name: competitor,
-        mentions: runRows.filter((r) => (r.raw_answer ?? "").toLowerCase().includes(competitor.toLowerCase())).length,
+        name: competitor.name,
+        mentions: runRows.filter((r) => competitorMatches(competitor, { answer: r.raw_answer })).length,
         isOwn: false,
       })),
     ].sort((a, b) => b.mentions - a.mentions);
@@ -748,6 +749,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
   .inputValidator((input: { batchId: string; brandId: string; promptIds: string[] }) => input)
   .handler(async ({ data, context }) => {
     const { measurePrompt } = await import("./measurement.server");
+    const { normalizeCompetitors, competitorMatches, competitorNames } = await import("./competitors");
     const { resolveSystemPrompt } = await import("./system-prompts.server");
     const systemPrompt = await resolveSystemPrompt(context.supabase, "measurement_answer");
     const [{ data: brand }, { data: intel }, { data: prompts }] = await Promise.all([
@@ -756,13 +758,13 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
       context.supabase.from("prompts").select("id, text").in("id", data.promptIds),
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
-    const competitors = ((intel?.competitors as string[] | null) ?? []).map((c) => String(c).toLowerCase());
+    const competitors = normalizeCompetitors(intel?.competitors);
 
     for (const prompt of prompts ?? []) {
       const measured = await measurePrompt({
         brandName: brand.name,
         brandDomain: brand.domain,
-        competitors: (intel?.competitors as string[] | null) ?? [],
+        competitors: competitorNames(competitors),
         promptText: prompt.text,
         systemPrompt,
       });
@@ -783,7 +785,10 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
           unique.map((source) => {
             const isOwn = source.domain.includes(brand.domain) || brand.domain.includes(source.domain);
             const isCompetitor =
-              !isOwn && competitors.some((c) => c.length > 2 && (source.domain.includes(c.replace(/\s+/g, "")) || source.title.toLowerCase().includes(c)));
+              !isOwn &&
+              competitors.some((competitor) =>
+                competitorMatches(competitor, { answer: source.title, domains: [source.domain] }),
+              );
             return {
               brand_id: data.brandId,
               run_id: run?.id ?? null,
@@ -1043,6 +1048,7 @@ export const searchCompetitors = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string; query?: string }) => input)
   .handler(async ({ data, context }) => {
     const { perplexityJson } = await import("./perplexity.server");
+    const { normalizeCompetitors, cleanDomain } = await import("./competitors");
     const [{ data: brand }, { data: intel }] = await Promise.all([
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
       context.supabase.from("brand_intelligence").select("summary, competitors").eq("brand_id", data.brandId).maybeSingle(),
@@ -1087,9 +1093,12 @@ Arama: ${data.query?.trim() || "aynı sektördeki başlıca rakipler"}`,
       fallback,
     );
 
-    const existing = new Set(((intel?.competitors as string[] | null) ?? []).map((c) => String(c).toLowerCase()));
+    const saved = normalizeCompetitors(intel?.competitors);
+    const existingNames = new Set(saved.map((c) => c.name.toLowerCase()));
+    const existingDomains = new Set(saved.map((c) => c.domain).filter(Boolean));
     return result.competitors
-      .filter((c) => c.name && !existing.has(c.name.toLowerCase()))
+      .map((c) => ({ ...c, domain: cleanDomain(c.domain) }))
+      .filter((c) => c.name && !existingNames.has(c.name.toLowerCase()) && !existingDomains.has(c.domain))
       .slice(0, 8);
   });
 
@@ -1100,11 +1109,12 @@ export const getCompetitors = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { getUserPlan } = await import("./plan.server");
     const { isUnlimited } = await import("./plan-limits");
+    const { normalizeCompetitors } = await import("./competitors");
     const [{ data: intel }, limits] = await Promise.all([
       context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
       getUserPlan(context.supabase, context.userId),
     ]);
-    const competitors = ((intel?.competitors as string[] | null) ?? []).map(String);
+    const competitors = normalizeCompetitors(intel?.competitors);
     const unlimited = isUnlimited(limits.maxCompetitors);
     return {
       competitors,
@@ -1118,16 +1128,18 @@ export const getCompetitors = createServerFn({ method: "POST" })
 
 export const saveCompetitors = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; competitors: string[] }) => input)
+  .inputValidator((input: { brandId: string; competitors: Array<{ name: string; domain?: string }> }) => input)
   .handler(async ({ data, context }) => {
+    const { normalizeCompetitors } = await import("./competitors");
     const { data: current } = await context.supabase
       .from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle();
-    const previous = ((current?.competitors as string[] | null) ?? []).length;
+    const previous = normalizeCompetitors(current?.competitors).length;
+    const next = normalizeCompetitors(data.competitors);
     // Liste küçülüyorsa (rakip kaldırma) kota kontrolü yapılmaz.
-    if (data.competitors.length > previous) {
+    if (next.length > previous) {
       const { assertCompetitorQuota } = await import("./plan.server");
       try {
-        await assertCompetitorQuota(context.supabase, context.userId, data.competitors.length);
+        await assertCompetitorQuota(context.supabase, context.userId, next.length);
       } catch (error) {
         // Kota aşımı bir hata değil, kullanıcıya gösterilecek bir durumdur.
         return { ok: false as const, message: error instanceof Error ? error.message : "Plan limiti aşıldı." };
@@ -1135,7 +1147,7 @@ export const saveCompetitors = createServerFn({ method: "POST" })
     }
     const { error } = await context.supabase
       .from("brand_intelligence")
-      .upsert({ brand_id: data.brandId, competitors: data.competitors }, { onConflict: "brand_id" });
+      .upsert({ brand_id: data.brandId, competitors: next }, { onConflict: "brand_id" });
     if (error) throw new Error(error.message);
     return { ok: true as const, message: "" };
   });
@@ -1168,7 +1180,8 @@ export const getCompetitorInsights = createServerFn({ method: "POST" })
       context.supabase.from("brands").select("domain").eq("id", data.brandId).single(),
     ]);
 
-    const tracked = ((intel?.competitors as string[] | null) ?? []).map((name) => String(name).toLowerCase());
+    const { normalizeCompetitors, domainIsTracked } = await import("./competitors");
+    const tracked = normalizeCompetitors(intel?.competitors);
     const ownDomain = (brand?.domain ?? "").replace(/^https?:\/\//, "").replace(/^www\./, "").toLowerCase();
     const counts = new Map<string, number>();
     for (const row of citations ?? []) {
@@ -1184,7 +1197,7 @@ export const getCompetitorInsights = createServerFn({ method: "POST" })
       .map(([domain, mentions]) => ({
         domain,
         mentions,
-        tracked: tracked.some((name) => domain.includes(name) || name.includes(domain.split(".")[0] ?? "")),
+        tracked: domainIsTracked(tracked, domain),
       }));
 
     return { suggestions, totalCitations: (citations ?? []).length };
@@ -1195,6 +1208,7 @@ export const getCompetitorVisibilityTrend = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string; days?: number }) => input)
   .handler(async ({ data, context }) => {
     const { buildCompetitorTrend } = await import("./competitor-trend.server");
+    const { normalizeCompetitors } = await import("./competitors");
     const days = data.days ?? 30;
     const since = new Date(Date.now() - days * 86400000).toISOString();
     const [{ data: runs }, { data: intel }, { data: brand }] = await Promise.all([
@@ -1212,7 +1226,7 @@ export const getCompetitorVisibilityTrend = createServerFn({ method: "POST" })
     return buildCompetitorTrend(
       (runs ?? []).map((r) => ({ created_at: r.created_at, brand_mentioned: Boolean(r.brand_mentioned), raw_answer: r.raw_answer })),
       brand?.name ?? "Markanız",
-      ((intel?.competitors as string[] | null) ?? []).map(String),
+      normalizeCompetitors(intel?.competitors),
       days,
     );
   });
