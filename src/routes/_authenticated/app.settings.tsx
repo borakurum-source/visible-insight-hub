@@ -31,6 +31,60 @@ export const Route = createFileRoute("/_authenticated/app/settings")({
 });
 
 function SettingsPage() {
+  return <SettingsPageBody />;
+}
+
+// Marka ekleme artik kurulum sihirbazi yerine marka ayarlarindan yapiliyor.
+function NewBrandCard({ onCreated }: { onCreated: (id: string) => void }) {
+  const create = useServerFn(createBrand);
+  const queryClient = useQueryClient();
+  const [newName, setNewName] = useState("");
+  const [newDomain, setNewDomain] = useState("");
+
+  const createMutation = useMutation({
+    mutationFn: () => create({ data: { name: newName, domain: newDomain } }),
+    onSuccess: async (created: { id: string }) => {
+      toast.success("Marka eklendi");
+      setNewName("");
+      setNewDomain("");
+      await queryClient.invalidateQueries({ queryKey: ["panel-session"] });
+      onCreated(created.id);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  return (
+    <Card>
+      <CardHeader><CardTitle className="text-base">Yeni marka ekle</CardTitle></CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Her marka kendi promptları, entegrasyonları ve skoruyla ayrı takip edilir. Plan limitiniz kadar marka ekleyebilirsiniz.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="new-brand-name">Marka adı</Label>
+            <Input id="new-brand-name" value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="Örn. ABS Kör Kalıp" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-brand-domain">Alan adı</Label>
+            <Input id="new-brand-domain" value={newDomain} onChange={(event) => setNewDomain(event.target.value)} placeholder="ornek.com" />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !newDomain.trim()}>
+            {createMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+            Markayı ekle
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/app/onboarding">Kurulum sihirbazını aç</Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SettingsPageBody() {
   const { brand, selectBrand } = useActiveBrand();
   const queryClient = useQueryClient();
   const save = useServerFn(updateBrand);
