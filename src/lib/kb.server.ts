@@ -1,7 +1,7 @@
 // RAG hattının paylaşılan sunucu mantığı: kaynak → temiz metin → parça → embedding → kb_chunks.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { chunkStructured, embedTexts, hashText, weightFor, withContext } from "./embeddings.server";
-import { extractFromHtml, fetchAndExtract } from "./extract.server";
+import { extractFromHtml, fetchExtracted } from "./extract.server";
 
 type AnyClient = SupabaseClient<any, any, any>;
 
@@ -12,6 +12,21 @@ export type IndexResult = {
   qualityScore?: number;
   noiseRatio?: number;
 };
+
+/** Sabit genislikte paralel havuz: sayfalari tek tek beklemek yerine 4'lu isler. */
+export async function runPool<T, R>(items: T[], size: number, worker: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(size, items.length) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      results[index] = await worker(items[index]!);
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
 
 // Parçanın kanıt değeri: sayı, tarih, oran, isim gibi doğrulanabilir sinyaller puan getirir.
 function evidenceScore(text: string): number {
@@ -30,7 +45,7 @@ function evidenceScore(text: string): number {
 export async function indexSource(supabase: AnyClient, sourceId: string, force = false): Promise<IndexResult> {
   const { data: source } = await supabase
     .from("knowledge_sources")
-    .select("id, brand_id, title, url, content, source_type, content_hash")
+    .select("id, brand_id, title, url, content, source_type, content_hash, etag, last_modified")
     .eq("id", sourceId)
     .single();
   if (!source) throw new Error("Kaynak bulunamadı");
@@ -39,6 +54,10 @@ export async function indexSource(supabase: AnyClient, sourceId: string, force =
   let noiseRatio = 0;
   let structured = "";
   let pageTitle = source.title as string;
+  let method: "static" | "render" | "manual" = "manual";
+  let etag: string | null = null;
+  let lastModified: string | null = null;
+  const checkedAt = new Date().toISOString();
 
   const manual = (source.content ?? "").trim();
   if (manual) {
@@ -52,12 +71,38 @@ export async function indexSource(supabase: AnyClient, sourceId: string, force =
       text = manual;
     }
   } else if (source.url) {
-    const page = await fetchAndExtract(source.url);
-    if (page) {
-      text = page.text;
-      structured = page.structured;
-      noiseRatio = page.noiseRatio;
-      if (page.title) pageTitle = page.title;
+    const outcome = await fetchExtracted(source.url, {
+      // Zorunlu yeniden indekslemede koşullu istek atlanır.
+      etag: force ? null : (source.etag as string | null),
+      lastModified: force ? null : (source.last_modified as string | null),
+    });
+
+    if (outcome.status === "not-modified") {
+      await supabase
+        .from("knowledge_sources")
+        .update({ last_checked_at: checkedAt })
+        .eq("id", source.id);
+      return { ok: true, chunks: 0, reason: "Sayfa değişmemiş" };
+    }
+    if (outcome.status === "ok") {
+      text = outcome.page.text;
+      structured = outcome.page.structured;
+      noiseRatio = outcome.page.noiseRatio;
+      method = outcome.page.method;
+      etag = outcome.page.etag ?? null;
+      lastModified = outcome.page.lastModified ?? null;
+      if (outcome.page.title) pageTitle = outcome.page.title;
+    } else {
+      await supabase
+        .from("knowledge_sources")
+        .update({
+          index_status: "hata",
+          extract_method: outcome.status === "empty" ? "js-required" : "error",
+          last_checked_at: checkedAt,
+          indexed_at: checkedAt,
+        })
+        .eq("id", source.id);
+      return { ok: false, chunks: 0, reason: outcome.reason };
     }
   }
 
@@ -65,7 +110,7 @@ export async function indexSource(supabase: AnyClient, sourceId: string, force =
   if (!combined) {
     await supabase
       .from("knowledge_sources")
-      .update({ index_status: "hata", indexed_at: new Date().toISOString() })
+      .update({ index_status: "hata", last_checked_at: checkedAt, indexed_at: checkedAt })
       .eq("id", source.id);
     return { ok: false, chunks: 0, reason: "İçerik alınamadı" };
   }
@@ -121,7 +166,11 @@ export async function indexSource(supabase: AnyClient, sourceId: string, force =
       chunk_count: rows.length,
       quality_score: qualityScore,
       noise_ratio: Number(noiseRatio.toFixed(3)),
-      indexed_at: new Date().toISOString(),
+      extract_method: method,
+      etag,
+      last_modified: lastModified,
+      last_checked_at: checkedAt,
+      indexed_at: checkedAt,
     })
     .eq("id", source.id);
 

@@ -1,6 +1,8 @@
-// HTML -> temiz metin cikarim katmani.
+// HTML -> temiz metin cikarim katmani (DOM tabanli, cheerio).
 // Amac: cerez bandi, menu, footer, form gibi gurultuyu atip yalnizca kanit degeri
 // tasiyan ana icerigi, baslik hiyerarsisini ve JSON-LD verisini birakmak.
+import * as cheerio from "cheerio";
+import type { CheerioAPI } from "cheerio";
 
 export type ExtractedPage = {
   title: string;
@@ -11,14 +13,20 @@ export type ExtractedPage = {
   structured: string;
   /** Ham metnin ne kadarinin gurultu olarak atildigi (0-1). */
   noiseRatio: number;
+  /** Icerigin nasil elde edildigi: statik fetch mi, JS render mi. */
+  method: "static" | "render";
+  /** Kosullu istek icin HTTP dogrulayicilar. */
+  etag?: string | null;
+  lastModified?: string | null;
 };
 
-const NOISE_TAGS = [
+const NOISE_SELECTORS = [
   "script", "style", "noscript", "template", "svg", "iframe", "form",
   "nav", "header", "footer", "aside", "dialog", "select", "button",
+  "[hidden]", "[aria-hidden=true]",
 ];
 
-// class/id icinde bu kaliplar geciyorsa blok tamamen atilir.
+// class/id/role icinde bu kaliplar geciyorsa dugum tamamen atilir.
 const NOISE_PATTERN =
   /(cookie|consent|gdpr|kvkk|çerez|cerez|banner|popup|modal|newsletter|bulten|bülten|subscribe|abone|breadcrumb|sidebar|side-bar|menu|navbar|navigation|social|share|paylas|comment|yorum|related|benzer|promo|advert|\bads?\b|sticky|offcanvas|drawer|backdrop|skip-link|cta-bar|announcement)/i;
 
@@ -26,99 +34,54 @@ const NOISE_PATTERN =
 const NOISE_LINE_PATTERN =
   /(çerez|cerez|cookie|kvkk|gizlilik politikas|kullanım koşullar|kullanim kosullar|tüm hakları saklıdır|tum haklari saklidir|all rights reserved|bültenimize|bultenimize|newsletter|abone ol|subscribe|sepete ekle|giriş yap|giris yap|kayıt ol|kayit ol|menüyü aç|menuyu ac)/i;
 
-function decodeEntities(input: string): string {
-  return input
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#0?39;|&apos;|&rsquo;/gi, "'")
-    .replace(/&#(\d+);/g, (_, code: string) => String.fromCharCode(Number(code)));
+function stripNoise($: CheerioAPI) {
+  $(NOISE_SELECTORS.join(",")).remove();
+  $("*").each((_, element) => {
+    const node = $(element);
+    const signature = [
+      node.attr("class") ?? "",
+      node.attr("id") ?? "",
+      node.attr("role") ?? "",
+      node.attr("data-testid") ?? "",
+      node.attr("aria-label") ?? "",
+    ].join(" ");
+    if (signature.trim() && NOISE_PATTERN.test(signature)) node.remove();
+  });
 }
 
-function stripTag(html: string, tag: string): string {
-  const paired = new RegExp(`<${tag}\\b[^>]*>[\\s\\S]*?<\\/${tag}>`, "gi");
-  const selfClosing = new RegExp(`<${tag}\\b[^>]*\\/?>`, "gi");
-  return html.replace(paired, " ").replace(selfClosing, " ");
-}
-
-// class/id'sinde gurultu kalibi olan <div>/<section> bloklarini, ic ice etiketleri
-// sayarak dogru kapanista keser.
-function stripNoisyBlocks(html: string): string {
-  const openTag = /<(div|section|ul|ol|aside)\b([^>]*)>/gi;
-  let result = html;
-  for (let pass = 0; pass < 3; pass += 1) {
-    let changed = false;
-    let output = "";
-    let cursor = 0;
-    openTag.lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = openTag.exec(result)) !== null) {
-      if (match.index < cursor) continue;
-      const attrs = match[2] ?? "";
-      const idClass = /(?:class|id|data-testid|role|aria-label)\s*=\s*["']([^"']*)["']/gi;
-      let noisy = false;
-      let attrMatch: RegExpExecArray | null;
-      while ((attrMatch = idClass.exec(attrs)) !== null) {
-        if (NOISE_PATTERN.test(attrMatch[1] ?? "")) { noisy = true; break; }
-      }
-      if (!noisy) continue;
-
-      const tag = (match[1] ?? "div").toLowerCase();
-      const scanner = new RegExp(`<${tag}\\b[^>]*>|<\\/${tag}>`, "gi");
-      scanner.lastIndex = match.index + match[0].length;
-      let depth = 1;
-      let end = -1;
-      let step: RegExpExecArray | null;
-      while ((step = scanner.exec(result)) !== null) {
-        if (step[0].startsWith("</")) depth -= 1;
-        else depth += 1;
-        if (depth === 0) { end = step.index + step[0].length; break; }
-      }
-      if (end === -1) continue;
-      output += result.slice(cursor, match.index) + " ";
-      cursor = end;
-      openTag.lastIndex = end;
-      changed = true;
-    }
-    output += result.slice(cursor);
-    result = output;
-    if (!changed) break;
+/** Ana icerik dugumu: once semantik seciciler, yoksa metin yogunlugu en yuksek blok. */
+function pickMainContent($: CheerioAPI): cheerio.Cheerio<any> {
+  for (const selector of ["main", "article", "[role=main]", "#content", "#main", ".content", ".entry-content"]) {
+    const found = $(selector).first();
+    if (found.length && found.text().replace(/\s+/g, " ").trim().length > 400) return found;
   }
-  return result;
+
+  // Icerik yogunlugu: metin uzunlugu / link metni orani. Menuler otomatik elenir.
+  let best: { node: cheerio.Cheerio<any>; score: number } | null = null;
+  $("body div, body section").each((_, element) => {
+    const node = $(element);
+    const text = node.text().replace(/\s+/g, " ").trim();
+    if (text.length < 500) return;
+    const linkText = node.find("a").text().replace(/\s+/g, " ").trim().length;
+    const density = 1 - Math.min(1, linkText / text.length);
+    const paragraphs = node.find("p").length;
+    const score = text.length * density * (1 + Math.min(paragraphs, 20) / 20);
+    if (!best || score > best.score) best = { node, score };
+  });
+  if (best) return (best as { node: cheerio.Cheerio<any> }).node;
+  return $("body").length ? $("body") : $.root();
 }
 
-function pickMainContent(html: string): string {
-  const candidates = [
-    /<main\b[^>]*>([\s\S]*?)<\/main>/i,
-    /<article\b[^>]*>([\s\S]*?)<\/article>/i,
-    /<[^>]+role=["']main["'][^>]*>([\s\S]*?)<\/[a-z]+>/i,
-    /<div\b[^>]*(?:id|class)=["'][^"']*(?:content|icerik|main)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i,
-  ];
-  for (const pattern of candidates) {
-    const found = html.match(pattern);
-    const body = found?.[1] ?? "";
-    // Cok kisa bloklar ana icerik degildir.
-    if (body && body.replace(/<[^>]+>/g, "").trim().length > 400) return body;
-  }
-  return html;
-}
-
-function readJsonLd(html: string): string {
-  const blocks = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+function readJsonLd($: CheerioAPI): string {
   const lines: string[] = [];
-  const wanted = new Set([
-    "organization", "localbusiness", "product", "service", "faqpage",
-    "offer", "aggregaterating", "breadcrumblist" /* atilir */,
-  ]);
+  const wanted = new Set(["organization", "localbusiness", "product", "service", "faqpage", "offer", "aggregaterating"]);
   const visit = (node: unknown, depth = 0) => {
     if (depth > 4 || !node) return;
     if (Array.isArray(node)) { node.forEach((item) => visit(item, depth + 1)); return; }
     if (typeof node !== "object") return;
     const record = node as Record<string, unknown>;
     const type = String(record["@type"] ?? "").toLowerCase();
-    if (type && wanted.has(type) && type !== "breadcrumblist") {
+    if (type && wanted.has(type)) {
       const fields = ["name", "description", "brand", "priceRange", "price", "areaServed", "slogan", "founder", "foundingDate", "telephone", "address"];
       const parts = fields
         .map((field) => {
@@ -138,47 +101,66 @@ function readJsonLd(html: string): string {
         const entities = record["mainEntity"];
         if (Array.isArray(entities)) {
           for (const item of entities.slice(0, 20)) {
-            const q = (item as Record<string, unknown>)["name"];
+            const question = (item as Record<string, unknown>)["name"];
             const answer = (item as Record<string, unknown>)["acceptedAnswer"] as Record<string, unknown> | undefined;
-            const a = answer?.["text"];
-            if (q && a) lines.push(`SSS — ${String(q)}: ${String(a).replace(/<[^>]+>/g, " ").slice(0, 400)}`);
+            const text = answer?.["text"];
+            if (question && text) {
+              lines.push(`SSS — ${String(question)}: ${cheerio.load(String(text)).text().replace(/\s+/g, " ").slice(0, 400)}`);
+            }
           }
         }
       }
     }
     for (const value of Object.values(record)) visit(value, depth + 1);
   };
-  for (const block of blocks) {
-    try { visit(JSON.parse((block[1] ?? "").trim())); } catch { /* bozuk json-ld yok sayilir */ }
-  }
+  $('script[type="application/ld+json"]').each((_, element) => {
+    try { visit(JSON.parse($(element).text().trim())); } catch { /* bozuk json-ld yok sayilir */ }
+  });
   return lines.slice(0, 30).join("\n");
+}
+
+/** Ana icerik dugumunu satir yapisi korunmus duz metne cevirir. */
+function nodeToText($: CheerioAPI, root: cheerio.Cheerio<any>): string {
+  root.find("h1, h2, h3").each((_, element) => {
+    const node = $(element);
+    node.replaceWith(`\n## ${node.text().replace(/\s+/g, " ").trim()}\n`);
+  });
+  root.find("h4, h5, h6").each((_, element) => {
+    const node = $(element);
+    node.replaceWith(`\n### ${node.text().replace(/\s+/g, " ").trim()}\n`);
+  });
+  root.find("li").each((_, element) => {
+    const node = $(element);
+    node.replaceWith(`\n- ${node.text().replace(/\s+/g, " ").trim()}\n`);
+  });
+  root.find("td, th").each((_, element) => {
+    const node = $(element);
+    node.replaceWith(` | ${node.text().replace(/\s+/g, " ").trim()}`);
+  });
+  root.find("br").replaceWith("\n");
+  root.find("p, tr, div, section, h1, h2, h3, h4, h5, h6, blockquote").each((_, element) => {
+    $(element).append("\n");
+  });
+  return root.text();
 }
 
 /** Ham HTML'i temiz, baslik hiyerarsisi korunmus metne cevirir. */
 export function extractFromHtml(html: string, maxChars = 120000): ExtractedPage {
-  const rawLength = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().length;
+  const $ = cheerio.load(html);
+  const rawLength = $.root().text().replace(/\s+/g, " ").trim().length;
 
-  const title = decodeEntities((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? "").trim()).slice(0, 200);
-  const description = decodeEntities(
-    (html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)?.[1] ?? "").trim(),
-  ).slice(0, 400);
-  const structured = readJsonLd(html);
+  const title = ($("title").first().text() || $("h1").first().text() || "").replace(/\s+/g, " ").trim().slice(0, 200);
+  const description = ($('meta[name="description"]').attr("content") ?? $('meta[property="og:description"]').attr("content") ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 400);
+  const structured = readJsonLd($);
 
-  let working = html;
-  for (const tag of NOISE_TAGS) working = stripTag(working, tag);
-  working = stripNoisyBlocks(working);
-  working = pickMainContent(working);
+  stripNoise($);
+  const main = pickMainContent($);
+  const rawText = nodeToText($, main);
 
-  // Basliklari isaretle, blok elemanlarini satir sonuna cevir.
-  working = working
-    .replace(/<h([1-3])\b[^>]*>([\s\S]*?)<\/h\1>/gi, (_, _level, inner: string) => `\n## ${inner.replace(/<[^>]+>/g, " ")}\n`)
-    .replace(/<h([4-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi, (_, _level, inner: string) => `\n### ${inner.replace(/<[^>]+>/g, " ")}\n`)
-    .replace(/<li\b[^>]*>/gi, "\n- ")
-    .replace(/<(p|br|tr|div|section)\b[^>]*>/gi, "\n")
-    .replace(/<td\b[^>]*>/gi, " | ")
-    .replace(/<[^>]+>/g, " ");
-
-  const lines = decodeEntities(working)
+  const lines = rawText
     .split("\n")
     .map((line) => line.replace(/[ \t\u00a0]+/g, " ").trim())
     .filter((line) => {
@@ -204,27 +186,139 @@ export function extractFromHtml(html: string, maxChars = 120000): ExtractedPage 
   const text = deduped.join("\n").slice(0, maxChars);
   const noiseRatio = rawLength > 0 ? Math.max(0, Math.min(1, 1 - text.length / rawLength)) : 0;
 
-  return { title, description, text, structured, noiseRatio };
+  return { title, description, text, structured, noiseRatio, method: "static" };
 }
 
-/** Bir URL'i indirir ve temiz metne cevirir. */
-export async function fetchAndExtract(url: string): Promise<ExtractedPage | null> {
-  try {
-    const target = url.startsWith("http") ? url : `https://${url}`;
-    const res = await fetch(target, {
-      headers: {
-        "user-agent": "Mozilla/5.0 (compatible; OneCiteBot/1.0; +https://1cite.com)",
-        accept: "text/html,application/xhtml+xml",
-      },
-      signal: AbortSignal.timeout(20000),
+/** Markdown ciktisini (Firecrawl) ayni ExtractedPage sekline cevirir. */
+export function extractFromMarkdown(markdown: string, meta: { title?: string; description?: string } = {}, maxChars = 120000): ExtractedPage {
+  const lines = markdown
+    .split("\n")
+    .map((line) => line.replace(/[ \t\u00a0]+/g, " ").trim())
+    .map((line) => line.replace(/^#{1,3}\s+/, "## ").replace(/^#{4,6}\s+/, "### "))
+    .map((line) => line.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1"))
+    .filter((line) => {
+      if (!line || line === "---") return false;
+      if (line.startsWith("##")) return line.replace(/#/g, "").trim().length > 1;
+      if (NOISE_LINE_PATTERN.test(line) && line.length < 220) return false;
+      if (line.length < 25 && !/[.!?:]/.test(line) && line.split(" ").length <= 3) return false;
+      return true;
     });
-    if (!res.ok) return null;
-    const type = res.headers.get("content-type") ?? "";
-    if (type && !/html|xml|text/i.test(type)) return null;
-    return extractFromHtml(await res.text());
-  } catch {
+  const text = lines.join("\n").slice(0, maxChars);
+  return {
+    title: (meta.title ?? "").slice(0, 200),
+    description: (meta.description ?? "").slice(0, 400),
+    text,
+    structured: "",
+    noiseRatio: 0,
+    method: "render",
+  };
+}
+
+const USER_AGENT = "Mozilla/5.0 (compatible; OneCiteBot/1.0; +https://1cite.com)";
+
+/** JS ile render edilen sayfalar icin Firecrawl'a duser. Baglanti yoksa null doner. */
+export async function renderWithFirecrawl(url: string): Promise<ExtractedPage | null> {
+  const key = process.env["FIRECRAWL_API_KEY"];
+  if (!key) return null;
+  const gatewayKey = process.env["LOVABLE_API_KEY"];
+  const usesGateway = key.startsWith("lovc_");
+  if (usesGateway && !gatewayKey) return null;
+  const endpoint = usesGateway
+    ? "https://connector-gateway.lovable.dev/firecrawl/v2/scrape"
+    : "https://api.firecrawl.dev/v2/scrape";
+  const headers: Record<string, string> = usesGateway
+    ? { "Content-Type": "application/json", Authorization: `Bearer ${gatewayKey}`, "X-Connection-Api-Key": key }
+    : { "Content-Type": "application/json", Authorization: `Bearer ${key}` };
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ url, formats: ["markdown"], onlyMainContent: true }),
+      signal: AbortSignal.timeout(45000),
+    });
+    const payload = (await res.json().catch(() => null)) as
+      | { markdown?: string; metadata?: Record<string, unknown>; data?: { markdown?: string; metadata?: Record<string, unknown> }; error?: string }
+      | null;
+    if (!res.ok) {
+      console.error(`Firecrawl render failed [${res.status}]: ${payload?.error ?? "bilinmeyen hata"}`);
+      return null;
+    }
+    const markdown = payload?.markdown ?? payload?.data?.markdown ?? "";
+    if (!markdown.trim()) return null;
+    const metadata = payload?.metadata ?? payload?.data?.metadata ?? {};
+    return extractFromMarkdown(markdown, {
+      title: String(metadata["title"] ?? ""),
+      description: String(metadata["description"] ?? ""),
+    });
+  } catch (error) {
+    console.error("Firecrawl render error", error);
     return null;
   }
+}
+
+export type FetchOptions = {
+  /** Kosullu istek: sunucu 304 donerse icerik yeniden islenmez. */
+  etag?: string | null;
+  lastModified?: string | null;
+  /** JS ile render edilen sayfalar icin Firecrawl fallback'i. */
+  allowRender?: boolean;
+};
+
+export type FetchOutcome =
+  | { status: "ok"; page: ExtractedPage }
+  | { status: "not-modified" }
+  | { status: "empty"; reason: string }
+  | { status: "error"; reason: string };
+
+/** Bir URL'i (kosullu) indirir, temizler, gerekirse render fallback'ine duser. */
+export async function fetchExtracted(url: string, options: FetchOptions = {}): Promise<FetchOutcome> {
+  const target = url.startsWith("http") ? url : `https://${url}`;
+  let html = "";
+  let etag: string | null = null;
+  let lastModified: string | null = null;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const headers: Record<string, string> = { "user-agent": USER_AGENT, accept: "text/html,application/xhtml+xml" };
+      if (options.etag) headers["if-none-match"] = options.etag;
+      if (options.lastModified) headers["if-modified-since"] = options.lastModified;
+      const res = await fetch(target, { headers, signal: AbortSignal.timeout(20000) });
+      if (res.status === 304) return { status: "not-modified" };
+      if (!res.ok) {
+        if (res.status >= 500 && attempt === 0) continue;
+        return { status: "error", reason: `HTTP ${res.status}` };
+      }
+      const type = res.headers.get("content-type") ?? "";
+      if (type && !/html|xml|text/i.test(type)) return { status: "error", reason: "Desteklenmeyen içerik tipi" };
+      etag = res.headers.get("etag");
+      lastModified = res.headers.get("last-modified");
+      html = await res.text();
+      break;
+    } catch (error) {
+      if (attempt === 1) return { status: "error", reason: error instanceof Error ? error.message : "İndirilemedi" };
+    }
+  }
+  if (!html) return { status: "error", reason: "Boş yanıt" };
+
+  const page = extractFromHtml(html);
+  const needsRender = page.text.trim().length < 500;
+
+  if (needsRender && options.allowRender !== false) {
+    const rendered = await renderWithFirecrawl(target);
+    if (rendered && rendered.text.trim().length >= 200) {
+      return { status: "ok", page: { ...rendered, structured: page.structured, etag, lastModified } };
+    }
+  }
+  if (needsRender) {
+    return { status: "empty", reason: "Sayfa JavaScript ile yükleniyor; statik içerik alınamadı" };
+  }
+  return { status: "ok", page: { ...page, etag, lastModified } };
+}
+
+/** Geriye donuk uyumlu sade sarmalayici. */
+export async function fetchAndExtract(url: string): Promise<ExtractedPage | null> {
+  const outcome = await fetchExtracted(url);
+  return outcome.status === "ok" ? outcome.page : null;
 }
 
 /** Birden fazla sayfada tekrarlayan satirlari (site geneli boilerplate) bulur. */
