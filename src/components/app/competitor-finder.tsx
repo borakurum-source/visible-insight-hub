@@ -35,7 +35,14 @@ export function CompetitorFinder({ brandId }: { brandId: string }) {
 
   const save = useMutation({
     mutationFn: (list: string[]) => persist({ data: { brandId, competitors: list } }),
-    onSuccess: async () => {
+    onSuccess: async (result) => {
+      if (!result.ok) {
+        toast.error(result.message, {
+          description: "Planınızı yükselterek daha fazla rakip takip edebilirsiniz.",
+          action: { label: "Planlar", onClick: () => { window.location.href = "/app/pricing"; } },
+        });
+        return;
+      }
       await queryClient.invalidateQueries({ queryKey: ["competitors", brandId] });
       toast.success("Rakip listesi güncellendi.");
     },
