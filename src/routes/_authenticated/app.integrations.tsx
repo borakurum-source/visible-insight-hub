@@ -184,6 +184,64 @@ function IntegrationsPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  // --- Bing Webmaster Tools (API anahtari ile) ---
+  const bingStatus = useQuery({
+    queryKey: ["bing-status", brand?.id],
+    queryFn: () => fetchBing({ data: { brandId: brand!.id } }),
+    enabled: !!brand?.id,
+  });
+
+  const saveKey = useMutation({
+    mutationFn: () => storeBingKey({ data: { brandId: brand!.id, apiKey: bingKey } }),
+    onSuccess: async (result) => {
+      setBingKey("");
+      toast.success("Bing API anahtarı kaydedildi.");
+      await bingStatus.refetch();
+      if (result.sites.length) setBingCandidates(result.sites);
+      else toast.error("Bing hesabınızda doğrulanmış site bulunamadı.");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const loadBingSites = useMutation({
+    mutationFn: () => fetchBingSites({ data: { brandId: brand!.id } }),
+    onSuccess: (result) => {
+      if (!result.sites.length) toast.error("Bing hesabınızda doğrulanmış site bulunamadı.");
+      else setBingCandidates(result.sites);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const chooseBing = useMutation({
+    mutationFn: (siteUrl: string) => saveBingSite({ data: { brandId: brand!.id, siteUrl } }),
+    onSuccess: async () => {
+      setBingCandidates(null);
+      await invalidate();
+      bingSync.mutate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const bingSync = useMutation({
+    mutationFn: () => runBingSync({ data: { brandId: brand!.id } }),
+    onSuccess: async (result) => {
+      toast.success(`Bing verisi güncellendi (${result.clicks} tıklama, ${result.queries} sorgu).`);
+      await invalidate();
+      await bingStatus.refetch();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const unlinkBing = useMutation({
+    mutationFn: () => removeBing({ data: { brandId: brand!.id } }),
+    onSuccess: async () => {
+      toast.success("Bing bağlantısı kaldırıldı.");
+      await invalidate();
+      await bingStatus.refetch();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const gsc = integrations.data?.connections.find((c) => c.provider === "gsc") ?? null;
   const ga4 = integrations.data?.connections.find((c) => c.provider === "ga4") ?? null;
   const bing = integrations.data?.connections.find((c) => c.provider === "bing") ?? null;
