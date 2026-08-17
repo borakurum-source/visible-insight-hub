@@ -232,7 +232,7 @@ function FreeReportPage() {
             </dl>
             <div className="mt-7 flex flex-wrap gap-2">
               <Button asChild><Link to="/fiyatlandirma">Planları gör <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
-              <Button variant="outline" asChild><Link to="/platform">Platformu incele</Link></Button>
+              <Button variant="outline" asChild><Link to="/ozellikler">Ürünü incele</Link></Button>
             </div>
           </div>
         </div>

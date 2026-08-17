@@ -205,7 +205,7 @@ function NasilCalisir() {
           ))}
         </div>
         <div className="mt-14 flex justify-center">
-          <Button asChild><Link to="/platform">Platformu inceleyin <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
+          <Button asChild><Link to="/ozellikler">Ürünün tamamını inceleyin <ArrowRight className="ml-1.5 h-4 w-4" /></Link></Button>
         </div>
       </div>
     </section>

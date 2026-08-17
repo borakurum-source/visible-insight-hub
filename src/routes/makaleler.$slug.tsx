@@ -278,7 +278,7 @@ function GenericArticle({ article }: { article: Article }) {
             <h2 className="mt-4 text-lg font-extrabold text-foreground">Bu kavramı markanızda görün.</h2>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">Ücretsiz raporla ilk kaynak ve kanıt çerçevenizi çıkarın.</p>
             <Button className="mt-5 w-full" asChild><Link to="/ucretsiz-yapay-zeka-gorunurluk-raporu">Ücretsiz ölçüm</Link></Button>
-            <Link to="/platform" className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-primary">Platformu inceleyin <SearchCheck className="h-4 w-4" /></Link>
+            <Link to="/ozellikler" className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-primary">Platformu inceleyin <SearchCheck className="h-4 w-4" /></Link>
           </aside>
         </div>
       </article>

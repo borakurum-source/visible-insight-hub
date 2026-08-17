@@ -60,7 +60,7 @@ const profiles = [
     title: "Tek markayı düzenli izliyorum",
     body: "Sabit soru seti, Bilgi Bankası ve aylık trend takibiyle ritim kurun.",
     plan: "Başlangıç / Büyüme",
-    href: "/platform",
+    href: "/ozellikler",
     action: "Platformu incele",
   },
   {
@@ -309,7 +309,7 @@ function PricingPage() {
       <MarketingCta
         title="Önce ücretsiz ölçün, sonra planı seçin."
         description="İlk ölçüm markanızın yapay zeka cevaplarındaki atıf payını ve eksik kanıtlarını gösterir. Plan kararını veriye bakarak verin."
-        secondaryHref="/platform"
+        secondaryHref="/ozellikler"
         secondaryLabel="Platformu incele"
       />
     </MarketingShell>

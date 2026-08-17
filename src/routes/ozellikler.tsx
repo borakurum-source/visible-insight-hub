@@ -156,7 +156,7 @@ const mainFeatures: MainFeature[] = [
     shot: shotGraph.url,
     alt: "OneCite marka zekası ekranı: 3D vektör haritası ve bilgi parçaları",
     caption: "Marka Zekası — canlı 3B vektör haritası",
-    href: "/platform",
+    href: "/platform/evidence-gaps",
     hrefLabel: "Platformu keşfet",
   },
   {
