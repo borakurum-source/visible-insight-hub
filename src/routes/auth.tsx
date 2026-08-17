@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import BrandLogo from "@/components/site/BrandLogo";
+import { flushPendingOAuth, markPendingOAuth, trackLogin, trackSignUp } from "@/lib/analytics";
 
 // Aynı origin'de göreli bir yol mu? OAuth onay akışı buraya geri döner.
 function safeNext(value: unknown): string | undefined {
@@ -55,7 +56,14 @@ function AuthPage() {
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) goNext();
+      if (session) {
+        const user = session.user;
+        const isNewUser =
+          !!user?.created_at &&
+          Date.now() - new Date(user.created_at).getTime() < 60_000;
+        flushPendingOAuth(isNewUser);
+        goNext();
+      }
     });
     void supabase.auth.getSession().then(({ data: s }) => {
       if (s.session) goNext();
@@ -66,6 +74,7 @@ function AuthPage() {
   const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
+    markPendingOAuth("google");
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: `${window.location.origin}/auth${next ? `?next=${encodeURIComponent(next)}` : ""}`,
     });
@@ -75,6 +84,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
+    flushPendingOAuth(false);
     void navigate({ to: "/app" });
   };
 
@@ -95,6 +105,7 @@ function AuthPage() {
         setEmailLoading(false);
         return;
       }
+      trackLogin("email");
       void navigate({ to: "/app" });
       return;
     }
@@ -110,9 +121,11 @@ function AuthPage() {
       return;
     }
     if (data.session) {
+      trackSignUp("email");
       void navigate({ to: "/app" });
       return;
     }
+    trackSignUp("email", "pending_verification");
     setNotice("Hesabını doğrulamak için e-postana gönderdiğimiz bağlantıya tıkla.");
     setEmailLoading(false);
   };
