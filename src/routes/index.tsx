@@ -392,7 +392,7 @@ function SonCagri() {
       <img src={heroSignalAction} alt="Üç ışıklı yolun şeffaf bir prizma içinde tek kaynak noktasında birleşmesi" className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-45" loading="lazy" />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-ink/55 via-ink/60 to-ink" aria-hidden="true" />
       <div className="mx-auto max-w-3xl rounded-2xl border border-white/15 bg-ink/70 px-7 py-12 text-center text-white backdrop-blur-md md:px-12">
-        <p className="visual-source-label text-cyan">SIGNAL → EVIDENCE → ACTION</p>
+        <p className="visual-source-label text-cyan">SİNYAL → KANIT → AKSİYON</p>
         <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] md:text-5xl">Markanızın yapay zeka cevaplarında nerede durduğunu tahmin etmeyin.</h2>
         <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-slate-300">İlk ölçümle soru, kaynak ve eksik kanıt zincirini görün. Sonra yalnızca en yüksek etkili uygulamaya odaklanın.</p>
         <Button size="lg" className="mt-8 bg-cyan text-foreground hover:bg-[#B8F4FF]" asChild>
