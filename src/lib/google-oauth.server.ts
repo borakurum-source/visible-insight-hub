@@ -22,8 +22,17 @@ export function isGoogleOAuthConfigured() {
   return Boolean(process.env["GOOGLE_OAUTH_CLIENT_ID"] && process.env["GOOGLE_OAUTH_CLIENT_SECRET"]);
 }
 
+// Google Console'a tek bir sabit adres kaydedilebilsin diye canonical URL kullanilir.
+// Onizleme/alan adi degisse bile redirect_uri ayni kalir.
+export const CANONICAL_GOOGLE_REDIRECT_URI = "https://www.1cite.com/api/public/oauth/google/callback";
+
 export function redirectUri(origin: string) {
-  return process.env["GOOGLE_OAUTH_REDIRECT_URI"] ?? `${origin}/api/public/oauth/google/callback`;
+  const override = process.env["GOOGLE_OAUTH_REDIRECT_URI"];
+  if (override) return override;
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return `${origin}/api/public/oauth/google/callback`;
+  }
+  return CANONICAL_GOOGLE_REDIRECT_URI;
 }
 
 function sign(payload: string) {
