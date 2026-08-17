@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DataProcessingRouteImport } from './routes/data-processing'
 import { Route as FiyatlandirmaRouteImport } from './routes/fiyatlandirma'
 import { Route as FreeAiReadinessReportRouteImport } from './routes/free-ai-readiness-report'
 import { Route as HakkimizdaRouteImport } from './routes/hakkimizda'
@@ -78,6 +79,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataProcessingRoute = DataProcessingRouteImport.update({
+  id: '/data-processing',
+  path: '/data-processing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FiyatlandirmaRoute = FiyatlandirmaRouteImport.update({
@@ -368,6 +374,7 @@ const ApiPublicOauthGoogleCallbackRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/data-processing': typeof DataProcessingRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
@@ -425,6 +432,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/data-processing': typeof DataProcessingRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
@@ -481,6 +489,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/data-processing': typeof DataProcessingRoute
   '/fiyatlandirma': typeof FiyatlandirmaRoute
   '/free-ai-readiness-report': typeof FreeAiReadinessReportRoute
   '/hakkimizda': typeof HakkimizdaRoute
@@ -540,6 +549,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/data-processing'
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
     | '/hakkimizda'
@@ -597,6 +607,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/data-processing'
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
     | '/hakkimizda'
@@ -652,6 +663,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/data-processing'
     | '/fiyatlandirma'
     | '/free-ai-readiness-report'
     | '/hakkimizda'
@@ -711,6 +723,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DataProcessingRoute: typeof DataProcessingRoute
   FiyatlandirmaRoute: typeof FiyatlandirmaRoute
   FreeAiReadinessReportRoute: typeof FreeAiReadinessReportRoute
   HakkimizdaRoute: typeof HakkimizdaRoute
@@ -760,6 +773,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-processing': {
+      id: '/data-processing'
+      path: '/data-processing'
+      fullPath: '/data-processing'
+      preLoaderRoute: typeof DataProcessingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fiyatlandirma': {
@@ -1233,6 +1253,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DataProcessingRoute: DataProcessingRoute,
   FiyatlandirmaRoute: FiyatlandirmaRoute,
   FreeAiReadinessReportRoute: FreeAiReadinessReportRoute,
   HakkimizdaRoute: HakkimizdaRoute,

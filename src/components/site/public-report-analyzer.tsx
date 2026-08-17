@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ReportTeaser } from "@/components/site/report-teaser";
+import { hasConsent, openConsentPreferences } from "@/lib/consent";
+import { toast } from "sonner";
 
 const STAGES = [
   { key: "validating", label: "Alan adınız doğrulanıyor" },
@@ -61,6 +63,15 @@ export function PublicReportAnalyzer() {
 
   function handleStart(event: React.FormEvent) {
     event.preventDefault();
+    if (!hasConsent("processing")) {
+      toast.info("Onayınız gerekiyor", {
+        description:
+          "Site tarama ve embedding işlemini başlatabilmemiz için çerez tercihlerinden bu izni açmalısınız.",
+        action: { label: "Tercihleri aç", onClick: () => openConsentPreferences() },
+      });
+      openConsentPreferences();
+      return;
+    }
     setToken(slugifyDomain(url));
     setPhase("analyzing");
   }
