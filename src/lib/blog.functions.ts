@@ -4,6 +4,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const LIST_COLUMNS =
   "slug, title, description, category, tags, cover_image_url, read_minutes, published_at, created_at, status, author";
 
+/** Herkese acik detay icin guvenli kolonlar (ic alanlar haric). */
+const PUBLIC_DETAIL_COLUMNS =
+  "id, slug, title, description, category, tags, cover_image_url, og_image_url, canonical_url, body, answer_summary, faq, sources, read_minutes, status, author, published_at, created_at, updated_at";
+
 export const listBlogPosts = createServerFn({ method: "GET" }).handler(async () => {
   const { publicSupabase } = await import("./blog.public.server");
   const { data } = await publicSupabase()
@@ -21,7 +25,7 @@ export const getBlogPost = createServerFn({ method: "GET" })
     const { publicSupabase } = await import("./blog.public.server");
     const { data: row } = await publicSupabase()
       .from("blog_posts")
-      .select("*")
+      .select(PUBLIC_DETAIL_COLUMNS)
       .eq("slug", data.slug)
       .eq("status", "published")
       .maybeSingle();

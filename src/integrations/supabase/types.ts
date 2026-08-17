@@ -1471,7 +1471,6 @@ export type Database = {
           brand_id: string
           created_at: string
           id: string
-          is_public: boolean
           payload: Json
           title: string
           token: string
@@ -1481,7 +1480,6 @@ export type Database = {
           brand_id: string
           created_at?: string
           id?: string
-          is_public?: boolean
           payload?: Json
           title: string
           token: string
@@ -1491,7 +1489,6 @@ export type Database = {
           brand_id?: string
           created_at?: string
           id?: string
-          is_public?: boolean
           payload?: Json
           title?: string
           token?: string
