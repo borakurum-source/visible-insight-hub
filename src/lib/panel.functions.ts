@@ -1001,19 +1001,22 @@ export const getPlanUsage = createServerFn({ method: "POST" })
 // Prompt detayında: o soruya ait son ölçüm yanıtı, kaynakları ve önerilen aksiyonlar.
 export const getPromptInsight = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; promptId: string }) => input)
+  .inputValidator((input: { brandId: string; promptId: string; runId?: string }) => input)
   .handler(async ({ data, context }) => {
-    const [{ data: prompt }, { data: run }, { data: brand }] = await Promise.all([
+    const [{ data: prompt }, { data: runRows }, { data: brand }, { data: intel }] = await Promise.all([
       context.supabase.from("prompts").select("id, text, category").eq("id", data.promptId).single(),
       context.supabase
         .from("prompt_runs")
-        .select("id, brand_mentioned, position, raw_answer, answer_summary, engine, created_at")
+        .select("id, brand_mentioned, position, raw_answer, answer_summary, engine, created_at, mentioned_brands, run_index, visibility")
         .eq("prompt_id", data.promptId)
         .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+        .limit(20),
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
     ]);
+
+    const allRuns = runRows ?? [];
+    const run = (data.runId ? allRuns.find((row) => row.id === data.runId) : allRuns[0]) ?? allRuns[0] ?? null;
 
     const { data: citations } = run
       ? await context.supabase
@@ -1029,6 +1032,35 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       type: c.citation_type ?? (c.is_own_domain ? "own" : "neutral"),
     }));
     const ownCited = sources.some((s) => s.type === "own");
+
+    // Yanıtta geçen markaları kendi markamız / takip edilen rakip / yeni olarak sınıflandır.
+    const { normalizeCompetitors, competitorMatches } = await import("./competitors");
+    const trackedCompetitors = normalizeCompetitors(intel?.competitors);
+    const ownNeedle = (brand?.name ?? "").toLowerCase();
+    const mentionedBrands = (Array.isArray(run?.mentioned_brands) ? (run?.mentioned_brands as unknown[]) : [])
+      .map((value) => String(value).trim())
+      .filter(Boolean)
+      .map((name, index) => {
+        const lower = name.toLowerCase();
+        const isOwn = Boolean(ownNeedle) && (lower.includes(ownNeedle) || ownNeedle.includes(lower));
+        const isTracked =
+          !isOwn && trackedCompetitors.some((competitor) => competitorMatches(competitor, { answer: name, domains: [] }));
+        return {
+          name,
+          rank: index + 1,
+          type: isOwn ? ("own" as const) : isTracked ? ("competitor" as const) : ("new" as const),
+        };
+      });
+
+    const { data: candidateRows } = await context.supabase
+      .from("competitor_candidates")
+      .select("id, name, domain, prompt_count, status")
+      .eq("brand_id", data.brandId)
+      .eq("status", "new")
+      .order("prompt_count", { ascending: false })
+      .limit(12);
+    const mentionedNames = new Set(mentionedBrands.map((item) => item.name.toLowerCase()));
+    const candidates = (candidateRows ?? []).filter((row) => mentionedNames.has(String(row.name).toLowerCase()));
 
     // Deterministik aksiyon önerileri — kullanıcı ne yapacağını net görsün.
     const actions: Array<{ key: string; title: string; description: string; priority: string }> = [];
@@ -1100,8 +1132,33 @@ export const getPromptInsight = createServerFn({ method: "POST" })
             answer: run.raw_answer ?? run.answer_summary ?? "",
             engine: run.engine,
             createdAt: run.created_at,
+            runIndex: run.run_index ?? null,
+            visibility: run.visibility === null || run.visibility === undefined ? null : Number(run.visibility),
           }
         : null,
+      runs: allRuns.map((row, index) => ({
+        id: row.id,
+        engine: row.engine,
+        createdAt: row.created_at,
+        brandMentioned: Boolean(row.brand_mentioned),
+        position: row.position,
+        runIndex: row.run_index ?? allRuns.length - index,
+        visibility:
+          row.visibility === null || row.visibility === undefined
+            ? row.brand_mentioned
+              ? row.position
+                ? Math.max(40, 100 - (row.position - 1) * 10)
+                : 60
+              : 0
+            : Number(row.visibility),
+      })),
+      mentionedBrands,
+      candidates: candidates.map((row) => ({
+        id: row.id,
+        name: row.name,
+        domain: row.domain ?? "",
+        promptCount: row.prompt_count ?? 1,
+      })),
       sources,
       actions: actions.map((action) => ({
         ...action,
