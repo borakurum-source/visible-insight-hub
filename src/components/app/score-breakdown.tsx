@@ -7,8 +7,8 @@ import { Hint } from "@/components/app/hint";
 import type { ScoreComponent } from "@/lib/score-model";
 
 function grade(total: number) {
-  if (total >= 75) return { label: "Ğüçlü", tone: "text-chart-2" };
-  if (total >= 45) return { label: "Ğelişmekte", tone: "text-foreground" };
+  if (total >= 75) return { label: "Güçlü", tone: "text-chart-2" };
+  if (total >= 45) return { label: "Gelişmekte", tone: "text-foreground" };
   return { label: "Zayıf", tone: "text-destructive" };
 }
 
@@ -21,7 +21,7 @@ const FIX: Record<string, { to: string; label: string; tip: string }> = {
   claims: { to: "/app/claims", label: "Iddia kanıtla", tip: "Her iddiaya kaynak bağlantısı ekleyin." },
 };
 
-// Ğörünürlük skoru + kırılımı tek kompakt kart: "OneCite Score".
+// Görünürlük skoru + kırılımı tek kompakt kart: "OneCite Score".
 export function ScoreBreakdown({
   total, components, runs, lastRunAt,
 }: {

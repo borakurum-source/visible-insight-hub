@@ -92,7 +92,7 @@ function ReportPage() {
                 </TableBody>
               </Table>
             ) : (
-              <QueryEmpty title="Henüz kaynak verisi yok." description="Bir ölçüm türü çalıştırdığınızda kaynaklar burada listelenir." />
+              <QueryEmpty title="Henüz kaynak verisi yok." description="Bir ölçüm turu çalıştırdığınızda kaynaklar burada listelenir." />
             )}
           </section>
 

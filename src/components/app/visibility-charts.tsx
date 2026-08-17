@@ -54,7 +54,7 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
     <div className="grid gap-4 lg:grid-cols-2">
       <ChartCard
         title="Görünürlük skoru trendi"
-        description={hasTrend ? "Her tamamlanan ölçüm türü bir nokta." : "İkinci ölçümden sonra trend çizgisi oluşur."}
+        description={hasTrend ? "Her tamamlanan ölçüm turu bir nokta." : "İkinci ölçümden sonra trend çizgisi oluşur."}
       >
         {hasTrend ? (
           <ResponsiveContainer width="100%" height="100%">
@@ -72,7 +72,7 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
             </AreaChart>
           </ResponsiveContainer>
         ) : (
-          <EmptyChart label="Henüz yeterli ölçüm türü yok." />
+          <EmptyChart label="Henüz yeterli ölçüm turu yok." />
         )}
       </ChartCard>
 

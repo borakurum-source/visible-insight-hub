@@ -1,7 +1,7 @@
 // Sistem talimatları kütüphanesi — panelin yapay zeka davranışının tek kaynağı.
 // Buradaki metinler varsayılandır; admin panelden düzenlerse veritabanındaki sürüm kullanılır.
 
-export type SystemPromptStage = "kurulum" | "keşif" | "ölçüm" | "uretim";
+export type SystemPromptStage = "kurulum" | "kesif" | "olcum" | "uretim";
 export type SystemPromptModel = "perplexity" | "deepseek";
 
 export type SystemPromptDef = {
@@ -89,7 +89,7 @@ ${SHARED_RULES}
     key: "prompt_discovery",
     title: "Prompt keşfi",
     description: "Mevcut soruların dışında, kazanılabilir yeni fırsat sorularını puanlayarak bulur.",
-    stage: "keşif",
+    stage: "kesif",
     model: "deepseek",
     content: `ROL: GEO fırsat analistisin.
 
@@ -112,7 +112,7 @@ ${SHARED_RULES}
     key: "measurement_answer",
     title: "Ölçüm yanıtı",
     description: "Perplexity üzerinden gerçek web araması yapar; hangi markaların önerildiğini ve kaynakları çıkarır.",
-    stage: "ölçüm",
+    stage: "olcum",
     model: "perplexity",
     content: `ROL: Tarafsız bir yapay zeka arama asistanısın. Bir kullanıcı sana bu soruyu soruyormuş gibi davran.
 
@@ -159,8 +159,8 @@ export const SYSTEM_PROMPT_MAP: Record<string, SystemPromptDef> = Object.fromEnt
 
 export const STAGE_LABELS: Record<SystemPromptStage, string> = {
   kurulum: "Kurulum",
-  keşif: "Keşif",
-  ölçüm: "Ölçüm",
+  kesif: "Keşif",
+  olcum: "Ölçüm",
   uretim: "Üretim",
 };
 

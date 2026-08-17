@@ -888,7 +888,7 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       actions.push({
         key: "measure",
         title: `"${(prompt?.text ?? "").slice(0, 80)}" sorusunu ölçün`,
-        description: "Bu soru henüz hiç ölçülmedi. Ölçüm & Skor ekranından bir tür başlatın.",
+        description: "Bu soru henüz hiç ölçülmedi. Ölçüm & Skor ekranından bir tur başlatın.",
         priority: "medium",
       });
     } else if (!run.brand_mentioned) {

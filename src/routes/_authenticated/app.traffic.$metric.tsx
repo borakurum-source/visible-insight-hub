@@ -13,9 +13,9 @@ export const Route = createFileRoute("/_authenticated/app/traffic/$metric")({
   head: () => ({
     meta: [
       { title: "Metrik Detayı — OneCite Paneli" },
-      { name: "description", content: "Şeçilen metriğin günlük serisi ve kaynak kırılımları." },
+      { name: "description", content: "Seçilen metriğin günlük serisi ve kaynak kırılımları." },
       { property: "og:title", content: "Metrik Detayı — OneCite Paneli" },
-      { property: "og:description", content: "Ğünlük seri ve kaynak kırılımları." },
+      { property: "og:description", content: "Günlük seri ve kaynak kırılımları." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -44,10 +44,10 @@ function MetricDetailPage() {
 
   const config = {
     "gsc-clicks": { title: "Google Arama Tıklamaları", key: "clicks", label: "Tıklama" },
-    "gsc-impressions": { title: "Arama Ğösterimleri", key: "impressions", label: "Ğösterim" },
+    "gsc-impressions": { title: "Arama Gösterimleri", key: "impressions", label: "Gösterim" },
     "ga4-sessions": { title: "Site Trafiği (GA4)", key: "sessions", label: "Oturum" },
     "ai-citations": { title: "AI Atıf Trafiği", key: "citations", label: "Atıf" },
-    "ai-visibility": { title: "Yapay Zeka Ğörünürlüğü", key: "mentioned", label: "Markanın geçtiği yanıt" },
+    "ai-visibility": { title: "Yapay Zeka Görünürlüğü", key: "mentioned", label: "Markanın geçtiği yanıt" },
   }[metric as string] ?? { title: "Metrik", key: "value", label: "Deger" };
 
   const series: Array<Record<string, number | string>> = data

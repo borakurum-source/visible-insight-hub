@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/app/measurement")({
       { title: "Ölçüm — OneCite Paneli" },
       { name: "description", content: "Onaylı promptlarınızı yapay zeka asistanlarında çalıştırın ve görünürlük skorunuzu kırılımıyla görün." },
       { property: "og:title", content: "Ölçüm — OneCite Paneli" },
-      { property: "og:description", content: "AI görünürlük ölçüm türü ve skor kırılımı." },
+      { property: "og:description", content: "AI görünürlük ölçüm turu ve skor kırılımı." },
       { name: "robots", content: "noindex" },
     ],
   }),
