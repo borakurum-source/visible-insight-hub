@@ -322,7 +322,7 @@ export const listContentGaps = createServerFn({ method: "POST" })
       mentionRate: number;
       measured: boolean;
       coverage: number;
-      impact: "yuksek" | "orta" | "dusuk";
+      impact: "yüksek" | "orta" | "düşük";
     }>;
 
     for (const candidate of candidates) {
@@ -341,8 +341,8 @@ export const listContentGaps = createServerFn({ method: "POST" })
       } catch (error) {
         console.error("Kapsam ölçümü başarısız", error);
       }
-      const impact: "yuksek" | "orta" | "dusuk" =
-        coverage < 0.35 && candidate.mentionRate < 0.34 ? "yuksek" : coverage < 0.55 ? "orta" : "dusuk";
+      const impact: "yüksek" | "orta" | "düşük" =
+        coverage < 0.35 && candidate.mentionRate < 0.34 ? "yüksek" : coverage < 0.55 ? "orta" : "düşük";
       gaps.push({
         promptId: candidate.id,
         prompt: candidate.text,

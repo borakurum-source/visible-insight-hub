@@ -8,7 +8,7 @@ export interface Overview {
   citedRate: number;
   visibilityScore: number | null;
   visibilityLabel: string;
-  visibilityBand: "kritik" | "zayif" | "gelisiyor" | "guclu";
+  visibilityBand: "kritik" | "zayıf" | "gelisiyor" | "güçlü";
   lastRunAt: string;
   competitorLeaderboard: { name: string; count: number }[];
 }
@@ -58,7 +58,7 @@ export const mockClusterStats = [
 ];
 
 export const mockPriorityTasks = [
-  { id: 1, title: "GSC'de yüksek gösterimli 6 sorgu için yayın kanıtı eksik", severity: "yuksek" as const },
+  { id: 1, title: "GSC'de yüksek gösterimli 6 sorgu için yayın kanıtı eksik", severity: "yüksek" as const },
   { id: 2, title: "3 rakip, fiyatlandırma cluster'ında sizden daha sık anılıyor", severity: "orta" as const },
-  { id: 3, title: "Bilgi bankasında 4 kaynak 90 günden eski", severity: "dusuk" as const },
+  { id: 3, title: "Bilgi bankasında 4 kaynak 90 günden eski", severity: "düşük" as const },
 ];

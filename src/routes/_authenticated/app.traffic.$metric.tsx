@@ -12,10 +12,10 @@ import { useActiveBrand } from "@/lib/use-panel";
 export const Route = createFileRoute("/_authenticated/app/traffic/$metric")({
   head: () => ({
     meta: [
-      { title: "Metrik Detayi — OneCite Paneli" },
-      { name: "description", content: "Secilen metrigin gunluk serisi ve kaynak kirilimlari." },
-      { property: "og:title", content: "Metrik Detayi — OneCite Paneli" },
-      { property: "og:description", content: "Gunluk seri ve kaynak kirilimlari." },
+      { title: "Metrik Detayı — OneCite Paneli" },
+      { name: "description", content: "Seçilen metriğin günlük serisi ve kaynak kırılımları." },
+      { property: "og:title", content: "Metrik Detayı — OneCite Paneli" },
+      { property: "og:description", content: "Günlük seri ve kaynak kırılımları." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -43,11 +43,11 @@ function MetricDetailPage() {
   });
 
   const config = {
-    "gsc-clicks": { title: "Google Arama Tiklamalari", key: "clicks", label: "Tiklama" },
-    "gsc-impressions": { title: "Arama Gosterimleri", key: "impressions", label: "Gosterim" },
-    "ga4-sessions": { title: "Site Trafigi (GA4)", key: "sessions", label: "Oturum" },
-    "ai-citations": { title: "AI Atif Trafigi", key: "citations", label: "Atif" },
-    "ai-visibility": { title: "Yapay Zeka Gorunurlugu", key: "mentioned", label: "Markanin gectigi yanit" },
+    "gsc-clicks": { title: "Google Arama Tıklamaları", key: "clicks", label: "Tıklama" },
+    "gsc-impressions": { title: "Arama Gösterimleri", key: "impressions", label: "Gösterim" },
+    "ga4-sessions": { title: "Site Trafiği (GA4)", key: "sessions", label: "Oturum" },
+    "ai-citations": { title: "AI Atıf Trafiği", key: "citations", label: "Atıf" },
+    "ai-visibility": { title: "Yapay Zeka Görünürlüğü", key: "mentioned", label: "Markanın geçtiği yanıt" },
   }[metric as string] ?? { title: "Metrik", key: "value", label: "Deger" };
 
   const series: Array<Record<string, number | string>> = data
@@ -72,7 +72,7 @@ function MetricDetailPage() {
   return (
     <>
       <PanelPageHeading
-        meta={{ title: config.title, description: `Son ${days} gunluk gunluk seri ve kaynak kirilimi.`, icon: LineChart }}
+        meta={{ title: config.title, description: `Son ${days} günlük günlük seri ve kaynak kırılımı.`, icon: LineChart }}
         action={
           <Button asChild variant="outline" size="sm">
             <Link to="/app"><ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Komuta Merkezi</Link>
@@ -111,14 +111,14 @@ function MetricDetailPage() {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <p className="flex h-full items-center justify-center text-xs text-muted-foreground">Bu aralikta veri yok.</p>
+            <p className="flex h-full items-center justify-center text-xs text-muted-foreground">Bu aralıkta veri yok.</p>
           )}
         </CardContent>
       </Card>
 
       {breakdown.length ? (
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Kaynak kirilimi</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Kaynak kırılımı</CardTitle></CardHeader>
           <CardContent className="p-0">
             <ul className="divide-y divide-border text-sm">
               {breakdown.map((row) => (

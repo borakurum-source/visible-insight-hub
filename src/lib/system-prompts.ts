@@ -55,7 +55,7 @@ GÖREV: Verilen URL listesinden, yapay zeka asistanlarının markayı doğru anl
 ÖNCELİK SIRASI
 1. Ürün/hizmet detay sayfaları
 2. Fiyatlandırma ve paket sayfaları
-3. Vaka/referans, müşteri sonucu
+3. Vaka/referans, müşteri sonuç
 4. Hakkımızda, ekip, kurumsal kimlik
 5. SSS ve rehber içerikleri
 DIŞARIDA BIRAK: blog etiket/arşiv, kategori listeleri, hukuki metinler, iletişim formu, kampanya sayfaları.
