@@ -200,7 +200,6 @@ function OnboardingPage() {
           tone: book.tone,
           products: book.products,
           audiences: book.audiences,
-          competitors: [],
           keywords: book.keywords,
           industry: book.industry,
           language: book.language,
