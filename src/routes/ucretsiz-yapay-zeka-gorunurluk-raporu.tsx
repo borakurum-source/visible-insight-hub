@@ -238,10 +238,48 @@ function FreeReportPage() {
         </div>
       </section>
 
+      <section className="border-t border-border bg-ink px-4 py-16 text-white md:px-6 md:py-20" data-testid="section-report-bridge">
+        <div className="marketing-container grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
+          <div>
+            <p className="editorial-eyebrow text-cyan">Rapordan sonra</p>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] md:text-4xl">
+              Raporda gördüğünüz eksikleri panelde takibe alın.
+            </h2>
+            <p className="mt-4 max-w-prose text-base leading-7 text-slate-300">
+              Rapor tek seferlik bir fotoğraf. Hesap açtığınızda aynı sorular haftalık ölçülür, rakiplerinizle karşılaştırılır ve her
+              eksik kanıt bir göreve dönüşür.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-2">
+              <Button asChild className="bg-cyan text-foreground hover:bg-[#B8F4FF]">
+                <Link to="/auth">Hesap açın ve takibe başlayın <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+              </Button>
+              <Button asChild variant="outline" className="border-white/25 bg-transparent text-white hover:bg-white/10">
+                <Link to="/fiyatlandirma">Planları görün</Link>
+              </Button>
+            </div>
+            <p className="mt-3 text-xs text-slate-400">7 gün ücretsiz · kredi kartı gerekmez</p>
+          </div>
+          <ol className="space-y-3">
+            {[
+              { step: "01", title: "Raporunuzu alın", body: "Alan adınızla ilk ölçüm birkaç dakikada hazır olur." },
+              { step: "02", title: "Soruları sabitleyin", body: "Rapordaki sorular panelde izlenen prompt setinize dönüşür." },
+              { step: "03", title: "Görevleri kapatın", body: "Eksik kanıtı üretin, skorun haftalık nasıl değiştiğini izleyin." },
+            ].map((item) => (
+              <li key={item.step} className="flex gap-4 rounded-xl border border-white/15 bg-white/[0.04] p-4 md:p-5">
+                <span className="font-mono text-xs text-cyan">{item.step}</span>
+                <div>
+                  <p className="text-sm font-bold text-white">{item.title}</p>
+                  <p className="mt-1.5 text-sm leading-6 text-slate-300">{item.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
       <section className="border-y border-border bg-background px-4 py-16 md:px-6 md:py-24">
         <div className="mx-auto max-w-3xl">
           <p className="editorial-eyebrow text-primary">Sık sorulan sorular</p>
-          <span className="sr-only">Yapay zeka görünürlük raporu SSS</span>
           <h2 className="mt-4 text-3xl font-extrabold tracking-[-0.04em] text-foreground md:text-4xl">Yapay zeka görünürlük testi hakkında.</h2>
           <Accordion type="single" collapsible className="mt-9 w-full">
             {faqs.map((faq, index) => (
