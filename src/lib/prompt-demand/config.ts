@@ -37,10 +37,10 @@ export const INTENT_VALUES: Record<Intent, number> = {
 export const INTENT_LABELS: Record<Intent, string> = {
   informational: "Bilgi",
   commercial: "Ticari",
-  commercial_investigation: "Ticari arastirma",
-  transactional: "Satin alma",
-  comparison: "Karsilastirma",
-  navigational: "Yonlendirme",
+  commercial_investigation: "Ticari araştırma",
+  transactional: "Satın alma",
+  comparison: "Karşılaştırma",
+  navigational: "Yönlendirme",
   brand: "Marka",
 };
 
@@ -92,22 +92,24 @@ export const OPPORTUNITY_THRESHOLDS: Array<{ min: number; level: Level }> = [
 export const COMPETITOR_PRESSURE: Record<Level, number> = { high: 1, medium: 0.6, low: 0.25 };
 
 export const EVIDENCE_GAP_SEVERITY: Record<string, number> = {
-  "Karsilastirma icerigi": 1,
-  "Bagimsiz kanit": 0.9,
-  "Urun tanimi": 0.7,
-  "Veri ve arastirma": 0.7,
-  "Vaka calismasi": 0.6,
-  "Dokumantasyon": 0.5,
+  "Karşılaştırma içeriği": 1,
+  "Bağımsız kanıt": 0.9,
+  "Ürün tanımı": 0.7,
+  "Veri ve araştırma": 0.7,
+  "Vaka çalışması": 0.6,
+  "Dokümantasyon": 0.5,
   "Yok": 0.2,
 };
 
-export const LEVEL_LABELS: Record<Level, string> = { high: "Yuksek", medium: "Orta", low: "Dusuk" };
+export const EVIDENCE_GAP_TYPES = Object.keys(EVIDENCE_GAP_SEVERITY).filter((k) => k !== "Yok");
+
+export const LEVEL_LABELS: Record<Level, string> = { high: "Yüksek", medium: "Orta", low: "Düşük" };
 
 export const SOURCE_LABELS = {
-  measured: "Olculen",
+  measured: "Ölçülen",
   estimated: "Tahmini",
-  inferred: "Cikarim",
+  inferred: "Çıkarım",
 } as const;
 
 export const DEMAND_TOOLTIP =
-  "AI Talebi; arama talebi, ilgili sorular, semantik prompt genisletmesi ve AI platform kullanim modellemesi ile bu konu etrafindaki aylik yanit talebini tahmin eder. ChatGPT veya diger AI saglayicilarina ait ozel kullanim verisini temsil etmez.";
+  "AI Talebi; arama talebi, ilgili sorular, semantik prompt genişletmesi ve AI platform kullanım modellemesi ile bu konu etrafındaki aylık yanıt talebini tahmin eder. ChatGPT veya diğer AI sağlayıcılarına ait özel kullanım verisini temsil etmez.";
