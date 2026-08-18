@@ -346,7 +346,7 @@ function PromptDemandPage() {
                   <p className="text-sm text-muted-foreground">Aksiyon önerisi için önce kanıt boşluğu tespit edilmeli.</p>
                 ) : null}
                 <Button asChild size="sm" variant="outline" className="w-full">
-                  <Link to="/app/tasks">Görevler sayfasına git</Link>
+                  <Link to="/app/geo-tasks">Görevler sayfasına git</Link>
                 </Button>
               </CardContent>
             </Card>
