@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 export const VISIBILITY_SUBNAV = [
   { to: "/app/prompts", label: "Promptlar" },
   { to: "/app/prompt-discovery", label: "Prompt Keşfi" },
+  { to: "/app/prompt-demand", label: "AI Talep Keşfi" },
   { to: "/app/measurement", label: "Ölçüm & Skor" },
   { to: "/app/citation-discovery", label: "Seçilen Kaynaklar" },
   { to: "/app/competitors", label: "Rakip Takibi" },
