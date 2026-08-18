@@ -48,8 +48,9 @@ export function DemandCitationMatrix({
           </div>
           <div className="p-2 text-right text-[10px] text-muted-foreground">Düşük talep · Kaynak gösteriliyor</div>
         </div>
-        {prompts.map((prompt) => {
-          const x = prompt.citationStatus === "cited" ? 0.62 + Math.random() * 0.3 : 0.08 + Math.random() * 0.3;
+        {prompts.map((prompt, index) => {
+          const jitter = ((index * 37) % 100) / 100;
+          const x = prompt.citationStatus === "cited" ? 0.6 + jitter * 0.32 : 0.06 + jitter * 0.32;
           const y = 1 - prompt.uniqueDemand / maxDemand;
           return (
             <button
