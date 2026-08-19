@@ -96,10 +96,10 @@ export function clusterConfidence(candidates: PromptCandidate[]): { score: numbe
   const lvl = level(score, CONFIDENCE_THRESHOLDS);
   const reason =
     lvl === "high"
-      ? "Kume icindeki promptlarin cogu dogrudan talep sinyaline dayaniyor."
+      ? "Küme içindeki promptların çoğu doğrudan talep sinyaline dayanıyor."
       : lvl === "medium"
-        ? "Kumeyi tahmin etmeye yetecek veri var, ancak bazi prompt varyantlari semantik cikarima dayaniyor."
-        : "Sinyal sayisi dusuk; sonuclar buyuk olcude semantik cikarima dayaniyor.";
+        ? "Kümeyi tahmin etmeye yetecek veri var, ancak bazı prompt varyantları semantik çıkarıma dayanıyor."
+        : "Sinyal sayısı düşük; sonuçlar büyük ölçüde semantik çıkarıma dayanıyor.";
   return { score, level: lvl, reason };
 }
 
