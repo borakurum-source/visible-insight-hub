@@ -15,7 +15,7 @@ export function stripCircumflex<T>(value: T): T {
   return value;
 }
 
-export async function aiJson<T>(messages: ChatMessage[], fallback: T): Promise<T> {
+export async function aiJson<T>(messages: ChatMessage[], fallback: T, options?: { maxTokens?: number }): Promise<T> {
   // Üretim ve analiz işlemleri yalnızca DeepSeek üzerinden çalışır (önbellekli).
   if (!process.env["DEEPSEEK_API_KEY"]) {
     console.warn("DEEPSEEK_API_KEY missing");
@@ -27,7 +27,7 @@ export async function aiJson<T>(messages: ChatMessage[], fallback: T): Promise<T
       i === 0 && m.role === "system" ? { ...m, content: `${m.content}\n${NO_CIRCUMFLEX_RULE}` } : m,
     );
     if (!withRule.some((m) => m.role === "system")) withRule.unshift({ role: "system", content: NO_CIRCUMFLEX_RULE });
-    return stripCircumflex(await deepseekJson<T>(withRule, fallback));
+    return stripCircumflex(await deepseekJson<T>(withRule, fallback, options));
   } catch (error) {
     console.error("DeepSeek failure", error);
     return fallback;
