@@ -224,6 +224,39 @@ function PromptDemandPage() {
             </CardContent>
           </Card>
 
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Veriyi besleyen kaynaklar</CardTitle></CardHeader>
+            <CardContent className="space-y-2 p-4 pt-0 text-xs">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className={result.signalSources.gscConnected ? LEVEL_TONE.high : LEVEL_TONE.low}>
+                  Search Console: {result.signalSources.gscConnected ? "bağlı" : "bağlı değil"}
+                </Badge>
+                <Badge variant="outline" className={result.signalSources.ga4Connected ? LEVEL_TONE.high : LEVEL_TONE.low}>
+                  GA4: {result.signalSources.ga4Connected ? "bağlı" : "bağlı değil"}
+                </Badge>
+                <Badge variant="outline" className={result.signalSources.gscMatchedPrompts > 0 ? LEVEL_TONE.high : LEVEL_TONE.medium}>
+                  {result.signalSources.gscMatchedPrompts} prompt gerçek arama verisiyle eşleşti
+                </Badge>
+                <Badge variant="outline" className={LEVEL_TONE.medium}>
+                  {result.signalSources.measuredPrompts} prompt OneCite ölçümünden
+                </Badge>
+              </div>
+              <p className="text-muted-foreground">
+                {result.signalSources.gscConnected
+                  ? `Search Console'dan ${number.format(result.signalSources.gscQueryCount)} sorgu ve ${number.format(result.signalSources.gscImpressions)} gösterim okundu${result.signalSources.snapshotDate ? ` (${result.signalSources.snapshotDate})` : ""}. Eşleşen promptlarda hacim tahmin değil ölçülen veridir.`
+                  : "Search Console bağlı değil; hacimler şu an dil modeli tahminidir. Bağladığınızda eşleşen promptlar gerçek gösterim verisine geçer."}
+                {result.signalSources.ga4Connected
+                  ? ` GA4'te son 28 günde ${number.format(result.signalSources.ga4AiSessions)} yapay zeka kaynaklı oturum görüldü.`
+                  : ""}
+              </p>
+              {!result.signalSources.gscConnected || !result.signalSources.ga4Connected ? (
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/app/integrations">Entegrasyonları bağla</Link>
+                </Button>
+              ) : null}
+            </CardContent>
+          </Card>
+
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader className="pb-2"><CardTitle className="text-sm">Platform dağılımı</CardTitle></CardHeader>
@@ -388,6 +421,16 @@ function PromptDemandPage() {
                     {CITATION_LABEL[selected.citationStatus]} · Kaynak sınıfı: {SOURCE_LABELS[selected.source]}
                   </p>
                 </div>
+                {selected.gsc ? (
+                  <div className="rounded-lg border border-border p-3 text-xs text-muted-foreground">
+                    <p className="font-medium text-foreground">Search Console eşleşmesi</p>
+                    <p className="mt-1">Sorgu: “{selected.gsc.query}”</p>
+                    <p>
+                      {number.format(selected.gsc.impressions)} gösterim · {number.format(selected.gsc.clicks)} tıklama · ortalama
+                      sıra {selected.gsc.position}
+                    </p>
+                  </div>
+                ) : null}
                 <div className="rounded-lg border border-border p-3">
                   <p className="text-xs font-medium">Kanıt boşluğu</p>
                   <p className="mt-1 text-xs text-muted-foreground">{selected.evidenceGapType}</p>
