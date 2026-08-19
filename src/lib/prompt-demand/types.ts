@@ -3,6 +3,16 @@
 
 export type DataSource = "measured" | "estimated" | "inferred";
 
+/**
+ * Satir duzeyinde veri kaynagi iki alana ayrilir:
+ * origin = veri nereden geldi, source = veri ne kadar islenmis.
+ * Rozetler: gsc+measured -> "Olculdu (GSC)", onecite+measured -> "Olculdu (OneCite)",
+ * gsc+modeled -> "GSC temelli tahmin", model+calibrated -> "Kalibre tahmin",
+ * model+estimated -> "Ham tahmin".
+ */
+export type RowOrigin = "gsc" | "onecite" | "model";
+export type RowSource = "measured" | "modeled" | "calibrated" | "estimated";
+
 export type Intent =
   | "informational"
   | "commercial"
@@ -38,6 +48,11 @@ export type GscSignal = {
   clicks: number;
   position: number;
   matchScore: number;
+  /** CTR egrisiyle gosterimden turetilen toplam talep — olculen degil, modellenmis. */
+  modeledDemand: number;
+  ctrUsed: number;
+  method: "vector" | "jaccard";
+  borderline: boolean;
 };
 
 /** Kume duzeyinde hangi gercek veri kaynaklarinin besledigi. */
@@ -50,7 +65,28 @@ export type SignalSources = {
   ga4AiSessions: number;
   measuredPrompts: number;
   snapshotDate: string | null;
+  /** Vektor eslestirme kullanildi mi, yoksa kelime ortusmesine mi dusuldu. */
+  matchMethod: "vector" | "jaccard";
+  gscAddedPrompts: number;
 };
+
+export type CalibrationInfo = {
+  applied: boolean;
+  ratio?: number;
+  matchedSampleSize: number;
+  note: string;
+};
+
+export type Ga4Signal = {
+  hasEnoughData: boolean;
+  referralSessions: number;
+  platformMix?: Record<string, number>;
+  /** Tiklanma tutarliligi — talep dogrulugu degil. */
+  clickConsistency: "high" | "low" | "unknown";
+  note: string;
+};
+
+export type DemandRange = { low: number; mid: number; high: number };
 
 /** Saglayicilardan (arama, soru, semantik genisletme) gelen ham aday. */
 export type PromptCandidate = {
@@ -59,11 +95,14 @@ export type PromptCandidate = {
   shape: PromptShape;
   semanticConfidence: number;
   signal: DemandSignal;
-  source: DataSource;
+  origin: RowOrigin;
+  source: RowSource;
   citationStatus: CitationStatus;
   competitorPresence: Level;
   evidenceGapType: string;
   gsc?: GscSignal;
+  /** Takibe alindi, ilk OneCite olcumu henuz gelmedi. */
+  pendingMeasurement?: boolean;
 };
 
 export type DemandBreakdown = {
@@ -72,6 +111,8 @@ export type DemandBreakdown = {
   promptSuitability: number;
   semanticConfidence: number;
   overlapAdjustment: number;
+  calibrationMultiplier: number;
+  ctrMultiplier: number | null;
   finalDemand: number;
 };
 
@@ -129,6 +170,9 @@ export type ClusterAnalysis = {
   commercialIntent: Level;
   citationShare: number;
   citationShareSource: DataSource;
+  demandRange: DemandRange;
+  calibration: CalibrationInfo;
+  ga4Signal: Ga4Signal;
   leadingCompetitor: { name: string; share: number } | null;
   competitors: CompetitorRow[];
   opportunity: Level;

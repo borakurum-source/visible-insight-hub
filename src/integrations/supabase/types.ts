@@ -1320,6 +1320,94 @@ export type Database = {
           },
         ]
       }
+      prompt_demand_calibration_log: {
+        Row: {
+          applied: boolean
+          brand_id: string
+          created_at: string
+          id: string
+          matched_sample_size: number
+          ratio: number | null
+          topic: string
+        }
+        Insert: {
+          applied?: boolean
+          brand_id: string
+          created_at?: string
+          id?: string
+          matched_sample_size?: number
+          ratio?: number | null
+          topic: string
+        }
+        Update: {
+          applied?: boolean
+          brand_id?: string
+          created_at?: string
+          id?: string
+          matched_sample_size?: number
+          ratio?: number | null
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_demand_calibration_log_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompt_demand_match_log: {
+        Row: {
+          accepted: boolean
+          borderline: boolean
+          brand_id: string
+          candidate_text: string
+          cosine_score: number | null
+          created_at: string
+          gsc_query: string | null
+          id: string
+          jaccard_score: number
+          method: string
+          topic: string
+        }
+        Insert: {
+          accepted?: boolean
+          borderline?: boolean
+          brand_id: string
+          candidate_text: string
+          cosine_score?: number | null
+          created_at?: string
+          gsc_query?: string | null
+          id?: string
+          jaccard_score?: number
+          method?: string
+          topic: string
+        }
+        Update: {
+          accepted?: boolean
+          borderline?: boolean
+          brand_id?: string
+          candidate_text?: string
+          cosine_score?: number | null
+          created_at?: string
+          gsc_query?: string | null
+          id?: string
+          jaccard_score?: number
+          method?: string
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompt_demand_match_log_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prompt_runs: {
         Row: {
           answer_summary: string | null
