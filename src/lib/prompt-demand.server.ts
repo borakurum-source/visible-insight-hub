@@ -53,8 +53,9 @@ export async function expandPrompts(params: {
           "monthlyVolume (ulke ve dil icin tahmini aylik arama hacmi), relatedVolume (ilgili sorular hacmi),",
           "autocompleteStrength (0-1), trend (0.7-1.4 yillik degisim carpani),",
           "evidenceGapType (Karsilastirma icerigi|Bagimsiz kanit|Urun tanimi|Veri ve arastirma|Vaka calismasi|Dokumantasyon|Yok).",
-          "Ayrica canonicalCluster alaninda konunun normallestirilmis kume adini don.",
-          "Yanit yalnizca JSON olsun. Hacimleri abartma; kucuk pazarlarda dusuk sayilar ver.",
+          "Yanit tam olarak su sekilde tek bir JSON nesnesi olsun:",
+          '{"canonicalCluster": "kume adi", "prompts": [{"text": "...", "intent": "...", "shape": "...", "semanticConfidence": 0.8, "monthlyVolume": 100, "relatedVolume": 40, "autocompleteStrength": 0.5, "trend": 1.1, "evidenceGapType": "..."}]}',
+          "En az 20 prompt uret. Hacimleri abartma; kucuk pazarlarda dusuk sayilar ver.",
         ].join(" "),
       },
       {
@@ -63,6 +64,7 @@ export async function expandPrompts(params: {
       },
     ],
     { canonicalCluster: params.topic, prompts: [] },
+    { maxTokens: 8000 },
   );
 
   const candidates = (result.prompts ?? [])
