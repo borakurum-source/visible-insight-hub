@@ -63,6 +63,7 @@ export async function expandPrompts(params: {
       },
     ],
     { canonicalCluster: params.topic, prompts: [] },
+    { maxTokens: 8000 },
   );
 
   const candidates = (result.prompts ?? [])
