@@ -2,12 +2,18 @@
 // Tum katsayilar config.ts icinde; burada yalnizca formuller vardir.
 import {
   AI_USAGE_FACTORS,
+  CALIBRATION_CLAMP,
+  CALIBRATION_MIN_MATCHES,
   COMPETITOR_PRESSURE,
   CONFIDENCE_ADJUSTMENT,
   CONFIDENCE_THRESHOLDS,
   CONFIDENCE_WEIGHTS,
+  CTR_CURVE,
+  CTR_MAX_MULTIPLIER,
   DEDUPLICATION,
+  DEMAND_BAND,
   EVIDENCE_GAP_SEVERITY,
+  GA4_MIN_SESSIONS,
   INTENT_VALUES,
   OPPORTUNITY_THRESHOLDS,
   OPPORTUNITY_WEIGHTS,
@@ -16,9 +22,12 @@ import {
 } from "./config";
 import type {
   ActionRow,
+  CalibrationInfo,
   ClusterAnalysis,
   CompetitorRow,
+  DemandRange,
   EvidenceGapRow,
+  Ga4Signal,
   Level,
   PromptCandidate,
   PromptDemandRow,
@@ -50,21 +59,124 @@ export function similarity(a: string, b: string): number {
 }
 
 /** ADIM 4: Ham arama talebi sinyalini tek sayiya indirger. */
-export function baseDemand(candidate: PromptCandidate): number {
+export function baseDemand(candidate: PromptCandidate, calibrationMultiplier = 1): number {
   const { directVolume, relatedVolume, autocompleteStrength, historicalTrend } = candidate.signal;
   const base = directVolume > 0 ? directVolume : relatedVolume * 0.45;
-  return Math.max(0, base * (0.8 + autocompleteStrength * 0.4) * historicalTrend);
+  // Kalibrasyon yalnizca saf model tahminlerine uygulanir; gercek veriye dokunmaz.
+  const multiplier = candidate.origin === "model" ? calibrationMultiplier : 1;
+  return Math.max(0, base * (0.8 + autocompleteStrength * 0.4) * historicalTrend * multiplier);
 }
 
 /** ADIM 8: Prompt Talebi = Ham Talep x AI kullanimi x Uygunluk x Semantik guven. */
-export function promptDemand(candidate: PromptCandidate): { demand: number; base: number } {
-  const base = baseDemand(candidate);
+export function promptDemand(
+  candidate: PromptCandidate,
+  calibrationMultiplier = 1,
+): { demand: number; base: number } {
+  const base = baseDemand(candidate, calibrationMultiplier);
   const demand =
     base *
     TOTAL_AI_USAGE_FACTOR *
     PROMPT_SUITABILITY[candidate.shape] *
     candidate.semanticConfidence;
   return { demand, base };
+}
+
+/** Pozisyona karsilik beklenen tiklama orani (genel endustri egrisi). */
+export function expectedCtr(position: number): number {
+  const safe = Number.isFinite(position) && position > 0 ? position : 20;
+  return CTR_CURVE.find((row) => safe <= row.maxPosition)?.ctr ?? 0.008;
+}
+
+/**
+ * Gosterim -> toplam sorgu talebi. Sonuc OLCUM DEGIL: olculen gosterimin
+ * modellenmis bir egriyle buyutulmus halidir.
+ */
+export function impressionsToDemand(
+  impressions: number,
+  position: number,
+): { demand: number; ctr: number; multiplier: number } {
+  const ctr = expectedCtr(position);
+  const rawMultiplier = 1 / Math.max(ctr, 0.001);
+  const multiplier = Math.min(rawMultiplier, CTR_MAX_MULTIPLIER);
+  return { demand: Math.round(Math.max(0, impressions) * multiplier), ctr, multiplier };
+}
+
+/**
+ * Kalibrasyon carpani: gercek/tahmin oranlarinin ortancasi.
+ * En az CALIBRATION_MIN_MATCHES cift yoksa uygulanmaz.
+ */
+export function calibrationRatio(
+  pairs: Array<{ actual: number; predicted: number }>,
+): CalibrationInfo {
+  const usable = pairs.filter((p) => p.actual > 0 && p.predicted > 0);
+  if (usable.length < CALIBRATION_MIN_MATCHES) {
+    return {
+      applied: false,
+      matchedSampleSize: usable.length,
+      note: `Kalibrasyon için yeterli eşleşme yok (${usable.length}/${CALIBRATION_MIN_MATCHES}). Tahminler ham bırakıldı.`,
+    };
+  }
+  const ratios = usable.map((p) => p.actual / p.predicted).sort((a, b) => a - b);
+  const middle = Math.floor(ratios.length / 2);
+  const median =
+    ratios.length % 2 === 0 ? ((ratios[middle - 1] ?? 1) + (ratios[middle] ?? 1)) / 2 : (ratios[middle] ?? 1);
+  const ratio = Math.min(CALIBRATION_CLAMP.max, Math.max(CALIBRATION_CLAMP.min, median));
+  return {
+    applied: true,
+    ratio: Number(ratio.toFixed(2)),
+    matchedSampleSize: usable.length,
+    note: `Global düzeltme, niyet bazlı değil. ${usable.length} eşleşmiş çiftin ortanca oranı kullanıldı.`,
+  };
+}
+
+/** Guven skorundan turetilen talep araligi; taban ve tavan ile kirpilir. */
+export function demandRange(midDemand: number, confidenceScore: number): DemandRange {
+  const mid = Math.max(0, Math.round(midDemand));
+  const confidence = Math.min(1, Math.max(0, confidenceScore));
+  const raw = DEMAND_BAND.baseWidthPercent * (1 - confidence);
+  const width = Math.min(DEMAND_BAND.maxWidthPercent, Math.max(DEMAND_BAND.minWidthPercent, raw));
+  return {
+    low: Math.max(0, Math.round(mid * (1 - width))),
+    mid,
+    high: Math.round(mid * (1 + width)),
+  };
+}
+
+/**
+ * GA4 yapay zeka yonlendirmeleri: TIKLANMA tutarliligi sinyali.
+ * Talep dogrulugunu olcmez; guven skorunu dusurmez.
+ */
+export function ga4ClickSignal(input: {
+  connected: boolean;
+  referralSessions: number;
+  predictedDemand: number;
+  platformMix?: Record<string, number>;
+}): Ga4Signal {
+  if (!input.connected) {
+    return {
+      hasEnoughData: false,
+      referralSessions: 0,
+      clickConsistency: "unknown",
+      note: "GA4 bağlı değil; yapay zeka yönlendirme sinyali okunamıyor.",
+    };
+  }
+  if (input.referralSessions < GA4_MIN_SESSIONS) {
+    return {
+      hasEnoughData: false,
+      referralSessions: input.referralSessions,
+      clickConsistency: "unknown",
+      note: `Yapay zeka yönlendirmeli oturum sayısı yetersiz (${input.referralSessions}/${GA4_MIN_SESSIONS}); varsayılan platform katsayıları kullanıldı.`,
+    };
+  }
+  const expected = Math.max(1, input.predictedDemand) * 0.01;
+  const consistency: Ga4Signal["clickConsistency"] = input.referralSessions >= expected ? "high" : "low";
+  return {
+    hasEnoughData: true,
+    referralSessions: input.referralSessions,
+    ...(input.platformMix ? { platformMix: input.platformMix } : {}),
+    clickConsistency: consistency,
+    note: "Bu sinyal tıklanma tutarlılığını ölçer, talep tahmininin doğruluğunu değil. Kaynak gösterilse bile kullanıcı tıklamayabilir ve bazı AI platformları yönlendirme bilgisi göndermez.",
+  };
 }
 
 function uniqueWeight(sim: number): number {
@@ -154,6 +266,9 @@ export type ClusterInput = {
   citationShareSource: ClusterAnalysis["citationShareSource"];
   competitors: Array<{ name: string; share: number; promptsCited: number; topEvidenceType: string }>;
   signalSources: SignalSources;
+  calibration?: CalibrationInfo;
+  ga4Signal?: Ga4Signal;
+  platformFactors?: Record<string, number>;
 };
 
 /** Tum adimlari birlestirir: prompt talebi, ortusme indirimi, guven, firsat, aksiyon. */
@@ -162,7 +277,7 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
     (c) => c.semanticConfidence >= DEDUPLICATION.semanticThreshold,
   );
   const scored = accepted
-    .map((candidate) => ({ candidate, ...promptDemand(candidate) }))
+    .map((candidate) => ({ candidate, ...promptDemand(candidate, calibrationMultiplier) }))
     .sort((a, b) => b.demand - a.demand);
 
   const confidence = clusterConfidence(accepted);
@@ -209,6 +324,8 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
         promptSuitability: PROMPT_SUITABILITY[item.candidate.shape],
         semanticConfidence: Number(item.candidate.semanticConfidence.toFixed(2)),
         overlapAdjustment: Number(overlap.toFixed(2)),
+        calibrationMultiplier: item.candidate.origin === "model" ? calibrationMultiplier : 1,
+        ctrMultiplier: item.candidate.gsc ? Number((1 / Math.max(item.candidate.gsc.ctrUsed, 0.001)).toFixed(1)) : null,
         finalDemand: Math.round(item.demand * overlap),
       },
     };
@@ -274,10 +391,16 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
       )
     : 0;
 
+  // Platform dagilimi: GA4 karisimi yeterli veriyle geldiyse onu, aksi halde varsayilani kullan.
+  const mix = input.platformFactors ?? null;
+  const mixTotal = mix ? Object.values(mix).reduce((s, v) => s + v, 0) : 0;
   const platformDemand = Object.entries(AI_USAGE_FACTORS).map(([key, platform]) => ({
     key,
     label: platform.label,
-    demand: Math.round((clusterDemand * platform.factor) / TOTAL_AI_USAGE_FACTOR),
+    demand:
+      mix && mixTotal > 0
+        ? Math.round((clusterDemand * (mix[key] ?? 0)) / mixTotal)
+        : Math.round((clusterDemand * platform.factor) / TOTAL_AI_USAGE_FACTOR),
   }));
 
   return {
@@ -294,6 +417,20 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
     commercialIntent,
     citationShare: input.citationShare,
     citationShareSource: input.citationShareSource,
+    demandRange: demandRange(clusterDemand, confidence.score),
+    calibration: input.calibration ?? {
+      applied: false,
+      matchedSampleSize: 0,
+      note: "Kalibrasyon uygulanmadı.",
+    },
+    ga4Signal:
+      input.ga4Signal ??
+      ({
+        hasEnoughData: false,
+        referralSessions: 0,
+        clickConsistency: "unknown",
+        note: "GA4 sinyali yok.",
+      } satisfies Ga4Signal),
     leadingCompetitor: leader ? { name: leader.name, share: leader.share } : null,
     competitors,
     opportunity: level(clusterOpportunityScore, OPPORTUNITY_THRESHOLDS),
