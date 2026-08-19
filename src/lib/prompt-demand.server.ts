@@ -1,8 +1,15 @@
 // AI Talep Kesfi saglayici katmani: prompt genisletme + olculen kaynak gosterim verisi.
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { similarity } from "./prompt-demand/engine";
+import {
+  calibrationRatio,
+  ga4ClickSignal,
+  impressionsToDemand,
+  promptDemand,
+  similarity,
+} from "./prompt-demand/engine";
+import { GA4_MIN_SESSIONS } from "./prompt-demand/config";
 import type { CitationStatus, Intent, Level, PromptCandidate, PromptShape } from "./prompt-demand/types";
-import type { SignalSources } from "./prompt-demand/types";
+import type { CalibrationInfo, Ga4Signal, SignalSources } from "./prompt-demand/types";
 
 const INTENTS: Intent[] = [
   "informational",
