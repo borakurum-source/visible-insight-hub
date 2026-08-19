@@ -89,7 +89,7 @@ export async function expandPrompts(params: {
         source: "estimated",
         citationStatus: "not_cited",
         competitorPresence: "medium",
-        evidenceGapType: String(raw.evidenceGapType ?? "Yok"),
+        evidenceGapType: normalizeGapType(raw.evidenceGapType),
       };
     })
     .filter((row): row is PromptCandidate => row !== null);
@@ -99,6 +99,26 @@ export async function expandPrompts(params: {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+/** Model ASCII yazsa bile kanit boslugu tipini kanonik Turkce yazimina eslestirir. */
+function normalizeGapType(value: unknown): string {
+  const canonical = ["Karşılaştırma içeriği", "Bağımsız kanıt", "Ürün tanımı", "Veri ve araştırma", "Vaka çalışması", "Dokümantasyon", "Yok"];
+  const input = fold(String(value ?? ""));
+  return canonical.find((item) => fold(item) === input) ?? "Yok";
+}
+
+function fold(value: string): string {
+  return value
+    .toLocaleLowerCase("tr")
+    .replace(/ç/g, "c")
+    .replace(/ğ/g, "g")
+    .replace(/[ıî]/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ş/g, "s")
+    .replace(/[üû]/g, "u")
+    .replace(/â/g, "a")
+    .trim();
 }
 
 /**
