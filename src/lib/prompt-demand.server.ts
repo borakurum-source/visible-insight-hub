@@ -2,6 +2,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { similarity } from "./prompt-demand/engine";
 import type { CitationStatus, Intent, Level, PromptCandidate, PromptShape } from "./prompt-demand/types";
+import type { SignalSources } from "./prompt-demand/types";
 
 const INTENTS: Intent[] = [
   "informational",
@@ -193,5 +194,79 @@ export async function attachCitationData(
     citationShare: Number(measuredShare.toFixed(2)),
     citationShareSource: totalRuns > 0 ? "measured" : "estimated",
     competitors,
+  };
+}
+
+type GscSnapshot = {
+  queries?: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+};
+type Ga4Snapshot = { ai?: { sessions?: number } };
+
+/**
+ * ADIM 3.5: Search Console sorgu verisini adaylara baglar.
+ * Eslesen promptlarda hacim artik tahmin degil olculen veridir (impressions/30 gun).
+ * GA4 yapay zeka referans oturumlari kume duzeyinde dogrulama sinyali olarak tasinir.
+ */
+export async function attachSearchSignals(
+  supabase: SupabaseClient,
+  brandId: string,
+  candidates: PromptCandidate[],
+  measuredPrompts: number,
+): Promise<{ candidates: PromptCandidate[]; signalSources: SignalSources }> {
+  const { data: snapshots } = await supabase
+    .from("analytics_snapshots")
+    .select("provider, snapshot_date, payload")
+    .eq("brand_id", brandId)
+    .in("provider", ["gsc", "ga4"])
+    .order("snapshot_date", { ascending: false })
+    .limit(20);
+
+  const gscRow = (snapshots ?? []).find((row) => row.provider === "gsc");
+  const ga4Row = (snapshots ?? []).find((row) => row.provider === "ga4");
+  const gscQueries = ((gscRow?.payload as GscSnapshot | null)?.queries ?? []).filter((q) => q.query);
+  const ga4AiSessions = Number((ga4Row?.payload as Ga4Snapshot | null)?.ai?.sessions ?? 0);
+
+  let matched = 0;
+  const enriched = candidates.map((candidate) => {
+    let best: { row: (typeof gscQueries)[number]; score: number } | null = null;
+    for (const row of gscQueries) {
+      const score = similarity(row.query, candidate.text);
+      if (!best || score > best.score) best = { row, score };
+    }
+    if (!best || best.score < 0.4) return candidate;
+    matched += 1;
+    // Search Console 30 gunluk gosterimi dogrudan aylik talep sinyali olarak kullanilir.
+    const directVolume = Math.max(candidate.signal.directVolume, Math.round(best.row.impressions));
+    return {
+      ...candidate,
+      source: "measured" as const,
+      semanticConfidence: Math.max(candidate.semanticConfidence, 0.9),
+      signal: {
+        ...candidate.signal,
+        directVolume,
+        autocompleteStrength: Math.max(candidate.signal.autocompleteStrength, Math.min(1, best.score + 0.3)),
+      },
+      gsc: {
+        query: best.row.query,
+        impressions: Math.round(best.row.impressions),
+        clicks: Math.round(best.row.clicks),
+        position: Number(best.row.position ?? 0),
+        matchScore: Number(best.score.toFixed(2)),
+      },
+    };
+  });
+
+  return {
+    candidates: enriched,
+    signalSources: {
+      gscConnected: Boolean(gscRow),
+      ga4Connected: Boolean(ga4Row),
+      gscMatchedPrompts: matched,
+      gscQueryCount: gscQueries.length,
+      gscImpressions: gscQueries.reduce((sum, q) => sum + (q.impressions ?? 0), 0),
+      ga4AiSessions,
+      measuredPrompts,
+      snapshotDate: (gscRow?.snapshot_date as string | undefined) ?? (ga4Row?.snapshot_date as string | undefined) ?? null,
+    },
   };
 }
