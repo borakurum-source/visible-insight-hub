@@ -228,7 +228,7 @@ export async function attachCitationData(
 type GscSnapshot = {
   queries?: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
 };
-type Ga4Snapshot = { ai?: { sessions?: number } };
+type Ga4Snapshot = { ai?: { sessions?: number; platforms?: Record<string, number> } };
 
 /**
  * ADIM 3.5: Search Console sorgu verisini adaylara baglar.
@@ -254,38 +254,124 @@ export async function attachSearchSignals(
   const gscQueries = ((gscRow?.payload as GscSnapshot | null)?.queries ?? []).filter((q) => q.query);
   const ga4AiSessions = Number((ga4Row?.payload as Ga4Snapshot | null)?.ai?.sessions ?? 0);
 
+  const { bestMatch, embedAll, thresholdsFor } = await import("./prompt-demand/matching.server");
+  const thresholds = thresholdsFor(language);
+  const queryTexts = gscQueries.map((row) => row.query);
+  const vectors = queryTexts.length
+    ? await embedAll([...candidates.map((c) => c.text), ...queryTexts])
+    : null;
+  const matchMethod: "vector" | "jaccard" = vectors && vectors.size > 0 ? "vector" : "jaccard";
+
   let matched = 0;
-  const enriched = candidates.map((candidate) => {
-    let best: { row: (typeof gscQueries)[number]; score: number } | null = null;
-    for (const row of gscQueries) {
-      const score = similarity(row.query, candidate.text);
-      if (!best || score > best.score) best = { row, score };
-    }
-    if (!best || best.score < 0.4) return candidate;
+  const usedQueryIndexes = new Set<number>();
+  const calibrationPairs: Array<{ actual: number; predicted: number }> = [];
+
+  const enriched: PromptCandidate[] = candidates.map((candidate) => {
+    const best = queryTexts.length
+      ? bestMatch(
+          candidate.text,
+          queryTexts,
+          vectors,
+          thresholds.gscMatch,
+          MATCHING.jaccardFallback.gscMatch,
+        )
+      : null;
+    if (!best) return candidate;
+    const row = gscQueries[best.index];
+    if (!row) return candidate;
     matched += 1;
-    // Search Console 30 gunluk gosterimi dogrudan aylik talep sinyali olarak kullanilir.
-    const directVolume = Math.max(candidate.signal.directVolume, Math.round(best.row.impressions));
+    usedQueryIndexes.add(best.index);
+
+    const position = Number(row.position ?? 0);
+    const impressions = Math.round(row.impressions ?? 0);
+    // Gosterim -> toplam talep: CTR egrisi ile modellenir. Bu bir OLCUM DEGIL,
+    // olculen gosterim uzerine kurulmus tahmindir; bu yuzden source "modeled".
+    const modeled = impressionsToDemand(impressions, position);
+    // Kalibrasyon icin model tahmini ile gercek gosterim karsilastirilir.
+    calibrationPairs.push({ actual: impressions, predicted: Math.max(1, candidate.signal.directVolume) });
+
     return {
       ...candidate,
-      source: "measured" as const,
+      origin: "gsc" as const,
+      source: "modeled" as const,
       semanticConfidence: Math.max(candidate.semanticConfidence, 0.9),
       signal: {
         ...candidate.signal,
-        directVolume,
-        autocompleteStrength: Math.max(candidate.signal.autocompleteStrength, Math.min(1, best.score + 0.3)),
+        // GSC verisi model tahminini EZER; tahmin yalnizca taban gorevi gorur.
+        directVolume: modeled.demand,
+        autocompleteStrength: Math.max(candidate.signal.autocompleteStrength, Math.min(1, best.score + 0.2)),
       },
       gsc: {
-        query: best.row.query,
-        impressions: Math.round(best.row.impressions),
-        clicks: Math.round(best.row.clicks),
-        position: Number(best.row.position ?? 0),
-        matchScore: Number(best.score.toFixed(2)),
+        query: row.query,
+        impressions,
+        clicks: Math.round(row.clicks ?? 0),
+        position,
+        matchScore: Number(best.score.toFixed(3)),
+        modeledDemand: modeled.demand,
+        ctrUsed: modeled.ctr,
+        method: best.method,
+        borderline: best.borderline,
       },
     };
   });
 
+  // Hicbir adayla eslesmeyen yuksek gosterimli GSC sorgulari gercek taleptir;
+  // model onlari uretmediyse eksik kalirlar. En guclu olanlari kumeye ekleriz.
+  const unmatched = gscQueries
+    .map((row, index) => ({ row, index }))
+    .filter(({ index }) => !usedQueryIndexes.has(index))
+    .filter(({ row }) => (row.impressions ?? 0) >= GSC_ADD_MIN_IMPRESSIONS)
+    .sort((a, b) => (b.row.impressions ?? 0) - (a.row.impressions ?? 0))
+    .slice(0, GSC_ADD_LIMIT);
+
+  unmatched.forEach(({ row }) => {
+    const position = Number(row.position ?? 0);
+    const impressions = Math.round(row.impressions ?? 0);
+    const modeled = impressionsToDemand(impressions, position);
+    enriched.push({
+      text: row.query,
+      intent: "informational",
+      shape: "keyword",
+      semanticConfidence: 0.95,
+      signal: {
+        directVolume: modeled.demand,
+        relatedVolume: 0,
+        autocompleteStrength: 0.6,
+        historicalTrend: 1,
+      },
+      origin: "gsc",
+      source: "modeled",
+      citationStatus: "not_cited",
+      competitorPresence: "medium",
+      evidenceGapType: "Yok",
+      gsc: {
+        query: row.query,
+        impressions,
+        clicks: Math.round(row.clicks ?? 0),
+        position,
+        matchScore: 1,
+        modeledDemand: modeled.demand,
+        ctrUsed: modeled.ctr,
+        method: matchMethod,
+        borderline: false,
+      },
+    });
+  });
+
+  const calibration = calibrationRatio(calibrationPairs);
+  const ga4Platforms = (ga4Row?.payload as Ga4Snapshot | null)?.ai?.platforms;
+  const predictedTotal = enriched.reduce((sum, row) => sum + promptDemand(row).finalDemand, 0);
+  const ga4Signal = ga4ClickSignal({
+    connected: Boolean(ga4Row),
+    referralSessions: ga4AiSessions,
+    predictedDemand: predictedTotal,
+    ...(ga4Platforms && ga4AiSessions >= GA4_MIN_SESSIONS ? { platformMix: ga4Platforms } : {}),
+  });
+
   return {
     candidates: enriched,
+    calibration,
+    ga4Signal,
     signalSources: {
       gscConnected: Boolean(gscRow),
       ga4Connected: Boolean(ga4Row),
