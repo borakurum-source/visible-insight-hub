@@ -6,9 +6,10 @@ Amaç: tek bir "425" sayısı yerine kaynağı belli, kalibre edilmiş, aralıkl
 
 Vektör eşleştirme doğrudan canlıya alınmaz.
 
-- 50-100 çiftlik elle etiketli bir kalibrasyon seti hazırlanır (aday prompt ↔ GSC sorgusu, doğru/yanlış eşleşme). Türkçe, İngilizce ve karışık dilli örnekler ayrı ayrı yer alır.
+- 30-50 çiftlik elle etiketli bir test fikstürü hazırlanır (aday prompt ↔ GSC sorgusu, doğru/yanlış eşleşme). Türkçe, İngilizce ve karışık dilli örnekler ile "konu yakın ama niyet farklı" çiftler (örn. "AI görünürlük platformu" ↔ "AI güvenlik platformu") mutlaka bulunur.
 - Eşikler bu setten türetilir; plandaki 0.72/0.80 sayıları **varsayılan başlangıç değeri**, nihai değer değildir. Hedef: yanlış pozitif oranı %5'in altında.
 - Gölge (shadow) mod: vektör eşleştirme bir süre Jaccard ile paralel çalışır, sonuç kullanılmaz yalnızca loglanır. `prompt_demand_match_log` tablosuna aday metni, GSC sorgusu, Jaccard skoru, kosinüs skoru ve hangi yöntemin eşleştirdiği yazılır. Elle örnekleme kontrolünden sonra geçiş yapılır.
+- Sınırda eşleşme uyarısı: kosinüs skoru eşiğe 0.02'den yakınsa eşleşme kabul edilse bile log'a "borderline" uyarısı düşer.
 - Dil testi: aynı set Türkçe ve İngilizce sorgularla ölçülür; eşikler dil başına ayrı tutulabilir (config'de dile göre override alanı bırakılır).
 
 Neden: Jaccard'ın hatası yanlış negatif (eşleşmeyi kaçırır), embeddingin hatası yanlış pozitiftir. "AI görünürlük platformu" ile "AI güvenlik platformu" kosinüste yakın çıkar ama niyet farklıdır — bu satırlar "gerçek veri" diye işaretlenirse hata, tahminden daha zararlı olur.
