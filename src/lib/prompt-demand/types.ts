@@ -31,6 +31,27 @@ export type DemandSignal = {
   historicalTrend: number;
 };
 
+/** Search Console'dan eslesen gercek sorgu verisi. */
+export type GscSignal = {
+  query: string;
+  impressions: number;
+  clicks: number;
+  position: number;
+  matchScore: number;
+};
+
+/** Kume duzeyinde hangi gercek veri kaynaklarinin besledigi. */
+export type SignalSources = {
+  gscConnected: boolean;
+  ga4Connected: boolean;
+  gscMatchedPrompts: number;
+  gscQueryCount: number;
+  gscImpressions: number;
+  ga4AiSessions: number;
+  measuredPrompts: number;
+  snapshotDate: string | null;
+};
+
 /** Saglayicilardan (arama, soru, semantik genisletme) gelen ham aday. */
 export type PromptCandidate = {
   text: string;
@@ -42,6 +63,7 @@ export type PromptCandidate = {
   citationStatus: CitationStatus;
   competitorPresence: Level;
   evidenceGapType: string;
+  gsc?: GscSignal;
 };
 
 export type DemandBreakdown = {
@@ -116,4 +138,5 @@ export type ClusterAnalysis = {
   prompts: PromptDemandRow[];
   evidenceGaps: EvidenceGapRow[];
   actions: ActionRow[];
+  signalSources: SignalSources;
 };
