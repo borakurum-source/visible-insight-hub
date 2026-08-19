@@ -6,9 +6,10 @@ Amaç: tek bir "425" sayısı yerine kaynağı belli, kalibre edilmiş, aralıkl
 
 Vektör eşleştirme doğrudan canlıya alınmaz.
 
-- 50-100 çiftlik elle etiketli bir kalibrasyon seti hazırlanır (aday prompt ↔ GSC sorgusu, doğru/yanlış eşleşme). Türkçe, İngilizce ve karışık dilli örnekler ayrı ayrı yer alır.
+- 30-50 çiftlik elle etiketli bir test fikstürü hazırlanır (aday prompt ↔ GSC sorgusu, doğru/yanlış eşleşme). Türkçe, İngilizce ve karışık dilli örnekler ile "konu yakın ama niyet farklı" çiftler (örn. "AI görünürlük platformu" ↔ "AI güvenlik platformu") mutlaka bulunur.
 - Eşikler bu setten türetilir; plandaki 0.72/0.80 sayıları **varsayılan başlangıç değeri**, nihai değer değildir. Hedef: yanlış pozitif oranı %5'in altında.
 - Gölge (shadow) mod: vektör eşleştirme bir süre Jaccard ile paralel çalışır, sonuç kullanılmaz yalnızca loglanır. `prompt_demand_match_log` tablosuna aday metni, GSC sorgusu, Jaccard skoru, kosinüs skoru ve hangi yöntemin eşleştirdiği yazılır. Elle örnekleme kontrolünden sonra geçiş yapılır.
+- Sınırda eşleşme uyarısı: kosinüs skoru eşiğe 0.02'den yakınsa eşleşme kabul edilse bile log'a "borderline" uyarısı düşer.
 - Dil testi: aynı set Türkçe ve İngilizce sorgularla ölçülür; eşikler dil başına ayrı tutulabilir (config'de dile göre override alanı bırakılır).
 
 Neden: Jaccard'ın hatası yanlış negatif (eşleşmeyi kaçırır), embeddingin hatası yanlış pozitiftir. "AI görünürlük platformu" ile "AI güvenlik platformu" kosinüste yakın çıkar ama niyet farklıdır — bu satırlar "gerçek veri" diye işaretlenirse hata, tahminden daha zararlı olur.
@@ -59,11 +60,20 @@ Neden: Jaccard'ın hatası yanlış negatif (eşleşmeyi kaçırır), embeddingi
 ## Teknik notlar
 
 - Tip ayrımı (rozetlerle birebir): `origin: "gsc" | "onecite" | "model"` ve `source: "measured" | "modeled" | "calibrated" | "estimated"`. `"gsc"` değeri `source` enum'undan çıkarılır. Dört rozet: Ölçüldü (GSC) = `gsc/measured`, Ölçüldü (OneCite) = `onecite/measured`, GSC temelli tahmin = `gsc/modeled`, Kalibre tahmin = `model/calibrated`, Ham tahmin = `model/estimated`.
-- `types.ts`: yukarıdaki alanlar + `demandRange {low, mid, high}`, `calibration`, `clickSignal`, `matchMethod: "vector" | "jaccard"`, `matchScore`.
+- `types.ts`: yukarıdaki alanlar + `demandRange {low, mid, high}`, `calibration {applied, ratio?, matchedSampleSize?}`, `ga4Signal {hasEnoughData, referralSessions?, platformMix?}`, `matchMethod: "vector" | "jaccard"`, `matchScore`.
 - `config.ts`: CTR eğrisi tablosu (kaynak notuyla), dil bazlı kosinüs eşikleri, `BASE_WIDTH` ve bant sınırları, GA4 minimum oturum eşiği, kalibrasyon minimum eşleşme sayısı.
 - `engine.ts`: kalibrasyon çarpanı, `demandRange` fonksiyonu, tıklama sinyalinin güvenden ayrılması.
 - Yeni `src/lib/prompt-demand/matching.server.ts`: ön filtre, toplu embedding, kosinüs, kalıcı önbellek okuma/yazma.
 - `prompt-demand.server.ts`: GSC öncelikli `attachSearchSignals`, kalibrasyon hesabı, GA4 eşikli dağılım.
 - `app.prompt-demand.tsx`: aralık, beş rozet, kırılım paneli, takip aksiyonu ve ara durum.
 - Veritabanı: `embedding_cache`, `prompt_demand_match_log`, `prompt_demand_calibration_log` tabloları (marka bazlı erişim kuralları ile).
-- Sıra: (1) tipler + config + tablolar, (2) eşleştirme katmanı **gölge modda** ve etiketli set doğrulaması, (3) GSC önceliği ve CTR eğrisi, (4) kalibrasyon + GA4 eşikli sinyal, (5) arayüz, (6) doğrulama sonrası vektör eşleştirmenin canlıya alınması.
+- Kalibrasyon ve aralık matematiği saf fonksiyon olarak `engine.ts` içinde kalır (I/O'suz, test edilebilir). `attachSearchSignals` yalnızca veri toplamayı yönetir.
+- Kırılım paneli, gösterim için yeniden hesap yapmaz; motorun ürettiği ara hesap nesnesini okur.
+- Sıra: (1) tipler + config + tablolar, (2) eşleştirme katmanı **gölge modda** ve etiketli fikstür doğrulaması, (3) GSC önceliği ve CTR eğrisi, (4) kalibrasyon + GA4 eşikli sinyal, (5) arayüz, (6) doğrulama sonrası vektör eşleştirmenin canlıya alınması.
+
+## Test ve kabul kriterleri
+
+- Birim testler: kosinüs eşleştirme (etiketli fikstüre karşı, Jaccard ile uyuşmazlık oranı raporlanır), CTR eğrisi dönüşümü, kalibrasyon oranı (5 eşleşme altı atlama durumu dahil), `demandRange` bant formülü (taban/tavan kırpma dahil).
+- Tip kontrolü, lint ve build temiz geçer.
+- Elle doğrulama: eşleşen satırlarda gerçek sıra/tıklama ve doğru "Ölçüldü (GSC)" ↔ "GSC temelli tahmin" ayrımı; eşleşmeyen satırlarda doğru kalibre/ham tahmin rozeti; GSC bağlı değilken uyarı kartı; takibe alma sonrası satırın görünür şekilde "ilk ölçüm bekleniyor" durumuna geçmesi.
+- Bütünlük kuralı: CTR eğrisiyle ölçeklenmiş veya kalibre edilmiş hiçbir sayı arayüzde "ölçüldü" olarak adlandırılmaz.
