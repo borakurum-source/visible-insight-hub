@@ -22,6 +22,7 @@ import type {
   Level,
   PromptCandidate,
   PromptDemandRow,
+  SignalSources,
 } from "./types";
 
 function level(score: number, table: Array<{ min: number; level: Level }>): Level {
@@ -152,6 +153,7 @@ export type ClusterInput = {
   citationShare: number;
   citationShareSource: ClusterAnalysis["citationShareSource"];
   competitors: Array<{ name: string; share: number; promptsCited: number; topEvidenceType: string }>;
+  signalSources: SignalSources;
 };
 
 /** Tum adimlari birlestirir: prompt talebi, ortusme indirimi, guven, firsat, aksiyon. */
@@ -301,6 +303,7 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
     prompts: rows,
     evidenceGaps,
     actions: buildActions(rows, evidenceGaps, input.canonicalCluster),
+    signalSources: input.signalSources,
   };
 }
 

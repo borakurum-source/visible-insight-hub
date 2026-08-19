@@ -18,7 +18,7 @@ export const analyzePromptDemand = createServerFn({ method: "POST" })
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
 
-    const { expandPrompts, attachCitationData } = await import("./prompt-demand.server");
+    const { expandPrompts, attachCitationData, attachSearchSignals } = await import("./prompt-demand.server");
     const { buildCluster } = await import("./prompt-demand/engine");
 
     const expansion = await expandPrompts({
@@ -32,15 +32,23 @@ export const analyzePromptDemand = createServerFn({ method: "POST" })
     if (!expansion.candidates.length) throw new Error("Bu konu için yeterli prompt sinyali bulunamadı");
 
     const enriched = await attachCitationData(context.supabase, data.brandId, expansion.candidates);
+    const measuredPromptCount = enriched.candidates.filter((c) => c.source === "measured").length;
+    const withSearch = await attachSearchSignals(
+      context.supabase,
+      data.brandId,
+      enriched.candidates,
+      measuredPromptCount,
+    );
 
     return buildCluster({
       topic,
       canonicalCluster: expansion.canonicalCluster,
       country,
       language,
-      candidates: enriched.candidates,
+      candidates: withSearch.candidates,
       citationShare: enriched.citationShare,
       citationShareSource: enriched.citationShareSource,
       competitors: enriched.competitors,
+      signalSources: withSearch.signalSources,
     });
   });
