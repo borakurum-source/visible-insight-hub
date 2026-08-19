@@ -87,6 +87,7 @@ export async function expandPrompts(params: {
           autocompleteStrength: clamp(Number(raw.autocompleteStrength) || 0.5, 0, 1),
           historicalTrend: clamp(Number(raw.trend) || 1, 0.5, 1.6),
         },
+        origin: "model",
         source: "estimated",
         citationStatus: "not_cited",
         competitorPresence: "medium",
