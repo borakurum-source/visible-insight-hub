@@ -160,23 +160,43 @@ export async function attachCitationData(
     .filter((prompt) => runByPrompt.has(prompt.id as string))
     .map((prompt) => ({ text: String(prompt.text), cited: runByPrompt.get(prompt.id as string) === true }));
 
+  // Takibe alinmis ama henuz olcumu gelmemis promptlar: "ilk olcum bekleniyor" durumu.
+  const pendingPrompts = (prompts ?? [])
+    .filter((prompt) => !runByPrompt.has(prompt.id as string))
+    .map((prompt) => String(prompt.text));
+
   const totalRuns = measuredPrompts.length;
   const measuredShare = totalRuns > 0 ? measuredPrompts.filter((p) => p.cited).length / totalRuns : 0;
 
+  const { bestMatch, embedAll, thresholdsFor } = await import("./prompt-demand/matching.server");
+  const thresholds = thresholdsFor();
+  const measuredTexts = measuredPrompts.map((p) => p.text);
+  const vectors =
+    measuredTexts.length > 0
+      ? await embedAll([...candidates.map((c) => c.text), ...measuredTexts, ...pendingPrompts])
+      : null;
+
   const enriched = candidates.map((candidate) => {
-    let best: { cited: boolean; score: number } | null = null;
-    for (const prompt of measuredPrompts) {
-      const score = similarity(prompt.text, candidate.text);
-      if (!best || score > best.score) best = { cited: prompt.cited, score };
+    const best = measuredTexts.length
+      ? bestMatch(candidate.text, measuredTexts, vectors, thresholds.measuredPromptMatch, 0.55)
+      : null;
+    if (best) {
+      const cited = measuredPrompts[best.index]?.cited === true;
+      const status: CitationStatus = cited ? "cited" : "competitor_cited";
+      return { ...candidate, origin: "onecite" as const, source: "measured" as const, citationStatus: status };
     }
-    if (best && best.score >= 0.55) {
-      const status: CitationStatus = best.cited ? "cited" : "competitor_cited";
-      return { ...candidate, source: "measured" as const, citationStatus: status };
-    }
+    const pending =
+      pendingPrompts.length > 0 &&
+      bestMatch(candidate.text, pendingPrompts, vectors, thresholds.measuredPromptMatch, 0.55) !== null;
     // Olculmemis promptlarda durum cikarimdir.
     const inferredStatus: CitationStatus = measuredShare > 0.6 ? "cited" : "not_cited";
     const presence: Level = measuredShare < 0.25 ? "high" : measuredShare < 0.6 ? "medium" : "low";
-    return { ...candidate, citationStatus: inferredStatus, competitorPresence: presence };
+    return {
+      ...candidate,
+      citationStatus: inferredStatus,
+      competitorPresence: presence,
+      ...(pending ? { pendingMeasurement: true } : {}),
+    };
   });
 
   const domainCounts = new Map<string, number>();
