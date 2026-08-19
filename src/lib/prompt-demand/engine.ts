@@ -273,6 +273,7 @@ export type ClusterInput = {
 
 /** Tum adimlari birlestirir: prompt talebi, ortusme indirimi, guven, firsat, aksiyon. */
 export function buildCluster(input: ClusterInput): ClusterAnalysis {
+  const calibrationMultiplier = input.calibration?.applied ? (input.calibration.ratio ?? 1) : 1;
   const accepted = input.candidates.filter(
     (c) => c.semanticConfidence >= DEDUPLICATION.semanticThreshold,
   );
