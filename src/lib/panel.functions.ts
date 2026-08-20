@@ -875,15 +875,16 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         position: measured.position,
         raw_answer: measured.answer,
         answer_summary: measured.answer.slice(0, 280),
-        mentioned_brands: measured.mentionedBrands,
+        mentioned_brands: measured.mentionedBrands.map((b) => typeof b === "string" ? b : b.name),
+        cited_reasons: measured.mentionedBrands,
         run_index: runIndex,
         visibility,
       }).select("id").single();
 
       // Yanıtta geçen, bilinmeyen markaları rakip adayı olarak biriktir.
       const ownNeedle = brand.name.toLowerCase();
-      for (const rawName of measured.mentionedBrands) {
-        const name = rawName.trim();
+      for (const brandObj of measured.mentionedBrands) {
+        const name = (typeof brandObj === "string" ? brandObj : brandObj.name).trim();
         const lower = name.toLowerCase();
         if (!name || lower.includes(ownNeedle) || ownNeedle.includes(lower)) continue;
         if (competitors.some((competitor) => competitorMatches(competitor, { answer: name, domains: [] }))) continue;

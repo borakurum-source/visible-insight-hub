@@ -281,6 +281,92 @@ export async function renderWithFirecrawl(url: string): Promise<ExtractedPage | 
   }
 }
 
+export type ExtractedEvidence = {
+  citation_evidence: {
+    evidence_types_present: string[];
+    direct_answer_format: boolean;
+    trust_signals?: string[];
+  };
+  evidence_gap: {
+    missing_evidence: string[];
+    structured_data_gap?: string;
+  };
+};
+
+/**
+ * Firecrawl JSON-schema extraction: bir sitenin sayfalarından sorgu bağlamına
+ * özgü kanıt unsurlarını çıkar (fiyat şeffaflığı, vaka çalışması, SSS, güven sinyalleri, cevap formatı).
+ */
+export async function extractEvidence(
+  urls: string[],
+  schema: {
+    name: string;
+    schema: object;
+  },
+): Promise<(ExtractedEvidence | null)[]> {
+  const { recordApiUsage } = await import("./observability.server");
+  const { withCache } = await import("./cache.server");
+  const key = process.env["FIRECRAWL_API_KEY"];
+  if (!key || urls.length === 0) return urls.map(() => null);
+
+  const gatewayKey = process.env["LOVABLE_API_KEY"];
+  const usesGateway = key.startsWith("lovc_");
+  if (usesGateway && !gatewayKey) return urls.map(() => null);
+
+  const endpoint = usesGateway
+    ? "https://connector-gateway.lovable.dev/firecrawl/v2/extract"
+    : "https://api.firecrawl.dev/v2/extract";
+  const headers: Record<string, string> = usesGateway
+    ? { "Content-Type": "application/json", Authorization: `Bearer ${gatewayKey}`, "X-Connection-Api-Key": key }
+    : { "Content-Type": "application/json", Authorization: `Bearer ${key}` };
+
+  return Promise.all(
+    urls.map(async (url) => {
+      const startedAt = Date.now();
+      try {
+        const cached = await withCache("firecrawl-extract", { url, schema: schema.name }, () =>
+          (async () => {
+            const res = await fetch(endpoint, {
+              method: "POST",
+              headers,
+              body: JSON.stringify({ url, schema }),
+              signal: AbortSignal.timeout(60000),
+            });
+            const payload = (await res.json().catch(() => null)) as
+              | { data?: ExtractedEvidence; error?: string }
+              | null;
+            if (!res.ok) {
+              console.error(`Firecrawl extract failed for ${url} [${res.status}]: ${payload?.error ?? "unknown"}`);
+              recordApiUsage({
+                provider: "firecrawl",
+                operation: "extract",
+                durationMs: Date.now() - startedAt,
+                status: res.status === 429 ? "rate_limited" : "error",
+                error: `${res.status} ${payload?.error ?? ""}`,
+              });
+              return null;
+            }
+            recordApiUsage({ provider: "firecrawl", operation: "extract", durationMs: Date.now() - startedAt });
+            return payload?.data ?? null;
+          })(),
+          3600,
+        );
+        return cached;
+      } catch (error) {
+        console.error(`Firecrawl extract error for ${url}`, error);
+        recordApiUsage({
+          provider: "firecrawl",
+          operation: "extract",
+          durationMs: Date.now() - startedAt,
+          status: "error",
+          error: String(error),
+        });
+        return null;
+      }
+    }),
+  );
+}
+
 export type FetchOptions = {
   /** Kosullu istek: sunucu 304 donerse icerik yeniden islenmez. */
   etag?: string | null;
