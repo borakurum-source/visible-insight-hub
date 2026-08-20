@@ -381,18 +381,73 @@ export const listCitationSources = createServerFn({ method: "POST" })
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
   });
 
+// Ölçüm ekranı: ölçüm turlarını (batch'leri) listele — her tur için tur tarihi, skoru, ölçülen prompt sayısı.
+export const listMeasurementRounds = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: batches } = await context.supabase
+      .from("measurement_batches")
+      .select("id, created_at, finished_at, score, status, total_prompts")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    // Her batch için o batch aralığında ölçülen run sayısını bul.
+    const rounds = [];
+    for (const batch of batches ?? []) {
+      const endTime = batch.finished_at ?? new Date().toISOString();
+      const { count: runCount } = await context.supabase
+        .from("prompt_runs")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", data.brandId)
+        .gte("created_at", batch.created_at)
+        .lte("created_at", endTime);
+
+      rounds.push({
+        batchId: batch.id,
+        roundDate: batch.created_at,
+        finishedAt: batch.finished_at,
+        score: batch.score ? Number(batch.score) : null,
+        status: batch.status,
+        runCount: runCount ?? 0,
+      });
+    }
+
+    return { rounds };
+  });
+
 // Ölçüm ekranı: her sorunun yanıtı ve o yanıtta yapay zekanın kullandığı kaynaklar.
 export const listRunCitations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; limit?: number }) => input)
+  .inputValidator((input: { brandId: string; batchId?: string; limit?: number }) => input)
   .handler(async ({ data, context }) => {
-    const limit = Math.min(Math.max(data.limit ?? 25, 1), 60);
-    const { data: runs } = await context.supabase
+    // Eğer batchId verilmişse, o batch'in zaman aralığında ölçülen runları al.
+    let query = context.supabase
       .from("prompt_runs")
       .select("id, prompt_id, brand_mentioned, position, answer_summary, raw_answer, created_at, prompts(text)")
-      .eq("brand_id", data.brandId)
+      .eq("brand_id", data.brandId);
+
+    if (data.batchId) {
+      const { data: batch } = await context.supabase
+        .from("measurement_batches")
+        .select("created_at, finished_at")
+        .eq("id", data.batchId)
+        .maybeSingle();
+
+      if (batch) {
+        const endTime = batch.finished_at ?? new Date().toISOString();
+        query = query
+          .gte("created_at", batch.created_at)
+          .lte("created_at", endTime);
+      }
+    }
+
+    const limit = Math.min(Math.max(data.limit ?? 25, 1), 60);
+    const { data: runs } = await query
       .order("created_at", { ascending: false })
       .limit(limit);
+
     const runIds = (runs ?? []).map((r) => r.id);
     const { data: citations } = runIds.length
       ? await context.supabase

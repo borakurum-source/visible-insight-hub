@@ -30,6 +30,23 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
+export function createAuthClientOptions(supabaseKey: string, token: string) {
+  return {
+    db: { schema: 'onecite' as const },
+    global: {
+      fetch: createSupabaseFetch(supabaseKey),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+    auth: {
+      storage: undefined,
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  };
+}
+
 export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server(
   async ({ next }) => {
     
@@ -74,19 +91,7 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
     const supabase = createClient<Database, "onecite">(
       SUPABASE_URL!,
       SUPABASE_PUBLISHABLE_KEY!,
-      {
-        global: {
-          fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY!),
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-        auth: {
-          storage: undefined,
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      }
+      createAuthClientOptions(SUPABASE_PUBLISHABLE_KEY!, token)
     );
 
     const { data, error } = await supabase.auth.getClaims(token);
