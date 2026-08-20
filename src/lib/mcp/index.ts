@@ -5,10 +5,11 @@ import listPromptsTool from "./tools/list-prompts";
 import searchKnowledgeTool from "./tools/search-knowledge";
 import addKnowledgeSourceTool from "./tools/add-knowledge-source";
 
-// OAuth issuer doğrudan Supabase host'u olmalı; proje ref build sırasında gömülür.
+// OAuth issuer, self-hosted Supabase'in public domain'inden türetilir.
 type McpTools = Parameters<typeof defineMcp>[0]["tools"];
 
-const projectRef = import.meta.env['VITE_SUPABASE_PROJECT_ID'] ?? "project-ref-unset";
+const supabaseUrl = process.env["SUPABASE_URL"] ?? import.meta.env["VITE_SUPABASE_URL"] ?? "";
+const supabaseIssuer = `${supabaseUrl.replace(/\/+$/, "")}/auth/v1`;
 
 export default defineMcp({
   name: "onecite",
@@ -17,7 +18,7 @@ export default defineMcp({
   instructions:
     "OneCite yapay zeka görünürlük paneli araçları. Önce list_brands ile marka kimliğini alın; ardından get_visibility ile skoru, list_prompts ile izlenen soruları, search_knowledge ile marka bilgi bankasındaki kanıtları okuyun. add_knowledge_source ile yeni kaynak ekleyebilirsiniz.",
   auth: auth.oauth.issuer({
-    issuer: `https://${projectRef}.supabase.co/auth/v1`,
+    issuer: supabaseIssuer,
     acceptedAudiences: "authenticated",
   }),
   // Araç tanımları exactOptionalPropertyTypes ile birebir eşleşmiyor; SDK tipine daraltıyoruz.

@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
+    "reembed:kb": "bun run scripts/reembed-kb-chunks.ts",
     "format": "prettier --write ."
   },
   "dependencies": {

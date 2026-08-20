@@ -1,5 +1,6 @@
 // AI Talep Kesfi saglayici katmani: prompt genisletme + olculen kaynak gosterim verisi.
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import {
   calibrationRatio,
   ga4ClickSignal,
@@ -10,6 +11,8 @@ import {
 import { GA4_MIN_SESSIONS, GSC_ADD_LIMIT, GSC_ADD_MIN_IMPRESSIONS, MATCHING } from "./prompt-demand/config";
 import type { CitationStatus, Intent, Level, PromptCandidate, PromptShape } from "./prompt-demand/types";
 import type { CalibrationInfo, Ga4Signal, SignalSources } from "./prompt-demand/types";
+
+type OneCiteClient = SupabaseClient<Database, "onecite">;
 
 const INTENTS: Intent[] = [
   "informational",
@@ -135,7 +138,7 @@ function fold(value: string): string {
  * Benzer prompt bulunursa kaynak sinifi "measured" olur; aksi halde tahmindir.
  */
 export async function attachCitationData(
-  supabase: SupabaseClient,
+  supabase: OneCiteClient,
   brandId: string,
   candidates: PromptCandidate[],
 ): Promise<{
@@ -236,7 +239,7 @@ type Ga4Snapshot = { ai?: { sessions?: number; platforms?: Record<string, number
  * GA4 yapay zeka referans oturumlari kume duzeyinde dogrulama sinyali olarak tasinir.
  */
 export async function attachSearchSignals(
-  supabase: SupabaseClient,
+  supabase: OneCiteClient,
   brandId: string,
   candidates: PromptCandidate[],
   measuredPrompts: number,

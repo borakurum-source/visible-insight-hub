@@ -4,7 +4,8 @@ import type { Database } from "@/integrations/supabase/types";
 /** Yayindaki blog yazilari icin anon anahtarli sunucu istemcisi (RLS gecerli). */
 export function publicSupabase() {
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"]!;
-  return createClient<Database>(process.env["SUPABASE_URL"]!, key, {
+  return createClient<Database, "onecite">(process.env["SUPABASE_URL"]!, key, {
+    db: { schema: "onecite" },
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
       fetch: (input, init) => {
