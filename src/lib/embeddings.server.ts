@@ -1,7 +1,13 @@
 // Bilgi bankası → parça → embedding hattının sunucu tarafı yardımcıları.
-// Embedding sağlayıcısı: Perplexity Embeddings API (pplx-embed-v1-4b, 2560 boyut).
-const EMBEDDING_MODEL = "pplx-embed-v1-4b";
-const EMBEDDING_DIMS = 2560;
+// BİRİNCİL sağlayıcı: yerel AI gateway (Ollama bge-m3, 1024 boyut) — ücretsiz,
+// kota yok. LOCAL_AI_KEY tanımlı değilse fallback: Perplexity pplx-embed-v1-4b
+// (MRL 2560 → 1024'e kırpılır; aynı uzayda tutarlılık için).
+const EMBEDDING_MODEL = "bge-m3";
+const EMBEDDING_DIMS = 1024;
+
+// Yerel AI gateway (bu sunucudaki nginx + API key korumalı röle).
+const LOCAL_EMBED_URL = process.env["LOCAL_EMBED_URL"] || "https://mcp.ragsignal.com/ai/embed";
+const LOCAL_AI_KEY = process.env["LOCAL_AI_KEY"] || "";
 
 // Kaynak tipine gore temel agirlik. Kanit degeri yuksek icerik daha yukari ciksin.
 export const SOURCE_WEIGHTS: Record<string, number> = {
@@ -158,6 +164,27 @@ function normalizeFloatVector(values: number[]): number[] {
 async function requestEmbeddings(batch: string[]): Promise<number[][]> {
   const { recordApiUsage } = await import("./observability.server");
   const startedAt = Date.now();
+
+  // Local AI gateway first (Ollama bge-m3, OpenAI-compatible /v1/embeddings).
+  if (LOCAL_AI_KEY) {
+    try {
+      const res = await fetch(LOCAL_EMBED_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": LOCAL_AI_KEY },
+        body: JSON.stringify({ model: EMBEDDING_MODEL, input: batch }),
+      });
+      if (!res.ok) throw new Error(`Local embed error: ${res.status}`);
+      const json = (await res.json()) as { data?: Array<{ embedding: number[] }> };
+      recordApiUsage({
+        provider: "local", operation: "embeddings", model: EMBEDDING_MODEL,
+        durationMs: Date.now() - startedAt,
+      });
+      return (json.data ?? []).map((row) => normalizeFloatVector(row.embedding ?? []));
+    } catch (e) {
+      console.error("Local embedding failed, falling back to Perplexity:", e);
+    }
+  }
+
   const key = process.env["PERPLEXITY_API_KEY"];
   if (!key) throw new Error("PERPLEXITY_API_KEY tanımlı değil");
   const res = await fetch("https://api.perplexity.ai/v1/embeddings", {
@@ -193,8 +220,8 @@ async function requestEmbeddings(batch: string[]): Promise<number[][]> {
   const rows = (json.data ?? []).slice().sort((a, b) => a.index - b.index);
   return rows.map((row) =>
     typeof row.embedding === "string"
-      ? decodeInt8Base64(row.embedding)
-      : normalizeFloatVector(row.embedding ?? []),
+      ? decodeInt8Base64(row.embedding).slice(0, EMBEDDING_DIMS)
+      : normalizeFloatVector(row.embedding ?? []).slice(0, EMBEDDING_DIMS),
   );
 }
 
