@@ -320,6 +320,7 @@ function PromptDemandPage() {
                       <th className="px-4 py-2 font-medium">Niyet</th>
                       <th className="px-4 py-2 text-right font-medium">AI Talebi</th>
                       <th className="px-4 py-2 font-medium">Kaynak durumu</th>
+                      <th className="px-4 py-2 font-medium">Veri kaynağı</th>
                       <th className="px-4 py-2 font-medium">Kanıt boşluğu</th>
                       <th className="px-4 py-2 text-right font-medium">Fırsat</th>
                     </tr>
@@ -335,6 +336,10 @@ function PromptDemandPage() {
                         <td className="px-4 py-2.5 text-xs text-muted-foreground">{INTENT_LABELS[row.intent]}</td>
                         <td className="px-4 py-2.5 text-right tabular-nums">{number.format(row.uniqueDemand)}</td>
                         <td className="px-4 py-2.5 text-xs">{CITATION_LABEL[row.citationStatus]}</td>
+                        <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                          {rowSourceLabel(row.origin, row.source)}
+                          {row.pendingMeasurement ? " · ilk ölçüm bekleniyor" : ""}
+                        </td>
                         <td className="px-4 py-2.5 text-xs text-muted-foreground">{row.evidenceGapType}</td>
                         <td className="px-4 py-2.5 text-right">
                           <Badge variant="outline" className={`text-[10px] ${LEVEL_TONE[row.opportunity]}`}>{row.opportunityScore}</Badge>
@@ -342,7 +347,7 @@ function PromptDemandPage() {
                       </tr>
                     ))}
                     {prompts.length === 0 ? (
-                      <tr><td colSpan={6} className="px-4 py-6 text-center text-sm text-muted-foreground">Bu filtreyle eşleşen prompt yok.</td></tr>
+                      <tr><td colSpan={7} className="px-4 py-6 text-center text-sm text-muted-foreground">Bu filtreyle eşleşen prompt yok.</td></tr>
                     ) : null}
                   </tbody>
                 </table>
