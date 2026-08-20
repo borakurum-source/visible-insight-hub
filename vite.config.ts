@@ -18,6 +18,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Self-hosted Node deployment (not Cloudflare Workers) — overrides the Lovable default preset.
+  nitro: {
+    preset: "node-server",
+  },
   vite: {
     plugins: [mcpPlugin()],
     resolve: {

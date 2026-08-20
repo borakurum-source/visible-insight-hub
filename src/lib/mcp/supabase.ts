@@ -53,6 +53,7 @@ export function supabaseForUser(ctx: ToolContext) {
   const token = ctx.getToken();
   if (!token) throw new Error("supabaseForUser requires a verified OAuth token");
   return createClient(supabaseProjectUrl(), supabasePublishableKey(), {
+    db: { schema: "onecite" },
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false },
   });

@@ -1,1 +1,1 @@
-CREATE POLICY "brands_select_creator" ON public.brands FOR SELECT TO authenticated USING (auth.uid() = created_by);
+CREATE POLICY "brands_select_creator" ON onecite.brands FOR SELECT TO authenticated USING (auth.uid() = created_by);

@@ -39,5 +39,5 @@ END $$;
 DROP POLICY IF EXISTS user_roles_select_admin ON onecite.user_roles;
 
 -- Helper functions stay non-executable for API roles
-REVOKE EXECUTE ON FUNCTION onecite.has_role(uuid, onecite.app_role) FROM authenticated, anon, PUBLIC;
+REVOKE EXECUTE ON FUNCTION onecite.has_role(uuid, app_role) FROM authenticated, anon, PUBLIC;
 REVOKE EXECUTE ON FUNCTION onecite.is_brand_member(uuid, uuid) FROM authenticated, anon, PUBLIC;

@@ -6,7 +6,7 @@ CREATE TABLE onecite.kb_chunks (
   brand_id uuid NOT NULL REFERENCES onecite.brands(id) ON DELETE CASCADE,
   source_id uuid REFERENCES onecite.knowledge_sources(id) ON DELETE CASCADE,
   content text NOT NULL,
-  embedding public.vector(3072),
+  embedding vector(3072),
   source_type text NOT NULL DEFAULT 'url',
   source_weight numeric NOT NULL DEFAULT 1.0,
   content_hash text NOT NULL DEFAULT '',
@@ -27,7 +27,7 @@ CREATE POLICY kb_chunks_all ON onecite.kb_chunks FOR ALL TO authenticated
 
 CREATE INDEX kb_chunks_brand_idx ON onecite.kb_chunks (brand_id);
 CREATE INDEX kb_chunks_source_idx ON onecite.kb_chunks (source_id);
-CREATE INDEX kb_chunks_embedding_idx ON onecite.kb_chunks USING hnsw ((embedding::public.halfvec(3072)) public.halfvec_cosine_ops);
+CREATE INDEX kb_chunks_embedding_idx ON onecite.kb_chunks USING hnsw ((embedding::halfvec(3072)) halfvec_cosine_ops);
 
 CREATE TRIGGER kb_chunks_updated_at BEFORE UPDATE ON onecite.kb_chunks
   FOR EACH ROW EXECUTE FUNCTION onecite.update_updated_at_column();
@@ -108,7 +108,7 @@ ALTER TABLE onecite.knowledge_sources
 -- 6. Semantic match function (brand scoped, RLS-safe via invoker rights)
 CREATE OR REPLACE FUNCTION onecite.match_kb_chunks(
   _brand_id uuid,
-  query_embedding public.vector(3072),
+  query_embedding vector(3072),
   match_count int DEFAULT 8
 )
 RETURNS TABLE (
@@ -128,18 +128,18 @@ AS $$
     c.source_id,
     c.content,
     c.source_type,
-    (1 - (c.embedding::public.halfvec(3072) OPERATOR(public.<=>) query_embedding::public.halfvec(3072)))::double precision AS similarity,
+    (1 - (c.embedding::halfvec(3072) <=> query_embedding::halfvec(3072)))::double precision AS similarity,
     (
-      GREATEST(0, 1 - (c.embedding::public.halfvec(3072) OPERATOR(public.<=>) query_embedding::public.halfvec(3072)))
+      GREATEST(0, 1 - (c.embedding::halfvec(3072) <=> query_embedding::halfvec(3072)))
       * c.source_weight
       * (1.0 / (1.0 + (EXTRACT(EPOCH FROM (now() - c.updated_at)) / 86400.0) / 30.0))
     )::double precision AS score
   FROM onecite.kb_chunks c
   WHERE c.brand_id = _brand_id
     AND c.embedding IS NOT NULL
-    ORDER BY c.embedding::public.halfvec(3072) OPERATOR(public.<=>) query_embedding::public.halfvec(3072)
+  ORDER BY c.embedding::halfvec(3072) <=> query_embedding::halfvec(3072)
   LIMIT match_count;
 $$;
 
-REVOKE ALL ON FUNCTION onecite.match_kb_chunks(uuid, public.vector, int) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION onecite.match_kb_chunks(uuid, public.vector, int) TO authenticated, service_role;
+REVOKE ALL ON FUNCTION onecite.match_kb_chunks(uuid, vector, int) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION onecite.match_kb_chunks(uuid, vector, int) TO authenticated, service_role;

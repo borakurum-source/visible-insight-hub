@@ -1,4 +1,4 @@
-CREATE TABLE public.public_reports (
+CREATE TABLE onecite.public_reports (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   token text NOT NULL UNIQUE,
   domain text NOT NULL,
@@ -11,12 +11,12 @@ CREATE TABLE public.public_reports (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-GRANT ALL ON public.public_reports TO service_role;
+GRANT ALL ON onecite.public_reports TO service_role;
 
-ALTER TABLE public.public_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE onecite.public_reports ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX public_reports_domain_idx ON public.public_reports (domain, created_at DESC);
+CREATE INDEX public_reports_domain_idx ON onecite.public_reports (domain, created_at DESC);
 
 CREATE TRIGGER public_reports_updated_at
-BEFORE UPDATE ON public.public_reports
-FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+BEFORE UPDATE ON onecite.public_reports
+FOR EACH ROW EXECUTE FUNCTION onecite.update_updated_at_column();

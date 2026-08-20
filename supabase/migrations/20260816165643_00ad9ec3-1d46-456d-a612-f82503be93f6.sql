@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION onecite.has_role(_user_id uuid, _role onecite.app_role)
+CREATE OR REPLACE FUNCTION onecite.has_role(_user_id uuid, _role app_role)
 RETURNS boolean
 LANGUAGE sql
 STABLE

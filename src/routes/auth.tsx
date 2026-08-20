@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,17 +74,18 @@ function AuthPage() {
     setLoading(true);
     setError(null);
     markPendingOAuth("google");
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/auth${next ? `?next=${encodeURIComponent(next)}` : ""}`,
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth${next ? `?next=${encodeURIComponent(next)}` : ""}`,
+      },
     });
-    if (result.error) {
+    if (oauthError) {
       setError("Google ile giriş yapılamadı. Lütfen tekrar deneyin.");
       setLoading(false);
       return;
     }
-    if (result.redirected) return;
-    flushPendingOAuth(false);
-    void navigate({ to: "/app" });
+    // supabase-js redirects the browser to the OAuth provider; execution stops here.
   };
 
   const submitEmail = async (event: React.FormEvent<HTMLFormElement>) => {

@@ -10,6 +10,7 @@ function getSupabase() {
     _supabase = createClient<any, any, any>(
       process.env["SUPABASE_URL"]!,
       process.env["SUPABASE_SERVICE_ROLE_KEY"]!,
+      { db: { schema: "onecite" } },
     );
   }
   return _supabase;
