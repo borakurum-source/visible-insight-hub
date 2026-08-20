@@ -159,7 +159,10 @@ export const disconnectIntegration = createServerFn({ method: "POST" })
 export const listGa4PropertyOptions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { data: brand } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).single();
+    if (!brand) throw new Error("Marka bulunamadı");
     const { listGa4Properties } = await import("./ga4.server");
     return await listGa4Properties(data.brandId);
   });
@@ -611,6 +614,9 @@ export const connectBingSite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; siteUrl: string }) => input)
   .handler(async ({ data, context }) => {
+    const { data: brand } = await context.supabase
+      .from("brands").select("id").eq("id", data.brandId).single();
+    if (!brand) throw new Error("Marka bulunamadı");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { getBrandBingKey, listBingSites } = await import("./bing.server");
     const apiKey = await getBrandBingKey(supabaseAdmin, data.brandId);
