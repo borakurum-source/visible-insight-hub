@@ -38,6 +38,7 @@ export const analyzePromptDemand = createServerFn({ method: "POST" })
       data.brandId,
       enriched.candidates,
       measuredPromptCount,
+      language,
     );
 
     return buildCluster({
@@ -50,5 +51,8 @@ export const analyzePromptDemand = createServerFn({ method: "POST" })
       citationShareSource: enriched.citationShareSource,
       competitors: enriched.competitors,
       signalSources: withSearch.signalSources,
+      calibration: withSearch.calibration,
+      ga4Signal: withSearch.ga4Signal,
+      ...(withSearch.ga4Signal.platformMix ? { platformFactors: withSearch.ga4Signal.platformMix } : {}),
     });
   });
