@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -14,8 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { addDiscoveredPrompts } from "@/lib/panel.functions";
+import { addDiscoveredPrompts, listPrompts } from "@/lib/panel.functions";
 import { analyzePromptDemand } from "@/lib/prompt-demand.functions";
+import { normalizePromptText } from "@/lib/prompt-normalize";
 import { DEMAND_TOOLTIP, INTENT_LABELS, LEVEL_LABELS, SOURCE_LABELS, rowSourceLabel } from "@/lib/prompt-demand/config";
 import type { Level, PromptDemandRow } from "@/lib/prompt-demand/types";
 import { useActiveBrand } from "@/lib/use-panel";
@@ -54,6 +55,7 @@ function PromptDemandPage() {
   const queryClient = useQueryClient();
   const analyze = useServerFn(analyzePromptDemand);
   const addPrompts = useServerFn(addDiscoveredPrompts);
+  const fetchExisting = useServerFn(listPrompts);
 
   const [topic, setTopic] = useState("");
   const [country, setCountry] = useState("TR");
@@ -62,12 +64,22 @@ function PromptDemandPage() {
   const [citationFilter, setCitationFilter] = useState("all");
   const [selected, setSelected] = useState<PromptDemandRow | null>(null);
   const [showDebug, setShowDebug] = useState(false);
+  const [existingPrompts, setExistingPrompts] = useState<Array<{ id: string; text: string }>>([]);
 
   const run = useMutation({
     mutationFn: (value: string) => analyze({ data: { brandId: brand!.id, topic: value, country, language } }),
     onError: (error: Error) => toast.error(error.message),
   });
   const result = run.data ?? null;
+
+  // Fetch existing prompts when brand changes
+  useEffect(() => {
+    if (brand) {
+      fetchExisting({ data: { brandId: brand.id } }).then((existing: any[]) => {
+        setExistingPrompts(existing || []);
+      });
+    }
+  }, [brand, fetchExisting]);
 
   const track = useMutation({
     mutationFn: (rows: PromptDemandRow[]) =>
@@ -80,18 +92,29 @@ function PromptDemandPage() {
     onSuccess: (_data, rows) => {
       toast.success(`${rows.length} prompt izlemeye alındı`);
       void queryClient.invalidateQueries({ queryKey: ["prompts", brand?.id] });
+      // Refresh existing prompts list
+      if (brand) {
+        fetchExisting({ data: { brandId: brand.id } }).then((existing: any[]) => {
+          setExistingPrompts(existing || []);
+        });
+      }
     },
     onError: (error: Error) => toast.error(error.message),
   });
 
   const prompts = useMemo(() => {
     if (!result) return [];
+    // Filter discovered prompts: hide those already tracked
+    const existingNormalized = new Set(
+      existingPrompts.map((p) => normalizePromptText(p.text))
+    );
     return result.prompts.filter(
       (row) =>
         (intentFilter === "all" || row.intent === intentFilter) &&
-        (citationFilter === "all" || row.citationStatus === citationFilter),
+        (citationFilter === "all" || row.citationStatus === citationFilter) &&
+        !existingNormalized.has(normalizePromptText(row.text)) // Hide duplicates
     );
-  }, [result, intentFilter, citationFilter]);
+  }, [result, intentFilter, citationFilter, existingPrompts]);
 
   if (!brand) {
     return (

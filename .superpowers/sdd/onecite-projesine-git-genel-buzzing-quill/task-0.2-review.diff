@@ -1,0 +1,219 @@
+Measurement Screen Round-Based View Implementation
+===================================================
+
+Commits: ee26d37..f4cfb5e
+Files Modified: 2
+- src/lib/panel.functions.ts (+63 lines)
+- src/routes/_authenticated/app.measurement.tsx (+72 lines)
+
+Key Changes:
+1. New server function listMeasurementRounds() — lists measurement batches with metadata
+2. Modified listRunCitations() — accepts optional batchId to filter runs by batch
+3. UI: Round selector with date, score, run count display
+4. Auto-selection of latest round on page load
+
+---
+
+diff --git a/src/lib/panel.functions.ts b/src/lib/panel.functions.ts
+index 133c8ea..2d8a5b3 100644
+--- a/src/lib/panel.functions.ts
++++ b/src/lib/panel.functions.ts
+@@ -374,32 +374,87 @@ export const listCitationSources = createServerFn({ method: "POST" })
+          lastSeen: row.created_at,
+          firstSeen: row.created_at,
+          sampleUrl: row.url,
+          links: [link],
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.count - a.count);
+  });
+
++// Ölçüm ekranı: ölçüm turlarını (batch'leri) listele — her tur için tur tarihi, skoru, ölçülen prompt sayısı.
++export const listMeasurementRounds = createServerFn({ method: "POST" })
++  .middleware([requireSupabaseAuth])
++  .inputValidator((input: { brandId: string }) => input)
++  .handler(async ({ data, context }) => {
++    const { data: batches } = await context.supabase
++      .from("measurement_batches")
++      .select("id, created_at, finished_at, score, status, total_prompts")
++      .eq("brand_id", data.brandId)
++      .order("created_at", { ascending: false })
++      .limit(10);
++
++    // Her batch için o batch aralığında ölçülen run sayısını bul.
++    const rounds = [];
++    for (const batch of batches ?? []) {
++      const endTime = batch.finished_at ?? new Date().toISOString();
++      const { count: runCount } = await context.supabase
++        .from("prompt_runs")
++        .select("id", { count: "exact", head: true })
++        .eq("brand_id", data.brandId)
++        .gte("created_at", batch.created_at)
++        .lte("created_at", endTime);
++
++      rounds.push({
++        batchId: batch.id,
++        roundDate: batch.created_at,
++        finishedAt: batch.finished_at,
++        score: batch.score ? Number(batch.score) : null,
++        status: batch.status,
++        runCount: runCount ?? 0,
++      });
++    }
++
++    return { rounds };
++  });
++
+ // Ölçüm ekranı: her sorunun yanıtı ve o yanıtta yapay zekanın kullandığı kaynaklar.
+ export const listRunCitations = createServerFn({ method: "POST" })
+   .middleware([requireSupabaseAuth])
+-  .inputValidator((input: { brandId: string; limit?: number }) => input)
++  .inputValidator((input: { brandId: string; batchId?: string; limit?: number }) => input)
+   .handler(async ({ data, context }) => {
+-    const limit = Math.min(Math.max(data.limit ?? 25, 1), 60);
+-    const { data: runs } = await context.supabase
++    // Eğer batchId verilmişse, o batch'in zaman aralığında ölçülen runları al.
++    let query = context.supabase
+       .from("prompt_runs")
+       .select("id, prompt_id, brand_mentioned, position, answer_summary, raw_answer, created_at, prompts(text)")
+-      .eq("brand_id", data.brandId)
++      .eq("brand_id", data.brandId);
++
++    if (data.batchId) {
++      const { data: batch } = await context.supabase
++        .from("measurement_batches")
++        .select("created_at, finished_at")
++        .eq("id", data.batchId)
++        .maybeSingle();
++
++      if (batch) {
++        const endTime = batch.finished_at ?? new Date().toISOString();
++        query = query
++          .gte("created_at", batch.created_at)
++          .lte("created_at", endTime);
++      }
++    }
++
++    const limit = Math.min(Math.max(data.limit ?? 25, 1), 60);
++    const { data: runs } = await query
+       .order("created_at", { ascending: false })
+       .limit(limit);
++
+     const runIds = (runs ?? []).map((r) => r.id);
+     const { data: citations } = runIds.length
+       ? await context.supabase
+          .from("citations")
+          .select("run_id, url, domain, title, citation_type, is_own_domain")
+          .in("run_id", runIds)
+       : { data: [] as Array<{ run_id: string | null; url: string; domain: string; title: string | null; citation_type: string; is_own_domain: boolean }> };
+
+diff --git a/src/routes/_authenticated/app.measurement.tsx b/src/routes/_authenticated/app.measurement.tsx
+index 98769fa..a8ed874 100644
+--- a/src/routes/_authenticated/app.measurement.tsx
++++ b/src/routes/_authenticated/app.measurement.tsx
+@@ -1,26 +1,26 @@
+-import { useEffect, useRef } from "react";
++import { useEffect, useRef, useState } from "react";
+ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+ import { useQuery } from "@tanstack/react-query";
+ import { useServerFn } from "@tanstack/react-start";
+ import { Activity, Play, Gauge, ListChecks, ExternalLink, Quote } from "lucide-react";
+ import { toast } from "sonner";
+ import { PanelPageHeading } from "@/components/app/panel-page-heading";
+ import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
+ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+ import { Button } from "@/components/ui/button";
+ import { Progress } from "@/components/ui/progress";
+ import { Badge } from "@/components/ui/badge";
+ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+ import { QuerySkeleton } from "@/components/app/panel-query-states";
+ import { ScoreBreakdown } from "@/components/app/score-breakdown";
+-import { getMeasurementState, listRunCitations } from "@/lib/panel.functions";
++import { getMeasurementState, listRunCitations, listMeasurementRounds } from "@/lib/panel.functions";
+ import { useMeasurementRun } from "@/lib/use-measurement-run";
+ import { toPlainText } from "@/lib/plain-text";
+ import { useActiveBrand } from "@/lib/use-panel";
+
+ export const Route = createFileRoute("/_authenticated/app/measurement")({
+   validateSearch: (search: Record<string, unknown>): { autostart?: boolean } =>
+     search["autostart"] === true || search["autostart"] === "1" ? { autostart: true } : {},
+   head: () => ({
+     meta: [
+       { title: "Ölçüm — OneCite Paneli" },
+@@ -32,46 +32,78 @@ export const Route = createFileRoute("/_authenticated/app/measurement")({
+   }),
+   component: MeasurementPage,
+ });
+
+ function MeasurementPage() {
+   const { brand } = useActiveBrand();
+   const { autostart } = Route.useSearch();
+   const navigate = useNavigate();
+   const fetchState = useServerFn(getMeasurementState);
+   const { run, progress, running } = useMeasurementRun(brand?.id);
++  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
+
+   const { data, isLoading } = useQuery({
+     queryKey: ["measurement-state", brand?.id],
+     queryFn: () => fetchState({ data: { brandId: brand!.id } }),
+     enabled: Boolean(brand?.id),
+   });
++
++  const fetchRounds = useServerFn(listMeasurementRounds);
++  const { data: roundsData } = useQuery({
++    queryKey: ["measurement-rounds", brand?.id, running],
++    queryFn: () => fetchRounds({ data: { brandId: brand!.id } }),
++    enabled: Boolean(brand?.id) && !running,
++  });
++
++  // Sonuncu tursa otomatik seçildi, yoksa kullanıcı seçer.
++  useEffect(() => {
++    if (roundsData?.rounds && roundsData.rounds.length > 0 && !selectedBatchId) {
++      setSelectedBatchId(roundsData.rounds[0].batchId);
++    }
++  }, [roundsData?.rounds, selectedBatchId]);
++
+   const fetchRuns = useServerFn(listRunCitations);
+   const { data: runs } = useQuery({
+-    queryKey: ["run-citations", brand?.id, running],
+-    queryFn: () => fetchRuns({ data: { brandId: brand!.id, limit: 30 } }),
+-    enabled: Boolean(brand?.id) && !running,
++    queryKey: ["run-citations", brand?.id, selectedBatchId, running],
++    queryFn: () => fetchRuns({ data: { brandId: brand!.id, batchId: selectedBatchId ?? undefined, limit: 30 } }),
++    enabled: Boolean(brand?.id) && !running && Boolean(selectedBatchId),
+   });
+
+   // Kurulum bitiminde /app/measurement?autostart=1 ile gelindiğinde ilk ölçümü kendiliğinden başlat.
+   const autostarted = useRef(false);
+   useEffect(() => {
+     if (!autostart || autostarted.current) return;
+     if (!brand?.id || isLoading) return;
+     autostarted.current = true;
+     navigate({ to: "/app/measurement", search: () => ({}), replace: true });
+     if ((data?.approvedPrompts ?? 0) > 0) {
+       toast.info("Kurulum tamam — ilk ölçümünüz başlıyor.");
+       void run();
+     }
+   }, [autostart, brand?.id, isLoading, data?.approvedPrompts, navigate, run]);
+
++  // Tarihi formatla: "Ağu 20, 10:35"
++  const formatRoundDate = (isoDate: string) => {
++    try {
++      const date = new Date(isoDate);
++      const formatter = new Intl.DateTimeFormat("tr-TR", {
++        month: "short",
++        day: "numeric",
++        hour: "2-digit",
++        minute: "2-digit",
++      });
++      return formatter.format(date);
++    } catch {
++      return isoDate;
++    }
++  };
+
+---
+
+Build Status: ✓ 0 errors, 1.62s compilation
+Test Coverage: Manual test plan provided (verify round selector shows 15 runs, not 30)

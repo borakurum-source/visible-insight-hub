@@ -328,9 +328,32 @@ export const addDiscoveredPrompts = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     if (!data.items.length) return { inserted: 0 };
     const { assertPromptQuota } = await import("./plan.server");
-    await assertPromptQuota(context.supabase, context.userId, data.brandId, data.items.length);
+    const { normalizePromptText } = await import("./prompt-normalize");
+
+    // Get existing approved prompts to check for duplicates
+    const { data: existing } = await context.supabase
+      .from("prompts")
+      .select("id, text")
+      .eq("brand_id", data.brandId)
+      .eq("status", "approved");
+
+    const existingNormalized = new Set(
+      (existing ?? []).map((p) => normalizePromptText(p.text))
+    );
+
+    // Filter out duplicates and collect those to insert
+    const toInsert = data.items.filter(
+      (item) => !existingNormalized.has(normalizePromptText(item.text))
+    );
+
+    if (!toInsert.length) {
+      return { inserted: 0 };
+    }
+
+    await assertPromptQuota(context.supabase, context.userId, data.brandId, toInsert.length);
+
     const { error } = await context.supabase.from("prompts").insert(
-      data.items.map((item) => ({
+      toInsert.map((item) => ({
         brand_id: data.brandId,
         text: item.text,
         category: item.cluster || "kategori",
@@ -340,7 +363,7 @@ export const addDiscoveredPrompts = createServerFn({ method: "POST" })
       })),
     );
     if (error) throw new Error(error.message);
-    return { inserted: data.items.length };
+    return { inserted: toInsert.length };
   });
 
 export const listCitationSources = createServerFn({ method: "POST" })
@@ -565,15 +588,56 @@ export const setPromptStatus = createServerFn({ method: "POST" })
     if (!data.ids.length) return { ok: true };
     if (data.status === "approved") {
       const { assertPromptQuota } = await import("./plan.server");
+      const { normalizePromptText } = await import("./prompt-normalize");
+
       const { data: rows } = await context.supabase
-        .from("prompts").select("id, brand_id, status").in("id", data.ids);
+        .from("prompts").select("id, brand_id, status, text").in("id", data.ids);
       const pending = (rows ?? []).filter((r) => r.status !== "approved");
-      const byBrand = new Map<string, number>();
-      for (const r of pending) byBrand.set(r.brand_id, (byBrand.get(r.brand_id) ?? 0) + 1);
-      for (const [brandId, adding] of byBrand) {
-        await assertPromptQuota(context.supabase, context.userId, brandId, adding);
+
+      // For each pending prompt, check if approved version already exists
+      const toApprove: string[] = [];
+      const toSkip: string[] = [];
+
+      for (const candidate of pending) {
+        const { data: approved } = await context.supabase
+          .from("prompts")
+          .select("id, text")
+          .eq("brand_id", candidate.brand_id)
+          .eq("status", "approved")
+          .limit(1000);
+
+        const duplicate = approved?.find(
+          (p) => normalizePromptText(p.text) === normalizePromptText(candidate.text)
+        );
+
+        if (duplicate) {
+          toSkip.push(candidate.id);
+        } else {
+          toApprove.push(candidate.id);
+        }
       }
+
+      // Check quota only for prompts that will actually be approved
+      if (toApprove.length > 0) {
+        const byBrand = new Map<string, number>();
+        for (const id of toApprove) {
+          const r = rows?.find((row) => row.id === id);
+          if (r) byBrand.set(r.brand_id, (byBrand.get(r.brand_id) ?? 0) + 1);
+        }
+        for (const [brandId, adding] of byBrand) {
+          await assertPromptQuota(context.supabase, context.userId, brandId, adding);
+        }
+
+        // Approve non-duplicate prompts
+        const { error } = await context.supabase.from("prompts").update({ status: "approved" }).in("id", toApprove);
+        if (error) throw new Error(error.message);
+      }
+
+      // Skip duplicates by not updating them (they remain as candidate/other status)
+      // This allows the user to see they were not approved due to duplicates
+      return { ok: true };
     }
+
     const { error } = await context.supabase.from("prompts").update({ status: data.status }).in("id", data.ids);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -584,7 +648,27 @@ export const createPrompt = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string; text: string }) => input)
   .handler(async ({ data, context }) => {
     const { assertPromptQuota } = await import("./plan.server");
+    const { normalizePromptText } = await import("./prompt-normalize");
+
     await assertPromptQuota(context.supabase, context.userId, data.brandId, 1);
+
+    // Check if brand already has this prompt (approved) with normalized text
+    const normalizedText = normalizePromptText(data.text);
+    const { data: existing } = await context.supabase
+      .from("prompts")
+      .select("id, text")
+      .eq("brand_id", data.brandId)
+      .eq("status", "approved")
+      .limit(1000);
+
+    const duplicate = existing?.find(
+      (p) => normalizePromptText(p.text) === normalizedText
+    );
+
+    if (duplicate) {
+      throw new Error(`Marka zaten bu soruyu izliyor: "${duplicate.text}"`);
+    }
+
     const { error } = await context.supabase.from("prompts").insert({
       brand_id: data.brandId, text: data.text, status: "approved", origin: "manual", category: "genel",
     });

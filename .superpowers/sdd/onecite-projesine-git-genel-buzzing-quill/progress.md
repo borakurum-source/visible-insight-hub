@@ -17,3 +17,4 @@
 ---
 
 Task 0.1: complete (commits e1b6345..ee26d37, review clean)
+Task 0.2: complete (commits ee26d37..f4cfb5e, review clean; minor: N+1 query deferred to Phase 1)
