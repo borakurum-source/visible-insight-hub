@@ -198,3 +198,6 @@ export const SOURCE_LABELS = {
 
 export const DEMAND_TOOLTIP =
   "AI Talebi; arama talebi, ilgili sorular, semantik prompt genişletmesi ve AI platform kullanım modellemesi ile bu konu etrafındaki aylık yanıt talebini tahmin eder. ChatGPT veya diğer AI sağlayıcılarına ait özel kullanım verisini temsil etmez.";
+/** Model uretmedigi halde gercek talep tasiyan GSC sorgulari icin ekleme esikleri. */
+export const GSC_ADD_MIN_IMPRESSIONS = 50;
+export const GSC_ADD_LIMIT = 15;

@@ -7,7 +7,7 @@ import {
   promptDemand,
   similarity,
 } from "./prompt-demand/engine";
-import { GA4_MIN_SESSIONS, MATCHING } from "./prompt-demand/config";
+import { GA4_MIN_SESSIONS, GSC_ADD_LIMIT, GSC_ADD_MIN_IMPRESSIONS, MATCHING } from "./prompt-demand/config";
 import type { CitationStatus, Intent, Level, PromptCandidate, PromptShape } from "./prompt-demand/types";
 import type { CalibrationInfo, Ga4Signal, SignalSources } from "./prompt-demand/types";
 
