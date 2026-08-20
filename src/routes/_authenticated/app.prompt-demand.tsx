@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { addDiscoveredPrompts } from "@/lib/panel.functions";
 import { analyzePromptDemand } from "@/lib/prompt-demand.functions";
-import { DEMAND_TOOLTIP, INTENT_LABELS, LEVEL_LABELS, SOURCE_LABELS } from "@/lib/prompt-demand/config";
+import { DEMAND_TOOLTIP, INTENT_LABELS, LEVEL_LABELS, SOURCE_LABELS, rowSourceLabel } from "@/lib/prompt-demand/config";
 import type { Level, PromptDemandRow } from "@/lib/prompt-demand/types";
 import { useActiveBrand } from "@/lib/use-panel";
 
