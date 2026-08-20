@@ -25,8 +25,11 @@ SELECT cron.schedule(
   '17 */6 * * *',
   $$
   SELECT net.http_post(
-    url := 'https://project--8e50bc36-64ac-4cc1-9948-3f4fac9d3f33.lovable.app/api/public/cron/sync-analytics',
-    headers := '{"Content-Type": "application/json", "apikey": "sb_publishable_4A2n5FDKqehhxp3nAbhpDA_cg24Ww5Z"}'::jsonb,
+    url := 'https://1cite.com/api/public/cron/sync-analytics',
+    headers := jsonb_build_object('Content-Type', 'application/json') || CASE
+      WHEN NULLIF(current_setting('app.settings.anon_key', true), '') IS NULL THEN '{}'::jsonb
+      ELSE jsonb_build_object('apikey', current_setting('app.settings.anon_key', true))
+    END,
     body := '{"source":"pg_cron"}'::jsonb
   );
   $$
