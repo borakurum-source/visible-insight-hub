@@ -1475,3 +1475,182 @@ export const getCompetitorVisibilityTrend = createServerFn({ method: "POST" })
       days,
     );
   });
+
+// ============ Evidence Bridge ============
+
+export const startEvidenceBridge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; promptId: string; competitorDomain: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { assertBrandActive } = await import("./plan.server");
+    await assertBrandActive(context.supabase, context.userId, data.brandId);
+
+    const { data: batch, error } = await context.supabase
+      .from("measurement_batches")
+      .insert({
+        brand_id: data.brandId,
+        status: "running",
+        engine: "evidence_bridge",
+        total_prompts: 1,
+        completed_prompts: 0,
+      })
+      .select("*")
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    const { data: run } = await context.supabase
+      .from("evidence_bridge_runs")
+      .insert({
+        brand_id: data.brandId,
+        prompt_id: data.promptId,
+        competitor_domain: data.competitorDomain,
+        batch_id: batch.id,
+        status: "pending",
+      })
+      .select("id")
+      .single();
+
+    return { batch, runId: run?.id };
+  });
+
+export const runEvidenceBridgeChunk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { batchId: string; brandId: string; runId: string; competitorDomain: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { measurePrompt } = await import("./measurement.server");
+    const { fetchSitemapUrls } = await import("./ai.server");
+    const { extractEvidence } = await import("./extract.server");
+    const { synthesizeEvidenceGap } = await import("./evidence-synthesis.server");
+    const { recordApiUsage } = await import("./observability.server");
+
+    const [{ data: brand }, { data: prompt }, { data: run }] = await Promise.all([
+      context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+      context.supabase.from("evidence_bridge_runs").select("prompt_id").eq("id", data.runId).single(),
+      context.supabase.from("evidence_bridge_runs").select("*").eq("id", data.runId).single(),
+    ]);
+
+    if (!brand || !run) throw new Error("Brand or run not found");
+
+    const promptData = await context.supabase.from("prompts").select("text").eq("id", run.prompt_id).single();
+    const promptText = (promptData.data as any)?.text || "";
+
+    const startedAt = Date.now();
+    try {
+      // Aşama 1: AI yanıtı
+      const measured = await measurePrompt({
+        brandName: brand.name,
+        brandDomain: brand.domain,
+        competitors: [],
+        promptText,
+      });
+
+      // Aşama 2: Firecrawl kanıt çıkarımı (her iki site için)
+      const brandUrls = (await fetchSitemapUrls(brand.domain, 5)).slice(0, 5);
+      const competitorUrls = (await fetchSitemapUrls(data.competitorDomain, 5)).slice(0, 5);
+
+      const evidenceSchema = {
+        name: "citation_evidence",
+        schema: {
+          type: "object",
+          properties: {
+            citation_evidence: {
+              type: "object",
+              properties: {
+                evidence_types_present: { type: "array", items: { type: "string" } },
+                direct_answer_format: { type: "boolean" },
+                trust_signals: { type: "array", items: { type: "string" } },
+              },
+              required: ["evidence_types_present", "direct_answer_format"],
+            },
+            evidence_gap: {
+              type: "object",
+              properties: {
+                missing_evidence: { type: "array", items: { type: "string" } },
+                structured_data_gap: { type: "string" },
+              },
+              required: ["missing_evidence"],
+            },
+          },
+          required: ["citation_evidence", "evidence_gap"],
+        },
+      };
+
+      const [brandEvidenceResults, competitorEvidenceResults] = await Promise.all([
+        extractEvidence(brandUrls, evidenceSchema),
+        extractEvidence(competitorUrls, evidenceSchema),
+      ]);
+
+      // Aşama 3: Sentez
+      const priorities = await synthesizeEvidenceGap({
+        brandName: brand.name,
+        brandDomain: brand.domain,
+        competitorDomain: data.competitorDomain,
+        promptText,
+        aiAnswer: measured.answer,
+        citedReasons: measured.mentionedBrands,
+        brandEvidence: brandEvidenceResults[0],
+        competitorEvidence: competitorEvidenceResults[0],
+      });
+
+      // Sonuçları kaydet
+      const { error } = await context.supabase.from("evidence_bridge_runs").update({
+        status: "completed",
+        ai_response_raw: measured.answer,
+        ai_response_parsed: {
+          mentioned_brands: measured.mentionedBrands,
+          sources: measured.sources,
+          position: measured.position,
+        },
+        firecrawl_brand: brandEvidenceResults[0],
+        firecrawl_competitor: competitorEvidenceResults[0],
+        content_priorities: priorities,
+        finished_at: new Date().toISOString(),
+      }).eq("id", data.runId);
+
+      if (error) throw new Error(error.message);
+
+      recordApiUsage({
+        provider: "evidence_bridge",
+        operation: "synthesis",
+        durationMs: Date.now() - startedAt,
+      });
+    } catch (error) {
+      await context.supabase
+        .from("evidence_bridge_runs")
+        .update({
+          status: "failed",
+          error: String(error),
+          finished_at: new Date().toISOString(),
+        })
+        .eq("id", data.runId);
+      throw error;
+    }
+  });
+
+export const finishEvidenceBridge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { batchId: string; brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: runs } = await context.supabase
+      .from("evidence_bridge_runs")
+      .select("*")
+      .eq("batch_id", data.batchId);
+
+    const completed = (runs ?? []).filter((r: any) => r.status === "completed").length;
+    const failed = (runs ?? []).filter((r: any) => r.status === "failed").length;
+
+    const status = failed > 0 ? "failed" : completed > 0 ? "completed" : "pending";
+
+    const { error } = await context.supabase
+      .from("measurement_batches")
+      .update({
+        status,
+        completed_prompts: completed,
+        finished_at: new Date().toISOString(),
+      })
+      .eq("id", data.batchId);
+
+    if (error) throw new Error(error.message);
+    return { status, completed, failed };
+  });
