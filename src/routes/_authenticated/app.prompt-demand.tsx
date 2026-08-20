@@ -183,9 +183,9 @@ function PromptDemandPage() {
             <MetricCard
               icon={Activity}
               label="AI Talebi (aylık)"
-              value={number.format(result.demand)}
+              value={`${number.format(result.demandRange.low)} – ${number.format(result.demandRange.high)}`}
               hint={DEMAND_TOOLTIP}
-              foot={`${result.trend >= 0 ? "+" : ""}${result.trend}% yıllık eğilim · ${result.promptCount} prompt`}
+              foot={`Orta değer ${number.format(result.demandRange.mid)} · ${result.trend >= 0 ? "+" : ""}${result.trend}% eğilim · ${result.promptCount} prompt`}
               badge={`Güven: ${LEVEL_LABELS[result.confidence]}`}
             />
             <MetricCard
@@ -240,14 +240,25 @@ function PromptDemandPage() {
                 <Badge variant="outline" className={LEVEL_TONE.medium}>
                   {result.signalSources.measuredPrompts} prompt OneCite ölçümünden
                 </Badge>
+                <Badge variant="outline" className={result.signalSources.matchMethod === "vector" ? LEVEL_TONE.high : LEVEL_TONE.medium}>
+                  Eşleştirme: {result.signalSources.matchMethod === "vector" ? "anlamsal (vektör)" : "kelime örtüşmesi (yedek)"}
+                </Badge>
+                {result.signalSources.gscAddedPrompts > 0 ? (
+                  <Badge variant="outline" className={LEVEL_TONE.high}>
+                    +{result.signalSources.gscAddedPrompts} sorgu doğrudan Search Console'dan eklendi
+                  </Badge>
+                ) : null}
               </div>
               <p className="text-muted-foreground">
                 {result.signalSources.gscConnected
-                  ? `Search Console'dan ${number.format(result.signalSources.gscQueryCount)} sorgu ve ${number.format(result.signalSources.gscImpressions)} gösterim okundu${result.signalSources.snapshotDate ? ` (${result.signalSources.snapshotDate})` : ""}. Eşleşen promptlarda hacim tahmin değil ölçülen veridir.`
+                  ? `Search Console'dan ${number.format(result.signalSources.gscQueryCount)} sorgu ve ${number.format(result.signalSources.gscImpressions)} gösterim okundu${result.signalSources.snapshotDate ? ` (${result.signalSources.snapshotDate})` : ""}. Eşleşen promptlarda gösterim ölçülmüş veridir; toplam talep bu gösterimden tıklama eğrisiyle modellenir, yani ölçüm değil gerçek veriye dayalı tahmindir.`
                   : "Search Console bağlı değil; hacimler şu an dil modeli tahminidir. Bağladığınızda eşleşen promptlar gerçek gösterim verisine geçer."}
-                {result.signalSources.ga4Connected
-                  ? ` GA4'te son 28 günde ${number.format(result.signalSources.ga4AiSessions)} yapay zeka kaynaklı oturum görüldü.`
-                  : ""}
+              </p>
+              <p className="text-muted-foreground">
+                <span className="font-medium text-foreground">Kalibrasyon:</span> {result.calibration.note}
+              </p>
+              <p className="text-muted-foreground">
+                <span className="font-medium text-foreground">GA4:</span> {result.ga4Signal.note}
               </p>
               {!result.signalSources.gscConnected || !result.signalSources.ga4Connected ? (
                 <Button asChild size="sm" variant="outline">
