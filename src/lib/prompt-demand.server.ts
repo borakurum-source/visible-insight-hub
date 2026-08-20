@@ -7,7 +7,7 @@ import {
   promptDemand,
   similarity,
 } from "./prompt-demand/engine";
-import { GA4_MIN_SESSIONS } from "./prompt-demand/config";
+import { GA4_MIN_SESSIONS, MATCHING } from "./prompt-demand/config";
 import type { CitationStatus, Intent, Level, PromptCandidate, PromptShape } from "./prompt-demand/types";
 import type { CalibrationInfo, Ga4Signal, SignalSources } from "./prompt-demand/types";
 
@@ -240,7 +240,13 @@ export async function attachSearchSignals(
   brandId: string,
   candidates: PromptCandidate[],
   measuredPrompts: number,
-): Promise<{ candidates: PromptCandidate[]; signalSources: SignalSources }> {
+  language?: string,
+): Promise<{
+  candidates: PromptCandidate[];
+  signalSources: SignalSources;
+  calibration: CalibrationInfo;
+  ga4Signal: Ga4Signal;
+}> {
   const { data: snapshots } = await supabase
     .from("analytics_snapshots")
     .select("provider, snapshot_date, payload")
@@ -360,7 +366,7 @@ export async function attachSearchSignals(
 
   const calibration = calibrationRatio(calibrationPairs);
   const ga4Platforms = (ga4Row?.payload as Ga4Snapshot | null)?.ai?.platforms;
-  const predictedTotal = enriched.reduce((sum, row) => sum + promptDemand(row).finalDemand, 0);
+  const predictedTotal = enriched.reduce((sum, row) => sum + promptDemand(row).demand, 0);
   const ga4Signal = ga4ClickSignal({
     connected: Boolean(ga4Row),
     referralSessions: ga4AiSessions,
@@ -380,6 +386,8 @@ export async function attachSearchSignals(
       gscImpressions: gscQueries.reduce((sum, q) => sum + (q.impressions ?? 0), 0),
       ga4AiSessions,
       measuredPrompts,
+      matchMethod,
+      gscAddedPrompts: unmatched.length,
       snapshotDate: (gscRow?.snapshot_date as string | undefined) ?? (ga4Row?.snapshot_date as string | undefined) ?? null,
     },
   };
