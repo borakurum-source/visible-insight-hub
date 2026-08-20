@@ -418,7 +418,7 @@ function PromptDemandPage() {
                 <div className="rounded-lg border border-border p-3">
                   <p className="text-xs font-medium">Kaynak durumu</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {CITATION_LABEL[selected.citationStatus]} · Kaynak sınıfı: {SOURCE_LABELS[selected.source]}
+                    {CITATION_LABEL[selected.citationStatus]} · Kaynak sınıfı: {rowSourceLabel(selected.origin, selected.source)}
                   </p>
                 </div>
                 {selected.gsc ? (
