@@ -39,17 +39,33 @@ function MeasurementPage() {
   const navigate = useNavigate();
   const fetchState = useServerFn(getMeasurementState);
   const { run, progress, running } = useMeasurementRun(brand?.id);
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["measurement-state", brand?.id],
     queryFn: () => fetchState({ data: { brandId: brand!.id } }),
     enabled: Boolean(brand?.id),
   });
+
+  const fetchRounds = useServerFn(listMeasurementRounds);
+  const { data: roundsData } = useQuery({
+    queryKey: ["measurement-rounds", brand?.id, running],
+    queryFn: () => fetchRounds({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id) && !running,
+  });
+
+  // Sonuncu tursa otomatik seçildi, yoksa kullanıcı seçer.
+  useEffect(() => {
+    if (roundsData?.rounds && roundsData.rounds.length > 0 && !selectedBatchId) {
+      setSelectedBatchId(roundsData.rounds[0].batchId);
+    }
+  }, [roundsData?.rounds, selectedBatchId]);
+
   const fetchRuns = useServerFn(listRunCitations);
   const { data: runs } = useQuery({
-    queryKey: ["run-citations", brand?.id, running],
-    queryFn: () => fetchRuns({ data: { brandId: brand!.id, limit: 30 } }),
-    enabled: Boolean(brand?.id) && !running,
+    queryKey: ["run-citations", brand?.id, selectedBatchId, running],
+    queryFn: () => fetchRuns({ data: { brandId: brand!.id, batchId: selectedBatchId ?? undefined, limit: 30 } }),
+    enabled: Boolean(brand?.id) && !running && Boolean(selectedBatchId),
   });
 
   // Kurulum bitiminde /app/measurement?autostart=1 ile gelindiğinde ilk ölçümü kendiliğinden başlat.
@@ -64,6 +80,22 @@ function MeasurementPage() {
       void run();
     }
   }, [autostart, brand?.id, isLoading, data?.approvedPrompts, navigate, run]);
+
+  // Tarihi formatla: "Ağu 20, 10:35"
+  const formatRoundDate = (isoDate: string) => {
+    try {
+      const date = new Date(isoDate);
+      const formatter = new Intl.DateTimeFormat("tr-TR", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return formatter.format(date);
+    } catch {
+      return isoDate;
+    }
+  };
 
   return (
     <>
@@ -96,6 +128,36 @@ function MeasurementPage() {
                 <p className="text-xs text-muted-foreground">
                   {progress?.done} / {progress?.total} prompt tamamlandı. Sayfayı açık tutun.
                 </p>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {/* Ölçüm turlarının seçici */}
+          {roundsData?.rounds && roundsData.rounds.length > 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Ölçüm Turları</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {roundsData.rounds.map((round) => (
+                    <button
+                      key={round.batchId}
+                      onClick={() => setSelectedBatchId(round.batchId)}
+                      className={`px-3 py-2 text-sm rounded-md border transition-colors ${
+                        selectedBatchId === round.batchId
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-medium">{formatRoundDate(round.roundDate)}</div>
+                      {round.score !== null && (
+                        <div className="text-xs text-muted-foreground">{Math.round(round.score)} puan</div>
+                      )}
+                      <div className="text-xs text-muted-foreground">{round.runCount} ölçüm</div>
+                    </button>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           ) : null}
