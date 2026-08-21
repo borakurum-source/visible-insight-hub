@@ -3,9 +3,22 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, ChevronDown, ListChecks, Loader2, Pause, Plus, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Download,
+  ListChecks,
+  Loader2,
+  Pause,
+  Play,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { Hint } from "@/components/app/hint";
 import { PromptResultCard } from "@/components/app/prompt-result-card";
+import { PromptMeasurementHeatmap } from "@/components/app/prompt-measurement-heatmap";
+import { VisibilityCharts } from "@/components/app/visibility-charts";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,10 +31,14 @@ import {
   createPrompt,
   deletePrompt,
   getPlanUsage,
+  getPromptMeasurementMatrix,
+  getVisibilityAnalytics,
   listPrompts,
+  measureSinglePrompt,
   setPromptStatus,
 } from "@/lib/panel.functions";
 import { useActiveBrand } from "@/lib/use-panel";
+import { useMeasurementRun } from "@/lib/use-measurement-run";
 
 export const Route = createFileRoute("/_authenticated/app/prompts")({
   validateSearch: (search: Record<string, unknown>): { prompt?: string } =>
@@ -29,7 +46,10 @@ export const Route = createFileRoute("/_authenticated/app/prompts")({
   head: () => ({
     meta: [
       { title: "Promptlar — OneCite Paneli" },
-      { name: "description", content: "Yapay zeka motorlarında takip ettiğiniz soruları yönetin ve onaylayın." },
+      {
+        name: "description",
+        content: "Yapay zeka motorlarında takip ettiğiniz soruları yönetin ve onaylayın.",
+      },
       { property: "og:title", content: "Promptlar — OneCite Paneli" },
       { property: "og:description", content: "Takip edilen soruları yönetin." },
       { name: "robots", content: "noindex" },
@@ -53,6 +73,10 @@ function PromptsPage() {
   const addPrompt = useServerFn(createPrompt);
   const removePrompt = useServerFn(deletePrompt);
   const fetchPlanUsage = useServerFn(getPlanUsage);
+  const fetchAnalytics = useServerFn(getVisibilityAnalytics);
+  const fetchMatrix = useServerFn(getPromptMeasurementMatrix);
+  const remeasurePrompt = useServerFn(measureSinglePrompt);
+  const { run: runAll, running: measuringAll } = useMeasurementRun(brand?.id);
   const [filter, setFilter] = useState<string>("approved");
   const [draft, setDraft] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -70,6 +94,16 @@ function PromptsPage() {
     queryFn: () => fetchPlanUsage({ data: { brandId: brand!.id } }),
     enabled: Boolean(brand?.id),
   });
+  const { data: analytics } = useQuery({
+    queryKey: ["visibility-analytics", brand?.id],
+    queryFn: () => fetchAnalytics({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
+  const { data: matrix } = useQuery({
+    queryKey: ["prompt-measurement-matrix", brand?.id],
+    queryFn: () => fetchMatrix({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: key });
@@ -79,13 +113,19 @@ function PromptsPage() {
 
   const statusMutation = useMutation({
     mutationFn: (input: { ids: string[]; status: string }) => updateStatus({ data: input }),
-    onSuccess: () => { setChecked({}); invalidate(); },
+    onSuccess: () => {
+      setChecked({});
+      invalidate();
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
   const createMutation = useMutation({
     mutationFn: () => addPrompt({ data: { brandId: brand!.id, text: draft.trim() } }),
-    onSuccess: () => { setDraft(""); invalidate(); },
+    onSuccess: () => {
+      setDraft("");
+      invalidate();
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -94,17 +134,72 @@ function PromptsPage() {
     onSuccess: invalidate,
     onError: (error: Error) => toast.error(error.message),
   });
+  const singleMeasurement = useMutation({
+    mutationFn: (promptId: string) => remeasurePrompt({ data: { brandId: brand!.id, promptId } }),
+    onSuccess: (_result, promptId) => {
+      toast.success("Prompt yeniden ölçüldü; tam tur trendi değiştirilmedi.");
+      void queryClient.invalidateQueries({ queryKey: ["prompts", brand?.id] });
+      void queryClient.invalidateQueries({ queryKey: ["prompt-insight", promptId] });
+      void queryClient.invalidateQueries({ queryKey: ["measurement-state", brand?.id] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const visible = data.filter((prompt) => prompt.status === filter);
   const selectedIds = visible.filter((prompt) => checked[prompt.id]).map((prompt) => prompt.id);
   const candidateCount = data.filter((prompt) => prompt.status === "candidate").length;
 
+  const downloadCsv = () => {
+    const escape = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+    const rows = visible.map((prompt) => [
+      prompt.text,
+      prompt.status,
+      prompt.category,
+      prompt.intent ?? "",
+      prompt.lastRun?.visibility ?? "",
+      prompt.lastRun?.brandMentioned ?? "",
+      prompt.lastRun?.position ?? "",
+      prompt.lastRun?.createdAt ?? "",
+      prompt.lastRun?.engine ?? "agent_web_grounded",
+    ]);
+    const csv = [
+      [
+        "prompt",
+        "status",
+        "category",
+        "intent",
+        "visibility",
+        "brand_mentioned",
+        "position",
+        "measured_at",
+        "measurement_surface",
+      ],
+      ...rows,
+    ]
+      .map((row) => row.map(escape).join(","))
+      .join("\n");
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${brand?.domain ?? "onecite"}-visibility.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!brand) {
     return (
       <>
         <PanelSubnav items={VISIBILITY_SUBNAV} />
-        <PanelPageHeading meta={{ title: "Promptlar", description: "Önce bir marka ekleyin.", icon: ListChecks }} />
-        <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
+        <PanelPageHeading
+          meta={{ title: "Promptlar", description: "Önce bir marka ekleyin.", icon: ListChecks }}
+        />
+        <Card>
+          <CardContent className="py-10 text-center">
+            <Button asChild>
+              <Link to="/app/onboarding">Markanı ekle</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </>
     );
   }
@@ -114,10 +209,25 @@ function PromptsPage() {
       <PanelSubnav items={VISIBILITY_SUBNAV} />
       <PanelPageHeading
         meta={{
-          title: "Promptlar",
-          description: "Yapay zeka motorlarında görünmek istediğiniz sorular. Adayları onaylayın, kendi sorunuzu ekleyin.",
+          title: "Görünürlük Çalışma Alanı",
+          description:
+            "Prompt, son ölçüm, skor ve değişimi tek yerde yönetin. Tekli ölçümler tam tur trendini değiştirmez.",
           icon: ListChecks,
         }}
+        action={
+          <Button
+            size="sm"
+            onClick={() => void runAll()}
+            disabled={measuringAll || !data.some((item) => item.status === "approved")}
+          >
+            {measuringAll ? (
+              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Play className="mr-2 h-3.5 w-3.5" />
+            )}
+            {measuringAll ? "Ölçülüyor…" : "Tümünü ölç"}
+          </Button>
+        }
       />
 
       <div className="flex flex-wrap items-center gap-2">
@@ -130,7 +240,9 @@ function PromptsPage() {
             {plan.maxPrompts > 0 && plan.approvedPrompts >= plan.maxPrompts ? (
               <>
                 {" — limit doldu. "}
-                <Link to="/fiyatlandirma" className="underline">Planı yükseltin</Link>
+                <Link to="/fiyatlandirma" className="underline">
+                  Planı yükseltin
+                </Link>
               </>
             ) : null}
           </div>
@@ -140,12 +252,23 @@ function PromptsPage() {
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Yeni bir soru yazın…"
           className="max-w-md"
-          onKeyDown={(event) => { if (event.key === "Enter" && draft.trim()) createMutation.mutate(); }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && draft.trim()) createMutation.mutate();
+          }}
         />
-        <Button onClick={() => createMutation.mutate()} disabled={!draft.trim() || createMutation.isPending}>
+        <Button
+          onClick={() => createMutation.mutate()}
+          disabled={!draft.trim() || createMutation.isPending}
+        >
           <Plus className="mr-1.5 h-4 w-4" /> Ekle
         </Button>
+        <Button variant="outline" onClick={downloadCsv} disabled={!visible.length}>
+          <Download className="mr-1.5 h-4 w-4" /> CSV indir
+        </Button>
       </div>
+
+      {analytics ? <VisibilityCharts data={analytics} /> : null}
+      {matrix ? <PromptMeasurementHeatmap data={matrix} /> : null}
 
       <Tabs value={filter} onValueChange={setFilter}>
         <TabsList>
@@ -159,7 +282,8 @@ function PromptsPage() {
 
       {filter === "candidate" && candidateCount > 0 ? (
         <p className="text-xs text-muted-foreground">
-          Onayladığınız sorular ölçüme girer. Emin olmadıklarınızı pasife alın — sonra her zaman geri açabilirsiniz.
+          Onayladığınız sorular ölçüme girer. Emin olmadıklarınızı pasife alın — sonra her zaman
+          geri açabilirsiniz.
         </p>
       ) : null}
 
@@ -173,15 +297,24 @@ function PromptsPage() {
             }
           />
           <span className="text-muted-foreground">
-            {selectedIds.length > 0 ? `${selectedIds.length} soru seçildi` : "Toplu işlem için seçin"}
+            {selectedIds.length > 0
+              ? `${selectedIds.length} soru seçildi`
+              : "Toplu işlem için seçin"}
           </span>
           <div className="ml-auto flex flex-wrap gap-2">
-            <Button size="sm" disabled={!selectedIds.length || statusMutation.isPending}
-              onClick={() => statusMutation.mutate({ ids: selectedIds, status: "approved" })}>
+            <Button
+              size="sm"
+              disabled={!selectedIds.length || statusMutation.isPending}
+              onClick={() => statusMutation.mutate({ ids: selectedIds, status: "approved" })}
+            >
               <Check className="mr-1.5 h-3.5 w-3.5" /> Onayla
             </Button>
-            <Button size="sm" variant="outline" disabled={!selectedIds.length || statusMutation.isPending}
-              onClick={() => statusMutation.mutate({ ids: selectedIds, status: "inactive" })}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!selectedIds.length || statusMutation.isPending}
+              onClick={() => statusMutation.mutate({ ids: selectedIds, status: "inactive" })}
+            >
               <Pause className="mr-1.5 h-3.5 w-3.5" /> Pasife al
             </Button>
           </div>
@@ -191,7 +324,9 @@ function PromptsPage() {
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
-            <p className="flex items-center gap-2 p-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Yükleniyor…</p>
+            <p className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Yükleniyor…
+            </p>
           ) : visible.length === 0 ? (
             <p className="p-6 text-sm text-muted-foreground">Bu listede prompt yok.</p>
           ) : (
@@ -199,51 +334,98 @@ function PromptsPage() {
               {visible.map((prompt) => (
                 <li key={prompt.id} className="p-3 text-sm">
                   <div className="flex flex-wrap items-center gap-3">
-                  <Checkbox
-                    aria-label="Promptu seç"
-                    checked={Boolean(checked[prompt.id])}
-                    onCheckedChange={(value) => setChecked({ ...checked, [prompt.id]: value === true })}
-                  />
-                  <button
-                    type="button"
-                    className="min-w-0 flex-1 text-left hover:text-primary"
-                    onClick={() => setOpenPrompt(openPrompt === prompt.id ? null : prompt.id)}
-                    aria-expanded={openPrompt === prompt.id}
-                  >
-                    {prompt.text}
-                    <ChevronDown
-                      className={`ml-1.5 inline h-3.5 w-3.5 transition-transform ${openPrompt === prompt.id ? "rotate-180" : ""}`}
-                      aria-hidden="true"
+                    <Checkbox
+                      aria-label="Promptu seç"
+                      checked={Boolean(checked[prompt.id])}
+                      onCheckedChange={(value) =>
+                        setChecked({ ...checked, [prompt.id]: value === true })
+                      }
                     />
-                  </button>
-                  {prompt.lastRun ? (
-                    <Badge
-                      variant="outline"
-                      className={`font-mono text-[10px] ${
-                        prompt.lastRun.visibility >= 70
-                          ? "border-success/40 text-success"
-                          : prompt.lastRun.visibility > 0
-                            ? "border-warning/40 text-warning"
-                            : "border-border text-muted-foreground"
-                      }`}
+                    <button
+                      type="button"
+                      className="min-w-0 flex-1 text-left hover:text-primary"
+                      onClick={() => setOpenPrompt(openPrompt === prompt.id ? null : prompt.id)}
+                      aria-expanded={openPrompt === prompt.id}
                     >
-                      %{Math.round(prompt.lastRun.visibility)}
+                      {prompt.text}
+                      <ChevronDown
+                        className={`ml-1.5 inline h-3.5 w-3.5 transition-transform ${openPrompt === prompt.id ? "rotate-180" : ""}`}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {prompt.lastRun ? (
+                      <Badge
+                        variant="outline"
+                        className={`font-mono text-[10px] ${
+                          prompt.lastRun.visibility >= 70
+                            ? "border-success/40 text-success"
+                            : prompt.lastRun.visibility > 0
+                              ? "border-warning/40 text-warning"
+                              : "border-border text-muted-foreground"
+                        }`}
+                      >
+                        %{Math.round(prompt.lastRun.visibility)}
+                      </Badge>
+                    ) : null}
+                    {prompt.intent ? (
+                      <Badge variant="secondary" className="text-[10px]">
+                        {prompt.intent}
+                      </Badge>
+                    ) : null}
+                    <Badge variant="outline" className="text-[10px]">
+                      {prompt.category}
                     </Badge>
-                  ) : null}
-                  {prompt.intent ? <Badge variant="secondary" className="text-[10px]">{prompt.intent}</Badge> : null}
-                  <Badge variant="outline" className="text-[10px]">{prompt.category}</Badge>
-                  {prompt.status !== "approved" ? (
-                    <Button size="sm" variant="outline" disabled={statusMutation.isPending}
-                      onClick={() => statusMutation.mutate({ ids: [prompt.id], status: "approved" })}>Onayla</Button>
-                  ) : (
-                    <Button size="sm" variant="ghost" disabled={statusMutation.isPending}
-                      onClick={() => statusMutation.mutate({ ids: [prompt.id], status: "inactive" })}>Duraklat</Button>
-                  )}
-                  <Button size="icon" variant="ghost" aria-label="Promptu sil" onClick={() => deleteMutation.mutate(prompt.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                    {prompt.status !== "approved" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={statusMutation.isPending}
+                        onClick={() =>
+                          statusMutation.mutate({ ids: [prompt.id], status: "approved" })
+                        }
+                      >
+                        Onayla
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={singleMeasurement.isPending || measuringAll}
+                          onClick={() => singleMeasurement.mutate(prompt.id)}
+                        >
+                          {singleMeasurement.isPending &&
+                          singleMeasurement.variables === prompt.id ? (
+                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                          )}
+                          Yeniden ölç
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={statusMutation.isPending}
+                          onClick={() =>
+                            statusMutation.mutate({ ids: [prompt.id], status: "inactive" })
+                          }
+                        >
+                          Duraklat
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label="Promptu sil"
+                      onClick={() => deleteMutation.mutate(prompt.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                  {openPrompt === prompt.id ? <PromptResultCard brandId={brand.id} promptId={prompt.id} /> : null}
+                  {openPrompt === prompt.id ? (
+                    <PromptResultCard brandId={brand.id} promptId={prompt.id} />
+                  ) : null}
                 </li>
               ))}
             </ul>

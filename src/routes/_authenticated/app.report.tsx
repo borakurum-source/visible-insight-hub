@@ -3,9 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { FileBarChart, Printer } from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
+import { ACTIONS_SUBNAV, PanelSubnav } from "@/components/app/panel-subnav";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { QuerySkeleton, QueryEmpty } from "@/components/app/panel-query-states";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
 import { getMeasurementState, listCitationSources } from "@/lib/panel.functions";
@@ -15,7 +22,11 @@ export const Route = createFileRoute("/_authenticated/app/report")({
   head: () => ({
     meta: [
       { title: "Rapor — OneCite Paneli" },
-      { name: "description", content: "Görünürlük skorunuzu, skor kırılımını ve kaynak dağılımını içeren yazdırılabilir rapor." },
+      {
+        name: "description",
+        content:
+          "Görünürlük skorunuzu, skor kırılımını ve kaynak dağılımını içeren yazdırılabilir rapor.",
+      },
       { property: "og:title", content: "Rapor — OneCite Paneli" },
       { property: "og:description", content: "Yazdırılabilir görünürlük ve kanıt raporu." },
       { name: "robots", content: "noindex" },
@@ -42,10 +53,18 @@ function ReportPage() {
 
   return (
     <>
-      <PanelSubnav items={VISIBILITY_SUBNAV} />
+      <PanelSubnav items={ACTIONS_SUBNAV} />
       <PanelPageHeading
-        meta={{ title: "Rapor", description: "Ölçüm verilerinizden deterministik olarak üretilen yazdırılabilir rapor.", icon: FileBarChart }}
-        action={<Button size="sm" onClick={() => window.print()}><Printer className="mr-2 h-3.5 w-3.5" /> Yazdır / PDF</Button>}
+        meta={{
+          title: "Rapor",
+          description: "Ölçüm verilerinizden deterministik olarak üretilen yazdırılabilir rapor.",
+          icon: FileBarChart,
+        }}
+        action={
+          <Button size="sm" onClick={() => window.print()}>
+            <Printer className="mr-2 h-3.5 w-3.5" /> Yazdır / PDF
+          </Button>
+        }
       />
 
       {!brand ? (
@@ -69,7 +88,9 @@ function ReportPage() {
           />
 
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Kaynak Dağılımı</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Kaynak Dağılımı
+            </h3>
             {sources && sources.length ? (
               <Table>
                 <TableHeader>
@@ -92,12 +113,16 @@ function ReportPage() {
                 </TableBody>
               </Table>
             ) : (
-              <QueryEmpty title="Henüz kaynak verisi yok." description="Bir ölçüm turu çalıştırdığınızda kaynaklar burada listelenir." />
+              <QueryEmpty
+                title="Henüz kaynak verisi yok."
+                description="Bir ölçüm turu çalıştırdığınızda kaynaklar burada listelenir."
+              />
             )}
           </section>
 
           <p className="border-t border-border pt-4 text-xs text-muted-foreground">
-            Bu rapor, ölçüm turlarında toplanan gerçek yanıt verilerinden deterministik olarak hesaplanmıştır.
+            Bu rapor, ölçüm turlarında toplanan gerçek yanıt verilerinden deterministik olarak
+            hesaplanmıştır.
           </p>
         </div>
       )}

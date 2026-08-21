@@ -54,7 +54,9 @@ export function similarity(a: string, b: string): number {
   const right = tokens(b);
   if (!left.size || !right.size) return 0;
   let shared = 0;
-  left.forEach((word) => { if (right.has(word)) shared += 1; });
+  left.forEach((word) => {
+    if (right.has(word)) shared += 1;
+  });
   return shared / (left.size + right.size - shared);
 }
 
@@ -119,7 +121,9 @@ export function calibrationRatio(
   const ratios = usable.map((p) => p.actual / p.predicted).sort((a, b) => a - b);
   const middle = Math.floor(ratios.length / 2);
   const median =
-    ratios.length % 2 === 0 ? ((ratios[middle - 1] ?? 1) + (ratios[middle] ?? 1)) / 2 : (ratios[middle] ?? 1);
+    ratios.length % 2 === 0
+      ? ((ratios[middle - 1] ?? 1) + (ratios[middle] ?? 1)) / 2
+      : (ratios[middle] ?? 1);
   const ratio = Math.min(CALIBRATION_CLAMP.max, Math.max(CALIBRATION_CLAMP.min, median));
   return {
     applied: true,
@@ -169,7 +173,8 @@ export function ga4ClickSignal(input: {
     };
   }
   const expected = Math.max(1, input.predictedDemand) * 0.01;
-  const consistency: Ga4Signal["clickConsistency"] = input.referralSessions >= expected ? "high" : "low";
+  const consistency: Ga4Signal["clickConsistency"] =
+    input.referralSessions >= expected ? "high" : "low";
   return {
     hasEnoughData: true,
     referralSessions: input.referralSessions,
@@ -184,15 +189,21 @@ function uniqueWeight(sim: number): number {
 }
 
 /** ADIM 10: Kume guven skoru. */
-export function clusterConfidence(candidates: PromptCandidate[]): { score: number; level: Level; reason: string } {
+export function clusterConfidence(candidates: PromptCandidate[]): {
+  score: number;
+  level: Level;
+  reason: string;
+} {
   if (!candidates.length) return { score: 0, level: "low", reason: "Yeterli sinyal yok." };
   const measured = candidates.filter((c) => c.source === "measured").length / candidates.length;
-  const directCoverage = candidates.filter((c) => c.signal.directVolume > 0).length / candidates.length;
+  const directCoverage =
+    candidates.filter((c) => c.signal.directVolume > 0).length / candidates.length;
   const directDataCoverage = Math.min(1, measured * 0.5 + directCoverage * 0.5);
   const clusterCoherence =
     candidates.reduce((sum, c) => sum + c.semanticConfidence, 0) / candidates.length;
   const signalAgreement =
-    candidates.reduce((sum, c) => sum + Math.min(1, c.signal.autocompleteStrength), 0) / candidates.length;
+    candidates.reduce((sum, c) => sum + Math.min(1, c.signal.autocompleteStrength), 0) /
+    candidates.length;
   const trends = candidates.map((c) => c.signal.historicalTrend);
   const mean = trends.reduce((s, t) => s + t, 0) / trends.length;
   const variance = trends.reduce((s, t) => s + (t - mean) ** 2, 0) / trends.length;
@@ -240,7 +251,8 @@ function recommendAction(row: {
   evidenceGapType: string;
   text: string;
 }): string {
-  if (row.citationStatus === "cited") return "Mevcut kaynak gösterimini koruyun; kanıtı güncel tutun.";
+  if (row.citationStatus === "cited")
+    return "Mevcut kaynak gösterimini koruyun; kanıtı güncel tutun.";
   if (row.intent === "comparison" || row.intent === "commercial_investigation") {
     return "Kategori karşılaştırma sayfası oluşturun ve farklılaşma kanıtını netleştirin.";
   }
@@ -264,7 +276,12 @@ export type ClusterInput = {
   candidates: PromptCandidate[];
   citationShare: number;
   citationShareSource: ClusterAnalysis["citationShareSource"];
-  competitors: Array<{ name: string; share: number; promptsCited: number; topEvidenceType: string }>;
+  competitors: Array<{
+    name: string;
+    share: number;
+    promptsCited: number;
+    topEvidenceType: string;
+  }>;
   signalSources: SignalSources;
   calibration?: CalibrationInfo;
   ga4Signal?: Ga4Signal;
@@ -290,11 +307,19 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
       index === 0
         ? 1
         : uniqueWeight(
-            Math.max(...scored.slice(0, index).map((prev) => similarity(prev.candidate.text, item.candidate.text))),
+            Math.max(
+              ...scored
+                .slice(0, index)
+                .map((prev) => similarity(prev.candidate.text, item.candidate.text)),
+            ),
           );
     const normalizedDemand = maxDemand > 0 ? item.demand / maxDemand : 0;
     const citationGap =
-      item.candidate.citationStatus === "cited" ? 0.15 : item.candidate.citationStatus === "competitor_cited" ? 1 : 0.8;
+      item.candidate.citationStatus === "cited"
+        ? 0.15
+        : item.candidate.citationStatus === "competitor_cited"
+          ? 1
+          : 0.8;
     const score = opportunityScore({
       normalizedDemand,
       intentValue: INTENT_VALUES[item.candidate.intent],
@@ -326,7 +351,9 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
         semanticConfidence: Number(item.candidate.semanticConfidence.toFixed(2)),
         overlapAdjustment: Number(overlap.toFixed(2)),
         calibrationMultiplier: item.candidate.origin === "model" ? calibrationMultiplier : 1,
-        ctrMultiplier: item.candidate.gsc ? Number((1 / Math.max(item.candidate.gsc.ctrUsed, 0.001)).toFixed(1)) : null,
+        ctrMultiplier: item.candidate.gsc
+          ? Number((1 / Math.max(item.candidate.gsc.ctrUsed, 0.001)).toFixed(1))
+          : null,
         finalDemand: Math.round(item.demand * overlap),
       },
     };
@@ -344,7 +371,8 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
     accepted.length > 0
       ? accepted.reduce((s, c) => s + INTENT_VALUES[c.intent], 0) / accepted.length
       : 0;
-  const commercialIntent: Level = intentAverage >= 0.85 ? "high" : intentAverage >= 0.65 ? "medium" : "low";
+  const commercialIntent: Level =
+    intentAverage >= 0.85 ? "high" : intentAverage >= 0.65 ? "medium" : "low";
 
   const leader = [...input.competitors].sort((a, b) => b.share - a.share)[0] ?? null;
   const competitors: CompetitorRow[] = input.competitors
@@ -372,7 +400,12 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
   const evidenceGaps: EvidenceGapRow[] = [...gapMap.entries()]
     .map(([type, value]) => {
       const severity = EVIDENCE_GAP_SEVERITY[type] ?? 0.5;
-      const share = clusterDemand > 0 ? value.demand / clusterDemand : 0;
+      const share =
+        clusterDemand > 0
+          ? value.demand / clusterDemand
+          : rows.length
+            ? value.prompts / rows.length
+            : 0;
       const impactScore = severity * 0.6 + share * 0.4;
       return {
         type,
@@ -385,10 +418,13 @@ export function buildCluster(input: ClusterInput): ClusterAnalysis {
     })
     .sort((a, b) => b.affectedDemand - a.affectedDemand);
 
+  const totalOpportunityWeight = rows.reduce((sum, row) => sum + row.uniqueDemand, 0);
   const clusterOpportunityScore = rows.length
     ? Math.round(
-        rows.reduce((sum, row) => sum + row.opportunityScore * row.uniqueDemand, 0) /
-          Math.max(1, rows.reduce((sum, row) => sum + row.uniqueDemand, 0)),
+        totalOpportunityWeight > 0
+          ? rows.reduce((sum, row) => sum + row.opportunityScore * row.uniqueDemand, 0) /
+              totalOpportunityWeight
+          : rows.reduce((sum, row) => sum + row.opportunityScore, 0) / rows.length,
       )
     : 0;
 
@@ -487,7 +523,8 @@ function buildActions(
   return gaps.slice(0, 4).map((gap) => {
     const related = rows.filter((row) => row.evidenceGapType === gap.type);
     const opportunity: Level = gap.impact;
-    const verb = gap.type === "Ürün tanımı" ? "Geliştir" : gap.type === "Bağımsız kanıt" ? "Kazan" : "Oluştur";
+    const verb =
+      gap.type === "Ürün tanımı" ? "Geliştir" : gap.type === "Bağımsız kanıt" ? "Kazan" : "Oluştur";
     const title =
       gap.type === "Karşılaştırma içeriği"
         ? `${cluster} karşılaştırma rehberi`

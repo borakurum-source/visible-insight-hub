@@ -6,9 +6,16 @@ export const getPanelSession = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const [{ data: profile }, { data: roles }, { data: brands }] = await Promise.all([
-      supabase.from("profiles").select("id, email, full_name, avatar_url").eq("id", userId).maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("id, email, full_name, avatar_url")
+        .eq("id", userId)
+        .maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("brands").select("id, name, domain, onboarding_step, onboarding_completed").order("created_at"),
+      supabase
+        .from("brands")
+        .select("id, name, domain, onboarding_step, onboarding_completed")
+        .order("created_at"),
     ]);
     return {
       profile: profile ?? { id: userId, email: null, full_name: null, avatar_url: null },
@@ -33,7 +40,9 @@ export const createBrand = createServerFn({ method: "POST" })
       .select("id, name, domain, onboarding_step, onboarding_completed")
       .single();
     if (error) throw new Error(error.message);
-    await context.supabase.from("brand_domains").insert({ brand_id: brand.id, domain, is_primary: true });
+    await context.supabase
+      .from("brand_domains")
+      .insert({ brand_id: brand.id, domain, is_primary: true });
     return brand;
   });
 
@@ -56,22 +65,44 @@ export const generateBrandIntelligence = createServerFn({ method: "POST" })
     const { aiJson, fetchSiteText } = await import("./ai.server");
     const { resolveSystemPrompt } = await import("./system-prompts.server");
     const { data: brand } = await context.supabase
-      .from("brands").select("id, name, domain").eq("id", data.brandId).single();
+      .from("brands")
+      .select("id, name, domain")
+      .eq("id", data.brandId)
+      .single();
     if (!brand) throw new Error("Marka bulunamadı");
 
     const siteText = await fetchSiteText(brand.domain);
     const systemPrompt = await resolveSystemPrompt(context.supabase, "brand_intelligence");
     const result = await aiJson<{
-      summary: string; detailedDescription?: string; industry?: string; language?: string; location?: string;
-      positioning: string; tone: string;
-      products: string[]; audiences: string[]; keyFeatures?: string[];
-      competitors: unknown; keywords: string[];
+      summary: string;
+      detailedDescription?: string;
+      industry?: string;
+      language?: string;
+      location?: string;
+      positioning: string;
+      tone: string;
+      products: string[];
+      audiences: string[];
+      keyFeatures?: string[];
+      competitors: unknown;
+      keywords: string[];
     }>(
       [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Marka: ${brand.name}\nAlan adı: ${brand.domain}\nSite metni:\n${siteText || "(site metni alınamadı, alan adından çıkarım yap)"}` },
+        {
+          role: "user",
+          content: `Marka: ${brand.name}\nAlan adı: ${brand.domain}\nSite metni:\n${siteText || "(site metni alınamadı, alan adından çıkarım yap)"}`,
+        },
       ],
-      { summary: "", positioning: "", tone: "", products: [], audiences: [], competitors: [], keywords: [] },
+      {
+        summary: "",
+        positioning: "",
+        tone: "",
+        products: [],
+        audiences: [],
+        competitors: [],
+        keywords: [],
+      },
     );
 
     const { normalizeCompetitors } = await import("./competitors");
@@ -92,39 +123,60 @@ export const generateBrandIntelligence = createServerFn({ method: "POST" })
       approved: false,
     };
     const { data: saved, error } = await context.supabase
-      .from("brand_intelligence").upsert(payload, { onConflict: "brand_id" }).select("*").single();
+      .from("brand_intelligence")
+      .upsert(payload, { onConflict: "brand_id" })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return saved;
   });
 
 export const saveBrandIntelligence = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: {
-    brandId: string; summary: string; positioning: string; tone: string;
-    products: string[]; audiences: string[]; competitors?: Array<{ name: string; domain?: string; type?: string }>; keywords: string[];
-    industry?: string; language?: string; location?: string; detailedDescription?: string; keyFeatures?: string[];
-    brandName?: string;
-  }) => input)
+  .inputValidator(
+    (input: {
+      brandId: string;
+      summary: string;
+      positioning: string;
+      tone: string;
+      products: string[];
+      audiences: string[];
+      competitors?: Array<{ name: string; domain?: string; type?: string }>;
+      keywords: string[];
+      industry?: string;
+      language?: string;
+      location?: string;
+      detailedDescription?: string;
+      keyFeatures?: string[];
+      brandName?: string;
+    }) => input,
+  )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("brand_intelligence").upsert({
-      brand_id: data.brandId,
-      summary: data.summary,
-      positioning: data.positioning,
-      tone: data.tone,
-      products: data.products,
-      audiences: data.audiences,
-      ...(data.competitors ? { competitors: JSON.parse(JSON.stringify(data.competitors)) } : {}),
-      keywords: data.keywords,
-      industry: data.industry ?? null,
-      language: data.language ?? null,
-      location: data.location ?? null,
-      detailed_description: data.detailedDescription ?? null,
-      key_features: data.keyFeatures ?? [],
-      approved: true,
-    }, { onConflict: "brand_id" });
+    const { error } = await context.supabase.from("brand_intelligence").upsert(
+      {
+        brand_id: data.brandId,
+        summary: data.summary,
+        positioning: data.positioning,
+        tone: data.tone,
+        products: data.products,
+        audiences: data.audiences,
+        ...(data.competitors ? { competitors: JSON.parse(JSON.stringify(data.competitors)) } : {}),
+        keywords: data.keywords,
+        industry: data.industry ?? null,
+        language: data.language ?? null,
+        location: data.location ?? null,
+        detailed_description: data.detailedDescription ?? null,
+        key_features: data.keyFeatures ?? [],
+        approved: true,
+      },
+      { onConflict: "brand_id" },
+    );
     if (error) throw new Error(error.message);
     if (data.brandName && data.brandName.trim()) {
-      await context.supabase.from("brands").update({ name: data.brandName.trim() }).eq("id", data.brandId);
+      await context.supabase
+        .from("brands")
+        .update({ name: data.brandName.trim() })
+        .eq("id", data.brandId);
     }
     await context.supabase.from("brands").update({ onboarding_step: 3 }).eq("id", data.brandId);
     return { ok: true };
@@ -136,13 +188,24 @@ export const suggestKnowledgeSources = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { fetchSitemapUrls, aiJson } = await import("./ai.server");
     const { resolveSystemPrompt } = await import("./system-prompts.server");
-    const { data: brand } = await context.supabase.from("brands").select("domain, name").eq("id", data.brandId).single();
+    const { data: brand } = await context.supabase
+      .from("brands")
+      .select("domain, name")
+      .eq("id", data.brandId)
+      .single();
     if (!brand) throw new Error("Marka bulunamadı");
-    const urls = await fetchSitemapUrls(brand.domain);
+    const { firecrawlV2 } = await import("./firecrawl-v2.server");
+    const mapped = await firecrawlV2.map(`https://${brand.domain}`).catch(() => []);
+    const urls = mapped.length
+      ? mapped.map((item) => item.url)
+      : await fetchSitemapUrls(brand.domain);
     if (urls.length) {
       const picked = await aiJson<{ items: Array<{ title: string; url: string }> }>(
         [
-          { role: "system", content: await resolveSystemPrompt(context.supabase, "knowledge_source_pick") },
+          {
+            role: "system",
+            content: await resolveSystemPrompt(context.supabase, "knowledge_source_pick"),
+          },
           { role: "user", content: `Marka: ${brand.name}\nURL'ler:\n${urls.join("\n")}` },
         ],
         { items: urls.slice(0, 8).map((u) => ({ title: u, url: u })) },
@@ -160,7 +223,10 @@ export const suggestKnowledgeSources = createServerFn({ method: "POST" })
 
 export const addKnowledgeSources = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; items: Array<{ title: string; url?: string; content?: string }> }) => input)
+  .inputValidator(
+    (input: { brandId: string; items: Array<{ title: string; url?: string; content?: string }> }) =>
+      input,
+  )
   .handler(async ({ data, context }) => {
     if (!data.items.length) return { inserted: 0 };
     const rows = data.items.map((item) => ({
@@ -181,7 +247,10 @@ export const listKnowledgeSources = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
-      .from("knowledge_sources").select("*").eq("brand_id", data.brandId).order("created_at", { ascending: false });
+      .from("knowledge_sources")
+      .select("*")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false });
     return rows ?? [];
   });
 
@@ -201,16 +270,32 @@ export const generatePromptCandidates = createServerFn({ method: "POST" })
     const { aiJson } = await import("./ai.server");
     const [{ data: brand }, { data: intel }, { data: sources }] = await Promise.all([
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
-      context.supabase.from("brand_intelligence").select("*").eq("brand_id", data.brandId).maybeSingle(),
-      context.supabase.from("knowledge_sources").select("title").eq("brand_id", data.brandId).limit(20),
+      context.supabase
+        .from("brand_intelligence")
+        .select("*")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
+      context.supabase
+        .from("knowledge_sources")
+        .select("title")
+        .eq("brand_id", data.brandId)
+        .limit(20),
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
 
     const { resolveSystemPrompt } = await import("./system-prompts.server");
-    const result = await aiJson<{ items: Array<{ text: string; category: string; intent: string; funnel?: string }> }>(
+    const result = await aiJson<{
+      items: Array<{ text: string; category: string; intent: string; funnel?: string }>;
+    }>(
       [
-        { role: "system", content: await resolveSystemPrompt(context.supabase, "prompt_generation") },
-        { role: "user", content: `Marka: ${brand.name} (${brand.domain})\nÖzet: ${intel?.summary ?? ""}\nÜrünler: ${JSON.stringify(intel?.products ?? [])}\nKitle: ${JSON.stringify(intel?.audiences ?? [])}\nRakipler: ${JSON.stringify(intel?.competitors ?? [])}\nBilgi bankası: ${(sources ?? []).map((s) => s.title).join(", ")}` },
+        {
+          role: "system",
+          content: await resolveSystemPrompt(context.supabase, "prompt_generation"),
+        },
+        {
+          role: "user",
+          content: `Marka: ${brand.name} (${brand.domain})\nÖzet: ${intel?.summary ?? ""}\nÜrünler: ${JSON.stringify(intel?.products ?? [])}\nKitle: ${JSON.stringify(intel?.audiences ?? [])}\nRakipler: ${JSON.stringify(intel?.competitors ?? [])}\nBilgi bankası: ${(sources ?? []).map((s) => s.title).join(", ")}`,
+        },
       ],
       { items: [] },
     );
@@ -220,17 +305,26 @@ export const generatePromptCandidates = createServerFn({ method: "POST" })
       text: item.text,
       category: item.category || "genel",
       intent: item.intent || null,
-      funnel_stage: ["top", "middle", "bottom"].includes(String(item.funnel)) ? String(item.funnel) : "middle",
+      funnel_stage: ["top", "middle", "bottom"].includes(String(item.funnel))
+        ? String(item.funnel)
+        : "middle",
       status: "candidate",
       origin: "ai",
     }));
     if (rows.length) {
-      await context.supabase.from("prompts").delete().eq("brand_id", data.brandId).eq("status", "candidate");
+      await context.supabase
+        .from("prompts")
+        .delete()
+        .eq("brand_id", data.brandId)
+        .eq("status", "candidate");
       const { error } = await context.supabase.from("prompts").insert(rows);
       if (error) throw new Error(error.message);
     }
     const { data: prompts } = await context.supabase
-      .from("prompts").select("*").eq("brand_id", data.brandId).order("created_at");
+      .from("prompts")
+      .select("*")
+      .eq("brand_id", data.brandId)
+      .order("created_at");
     return prompts ?? [];
   });
 
@@ -239,7 +333,10 @@ export const listPrompts = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
-      .from("prompts").select("*").eq("brand_id", data.brandId).order("created_at");
+      .from("prompts")
+      .select("*")
+      .eq("brand_id", data.brandId)
+      .order("created_at");
     const prompts = rows ?? [];
     if (!prompts.length) return prompts.map((row) => ({ ...row, lastRun: null }));
 
@@ -250,7 +347,17 @@ export const listPrompts = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .limit(2000);
 
-    const latest = new Map<string, { engine: string; createdAt: string; brandMentioned: boolean; position: number | null; visibility: number; runIndex: number | null }>();
+    const latest = new Map<
+      string,
+      {
+        engine: string;
+        createdAt: string;
+        brandMentioned: boolean;
+        position: number | null;
+        visibility: number;
+        runIndex: number | null;
+      }
+    >();
     for (const run of runs ?? []) {
       if (!run.prompt_id || latest.has(run.prompt_id)) continue;
       const visibility =
@@ -289,7 +396,11 @@ export const discoverPromptCandidates = createServerFn({ method: "POST" })
     const { aiJson } = await import("./ai.server");
     const [{ data: brand }, { data: intel }, { data: existing }] = await Promise.all([
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
-      context.supabase.from("brand_intelligence").select("*").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase
+        .from("brand_intelligence")
+        .select("*")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
       context.supabase.from("prompts").select("text").eq("brand_id", data.brandId).limit(60),
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
@@ -324,7 +435,10 @@ export const discoverPromptCandidates = createServerFn({ method: "POST" })
 
 export const addDiscoveredPrompts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; items: Array<{ text: string; cluster: string; intent: string }> }) => input)
+  .inputValidator(
+    (input: { brandId: string; items: Array<{ text: string; cluster: string; intent: string }> }) =>
+      input,
+  )
   .handler(async ({ data, context }) => {
     if (!data.items.length) return { inserted: 0 };
     const { assertPromptQuota } = await import("./plan.server");
@@ -337,13 +451,11 @@ export const addDiscoveredPrompts = createServerFn({ method: "POST" })
       .eq("brand_id", data.brandId)
       .eq("status", "approved");
 
-    const existingNormalized = new Set(
-      (existing ?? []).map((p) => normalizePromptText(p.text))
-    );
+    const existingNormalized = new Set((existing ?? []).map((p) => normalizePromptText(p.text)));
 
     // Filter out duplicates and collect those to insert
     const toInsert = data.items.filter(
-      (item) => !existingNormalized.has(normalizePromptText(item.text))
+      (item) => !existingNormalized.has(normalizePromptText(item.text)),
     );
 
     if (!toInsert.length) {
@@ -379,7 +491,16 @@ export const listCitationSources = createServerFn({ method: "POST" })
     type Link = { url: string; title: string; lastSeen: string };
     const map = new Map<
       string,
-      { domain: string; count: number; isOwn: boolean; type: string; lastSeen: string; firstSeen: string; sampleUrl: string; links: Link[] }
+      {
+        domain: string;
+        count: number;
+        isOwn: boolean;
+        type: string;
+        lastSeen: string;
+        firstSeen: string;
+        sampleUrl: string;
+        links: Link[];
+      }
     >();
     for (const row of rows ?? []) {
       const current = map.get(row.domain);
@@ -387,7 +508,8 @@ export const listCitationSources = createServerFn({ method: "POST" })
       if (current) {
         current.count += 1;
         current.firstSeen = row.created_at;
-        if (current.links.length < 8 && !current.links.some((l) => l.url === row.url)) current.links.push(link);
+        if (current.links.length < 8 && !current.links.some((l) => l.url === row.url))
+          current.links.push(link);
       } else {
         map.set(row.domain, {
           domain: row.domain,
@@ -413,6 +535,7 @@ export const listMeasurementRounds = createServerFn({ method: "POST" })
       .from("measurement_batches")
       .select("id, created_at, finished_at, score, status, total_prompts")
       .eq("brand_id", data.brandId)
+      .eq("measurement_mode" as never, "full")
       .order("created_at", { ascending: false })
       .limit(10);
 
@@ -446,7 +569,9 @@ export const listRunCitations = createServerFn({ method: "POST" })
     // Eğer batchId verilmişse, o batch'te ölçülen runları al (Task 1.1: batch_id ile doğrudan, zaman damgası tahmini yerine).
     let query = context.supabase
       .from("prompt_runs")
-      .select("id, prompt_id, brand_mentioned, position, answer_summary, raw_answer, created_at, prompts(text)")
+      .select(
+        "id, prompt_id, brand_mentioned, position, answer_summary, raw_answer, created_at, prompts(text)",
+      )
       .eq("brand_id", data.brandId);
 
     if (data.batchId) {
@@ -454,9 +579,7 @@ export const listRunCitations = createServerFn({ method: "POST" })
     }
 
     const limit = Math.min(Math.max(data.limit ?? 25, 1), 60);
-    const { data: runs } = await query
-      .order("created_at", { ascending: false })
-      .limit(limit);
+    const { data: runs } = await query.order("created_at", { ascending: false }).limit(limit);
 
     const runIds = (runs ?? []).map((r) => r.id);
     const { data: citations } = runIds.length
@@ -464,9 +587,21 @@ export const listRunCitations = createServerFn({ method: "POST" })
           .from("citations")
           .select("run_id, url, domain, title, citation_type, is_own_domain")
           .in("run_id", runIds)
-      : { data: [] as Array<{ run_id: string | null; url: string; domain: string; title: string | null; citation_type: string; is_own_domain: boolean }> };
+      : {
+          data: [] as Array<{
+            run_id: string | null;
+            url: string;
+            domain: string;
+            title: string | null;
+            citation_type: string;
+            is_own_domain: boolean;
+          }>,
+        };
 
-    const byRun = new Map<string, Array<{ url: string; domain: string; title: string; type: string }>>();
+    const byRun = new Map<
+      string,
+      Array<{ url: string; domain: string; title: string; type: string }>
+    >();
     for (const c of citations ?? []) {
       if (!c.run_id) continue;
       const list = byRun.get(c.run_id) ?? [];
@@ -498,13 +633,20 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { normalizeCompetitors, competitorMatches } = await import("./competitors");
-    const [{ data: batches }, { data: runs }, { data: citations }, { data: intel }, { data: brand }] = await Promise.all([
+    const [
+      { data: batchRows },
+      { data: runs },
+      { data: citations },
+      { data: intel },
+      { data: brand },
+    ] = await Promise.all([
       context.supabase
         .from("measurement_batches")
-        .select("id, score, finished_at, created_at, status")
+        .select("*")
         .eq("brand_id", data.brandId)
         .eq("status", "completed")
-        .order("created_at", { ascending: true })
+        .eq("measurement_mode" as never, "full" as never)
+        .order("created_at", { ascending: false })
         .limit(24),
       context.supabase
         .from("prompt_runs")
@@ -512,15 +654,41 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
         .eq("brand_id", data.brandId)
         .order("created_at", { ascending: false })
         .limit(400),
-      context.supabase.from("citations").select("citation_type, is_own_domain, domain").eq("brand_id", data.brandId).limit(1000),
-      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase
+        .from("citations")
+        .select("citation_type, is_own_domain, domain")
+        .eq("brand_id", data.brandId)
+        .limit(1000),
+      context.supabase
+        .from("brand_intelligence")
+        .select("competitors")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
       context.supabase.from("brands").select("name").eq("id", data.brandId).single(),
     ]);
 
-    const trend = (batches ?? []).map((b) => ({
-      date: (b.finished_at ?? b.created_at).slice(0, 10),
-      score: Number(b.score ?? 0),
-    }));
+    const batches = [...(batchRows ?? [])].reverse();
+    let previousPromptSet: string | null = null;
+    const trend = (batches ?? []).map((rawBatch) => {
+      const batch = rawBatch as unknown as {
+        finished_at?: string | null;
+        created_at: string;
+        score?: number | null;
+        prompt_set_hash?: string | null;
+        confidence?: number | null;
+        coverage?: number | null;
+      };
+      const currentPromptSet = batch.prompt_set_hash ?? null;
+      const promptSetChanged = previousPromptSet !== null && currentPromptSet !== previousPromptSet;
+      previousPromptSet = currentPromptSet;
+      return {
+        date: (batch.finished_at ?? batch.created_at).slice(0, 10),
+        score: Number(batch.score ?? 0),
+        promptSetChanged,
+        confidence: batch.confidence === null ? null : Number(batch.confidence ?? 0),
+        coverage: batch.coverage === null ? null : Number(batch.coverage ?? 0),
+      };
+    });
 
     const runRows = runs ?? [];
     const competitors = normalizeCompetitors(intel?.competitors).slice(0, 6);
@@ -532,7 +700,8 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
       },
       ...competitors.map((competitor) => ({
         name: competitor.name,
-        mentions: runRows.filter((r) => competitorMatches(competitor, { answer: r.raw_answer })).length,
+        mentions: runRows.filter((r) => competitorMatches(competitor, { answer: r.raw_answer }))
+          .length,
         isOwn: false,
       })),
     ].sort((a, b) => b.mentions - a.mentions);
@@ -540,13 +709,22 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
     const citationRows = citations ?? [];
     const mix = [
       { name: "Kendi siteniz", value: citationRows.filter((c) => c.is_own_domain).length },
-      { name: "Rakip", value: citationRows.filter((c) => !c.is_own_domain && c.citation_type === "competitor").length },
-      { name: "Tarafsız kaynak", value: citationRows.filter((c) => !c.is_own_domain && c.citation_type !== "competitor").length },
+      {
+        name: "Rakip",
+        value: citationRows.filter((c) => !c.is_own_domain && c.citation_type === "competitor")
+          .length,
+      },
+      {
+        name: "Tarafsız kaynak",
+        value: citationRows.filter((c) => !c.is_own_domain && c.citation_type !== "competitor")
+          .length,
+      },
     ];
 
     const categoryMap = new Map<string, { category: string; total: number; mentioned: number }>();
     for (const run of runRows) {
-      const category = (run as unknown as { prompts?: { category?: string } }).prompts?.category ?? "genel";
+      const category =
+        (run as unknown as { prompts?: { category?: string } }).prompts?.category ?? "genel";
       const entry = categoryMap.get(category) ?? { category, total: 0, mentioned: 0 };
       entry.total += 1;
       if (run.brand_mentioned) entry.mentioned += 1;
@@ -556,15 +734,94 @@ export const getVisibilityAnalytics = createServerFn({ method: "POST" })
       .map((c) => ({ ...c, rate: c.total ? Math.round((c.mentioned / c.total) * 100) : 0 }))
       .sort((a, b) => b.total - a.total);
 
-    const positions = runRows.map((r) => r.position).filter((p): p is number => typeof p === "number");
+    const positions = runRows
+      .map((r) => r.position)
+      .filter((p): p is number => typeof p === "number");
     return {
       trend,
       share,
       mix,
       categories,
       totalRuns: runRows.length,
-      mentionRate: runRows.length ? Math.round((runRows.filter((r) => r.brand_mentioned).length / runRows.length) * 100) : 0,
-      avgPosition: positions.length ? Math.round((positions.reduce((a, b) => a + b, 0) / positions.length) * 10) / 10 : null,
+      mentionRate: runRows.length
+        ? Math.round((runRows.filter((r) => r.brand_mentioned).length / runRows.length) * 100)
+        : 0,
+      avgPosition: positions.length
+        ? Math.round((positions.reduce((a, b) => a + b, 0) / positions.length) * 10) / 10
+        : null,
+    };
+  });
+
+export const getPromptMeasurementMatrix = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: rawBatches } = await context.supabase
+      .from("measurement_batches")
+      .select("*")
+      .eq("brand_id", data.brandId)
+      .eq("status", "completed")
+      .eq("measurement_mode" as never, "full" as never)
+      .order("created_at", { ascending: false })
+      .limit(12);
+    const batches = (rawBatches ?? [])
+      .map(
+        (batch) =>
+          batch as unknown as {
+            id: string;
+            created_at: string;
+            finished_at?: string | null;
+            prompt_set_hash?: string | null;
+          },
+      )
+      .reverse();
+    if (!batches.length) return { columns: [], rows: [] };
+
+    const batchIds = batches.map((batch) => batch.id);
+    const [{ data: runs }, { data: prompts }] = await Promise.all([
+      context.supabase
+        .from("prompt_runs")
+        .select("prompt_id,batch_id,visibility,brand_mentioned")
+        .eq("brand_id", data.brandId)
+        .in("batch_id", batchIds),
+      context.supabase
+        .from("prompts")
+        .select("id,text,category")
+        .eq("brand_id", data.brandId)
+        .order("created_at"),
+    ]);
+    const values = new Map<string, number>();
+    for (const run of runs ?? []) {
+      if (!run.batch_id) continue;
+      const score =
+        run.visibility === null || run.visibility === undefined
+          ? run.brand_mentioned
+            ? 60
+            : 0
+          : Number(run.visibility);
+      values.set(`${run.prompt_id}:${run.batch_id}`, score);
+    }
+    let previousPromptSet: string | null = null;
+    const columns = batches.map((batch) => {
+      const promptSetChanged =
+        previousPromptSet !== null && batch.prompt_set_hash !== previousPromptSet;
+      previousPromptSet = batch.prompt_set_hash ?? null;
+      return {
+        id: batch.id,
+        date: (batch.finished_at ?? batch.created_at).slice(0, 10),
+        promptSetChanged,
+      };
+    });
+    return {
+      columns,
+      rows: (prompts ?? [])
+        .map((prompt) => ({
+          id: prompt.id,
+          prompt: prompt.text,
+          category: prompt.category,
+          values: batches.map((batch) => values.get(`${prompt.id}:${batch.id}`) ?? null),
+        }))
+        .filter((row) => row.values.some((value) => value !== null)),
     };
   });
 
@@ -578,7 +835,9 @@ export const setPromptStatus = createServerFn({ method: "POST" })
       const { normalizePromptText } = await import("./prompt-normalize");
 
       const { data: rows } = await context.supabase
-        .from("prompts").select("id, brand_id, status, text").in("id", data.ids);
+        .from("prompts")
+        .select("id, brand_id, status, text")
+        .in("id", data.ids);
       const pending = (rows ?? []).filter((r) => r.status !== "approved");
 
       // For each pending prompt, check if approved version already exists
@@ -594,7 +853,7 @@ export const setPromptStatus = createServerFn({ method: "POST" })
           .limit(1000);
 
         const duplicate = approved?.find(
-          (p) => normalizePromptText(p.text) === normalizePromptText(candidate.text)
+          (p) => normalizePromptText(p.text) === normalizePromptText(candidate.text),
         );
 
         if (duplicate) {
@@ -616,7 +875,10 @@ export const setPromptStatus = createServerFn({ method: "POST" })
         }
 
         // Approve non-duplicate prompts
-        const { error } = await context.supabase.from("prompts").update({ status: "approved" }).in("id", toApprove);
+        const { error } = await context.supabase
+          .from("prompts")
+          .update({ status: "approved" })
+          .in("id", toApprove);
         if (error) throw new Error(error.message);
       }
 
@@ -625,7 +887,10 @@ export const setPromptStatus = createServerFn({ method: "POST" })
       return { ok: true };
     }
 
-    const { error } = await context.supabase.from("prompts").update({ status: data.status }).in("id", data.ids);
+    const { error } = await context.supabase
+      .from("prompts")
+      .update({ status: data.status })
+      .in("id", data.ids);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -648,16 +913,18 @@ export const createPrompt = createServerFn({ method: "POST" })
       .eq("status", "approved")
       .limit(1000);
 
-    const duplicate = existing?.find(
-      (p) => normalizePromptText(p.text) === normalizedText
-    );
+    const duplicate = existing?.find((p) => normalizePromptText(p.text) === normalizedText);
 
     if (duplicate) {
       throw new Error(`Marka zaten bu soruyu izliyor: "${duplicate.text}"`);
     }
 
     const { error } = await context.supabase.from("prompts").insert({
-      brand_id: data.brandId, text: data.text, status: "approved", origin: "manual", category: "genel",
+      brand_id: data.brandId,
+      text: data.text,
+      status: "approved",
+      origin: "manual",
+      category: "genel",
     });
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -677,7 +944,9 @@ export const completeOnboarding = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
-      .from("brands").update({ onboarding_completed: true, onboarding_step: 4 }).eq("id", data.brandId);
+      .from("brands")
+      .update({ onboarding_completed: true, onboarding_step: 4 })
+      .eq("id", data.brandId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -685,10 +954,14 @@ export const completeOnboarding = createServerFn({ method: "POST" })
 // Kurulum sihirbazında prompt metni ve huni aşamasını günceller.
 export const updatePrompts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { items: Array<{ id: string; text: string; funnelStage: string }> }) => input)
+  .inputValidator(
+    (input: { items: Array<{ id: string; text: string; funnelStage: string }> }) => input,
+  )
   .handler(async ({ data, context }) => {
     for (const item of data.items) {
-      const stage = ["top", "middle", "bottom"].includes(item.funnelStage) ? item.funnelStage : "middle";
+      const stage = ["top", "middle", "bottom"].includes(item.funnelStage)
+        ? item.funnelStage
+        : "middle";
       await context.supabase
         .from("prompts")
         .update({ text: item.text, funnel_stage: stage })
@@ -702,11 +975,11 @@ export const setBrandEngines = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; engines: string[] }) => input)
   .handler(async ({ data, context }) => {
-    const allowed = ["perplexity", "deepseek"];
+    const allowed = ["agent_web_grounded", "model_panel"];
     const engines = data.engines.filter((e) => allowed.includes(e));
     const { error } = await context.supabase
       .from("brands")
-      .update({ engines: engines.length ? engines : ["perplexity"] })
+      .update({ engines: engines.length ? engines : ["agent_web_grounded"] })
       .eq("id", data.brandId);
     if (error) throw new Error(error.message);
     return { ok: true, engines };
@@ -717,8 +990,148 @@ export const getBrandEngines = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: row } = await context.supabase
-      .from("brands").select("engines").eq("id", data.brandId).maybeSingle();
-    return { engines: (row?.engines as string[] | null) ?? ["perplexity", "deepseek"] };
+      .from("brands")
+      .select("engines")
+      .eq("id", data.brandId)
+      .maybeSingle();
+    return { engines: (row?.engines as string[] | null) ?? ["agent_web_grounded"] };
+  });
+
+export const getOnboardingRun = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("onboarding_runs" as never)
+      .select("*" as never)
+      .eq("brand_id" as never, data.brandId)
+      .order("created_at" as never, { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return row as unknown as Record<string, unknown> | null;
+  });
+
+export const saveOnboardingProgress = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: {
+      brandId: string;
+      currentStep: 1 | 2 | 3;
+      status: "draft" | "scanning" | "awaiting_approval" | "completed" | "failed";
+      market?: Record<string, unknown>;
+      progress?: Record<string, unknown>;
+      proposedPrompts?: unknown[];
+      proposedCompetitors?: unknown[];
+      discoveredFacts?: unknown[];
+      lastError?: Record<string, unknown> | null;
+    }) => input,
+  )
+  .handler(async ({ data, context }) => {
+    const { data: existing } = await context.supabase
+      .from("onboarding_runs" as never)
+      .select("id" as never)
+      .eq("brand_id" as never, data.brandId)
+      .order("created_at" as never, { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const payload = {
+      brand_id: data.brandId,
+      current_step: data.currentStep,
+      status: data.status,
+      ...(data.market ? { market: data.market } : {}),
+      ...(data.progress ? { progress: data.progress } : {}),
+      ...(data.proposedPrompts ? { proposed_prompts: data.proposedPrompts } : {}),
+      ...(data.proposedCompetitors ? { proposed_competitors: data.proposedCompetitors } : {}),
+      ...(data.discoveredFacts ? { discovered_facts: data.discoveredFacts } : {}),
+      ...(data.lastError !== undefined ? { last_error: data.lastError } : {}),
+    };
+    const query =
+      existing && typeof existing === "object" && "id" in existing
+        ? context.supabase
+            .from("onboarding_runs" as never)
+            .update(payload as never)
+            .eq("id" as never, String(existing.id))
+        : context.supabase.from("onboarding_runs" as never).insert(payload as never);
+    const { error } = await query;
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getOutcomeControlCenter = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const [findingResult, taskResult, runResult] = await Promise.all([
+      context.supabase
+        .from("findings" as never)
+        .select("id,title,impact,effort,confidence,evidence_count,status,created_at" as never)
+        .eq("brand_id" as never, data.brandId)
+        .order("created_at" as never, { ascending: false })
+        .limit(20),
+      context.supabase.from("geo_tasks").select("status,updated_at").eq("brand_id", data.brandId),
+      context.supabase
+        .from("research_runs" as never)
+        .select("coverage,confidence,updated_at" as never)
+        .eq("brand_id" as never, data.brandId)
+        .order("created_at" as never, { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+    const rawFindings = (findingResult.data ?? []) as unknown as Array<Record<string, unknown>>;
+    const run = runResult.data as unknown as Record<string, unknown> | null;
+    const tasks = taskResult.data ?? [];
+    return {
+      findings: rawFindings.map((item) => ({
+        id: String(item.id),
+        title: String(item.title),
+        impact: Number(item.impact ?? 0),
+        effort: Number(item.effort ?? 0),
+        confidence: Number(item.confidence ?? 0),
+        evidenceCount: Number(item.evidence_count ?? 0),
+        status: String(item.status),
+        createdAt: String(item.created_at),
+      })),
+      funnel: {
+        pending: rawFindings.filter((item) => item.status === "open").length,
+        approved: rawFindings.filter((item) => item.status === "approved").length,
+        completed: tasks.filter((item) => item.status === "done").length,
+      },
+      coverage: run?.coverage == null ? null : Number(run.coverage),
+      confidence: run?.confidence == null ? null : Number(run.confidence),
+      lastUpdated: run?.updated_at ? String(run.updated_at) : null,
+    };
+  });
+
+export const listFindings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; status?: string }) => input)
+  .handler(async ({ data, context }) => {
+    let query = context.supabase
+      .from("findings" as never)
+      .select(
+        "id,title,detection,cause,recommendation,affected_entities,evidence_count,confidence,impact,effort,status,approved_task_id,created_at" as never,
+      )
+      .eq("brand_id" as never, data.brandId)
+      .order("created_at" as never, { ascending: false });
+    if (data.status) query = query.eq("status" as never, data.status);
+    const { data: rows, error } = await query.limit(100);
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as unknown as Array<Record<string, unknown>>;
+  });
+
+export const approveFinding = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { findingId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: taskId, error } = await context.supabase.rpc(
+      "approve_finding_to_task" as never,
+      {
+        _finding_id: data.findingId,
+      } as never,
+    );
+    if (error) throw new Error(error.message);
+    return { taskId: String(taskId) };
   });
 
 export const getBrandOverview = createServerFn({ method: "POST" })
@@ -726,11 +1139,24 @@ export const getBrandOverview = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const [prompts, sources, claims, runs, citations] = await Promise.all([
-      context.supabase.from("prompts").select("id, status", { count: "exact", head: true }).eq("brand_id", data.brandId).eq("status", "approved"),
-      context.supabase.from("knowledge_sources").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
-      context.supabase.from("claims").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
+      context.supabase
+        .from("prompts")
+        .select("id, status", { count: "exact", head: true })
+        .eq("brand_id", data.brandId)
+        .eq("status", "approved"),
+      context.supabase
+        .from("knowledge_sources")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", data.brandId),
+      context.supabase
+        .from("claims")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", data.brandId),
       context.supabase.from("prompt_runs").select("brand_mentioned").eq("brand_id", data.brandId),
-      context.supabase.from("citations").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
+      context.supabase
+        .from("citations")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", data.brandId),
     ]);
     const runRows = runs.data ?? [];
     const mentioned = runRows.filter((r) => r.brand_mentioned).length;
@@ -749,7 +1175,10 @@ export const listClaims = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
-      .from("claims").select("*").eq("brand_id", data.brandId).order("created_at", { ascending: false });
+      .from("claims")
+      .select("*")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false });
     return rows ?? [];
   });
 
@@ -758,7 +1187,10 @@ export const createClaim = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string; statement: string; evidenceUrl?: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("claims").insert({
-      brand_id: data.brandId, statement: data.statement, evidence_url: data.evidenceUrl ?? null, status: "draft",
+      brand_id: data.brandId,
+      statement: data.statement,
+      evidence_url: data.evidenceUrl ?? null,
+      status: "draft",
     });
     if (error) throw new Error(error.message);
     const { syncClaimsKnowledgeSource } = await import("./claims.server");
@@ -787,18 +1219,40 @@ export const getClaimsInsight = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { claimEchoScore } = await import("./claims.server");
     const [claimsRes, runsRes, citationsRes, sourceRes] = await Promise.all([
-      context.supabase.from("claims").select("*").eq("brand_id", data.brandId).order("created_at", { ascending: false }),
-      context.supabase.from("prompt_runs").select("raw_answer, answer_summary").eq("brand_id", data.brandId).order("created_at", { ascending: false }).limit(80),
+      context.supabase
+        .from("claims")
+        .select("*")
+        .eq("brand_id", data.brandId)
+        .order("created_at", { ascending: false }),
+      context.supabase
+        .from("prompt_runs")
+        .select("raw_answer, answer_summary")
+        .eq("brand_id", data.brandId)
+        .order("created_at", { ascending: false })
+        .limit(80),
       context.supabase.from("citations").select("url").eq("brand_id", data.brandId),
-      context.supabase.from("knowledge_sources").select("index_status, chunk_count, indexed_at").eq("brand_id", data.brandId).eq("title", "Marka İddiaları").maybeSingle(),
+      context.supabase
+        .from("knowledge_sources")
+        .select("index_status, chunk_count, indexed_at")
+        .eq("brand_id", data.brandId)
+        .eq("title", "Marka İddiaları")
+        .maybeSingle(),
     ]);
 
-    const answers = (runsRes.data ?? []).map((r) => `${r.raw_answer ?? ""} ${r.answer_summary ?? ""}`).filter((a) => a.trim());
-    const citedUrls = new Set((citationsRes.data ?? []).map((c) => (c.url ?? "").split("?")[0]!.replace(/\/$/, "")));
+    const answers = (runsRes.data ?? [])
+      .map((r) => `${r.raw_answer ?? ""} ${r.answer_summary ?? ""}`)
+      .filter((a) => a.trim());
+    const citedUrls = new Set(
+      (citationsRes.data ?? []).map((c) => (c.url ?? "").split("?")[0]!.replace(/\/$/, "")),
+    );
 
     const claims = (claimsRes.data ?? []).map((claim) => {
-      const echoes = answers.filter((answer) => claimEchoScore(claim.statement, answer) >= 0.6).length;
-      const evidence = claim.evidence_url ? claim.evidence_url.split("?")[0]!.replace(/\/$/, "") : null;
+      const echoes = answers.filter(
+        (answer) => claimEchoScore(claim.statement, answer) >= 0.6,
+      ).length;
+      const evidence = claim.evidence_url
+        ? claim.evidence_url.split("?")[0]!.replace(/\/$/, "")
+        : null;
       return {
         ...claim,
         echoes,
@@ -820,13 +1274,54 @@ export const listGeoTasks = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { data: rows } = await context.supabase
-      .from("geo_tasks").select("*").eq("brand_id", data.brandId).order("created_at", { ascending: false });
-    return rows ?? [];
+      .from("geo_tasks")
+      .select("*")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false });
+    const snapshotIds = [
+      ...new Set(
+        (rows ?? []).flatMap((row) => {
+          const snapshots = row as unknown as {
+            before_snapshot_id?: string | null;
+            after_snapshot_id?: string | null;
+          };
+          return [snapshots.before_snapshot_id, snapshots.after_snapshot_id].filter(
+            (id): id is string => Boolean(id),
+          );
+        }),
+      ),
+    ];
+    const { data: snapshots } = snapshotIds.length
+      ? await context.supabase
+          .from("measurement_batches")
+          .select("*")
+          .in("research_run_id" as never, snapshotIds as never)
+          .eq("status", "completed")
+      : { data: [] };
+    const scores = new Map<string, number>();
+    for (const raw of snapshots ?? []) {
+      const snapshot = raw as unknown as { research_run_id?: string | null; score?: number | null };
+      if (snapshot.research_run_id && snapshot.score !== null)
+        scores.set(snapshot.research_run_id, Number(snapshot.score ?? 0));
+    }
+    return (rows ?? []).map((row) => {
+      const task = row as typeof row & {
+        before_snapshot_id?: string | null;
+        after_snapshot_id?: string | null;
+      };
+      return {
+        ...row,
+        beforeScore: task.before_snapshot_id ? (scores.get(task.before_snapshot_id) ?? null) : null,
+        afterScore: task.after_snapshot_id ? (scores.get(task.after_snapshot_id) ?? null) : null,
+      };
+    });
   });
 
 export const createGeoTask = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; title: string; description?: string; priority?: string }) => input)
+  .inputValidator(
+    (input: { brandId: string; title: string; description?: string; priority?: string }) => input,
+  )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("geo_tasks").insert({
       brand_id: data.brandId,
@@ -843,9 +1338,72 @@ export const setGeoTaskStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string; status: string }) => input)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("geo_tasks").update({ status: data.status }).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("geo_tasks")
+      .update({ status: data.status })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
+  });
+
+export const remeasureGeoTask = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { id: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: task, error: taskError } = await context.supabase
+      .from("geo_tasks")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (taskError || !task) throw new Error(taskError?.message ?? "Görev bulunamadı");
+    if (task.status !== "done") throw new Error("Yeniden ölçüm için önce görevi tamamlayın");
+    const findingId = (task as unknown as { finding_id?: string | null }).finding_id;
+    const { data: finding } = findingId
+      ? await context.supabase
+          .from("findings" as never)
+          .select("affected_entities" as never)
+          .eq("id" as never, findingId)
+          .maybeSingle()
+      : { data: null };
+    const batchId = String(
+      (
+        finding as unknown as {
+          affected_entities?: { batch_id?: string };
+        } | null
+      )?.affected_entities?.batch_id ?? "",
+    );
+    const { data: originalRuns } = batchId
+      ? await context.supabase.from("prompt_runs").select("prompt_id").eq("batch_id", batchId)
+      : { data: [] };
+    const promptIds = [...new Set((originalRuns ?? []).map((run) => run.prompt_id))];
+    const { data: before } = await context.supabase
+      .from("research_runs" as never)
+      .select("id" as never)
+      .eq("brand_id" as never, task.brand_id)
+      .eq("kind" as never, "visibility")
+      .eq("status" as never, "completed")
+      .order("created_at" as never, { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const { enqueueResearchRun } = await import("./orchestrator.server");
+    const run = await enqueueResearchRun({
+      brandId: task.brand_id,
+      kind: "visibility",
+      measurementMode: "remeasure",
+      trigger: "user",
+      idempotencyKey: `remeasure:${task.id}`,
+      manifest: { taskId: task.id, expectedOutcome: task.title, promptIds },
+      createdBy: context.userId,
+    });
+    const { error } = await context.supabase
+      .from("geo_tasks")
+      .update({
+        remeasure_status: "queued",
+        before_snapshot_id: (before as unknown as { id?: string } | null)?.id ?? null,
+      } as never)
+      .eq("id", task.id);
+    if (error) throw new Error(error.message);
+    return run;
   });
 
 export const deleteGeoTask = createServerFn({ method: "POST" })
@@ -862,7 +1420,9 @@ export const updateProfile = createServerFn({ method: "POST" })
   .inputValidator((input: { fullName: string }) => input)
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
-      .from("profiles").update({ full_name: data.fullName }).eq("id", context.userId);
+      .from("profiles")
+      .update({ full_name: data.fullName })
+      .eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -875,7 +1435,9 @@ export const updateBrand = createServerFn({ method: "POST" })
     const domain = normalizeDomain(data.domain);
     if (!domain) throw new Error("Geçerli bir alan adı girin");
     const { error } = await context.supabase
-      .from("brands").update({ name: data.name.trim() || domain, domain }).eq("id", data.brandId);
+      .from("brands")
+      .update({ name: data.name.trim() || domain, domain })
+      .eq("id", data.brandId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -901,7 +1463,10 @@ export const adminListBrands = createServerFn({ method: "GET" })
     if (!roleRow) throw new Error("Bu sayfaya erişim yetkiniz yok");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: brands }, { data: members }] = await Promise.all([
-      supabaseAdmin.from("brands").select("id, name, domain, onboarding_completed, created_at").order("created_at", { ascending: false }),
+      supabaseAdmin
+        .from("brands")
+        .select("id, name, domain, onboarding_completed, created_at")
+        .order("created_at", { ascending: false }),
       supabaseAdmin.from("brand_members").select("brand_id"),
     ]);
     const counts = new Map<string, number>();
@@ -919,9 +1484,14 @@ export const startMeasurement = createServerFn({ method: "POST" })
     await assertBrandActive(context.supabase, context.userId, data.brandId);
 
     const { data: prompts } = await context.supabase
-      .from("prompts").select("id").eq("brand_id", data.brandId).eq("status", "approved");
+      .from("prompts")
+      .select("id")
+      .eq("brand_id", data.brandId)
+      .eq("status", "approved");
     const ids = (prompts ?? []).map((p) => p.id);
     if (!ids.length) throw new Error("Önce en az bir prompt onaylayın.");
+    const { promptSetFingerprint } = await import("./measurement-rounds.server");
+    const promptSetHash = promptSetFingerprint(ids);
 
     // Yarım kalmış bir tür varsa onu sürdür: aynı turda ölçülen promptları tekrar ölçme.
     const { data: openBatch } = await context.supabase
@@ -935,7 +1505,9 @@ export const startMeasurement = createServerFn({ method: "POST" })
 
     if (openBatch) {
       const fresh = Date.now() - new Date(openBatch.created_at).getTime() < 60 * 60 * 1000;
-      if (fresh) {
+      const openPromptSetHash = (openBatch as unknown as { prompt_set_hash?: string | null })
+        .prompt_set_hash;
+      if (fresh && openPromptSetHash === promptSetHash) {
         const { data: doneRuns } = await context.supabase
           .from("prompt_runs")
           .select("prompt_id")
@@ -947,7 +1519,11 @@ export const startMeasurement = createServerFn({ method: "POST" })
       }
       await context.supabase
         .from("measurement_batches")
-        .update({ status: "failed", error: "Tür yarıda kaldı", finished_at: new Date().toISOString() })
+        .update({
+          status: "failed",
+          error: "Tür yarıda kaldı",
+          finished_at: new Date().toISOString(),
+        })
         .eq("id", openBatch.id);
     }
 
@@ -955,8 +1531,18 @@ export const startMeasurement = createServerFn({ method: "POST" })
 
     const { data: batch, error } = await context.supabase
       .from("measurement_batches")
-      .insert({ brand_id: data.brandId, status: "running", total_prompts: ids.length, completed_prompts: 0 })
-      .select("*").single();
+      .insert({
+        brand_id: data.brandId,
+        status: "running",
+        engine: "agent_web_grounded",
+        total_prompts: ids.length,
+        completed_prompts: 0,
+        measurement_mode: "full",
+        prompt_set_hash: promptSetHash,
+        prompt_ids: ids,
+      } as never)
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return { batch, promptIds: ids };
   });
@@ -967,24 +1553,57 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { assertBrandActive } = await import("./plan.server");
     const { data: batchRow } = await context.supabase
-      .from("measurement_batches").select("brand_id").eq("id", data.batchId).maybeSingle();
-    if (!batchRow || batchRow.brand_id !== data.brandId) throw new Error("Bu tur bu markaya ait değil");
+      .from("measurement_batches")
+      .select("brand_id,status,measurement_mode,prompt_ids")
+      .eq("id", data.batchId)
+      .maybeSingle();
+    if (!batchRow || batchRow.brand_id !== data.brandId)
+      throw new Error("Bu tur bu markaya ait değil");
+    if (batchRow.status !== "running" || batchRow.measurement_mode !== "full")
+      throw new Error("Yalnızca çalışan tam ölçüm turu ilerletilebilir");
     await assertBrandActive(context.supabase, context.userId, data.brandId);
 
     const { measurePrompt } = await import("./measurement.server");
-    const { normalizeCompetitors, competitorMatches, competitorNames } = await import("./competitors");
+    const { normalizeCompetitors, competitorMatches, competitorNames } =
+      await import("./competitors");
     const { resolveSystemPrompt } = await import("./system-prompts.server");
     const systemPrompt = await resolveSystemPrompt(context.supabase, "measurement_answer");
-    const [{ data: brand }, { data: intel }, { data: prompts }] = await Promise.all([
-      context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
-      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
-      context.supabase.from("prompts").select("id, text").in("id", data.promptIds),
-    ]);
+    const [{ data: brand }, { data: intel }, { data: prompts }, { data: approvedPrompts }] =
+      await Promise.all([
+        context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+        context.supabase
+          .from("brand_intelligence")
+          .select("competitors")
+          .eq("brand_id", data.brandId)
+          .maybeSingle(),
+        context.supabase.from("prompts").select("id, text").in("id", data.promptIds),
+        context.supabase
+          .from("prompts")
+          .select("id")
+          .eq("brand_id", data.brandId)
+          .eq("status", "approved"),
+      ]);
     if (!brand) throw new Error("Marka bulunamadı");
+    const approvedIds = new Set((approvedPrompts ?? []).map((prompt) => prompt.id));
+    if (data.promptIds.some((promptId) => !approvedIds.has(promptId)))
+      throw new Error("Turun prompt kümesi dışında bir prompt ölçülemez");
+    const batchPromptIds = new Set(
+      ((batchRow as unknown as { prompt_ids?: string[] | null }).prompt_ids ?? []).map(String),
+    );
+    if (batchPromptIds.size && data.promptIds.some((promptId) => !batchPromptIds.has(promptId)))
+      throw new Error("Bu prompt bu ölçüm turunun başlangıç kümesinde değil");
     const competitors = normalizeCompetitors(intel?.competitors);
 
     const failedPromptIds: string[] = [];
+    let completedDelta = 0;
     for (const prompt of prompts ?? []) {
+      const { data: existingRun } = await context.supabase
+        .from("prompt_runs")
+        .select("id")
+        .eq("batch_id", data.batchId)
+        .eq("prompt_id", prompt.id)
+        .maybeSingle();
+      if (existingRun) continue;
       let measured: Awaited<ReturnType<typeof measurePrompt>>;
       try {
         measured = await measurePrompt({
@@ -1000,26 +1619,47 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         continue;
       }
       // Atomik run_index (Task 1.4, Finding C6): DB tarafında prompt satırını kilitleyip hesaplar, count-sonra-yaz yarışını önler.
-      const { data: runIndex } = await context.supabase.rpc("next_run_index", { p_prompt_id: prompt.id });
+      const { data: runIndex } = await context.supabase.rpc("next_run_index", {
+        p_prompt_id: prompt.id,
+      });
       const visibility = !measured.brandMentioned
         ? 0
         : measured.position
           ? Math.max(40, 100 - (measured.position - 1) * 10)
           : 60;
-      const { data: run } = await context.supabase.from("prompt_runs").insert({
-        brand_id: data.brandId,
-        prompt_id: prompt.id,
-        batch_id: data.batchId,
-        engine: "perplexity",
-        brand_mentioned: measured.brandMentioned,
-        position: measured.position,
-        raw_answer: measured.answer,
-        answer_summary: measured.answer.slice(0, 280),
-        mentioned_brands: measured.mentionedBrands.map((b) => typeof b === "string" ? b : b.name),
-        cited_reasons: measured.mentionedBrands,
-        run_index: runIndex,
-        visibility,
-      }).select("id").single();
+      const { data: run, error: runError } = await context.supabase
+        .from("prompt_runs")
+        .insert({
+          brand_id: data.brandId,
+          prompt_id: prompt.id,
+          batch_id: data.batchId,
+          batch_prompt_key: `${data.batchId}:${prompt.id}`,
+          engine: "agent_web_grounded",
+          measurement_mode: "full",
+          measurement_surface: "agent_web_grounded",
+          model_id: "perplexity/preset-fast",
+          brand_mentioned: measured.brandMentioned,
+          position: measured.position,
+          raw_answer: measured.answer,
+          answer_summary: measured.answer.slice(0, 280),
+          mentioned_brands: measured.mentionedBrands.map((b) =>
+            typeof b === "string" ? b : b.name,
+          ),
+          cited_reasons: measured.mentionedBrands,
+          run_index: runIndex,
+          visibility,
+          confidence: measured.sources.length ? 0.85 : 0.55,
+          coverage: 1,
+        } as never)
+        .select("id")
+        .single();
+      if (runError) {
+        // A concurrent chunk may have committed this deterministic key first.
+        // Treat that replay as a no-op; every other insert error is real.
+        if (runError.code === "23505") continue;
+        throw new Error(runError.message);
+      }
+      if (!run) throw new Error("Prompt ölçüm sonucu yazılamadı");
 
       // Yanıtta geçen, bilinmeyen markaları rakip adayı olarak biriktir (Task 1.4, Finding C7: atomik upsert, select-sonra-yaz yarışı yok).
       const ownNeedle = brand.name.toLowerCase();
@@ -1027,7 +1667,12 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         const name = (typeof brandObj === "string" ? brandObj : brandObj.name).trim();
         const lower = name.toLowerCase();
         if (!name || lower.includes(ownNeedle) || ownNeedle.includes(lower)) continue;
-        if (competitors.some((competitor) => competitorMatches(competitor, { answer: name, domains: [] }))) continue;
+        if (
+          competitors.some((competitor) =>
+            competitorMatches(competitor, { answer: name, domains: [] }),
+          )
+        )
+          continue;
         await context.supabase.rpc("upsert_competitor_candidate", {
           p_brand_id: data.brandId,
           p_name: name,
@@ -1035,13 +1680,15 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
           p_prompt_id: prompt.id,
         });
       }
+      completedDelta += 1;
 
       const seen = new Set<string>();
       const unique = measured.sources.filter((s) => (seen.has(s.url) ? false : seen.add(s.url)));
       if (unique.length) {
         await context.supabase.from("citations").insert(
           unique.map((source) => {
-            const isOwn = source.domain.includes(brand.domain) || brand.domain.includes(source.domain);
+            const isOwn =
+              source.domain.includes(brand.domain) || brand.domain.includes(source.domain);
             const isCompetitor =
               !isOwn &&
               competitors.some((competitor) =>
@@ -1063,10 +1710,157 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
     }
 
     // Atomik completed_prompts artışı (Task 1.4, Finding C5): oku-değiştir-yaz yerine tek UPDATE, eşzamanlı chunk'larda kayıp güncelleme olmaz.
-    await context.supabase.rpc("increment_completed_prompts", { p_batch_id: data.batchId, p_delta: prompts?.length ?? 0 });
+    await context.supabase.rpc("increment_completed_prompts", {
+      p_batch_id: data.batchId,
+      p_delta: completedDelta,
+    });
     const { data: current } = await context.supabase
-      .from("measurement_batches").select("completed_prompts, total_prompts").eq("id", data.batchId).single();
-    return { completed: current?.completed_prompts ?? 0, total: current?.total_prompts ?? 0, failedPromptIds };
+      .from("measurement_batches")
+      .select("completed_prompts, total_prompts")
+      .eq("id", data.batchId)
+      .single();
+    return {
+      completed: current?.completed_prompts ?? 0,
+      total: current?.total_prompts ?? 0,
+      failedPromptIds,
+    };
+  });
+
+// Tek prompt yeniden olcumu ayri bir batch'tir; tam tur trendini ve skor snapshot'ini degistirmez.
+export const measureSinglePrompt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; promptId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { assertBrandActive, assertAnswerQuota } = await import("./plan.server");
+    await assertBrandActive(context.supabase, context.userId, data.brandId);
+    await assertAnswerQuota(context.supabase, context.userId, 1);
+    const [{ data: prompt }, { data: brand }, { data: intel }] = await Promise.all([
+      context.supabase
+        .from("prompts")
+        .select("id,text,status")
+        .eq("id", data.promptId)
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
+      context.supabase.from("brands").select("name,domain").eq("id", data.brandId).single(),
+      context.supabase
+        .from("brand_intelligence")
+        .select("competitors")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
+    ]);
+    if (!prompt || !brand) throw new Error("Prompt bu markaya ait değil");
+    if (prompt.status !== "approved") throw new Error("Yalnız onaylı promptlar ölçülebilir");
+
+    const { data: batch, error: batchError } = await context.supabase
+      .from("measurement_batches")
+      .insert({
+        brand_id: data.brandId,
+        status: "running",
+        engine: "agent_web_grounded",
+        total_prompts: 1,
+        completed_prompts: 0,
+        measurement_mode: "single",
+        prompt_ids: [data.promptId],
+      } as never)
+      .select("id")
+      .single();
+    if (batchError || !batch)
+      throw new Error(batchError?.message ?? "Tekli ölçüm turu oluşturulamadı");
+
+    try {
+      const { measurePrompt } = await import("./measurement.server");
+      const { normalizeCompetitors, competitorMatches, competitorNames } =
+        await import("./competitors");
+      const { resolveSystemPrompt } = await import("./system-prompts.server");
+      const competitors = normalizeCompetitors(intel?.competitors);
+      const measured = await measurePrompt({
+        brandName: brand.name,
+        brandDomain: brand.domain,
+        competitors: competitorNames(competitors),
+        promptText: prompt.text,
+        systemPrompt: await resolveSystemPrompt(context.supabase, "measurement_answer"),
+      });
+      const { data: runIndex } = await context.supabase.rpc("next_run_index", {
+        p_prompt_id: prompt.id,
+      });
+      const visibility = !measured.brandMentioned
+        ? 0
+        : measured.position
+          ? Math.max(40, 100 - (measured.position - 1) * 10)
+          : 60;
+      const { data: run, error: runError } = await context.supabase
+        .from("prompt_runs")
+        .insert({
+          brand_id: data.brandId,
+          prompt_id: prompt.id,
+          batch_id: batch.id,
+          batch_prompt_key: `${batch.id}:${prompt.id}`,
+          engine: "agent_web_grounded",
+          measurement_mode: "single",
+          measurement_surface: "agent_web_grounded",
+          model_id: "perplexity/preset-fast",
+          brand_mentioned: measured.brandMentioned,
+          position: measured.position,
+          raw_answer: measured.answer,
+          answer_summary: measured.answer.slice(0, 280),
+          mentioned_brands: measured.mentionedBrands.map((item) => item.name),
+          cited_reasons: measured.mentionedBrands,
+          run_index: runIndex,
+          visibility,
+          confidence: measured.sources.length ? 0.85 : 0.55,
+          coverage: 1,
+        } as never)
+        .select("id")
+        .single();
+      if (runError || !run) throw new Error(runError?.message ?? "Tekli ölçüm sonucu yazılamadı");
+
+      const seen = new Set<string>();
+      const sources = measured.sources.filter((source) =>
+        seen.has(source.url) ? false : seen.add(source.url),
+      );
+      if (sources.length) {
+        await context.supabase.from("citations").insert(
+          sources.map((source) => {
+            const isOwn =
+              source.domain.includes(brand.domain) || brand.domain.includes(source.domain);
+            const isCompetitor =
+              !isOwn &&
+              competitors.some((competitor) =>
+                competitorMatches(competitor, { answer: source.title, domains: [source.domain] }),
+              );
+            return {
+              brand_id: data.brandId,
+              run_id: run.id,
+              prompt_id: prompt.id,
+              domain: source.domain,
+              url: source.url,
+              title: source.title || source.domain,
+              is_own_domain: isOwn,
+              citation_type: isOwn ? "own" : isCompetitor ? "competitor" : "neutral",
+            };
+          }),
+        );
+      }
+      await context.supabase
+        .from("measurement_batches")
+        .update({
+          status: "completed",
+          completed_prompts: 1,
+          finished_at: new Date().toISOString(),
+        })
+        .eq("id", batch.id);
+      return { batchId: batch.id, runId: run.id, visibility, measurementMode: "single" as const };
+    } catch (error) {
+      await context.supabase
+        .from("measurement_batches")
+        .update({
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+          finished_at: new Date().toISOString(),
+        })
+        .eq("id", batch.id);
+      throw error;
+    }
   });
 
 export const finishMeasurement = createServerFn({ method: "POST" })
@@ -1076,38 +1870,98 @@ export const finishMeasurement = createServerFn({ method: "POST" })
     const { assertBrandActive } = await import("./plan.server");
     const { computeVisibilityScore } = await import("./score-model");
     // Batch↔brand sahiplik kontrolünü mevcut paralel okumaya katıyoruz (ekstra round-trip yok).
-    const [batchRow, runs, citations, sources, claims] = await Promise.all([
-      context.supabase.from("measurement_batches").select("brand_id").eq("id", data.batchId).maybeSingle(),
+    const [batchRow, runs, sources, claims] = await Promise.all([
+      context.supabase.from("measurement_batches").select("*").eq("id", data.batchId).maybeSingle(),
       // Bu turun skoru sadece bu batch'in çalışmalarından hesaplanır; kaynak/kanıt bileşenleri markanın genel (kümülatif) durumunu yansıtmaya devam eder.
-      context.supabase.from("prompt_runs").select("brand_mentioned, position")
-        .eq("brand_id", data.brandId).eq("batch_id", data.batchId),
-      context.supabase.from("citations").select("is_own_domain").eq("brand_id", data.brandId).limit(1000),
-      context.supabase.from("knowledge_sources").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
-      context.supabase.from("claims").select("evidence_url").eq("brand_id", data.brandId).limit(1000),
+      context.supabase
+        .from("prompt_runs")
+        .select("id, brand_mentioned, position")
+        .eq("brand_id", data.brandId)
+        .eq("batch_id", data.batchId),
+      context.supabase
+        .from("knowledge_sources")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", data.brandId),
+      context.supabase
+        .from("claims")
+        .select("evidence_url")
+        .eq("brand_id", data.brandId)
+        .limit(1000),
     ]);
-    if (!batchRow.data || batchRow.data.brand_id !== data.brandId) throw new Error("Bu tur bu markaya ait değil");
+    if (!batchRow.data || batchRow.data.brand_id !== data.brandId)
+      throw new Error("Bu tur bu markaya ait değil");
     await assertBrandActive(context.supabase, context.userId, data.brandId);
-    const citationRows = citations.data ?? [];
+    const runIds = (runs.data ?? []).map((run) => run.id);
+    const { data: batchCitations, error: citationError } = runIds.length
+      ? await context.supabase
+          .from("citations")
+          .select("is_own_domain")
+          .eq("brand_id", data.brandId)
+          .in("run_id", runIds)
+          .limit(1000)
+      : { data: [], error: null };
+    if (citationError) throw new Error(citationError.message);
+    const citationRows = batchCitations ?? [];
+    const batchMeta = batchRow.data as unknown as {
+      total_prompts?: number | null;
+      research_run_id?: string | null;
+    };
+    const measuredCount = runs.data?.length ?? 0;
+    const totalPrompts = Number(batchMeta.total_prompts ?? measuredCount);
+    const coverage = totalPrompts > 0 ? measuredCount / totalPrompts : 0;
+    const confidence = Math.max(
+      0.35,
+      Math.min(0.95, coverage * 0.75 + (citationRows.length > 0 ? 0.2 : 0.05)),
+    );
+    const safeCitationRows = citationRows ?? [];
     const score = computeVisibilityScore({
       runs: runs.data ?? [],
-      ownCitations: citationRows.filter((c) => c.is_own_domain).length,
-      totalCitations: citationRows.length,
+      ownCitations: safeCitationRows.filter((c) => c.is_own_domain).length,
+      totalCitations: safeCitationRows.length,
       knowledgeSources: sources.count ?? 0,
       claimsWithEvidence: (claims.data ?? []).filter((c) => Boolean(c.evidence_url)).length,
     });
-    const { error } = await context.supabase.from("measurement_batches").update({
-      status: "completed",
-      score: score.total,
-      components: score.components,
-      finished_at: new Date().toISOString(),
-      ...(data.failedCount ? { error: `${data.failedCount} soru ölçülemedi` } : {}),
-    }).eq("id", data.batchId);
+    const { error } = await context.supabase
+      .from("measurement_batches")
+      .update({
+        status: "completed",
+        score: score.total,
+        components: score.components,
+        coverage,
+        confidence,
+        finished_at: new Date().toISOString(),
+        ...(data.failedCount ? { error: `${data.failedCount} soru ölçülemedi` } : {}),
+      })
+      .eq("id", data.batchId);
     if (error) throw new Error(error.message);
 
-    // Ölçüm sonrası otomatik 3 öncelikli aksiyon.
-    const { createPriorityTasks } = await import("./tasks.server");
-    const created = await createPriorityTasks(context.supabase, data.brandId, citationRows);
-    return { ...score, tasksCreated: created };
+    // Otomatik görev yok: kanıtlı bulgu kullanıcı onayından sonra tek göreve dönüşür.
+    const ownCitationCount = citationRows.filter((citation) => citation.is_own_domain).length;
+    let findingCreated = false;
+    if ((runs.data?.length ?? 0) > 0 && ownCitationCount === 0) {
+      // Findings are service-written records; the authenticated client has
+      // read-only grants so users cannot fabricate audit findings.
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error: findingError } = await supabaseAdmin.from("findings" as never).insert({
+        brand_id: data.brandId,
+        ...(batchMeta.research_run_id ? { run_id: batchMeta.research_run_id } : {}),
+        finding_type: "citation_gap",
+        title: "Marka kaynakları ölçülen yanıtlarda kullanılmıyor",
+        detection: `Bu tam turda ${runs.data?.length ?? 0} prompt ölçüldü; marka alan adından kaynak bulunamadı.`,
+        cause:
+          "AI yanıtlarında seçilebilir, açık ve doğrulanabilir marka kanıtı yetersiz olabilir.",
+        recommendation:
+          "Etkilenen promptları doğrudan yanıtlayan kaynak sayfaları güçlendirin ve aynı prompt setiyle yeniden ölçün.",
+        affected_entities: { batch_id: data.batchId },
+        evidence_count: citationRows.length,
+        confidence: Math.min(0.9, 0.5 + (runs.data?.length ?? 0) / 100),
+        impact: 85,
+        effort: 55,
+      } as never);
+      if (findingError && findingError.code !== "23505") throw new Error(findingError.message);
+      findingCreated = !findingError;
+    }
+    return { ...score, findingsCreated: findingCreated ? 1 : 0, tasksCreated: 0 };
   });
 
 export const getMeasurementState = createServerFn({ method: "POST" })
@@ -1115,20 +1969,45 @@ export const getMeasurementState = createServerFn({ method: "POST" })
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
     const { computeVisibilityScore } = await import("./score-model");
-    const [{ data: batch }, runs, citations, sources, claims, approved] = await Promise.all([
-      context.supabase.from("measurement_batches").select("*").eq("brand_id", data.brandId)
-        .order("created_at", { ascending: false }).limit(1).maybeSingle(),
-      context.supabase.from("prompt_runs").select("brand_mentioned, position").eq("brand_id", data.brandId),
-      context.supabase.from("citations").select("is_own_domain, domain").eq("brand_id", data.brandId),
-      context.supabase.from("knowledge_sources").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
+    const { data: batch } = await context.supabase
+      .from("measurement_batches")
+      .select("*")
+      .eq("brand_id", data.brandId)
+      .eq("measurement_mode" as never, "full" as never)
+      .eq("status", "completed")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const batchId = batch?.id ?? "00000000-0000-0000-0000-000000000000";
+    const [runs, sources, claims, approved] = await Promise.all([
+      context.supabase
+        .from("prompt_runs")
+        .select("id, brand_mentioned, position")
+        .eq("brand_id", data.brandId)
+        .eq("batch_id", batchId),
+      context.supabase
+        .from("knowledge_sources")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", data.brandId),
       context.supabase.from("claims").select("evidence_url").eq("brand_id", data.brandId),
-      context.supabase.from("prompts").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId).eq("status", "approved"),
+      context.supabase
+        .from("prompts")
+        .select("id", { count: "exact", head: true })
+        .eq("brand_id", data.brandId)
+        .eq("status", "approved"),
     ]);
-    const citationRows = citations.data ?? [];
+    const runIds = (runs.data ?? []).map((run) => run.id);
+    const { data: citationRows } = runIds.length
+      ? await context.supabase
+          .from("citations")
+          .select("is_own_domain, domain")
+          .in("run_id", runIds)
+      : { data: [] as Array<{ is_own_domain: boolean; domain: string }> };
+    const safeCitationRows = citationRows ?? [];
     const score = computeVisibilityScore({
       runs: runs.data ?? [],
-      ownCitations: citationRows.filter((c) => c.is_own_domain).length,
-      totalCitations: citationRows.length,
+      ownCitations: safeCitationRows.filter((c) => c.is_own_domain).length,
+      totalCitations: safeCitationRows.length,
       knowledgeSources: sources.count ?? 0,
       claimsWithEvidence: (claims.data ?? []).filter((c) => Boolean(c.evidence_url)).length,
     });
@@ -1147,7 +2026,10 @@ export const getPlanUsage = createServerFn({ method: "POST" })
     const { getUserPlan, countApprovedPrompts } = await import("./plan.server");
     const limits = await getUserPlan(context.supabase, context.userId);
     const [{ count: brandCount }, approvedPrompts] = await Promise.all([
-      context.supabase.from("brands").select("id", { count: "exact", head: true }).eq("created_by", context.userId),
+      context.supabase
+        .from("brands")
+        .select("id", { count: "exact", head: true })
+        .eq("created_by", context.userId),
       data.brandId ? countApprovedPrompts(context.supabase, data.brandId) : Promise.resolve(0),
     ]);
     return {
@@ -1167,27 +2049,49 @@ export const getPromptInsight = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; promptId: string; runId?: string }) => input)
   .handler(async ({ data, context }) => {
-    const [{ data: prompt }, { data: runRows }, { data: brand }, { data: intel }] = await Promise.all([
-      context.supabase.from("prompts").select("id, text, category").eq("id", data.promptId).single(),
-      context.supabase
-        .from("prompt_runs")
-        .select("id, brand_mentioned, position, raw_answer, answer_summary, engine, created_at, mentioned_brands, run_index, visibility")
-        .eq("prompt_id", data.promptId)
-        .order("created_at", { ascending: false })
-        .limit(20),
-      context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
-      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
-    ]);
+    const [{ data: prompt }, { data: runRows }, { data: brand }, { data: intel }] =
+      await Promise.all([
+        context.supabase
+          .from("prompts")
+          .select("id, text, category")
+          .eq("id", data.promptId)
+          .single(),
+        context.supabase
+          .from("prompt_runs")
+          .select(
+            "id, brand_mentioned, position, raw_answer, answer_summary, engine, created_at, mentioned_brands, run_index, visibility",
+          )
+          .eq("prompt_id", data.promptId)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
+        context.supabase
+          .from("brand_intelligence")
+          .select("competitors")
+          .eq("brand_id", data.brandId)
+          .maybeSingle(),
+      ]);
 
     const allRuns = runRows ?? [];
-    const run = (data.runId ? allRuns.find((row) => row.id === data.runId) : allRuns[0]) ?? allRuns[0] ?? null;
+    const run =
+      (data.runId ? allRuns.find((row) => row.id === data.runId) : allRuns[0]) ??
+      allRuns[0] ??
+      null;
 
     const { data: citations } = run
       ? await context.supabase
           .from("citations")
           .select("url, domain, title, citation_type, is_own_domain")
           .eq("run_id", run.id)
-      : { data: [] as Array<{ url: string; domain: string; title: string | null; citation_type: string; is_own_domain: boolean }> };
+      : {
+          data: [] as Array<{
+            url: string;
+            domain: string;
+            title: string | null;
+            citation_type: string;
+            is_own_domain: boolean;
+          }>,
+        };
 
     const sources = (citations ?? []).map((c) => ({
       url: c.url,
@@ -1201,14 +2105,20 @@ export const getPromptInsight = createServerFn({ method: "POST" })
     const { normalizeCompetitors, competitorMatches } = await import("./competitors");
     const trackedCompetitors = normalizeCompetitors(intel?.competitors);
     const ownNeedle = (brand?.name ?? "").toLowerCase();
-    const mentionedBrands = (Array.isArray(run?.mentioned_brands) ? (run?.mentioned_brands as unknown[]) : [])
+    const mentionedBrands = (
+      Array.isArray(run?.mentioned_brands) ? (run?.mentioned_brands as unknown[]) : []
+    )
       .map((value) => String(value).trim())
       .filter(Boolean)
       .map((name, index) => {
         const lower = name.toLowerCase();
-        const isOwn = Boolean(ownNeedle) && (lower.includes(ownNeedle) || ownNeedle.includes(lower));
+        const isOwn =
+          Boolean(ownNeedle) && (lower.includes(ownNeedle) || ownNeedle.includes(lower));
         const isTracked =
-          !isOwn && trackedCompetitors.some((competitor) => competitorMatches(competitor, { answer: name, domains: [] }));
+          !isOwn &&
+          trackedCompetitors.some((competitor) =>
+            competitorMatches(competitor, { answer: name, domains: [] }),
+          );
         return {
           name,
           rank: index + 1,
@@ -1224,10 +2134,13 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       .order("prompt_count", { ascending: false })
       .limit(12);
     const mentionedNames = new Set(mentionedBrands.map((item) => item.name.toLowerCase()));
-    const candidates = (candidateRows ?? []).filter((row) => mentionedNames.has(String(row.name).toLowerCase()));
+    const candidates = (candidateRows ?? []).filter((row) =>
+      mentionedNames.has(String(row.name).toLowerCase()),
+    );
 
     // Deterministik aksiyon önerileri — kullanıcı ne yapacağını net görsün.
-    const actions: Array<{ key: string; title: string; description: string; priority: string }> = [];
+    const actions: Array<{ key: string; title: string; description: string; priority: string }> =
+      [];
     if (!run) {
       actions.push({
         key: "measure",
@@ -1246,7 +2159,12 @@ export const getPromptInsight = createServerFn({ method: "POST" })
         actions.push({
           key: "cited-sources",
           title: "Seçilen kaynaklarda yer alın",
-          description: `Bu yanıtta ${sources.slice(0, 3).map((s) => s.domain).join(", ")} kaynak gösterildi. Bu sayfalarda listelenmek, karşılaştırmaya girmek veya benzer kapsamda kendi sayfanızı üretmek için çalışın.`,
+          description: `Bu yanıtta ${sources
+            .slice(0, 3)
+            .map((s) => s.domain)
+            .join(
+              ", ",
+            )} kaynak gösterildi. Bu sayfalarda listelenmek, karşılaştırmaya girmek veya benzer kapsamda kendi sayfanızı üretmek için çalışın.`,
           priority: "medium",
         });
       }
@@ -1254,7 +2172,8 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       actions.push({
         key: "own-citation",
         title: "Kendi sayfanızın kaynak gösterilmesini sağlayın",
-        description: "Markanız yanıtta geçiyor ama kaynak olarak kendi siteniz gösterilmiyor. İlgili sayfayı güncelleyin, net tanımlar, tarih, veri ve SSS ekleyin.",
+        description:
+          "Markanız yanıtta geçiyor ama kaynak olarak kendi siteniz gösterilmiyor. İlgili sayfayı güncelleyin, net tanımlar, tarih, veri ve SSS ekleyin.",
         priority: "medium",
       });
     } else if ((run.position ?? 99) > 3) {
@@ -1269,7 +2188,8 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       actions.push({
         key: "kb-source",
         title: "Bilgi Bankası'na bu konuda kaynak ekleyin",
-        description: "Konuyla ilgili teknik doküman, vaka çalışması veya SSS ekleyip indeksleyin; marka zekası yanıt üretiminde bu kanıtları kullanır.",
+        description:
+          "Konuyla ilgili teknik doküman, vaka çalışması veya SSS ekleyip indeksleyin; marka zekası yanıt üretiminde bu kanıtları kullanır.",
         priority: "low",
       });
     }
@@ -1280,10 +2200,9 @@ export const getPromptInsight = createServerFn({ method: "POST" })
       .select("action_key, done, done_at")
       .eq("prompt_id", data.promptId);
     const doneMap = new Map(
-      ((savedItems ?? []) as Array<{ action_key: string; done: boolean; done_at: string | null }>).map((row) => [
-        row.action_key,
-        { done: row.done, doneAt: row.done_at },
-      ]),
+      (
+        (savedItems ?? []) as Array<{ action_key: string; done: boolean; done_at: string | null }>
+      ).map((row) => [row.action_key, { done: row.done, doneAt: row.done_at }]),
     );
 
     return {
@@ -1297,7 +2216,10 @@ export const getPromptInsight = createServerFn({ method: "POST" })
             engine: run.engine,
             createdAt: run.created_at,
             runIndex: run.run_index ?? null,
-            visibility: run.visibility === null || run.visibility === undefined ? null : Number(run.visibility),
+            visibility:
+              run.visibility === null || run.visibility === undefined
+                ? null
+                : Number(run.visibility),
           }
         : null,
       runs: allRuns.map((row, index) => ({
@@ -1373,7 +2295,11 @@ export const searchCompetitors = createServerFn({ method: "POST" })
     const { normalizeCompetitors, cleanDomain } = await import("./competitors");
     const [{ data: brand }, { data: intel }] = await Promise.all([
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
-      context.supabase.from("brand_intelligence").select("summary, competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase
+        .from("brand_intelligence")
+        .select("summary, competitors")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
     ]);
     if (!brand) throw new Error("Marka bulunamadı");
 
@@ -1402,7 +2328,11 @@ Arama: ${data.query?.trim() || "aynı sektördeki başlıca rakipler"}`,
               type: "array",
               items: {
                 type: "object",
-                properties: { name: { type: "string" }, domain: { type: "string" }, reason: { type: "string" } },
+                properties: {
+                  name: { type: "string" },
+                  domain: { type: "string" },
+                  reason: { type: "string" },
+                },
                 required: ["name", "domain", "reason"],
                 additionalProperties: false,
               },
@@ -1420,7 +2350,9 @@ Arama: ${data.query?.trim() || "aynı sektördeki başlıca rakipler"}`,
     const existingDomains = new Set(saved.map((c) => c.domain).filter(Boolean));
     return result.competitors
       .map((c) => ({ ...c, domain: cleanDomain(c.domain) }))
-      .filter((c) => c.name && !existingNames.has(c.name.toLowerCase()) && !existingDomains.has(c.domain))
+      .filter(
+        (c) => c.name && !existingNames.has(c.name.toLowerCase()) && !existingDomains.has(c.domain),
+      )
       .slice(0, 8);
   });
 
@@ -1433,7 +2365,11 @@ export const getCompetitors = createServerFn({ method: "POST" })
     const { isUnlimited } = await import("./plan-limits");
     const { normalizeCompetitors } = await import("./competitors");
     const [{ data: intel }, limits] = await Promise.all([
-      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase
+        .from("brand_intelligence")
+        .select("competitors")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
       getUserPlan(context.supabase, context.userId),
     ]);
     const competitors = normalizeCompetitors(intel?.competitors);
@@ -1444,17 +2380,27 @@ export const getCompetitors = createServerFn({ method: "POST" })
       planLabel: limits.label,
       maxCompetitors: limits.maxCompetitors,
       unlimited,
-      remaining: unlimited ? Number.MAX_SAFE_INTEGER : Math.max(0, limits.maxCompetitors - competitors.length),
+      remaining: unlimited
+        ? Number.MAX_SAFE_INTEGER
+        : Math.max(0, limits.maxCompetitors - competitors.length),
     };
   });
 
 export const saveCompetitors = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; competitors: Array<{ name: string; domain?: string; type?: string }> }) => input)
+  .inputValidator(
+    (input: {
+      brandId: string;
+      competitors: Array<{ name: string; domain?: string; type?: string }>;
+    }) => input,
+  )
   .handler(async ({ data, context }) => {
     const { normalizeCompetitors } = await import("./competitors");
     const { data: current } = await context.supabase
-      .from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle();
+      .from("brand_intelligence")
+      .select("competitors")
+      .eq("brand_id", data.brandId)
+      .maybeSingle();
     const previous = normalizeCompetitors(current?.competitors).length;
     const next = normalizeCompetitors(data.competitors);
     // Liste küçülüyorsa (rakip kaldırma) kota kontrolü yapılmaz.
@@ -1464,7 +2410,10 @@ export const saveCompetitors = createServerFn({ method: "POST" })
         await assertCompetitorQuota(context.supabase, context.userId, next.length);
       } catch (error) {
         // Kota aşımı bir hata değil, kullanıcıya gösterilecek bir durumdur.
-        return { ok: false as const, message: error instanceof Error ? error.message : "Plan limiti aşıldı." };
+        return {
+          ok: false as const,
+          message: error instanceof Error ? error.message : "Plan limiti aşıldı.",
+        };
       }
     }
     const { error } = await context.supabase
@@ -1487,7 +2436,11 @@ export const promoteCompetitorCandidate = createServerFn({ method: "POST" })
         .eq("id", data.candidateId)
         .eq("brand_id", data.brandId)
         .single(),
-      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase
+        .from("brand_intelligence")
+        .select("competitors")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
     ]);
     if (!candidate) return { ok: false as const, message: "Aday bulunamadı." };
 
@@ -1501,7 +2454,10 @@ export const promoteCompetitorCandidate = createServerFn({ method: "POST" })
       try {
         await assertCompetitorQuota(context.supabase, context.userId, next.length);
       } catch (error) {
-        return { ok: false as const, message: error instanceof Error ? error.message : "Plan limiti aşıldı." };
+        return {
+          ok: false as const,
+          message: error instanceof Error ? error.message : "Plan limiti aşıldı.",
+        };
       }
     }
     const { error } = await context.supabase
@@ -1536,7 +2492,10 @@ export const suggestGeoTasks = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { createPriorityTasks } = await import("./tasks.server");
     const { data: citations } = await context.supabase
-      .from("citations").select("is_own_domain").eq("brand_id", data.brandId).limit(500);
+      .from("citations")
+      .select("is_own_domain")
+      .eq("brand_id", data.brandId)
+      .limit(500);
     const created = await createPriorityTasks(context.supabase, data.brandId, citations ?? []);
     return { created };
   });
@@ -1553,17 +2512,26 @@ export const getCompetitorInsights = createServerFn({ method: "POST" })
         .eq("brand_id", data.brandId)
         .order("created_at", { ascending: false })
         .limit(1000),
-      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase
+        .from("brand_intelligence")
+        .select("competitors")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
       context.supabase.from("brands").select("domain").eq("id", data.brandId).single(),
     ]);
 
     const { normalizeCompetitors, domainIsTracked } = await import("./competitors");
     const tracked = normalizeCompetitors(intel?.competitors);
-    const ownDomain = (brand?.domain ?? "").replace(/^https?:\/\//, "").replace(/^www\./, "").toLowerCase();
+    const ownDomain = (brand?.domain ?? "")
+      .replace(/^https?:\/\//, "")
+      .replace(/^www\./, "")
+      .toLowerCase();
     const counts = new Map<string, number>();
     for (const row of citations ?? []) {
       if (row.is_own_domain) continue;
-      const domain = String(row.domain ?? "").replace(/^www\./, "").toLowerCase();
+      const domain = String(row.domain ?? "")
+        .replace(/^www\./, "")
+        .toLowerCase();
       if (!domain || domain === ownDomain) continue;
       counts.set(domain, (counts.get(domain) ?? 0) + 1);
     }
@@ -1596,12 +2564,20 @@ export const getCompetitorVisibilityTrend = createServerFn({ method: "POST" })
         .gte("created_at", since)
         .order("created_at", { ascending: true })
         .limit(2000),
-      context.supabase.from("brand_intelligence").select("competitors").eq("brand_id", data.brandId).maybeSingle(),
+      context.supabase
+        .from("brand_intelligence")
+        .select("competitors")
+        .eq("brand_id", data.brandId)
+        .maybeSingle(),
       context.supabase.from("brands").select("name").eq("id", data.brandId).single(),
     ]);
 
     return buildCompetitorTrend(
-      (runs ?? []).map((r) => ({ created_at: r.created_at, brand_mentioned: Boolean(r.brand_mentioned), raw_answer: r.raw_answer })),
+      (runs ?? []).map((r) => ({
+        created_at: r.created_at,
+        brand_mentioned: Boolean(r.brand_mentioned),
+        raw_answer: r.raw_answer,
+      })),
       brand?.name ?? "Markanız",
       normalizeCompetitors(intel?.competitors),
       days,
@@ -1648,7 +2624,9 @@ export const startEvidenceBridge = createServerFn({ method: "POST" })
 
 export const runEvidenceBridgeChunk = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { batchId: string; brandId: string; runId: string; competitorDomain: string }) => input)
+  .inputValidator(
+    (input: { batchId: string; brandId: string; runId: string; competitorDomain: string }) => input,
+  )
   .handler(async ({ data, context }) => {
     const { measurePrompt } = await import("./measurement.server");
     const { fetchSitemapUrls } = await import("./ai.server");
@@ -1658,14 +2636,22 @@ export const runEvidenceBridgeChunk = createServerFn({ method: "POST" })
 
     const [{ data: brand }, { data: prompt }, { data: run }] = await Promise.all([
       context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
-      context.supabase.from("evidence_bridge_runs").select("prompt_id").eq("id", data.runId).single(),
+      context.supabase
+        .from("evidence_bridge_runs")
+        .select("prompt_id")
+        .eq("id", data.runId)
+        .single(),
       context.supabase.from("evidence_bridge_runs").select("*").eq("id", data.runId).single(),
     ]);
 
     if (!brand || !run) throw new Error("Brand or run not found");
 
-    const promptData = await context.supabase.from("prompts").select("text").eq("id", run.prompt_id).single();
-    const promptText = (promptData.data as any)?.text || "";
+    const promptData = await context.supabase
+      .from("prompts")
+      .select("text")
+      .eq("id", run.prompt_id)
+      .single();
+    const promptText = promptData.data?.text ?? "";
 
     const startedAt = Date.now();
     try {
@@ -1726,19 +2712,22 @@ export const runEvidenceBridgeChunk = createServerFn({ method: "POST" })
       });
 
       // Sonuçları kaydet
-      const { error } = await context.supabase.from("evidence_bridge_runs").update({
-        status: "completed",
-        ai_response_raw: measured.answer,
-        ai_response_parsed: {
-          mentioned_brands: measured.mentionedBrands,
-          sources: measured.sources,
-          position: measured.position,
-        },
-        firecrawl_brand: brandEvidenceResults[0],
-        firecrawl_competitor: competitorEvidenceResults[0],
-        content_priorities: priorities,
-        finished_at: new Date().toISOString(),
-      }).eq("id", data.runId);
+      const { error } = await context.supabase
+        .from("evidence_bridge_runs")
+        .update({
+          status: "completed",
+          ai_response_raw: measured.answer,
+          ai_response_parsed: {
+            mentioned_brands: measured.mentionedBrands,
+            sources: measured.sources,
+            position: measured.position,
+          },
+          firecrawl_brand: brandEvidenceResults[0],
+          firecrawl_competitor: competitorEvidenceResults[0],
+          content_priorities: priorities,
+          finished_at: new Date().toISOString(),
+        })
+        .eq("id", data.runId);
 
       if (error) throw new Error(error.message);
 
@@ -1769,8 +2758,8 @@ export const finishEvidenceBridge = createServerFn({ method: "POST" })
       .select("*")
       .eq("batch_id", data.batchId);
 
-    const completed = (runs ?? []).filter((r: any) => r.status === "completed").length;
-    const failed = (runs ?? []).filter((r: any) => r.status === "failed").length;
+    const completed = (runs ?? []).filter((row) => row.status === "completed").length;
+    const failed = (runs ?? []).filter((row) => row.status === "failed").length;
 
     const status = failed > 0 ? "failed" : completed > 0 ? "completed" : "pending";
 

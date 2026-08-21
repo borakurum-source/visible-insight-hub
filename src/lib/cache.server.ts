@@ -1,7 +1,7 @@
 // Sunucu tarafı yanıt önbelleği: aynı istek için tekrar tekrar dış API çağırmayı önler.
 // Kayıtlar public.ai_cache tablosunda tutulur (yalnızca service_role erişir).
 
-type CacheKind = "perplexity" | "measurement" | "embedding" | "deepseek";
+type CacheKind = "perplexity" | "measurement" | "embedding" | "firecrawl-extract";
 
 const memory = new Map<string, { value: unknown; expiresAt: number }>();
 const MEMORY_LIMIT = 500;
@@ -62,7 +62,12 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
   }
 }
 
-export async function cacheSet(key: string, kind: CacheKind, value: unknown, ttlSeconds: number): Promise<void> {
+export async function cacheSet(
+  key: string,
+  kind: CacheKind,
+  value: unknown,
+  ttlSeconds: number,
+): Promise<void> {
   memorySet(key, value, Math.min(ttlSeconds, 300));
   const db = await admin();
   if (!db) return;
@@ -101,5 +106,4 @@ export const CACHE_TTL = {
   perplexity: 60 * 60 * 12, // 12 saat
   measurement: 60 * 60 * 6, // 6 saat
   embedding: 60 * 60 * 24 * 30, // 30 gün
-  deepseek: 60 * 60 * 24, // 1 gün
 } as const;

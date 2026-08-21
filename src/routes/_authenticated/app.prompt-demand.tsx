@@ -1,23 +1,45 @@
 import { useMemo, useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Activity, ArrowUpRight, Gauge, Info, Loader2, Radar, Search, Target } from "lucide-react";
+import {
+  Activity,
+  ArrowUpRight,
+  Gauge,
+  History,
+  Info,
+  Loader2,
+  Radar,
+  Search,
+  Target,
+} from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
-import { PanelSubnav, VISIBILITY_SUBNAV } from "@/components/app/panel-subnav";
+import { PanelSubnav, OPPORTUNITY_SUBNAV } from "@/components/app/panel-subnav";
 import { DemandCitationMatrix, PlatformBars } from "@/components/app/prompt-demand/demand-visuals";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { addDiscoveredPrompts, listPrompts } from "@/lib/panel.functions";
-import { analyzePromptDemand } from "@/lib/prompt-demand.functions";
+import { analyzePromptDemand, listPromptDemandHistory } from "@/lib/prompt-demand.functions";
 import { normalizePromptText } from "@/lib/prompt-normalize";
-import { DEMAND_TOOLTIP, INTENT_LABELS, LEVEL_LABELS, SOURCE_LABELS, rowSourceLabel } from "@/lib/prompt-demand/config";
+import {
+  DEMAND_TOOLTIP,
+  INTENT_LABELS,
+  LEVEL_LABELS,
+  SOURCE_LABELS,
+  rowSourceLabel,
+} from "@/lib/prompt-demand/config";
 import type { Level, PromptDemandRow } from "@/lib/prompt-demand/types";
 import { useActiveBrand } from "@/lib/use-panel";
 
@@ -25,9 +47,16 @@ export const Route = createFileRoute("/_authenticated/app/prompt-demand")({
   head: () => ({
     meta: [
       { title: "AI Talep Keşfi — OneCite Paneli" },
-      { name: "description", content: "Bir konu etrafındaki AI prompt talebini ölçün, kaynak gösterim payınızı görün ve kanıt boşluklarını aksiyona çevirin." },
+      {
+        name: "description",
+        content:
+          "Bir konu etrafındaki AI prompt talebini ölçün, kaynak gösterim payınızı görün ve kanıt boşluklarını aksiyona çevirin.",
+      },
       { property: "og:title", content: "AI Talep Keşfi — OneCite Paneli" },
-      { property: "og:description", content: "AI Talebi, kaynak gösterim payı ve kanıt boşluğu analizi." },
+      {
+        property: "og:description",
+        content: "AI Talebi, kaynak gösterim payı ve kanıt boşluğu analizi.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -48,12 +77,17 @@ const CITATION_LABEL: Record<PromptDemandRow["citationStatus"], string> = {
   competitor_cited: "Rakip kaynak gösteriliyor",
 };
 
-const EXAMPLE_TOPICS = ["yapay zeka görünürlük aracı", "e-ticaret kargo entegrasyonu", "kurumsal SEO ajansı"];
+const EXAMPLE_TOPICS = [
+  "yapay zeka görünürlük aracı",
+  "e-ticaret kargo entegrasyonu",
+  "kurumsal SEO ajansı",
+];
 
 function PromptDemandPage() {
   const { brand } = useActiveBrand();
   const queryClient = useQueryClient();
   const analyze = useServerFn(analyzePromptDemand);
+  const loadHistory = useServerFn(listPromptDemandHistory);
   const addPrompts = useServerFn(addDiscoveredPrompts);
   const fetchExisting = useServerFn(listPrompts);
 
@@ -67,15 +101,23 @@ function PromptDemandPage() {
   const [existingPrompts, setExistingPrompts] = useState<Array<{ id: string; text: string }>>([]);
 
   const run = useMutation({
-    mutationFn: (value: string) => analyze({ data: { brandId: brand!.id, topic: value, country, language } }),
+    mutationFn: (value: string) =>
+      analyze({ data: { brandId: brand!.id, topic: value, country, language } }),
+    onSuccess: () =>
+      void queryClient.invalidateQueries({ queryKey: ["prompt-demand-history", brand?.id] }),
     onError: (error: Error) => toast.error(error.message),
+  });
+  const history = useQuery({
+    queryKey: ["prompt-demand-history", brand?.id],
+    queryFn: () => loadHistory({ data: { brandId: brand!.id, limit: 12 } }),
+    enabled: Boolean(brand?.id),
   });
   const result = run.data ?? null;
 
   // Fetch existing prompts when brand changes
   useEffect(() => {
     if (brand) {
-      fetchExisting({ data: { brandId: brand.id } }).then((existing: any[]) => {
+      fetchExisting({ data: { brandId: brand.id } }).then((existing) => {
         setExistingPrompts(existing || []);
       });
     }
@@ -86,7 +128,11 @@ function PromptDemandPage() {
       addPrompts({
         data: {
           brandId: brand!.id,
-          items: rows.map((row) => ({ text: row.text, cluster: result?.canonicalCluster ?? "talep", intent: row.intent })),
+          items: rows.map((row) => ({
+            text: row.text,
+            cluster: result?.canonicalCluster ?? "talep",
+            intent: row.intent,
+          })),
         },
       }),
     onSuccess: (_data, rows) => {
@@ -94,7 +140,7 @@ function PromptDemandPage() {
       void queryClient.invalidateQueries({ queryKey: ["prompts", brand?.id] });
       // Refresh existing prompts list
       if (brand) {
-        fetchExisting({ data: { brandId: brand.id } }).then((existing: any[]) => {
+        fetchExisting({ data: { brandId: brand.id } }).then((existing) => {
           setExistingPrompts(existing || []);
         });
       }
@@ -105,30 +151,36 @@ function PromptDemandPage() {
   const prompts = useMemo(() => {
     if (!result) return [];
     // Filter discovered prompts: hide those already tracked
-    const existingNormalized = new Set(
-      existingPrompts.map((p) => normalizePromptText(p.text))
-    );
+    const existingNormalized = new Set(existingPrompts.map((p) => normalizePromptText(p.text)));
     return result.prompts.filter(
       (row) =>
         (intentFilter === "all" || row.intent === intentFilter) &&
         (citationFilter === "all" || row.citationStatus === citationFilter) &&
-        !existingNormalized.has(normalizePromptText(row.text)) // Hide duplicates
+        !existingNormalized.has(normalizePromptText(row.text)), // Hide duplicates
     );
   }, [result, intentFilter, citationFilter, existingPrompts]);
 
   if (!brand) {
     return (
       <>
-        <PanelSubnav items={VISIBILITY_SUBNAV} />
-        <PanelPageHeading meta={{ title: "AI Talep Keşfi", description: "Önce bir marka ekleyin.", icon: Radar }} />
-        <Card><CardContent className="py-10 text-center"><Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button></CardContent></Card>
+        <PanelSubnav items={OPPORTUNITY_SUBNAV} />
+        <PanelPageHeading
+          meta={{ title: "AI Talep Keşfi", description: "Önce bir marka ekleyin.", icon: Radar }}
+        />
+        <Card>
+          <CardContent className="py-10 text-center">
+            <Button asChild>
+              <Link to="/app/onboarding">Markanı ekle</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </>
     );
   }
 
   return (
     <TooltipProvider delayDuration={150}>
-      <PanelSubnav items={VISIBILITY_SUBNAV} />
+      <PanelSubnav items={OPPORTUNITY_SUBNAV} />
       <PanelPageHeading
         meta={{
           title: "AI Talep Keşfi",
@@ -144,7 +196,10 @@ function PromptDemandPage() {
             className="flex flex-col gap-2 md:flex-row"
             onSubmit={(event) => {
               event.preventDefault();
-              if (topic.trim().length < 3) { toast.error("En az 3 karakterlik bir konu girin"); return; }
+              if (topic.trim().length < 3) {
+                toast.error("En az 3 karakterlik bir konu girin");
+                return;
+              }
               run.mutate(topic.trim());
             }}
           >
@@ -158,7 +213,9 @@ function PromptDemandPage() {
               />
             </div>
             <Select value={country} onValueChange={setCountry}>
-              <SelectTrigger className="md:w-32"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="md:w-32">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="TR">Türkiye</SelectItem>
                 <SelectItem value="US">ABD</SelectItem>
@@ -166,7 +223,9 @@ function PromptDemandPage() {
               </SelectContent>
             </Select>
             <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="md:w-32"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="md:w-32">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="tr">Türkçe</SelectItem>
                 <SelectItem value="en">İngilizce</SelectItem>
@@ -174,7 +233,11 @@ function PromptDemandPage() {
               </SelectContent>
             </Select>
             <Button type="submit" disabled={run.isPending}>
-              {run.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Radar className="mr-2 h-4 w-4" />}
+              {run.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Radar className="mr-2 h-4 w-4" />
+              )}
               Talebi analiz et
             </Button>
           </form>
@@ -186,7 +249,10 @@ function PromptDemandPage() {
                   key={example}
                   type="button"
                   className="rounded-full border border-border px-2.5 py-1 transition-colors hover:border-primary/50 hover:text-foreground"
-                  onClick={() => { setTopic(example); run.mutate(example); }}
+                  onClick={() => {
+                    setTopic(example);
+                    run.mutate(example);
+                  }}
                 >
                   {example}
                 </button>
@@ -196,8 +262,62 @@ function PromptDemandPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <History className="h-4 w-4" /> Son keşif çalışmaları
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          {history.isLoading ? (
+            <p className="text-xs text-muted-foreground">Geçmiş yükleniyor…</p>
+          ) : null}
+          {!history.isLoading && !history.data?.length ? (
+            <p className="text-xs text-muted-foreground">
+              İlk keşif çalışmanız burada kalıcı olarak görünecek.
+            </p>
+          ) : null}
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {(history.data ?? []).map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="rounded-lg border border-border p-3 text-left transition-colors hover:border-primary/40"
+                onClick={() => {
+                  const previousTopic = item.query_manifest?.topic ?? "";
+                  if (!previousTopic) return;
+                  setTopic(previousTopic);
+                  setCountry(item.query_manifest?.country ?? "TR");
+                  setLanguage(item.query_manifest?.language ?? "tr");
+                  run.mutate(previousTopic);
+                }}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="line-clamp-1 text-sm font-medium">
+                    {item.query_manifest?.topic ?? "Keşif"}
+                  </span>
+                  <Badge variant="outline">{Math.round(item.opportunity_signal ?? 0)}/100</Badge>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {new Date(item.created_at).toLocaleString("tr-TR")} ·{" "}
+                  {item.signal_class === "observed_search_demand"
+                    ? "GSC gözlemi"
+                    : item.signal_class === "observed_ai_referral"
+                      ? "GA4 AI referral"
+                      : "Keşif/kanıt sinyali"}
+                </p>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {run.isPending ? (
-        <Card><CardContent className="flex items-center gap-2 p-6 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Prompt talebi modelleniyor…</CardContent></Card>
+        <Card>
+          <CardContent className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Prompt talebi modelleniyor…
+          </CardContent>
+        </Card>
       ) : null}
 
       {result ? (
@@ -205,10 +325,10 @@ function PromptDemandPage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <MetricCard
               icon={Activity}
-              label="AI Talebi (aylık)"
-              value={`${number.format(result.demandRange.low)} – ${number.format(result.demandRange.high)}`}
-              hint={DEMAND_TOOLTIP}
-              foot={`Orta değer ${number.format(result.demandRange.mid)} · ${result.trend >= 0 ? "+" : ""}${result.trend}% eğilim · ${result.promptCount} prompt`}
+              label="Fırsat Sinyali"
+              value={`${result.opportunityScore}/100`}
+              hint="Gözlenmemiş arama hacmi değildir; niyet, kanıt boşluğu, rekabet ve mevcut ölçüm kapsamının birleşik sinyalidir."
+              foot={`${result.promptCount} prompt · ${result.signalSources.gscMatchedPrompts} GSC eşleşmesi`}
               badge={`Güven: ${LEVEL_LABELS[result.confidence]}`}
             />
             <MetricCard
@@ -216,7 +336,7 @@ function PromptDemandPage() {
               label="AI Kaynak Payınız"
               value={`%${Math.round(result.citationShare * 100)}`}
               hint="Bu kümedeki sorularda markanızın kaynak gösterilme oranı."
-              foot={`${number.format(result.demandCovered)} talep karşılanıyor`}
+              foot={`${result.prompts.filter((item) => item.citationStatus === "cited").length} promptta görünür`}
               badge={SOURCE_LABELS[result.citationShareSource]}
             />
             <MetricCard
@@ -232,7 +352,11 @@ function PromptDemandPage() {
               label="Öne çıkan rakip"
               value={result.leadingCompetitor ? result.leadingCompetitor.name : "Veri yok"}
               hint="Ölçümlerinizde en sık kaynak gösterilen rakip alan adı."
-              foot={result.leadingCompetitor ? `%${Math.round(result.leadingCompetitor.share * 100)} kaynak payı` : "Ölçüm yaptıkça dolar"}
+              foot={
+                result.leadingCompetitor
+                  ? `%${Math.round(result.leadingCompetitor.share * 100)} kaynak payı`
+                  : "Ölçüm yaptıkça dolar"
+              }
               badge={result.canonicalCluster}
             />
           </div>
@@ -240,45 +364,72 @@ function PromptDemandPage() {
           <Card>
             <CardContent className="flex flex-col gap-2 p-4 text-sm md:flex-row md:items-center md:justify-between">
               <p className="text-muted-foreground">
-                <span className="font-medium text-foreground">Zincir:</span> Talep {number.format(result.demand)} → Kaynak payı %
-                {Math.round(result.citationShare * 100)} → {result.evidenceGaps.length} kanıt boşluğu → {result.actions.length} önerilen aksiyon
+                <span className="font-medium text-foreground">Zincir:</span> Fırsat{" "}
+                {result.opportunityScore}/100 → Kaynak payı %
+                {Math.round(result.citationShare * 100)} → {result.evidenceGaps.length} kanıt
+                boşluğu → {result.actions.length} önerilen aksiyon
               </p>
               <span className="text-xs text-muted-foreground">{result.confidenceReason}</span>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">Veriyi besleyen kaynaklar</CardTitle></CardHeader>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Veriyi besleyen kaynaklar</CardTitle>
+            </CardHeader>
             <CardContent className="space-y-2 p-4 pt-0 text-xs">
               <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className={result.signalSources.gscConnected ? LEVEL_TONE.high : LEVEL_TONE.low}>
+                <Badge
+                  variant="outline"
+                  className={result.signalSources.gscConnected ? LEVEL_TONE.high : LEVEL_TONE.low}
+                >
                   Search Console: {result.signalSources.gscConnected ? "bağlı" : "bağlı değil"}
                 </Badge>
-                <Badge variant="outline" className={result.signalSources.ga4Connected ? LEVEL_TONE.high : LEVEL_TONE.low}>
+                <Badge
+                  variant="outline"
+                  className={result.signalSources.ga4Connected ? LEVEL_TONE.high : LEVEL_TONE.low}
+                >
                   GA4: {result.signalSources.ga4Connected ? "bağlı" : "bağlı değil"}
                 </Badge>
-                <Badge variant="outline" className={result.signalSources.gscMatchedPrompts > 0 ? LEVEL_TONE.high : LEVEL_TONE.medium}>
+                <Badge
+                  variant="outline"
+                  className={
+                    result.signalSources.gscMatchedPrompts > 0 ? LEVEL_TONE.high : LEVEL_TONE.medium
+                  }
+                >
                   {result.signalSources.gscMatchedPrompts} prompt gerçek arama verisiyle eşleşti
                 </Badge>
                 <Badge variant="outline" className={LEVEL_TONE.medium}>
                   {result.signalSources.measuredPrompts} prompt OneCite ölçümünden
                 </Badge>
-                <Badge variant="outline" className={result.signalSources.matchMethod === "vector" ? LEVEL_TONE.high : LEVEL_TONE.medium}>
-                  Eşleştirme: {result.signalSources.matchMethod === "vector" ? "anlamsal (vektör)" : "kelime örtüşmesi (yedek)"}
+                <Badge
+                  variant="outline"
+                  className={
+                    result.signalSources.matchMethod === "vector"
+                      ? LEVEL_TONE.high
+                      : LEVEL_TONE.medium
+                  }
+                >
+                  Eşleştirme:{" "}
+                  {result.signalSources.matchMethod === "vector"
+                    ? "anlamsal (vektör)"
+                    : "kelime örtüşmesi (yedek)"}
                 </Badge>
                 {result.signalSources.gscAddedPrompts > 0 ? (
                   <Badge variant="outline" className={LEVEL_TONE.high}>
-                    +{result.signalSources.gscAddedPrompts} sorgu doğrudan Search Console'dan eklendi
+                    +{result.signalSources.gscAddedPrompts} sorgu doğrudan Search Console'dan
+                    eklendi
                   </Badge>
                 ) : null}
               </div>
               <p className="text-muted-foreground">
                 {result.signalSources.gscConnected
                   ? `Search Console'dan ${number.format(result.signalSources.gscQueryCount)} sorgu ve ${number.format(result.signalSources.gscImpressions)} gösterim okundu${result.signalSources.snapshotDate ? ` (${result.signalSources.snapshotDate})` : ""}. Eşleşen promptlarda gösterim ölçülmüş veridir; toplam talep bu gösterimden tıklama eğrisiyle modellenir, yani ölçüm değil gerçek veriye dayalı tahmindir.`
-                  : "Search Console bağlı değil; hacimler şu an dil modeli tahminidir. Bağladığınızda eşleşen promptlar gerçek gösterim verisine geçer."}
+                  : "Search Console bağlı değil; mutlak arama hacmi gösterilmez. Perplexity ve Firecrawl yalnız keşif/kanıt sinyali sağlar; GSC bağlandığında gözlenen gösterimler ayrıca etiketlenir."}
               </p>
               <p className="text-muted-foreground">
-                <span className="font-medium text-foreground">Kalibrasyon:</span> {result.calibration.note}
+                <span className="font-medium text-foreground">Kalibrasyon:</span>{" "}
+                {result.calibration.note}
               </p>
               <p className="text-muted-foreground">
                 <span className="font-medium text-foreground">GA4:</span> {result.ga4Signal.note}
@@ -293,12 +444,20 @@ function PromptDemandPage() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">Platform dağılımı</CardTitle></CardHeader>
-              <CardContent><PlatformBars items={result.platformDemand} /></CardContent>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Platform dağılımı</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PlatformBars items={result.platformDemand} />
+              </CardContent>
             </Card>
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">Talep — Kaynak gösterimi matrisi</CardTitle></CardHeader>
-              <CardContent><DemandCitationMatrix prompts={result.prompts} onSelect={setSelected} /></CardContent>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Talep — Kaynak gösterimi matrisi</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DemandCitationMatrix prompts={result.prompts} onSelect={setSelected} />
+              </CardContent>
             </Card>
           </div>
 
@@ -307,16 +466,22 @@ function PromptDemandPage() {
               <CardTitle className="text-sm">Prompt kümeleri</CardTitle>
               <div className="flex flex-wrap gap-2">
                 <Select value={intentFilter} onValueChange={setIntentFilter}>
-                  <SelectTrigger className="h-8 w-40 text-xs"><SelectValue placeholder="Niyet" /></SelectTrigger>
+                  <SelectTrigger className="h-8 w-40 text-xs">
+                    <SelectValue placeholder="Niyet" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tüm niyetler</SelectItem>
                     {Object.entries(INTENT_LABELS).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Select value={citationFilter} onValueChange={setCitationFilter}>
-                  <SelectTrigger className="h-8 w-48 text-xs"><SelectValue placeholder="Kaynak durumu" /></SelectTrigger>
+                  <SelectTrigger className="h-8 w-48 text-xs">
+                    <SelectValue placeholder="Kaynak durumu" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Tüm kaynak durumları</SelectItem>
                     <SelectItem value="not_cited">Kaynak gösterilmiyor</SelectItem>
@@ -356,21 +521,41 @@ function PromptDemandPage() {
                         onClick={() => setSelected(row)}
                       >
                         <td className="max-w-sm px-4 py-2.5">{row.text}</td>
-                        <td className="px-4 py-2.5 text-xs text-muted-foreground">{INTENT_LABELS[row.intent]}</td>
-                        <td className="px-4 py-2.5 text-right tabular-nums">{number.format(row.uniqueDemand)}</td>
-                        <td className="px-4 py-2.5 text-xs">{CITATION_LABEL[row.citationStatus]}</td>
+                        <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                          {INTENT_LABELS[row.intent]}
+                        </td>
+                        <td className="px-4 py-2.5 text-right tabular-nums">
+                          {number.format(row.uniqueDemand)}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs">
+                          {CITATION_LABEL[row.citationStatus]}
+                        </td>
                         <td className="px-4 py-2.5 text-xs text-muted-foreground">
                           {rowSourceLabel(row.origin, row.source)}
                           {row.pendingMeasurement ? " · ilk ölçüm bekleniyor" : ""}
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-muted-foreground">{row.evidenceGapType}</td>
+                        <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                          {row.evidenceGapType}
+                        </td>
                         <td className="px-4 py-2.5 text-right">
-                          <Badge variant="outline" className={`text-[10px] ${LEVEL_TONE[row.opportunity]}`}>{row.opportunityScore}</Badge>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] ${LEVEL_TONE[row.opportunity]}`}
+                          >
+                            {row.opportunityScore}
+                          </Badge>
                         </td>
                       </tr>
                     ))}
                     {prompts.length === 0 ? (
-                      <tr><td colSpan={7} className="px-4 py-6 text-center text-sm text-muted-foreground">Bu filtreyle eşleşen prompt yok.</td></tr>
+                      <tr>
+                        <td
+                          colSpan={7}
+                          className="px-4 py-6 text-center text-sm text-muted-foreground"
+                        >
+                          Bu filtreyle eşleşen prompt yok.
+                        </td>
+                      </tr>
                     ) : null}
                   </tbody>
                 </table>
@@ -380,42 +565,63 @@ function PromptDemandPage() {
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">Kanıt boşlukları</CardTitle></CardHeader>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Kanıt boşlukları</CardTitle>
+              </CardHeader>
               <CardContent className="space-y-3">
                 {result.evidenceGaps.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Bu kümede belirgin bir kanıt boşluğu bulunmadı.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Bu kümede belirgin bir kanıt boşluğu bulunmadı.
+                  </p>
                 ) : null}
                 {result.evidenceGaps.map((gap) => (
                   <div key={gap.type} className="rounded-lg border border-border p-3">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-medium">{gap.type}</p>
-                      <Badge variant="outline" className={`text-[10px] ${LEVEL_TONE[gap.impact]}`}>{LEVEL_LABELS[gap.impact]} etki</Badge>
+                      <Badge variant="outline" className={`text-[10px] ${LEVEL_TONE[gap.impact]}`}>
+                        {LEVEL_LABELS[gap.impact]} etki
+                      </Badge>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{gap.why}</p>
                     <p className="mt-2 text-xs">
-                      Etkilenen talep: <span className="font-medium">{number.format(gap.affectedDemand)}</span> · {gap.affectedPrompts} prompt
+                      Etkilenen talep:{" "}
+                      <span className="font-medium">{number.format(gap.affectedDemand)}</span> ·{" "}
+                      {gap.affectedPrompts} prompt
                     </p>
                   </div>
                 ))}
               </CardContent>
             </Card>
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">Önerilen aksiyonlar</CardTitle></CardHeader>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Önerilen aksiyonlar</CardTitle>
+              </CardHeader>
               <CardContent className="space-y-3">
                 {result.actions.map((action) => (
                   <div key={action.title} className="rounded-lg border border-border p-3">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium">{action.verb}: {action.title}</p>
-                      <Badge variant="outline" className={`text-[10px] ${LEVEL_TONE[action.opportunity]}`}>{LEVEL_LABELS[action.opportunity]} fırsat</Badge>
+                      <p className="text-sm font-medium">
+                        {action.verb}: {action.title}
+                      </p>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] ${LEVEL_TONE[action.opportunity]}`}
+                      >
+                        {LEVEL_LABELS[action.opportunity]} fırsat
+                      </Badge>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{action.reason}</p>
                     <p className="mt-2 text-xs">
-                      Kazanılabilir talep: <span className="font-medium">{number.format(action.potentialDemand)}</span> · {action.affectedPrompts} prompt
+                      Kazanılabilir talep:{" "}
+                      <span className="font-medium">{number.format(action.potentialDemand)}</span> ·{" "}
+                      {action.affectedPrompts} prompt
                     </p>
                   </div>
                 ))}
                 {result.actions.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Aksiyon önerisi için önce kanıt boşluğu tespit edilmeli.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Aksiyon önerisi için önce kanıt boşluğu tespit edilmeli.
+                  </p>
                 ) : null}
                 <Button asChild size="sm" variant="outline" className="w-full">
                   <Link to="/app/geo-tasks">Görevler sayfasına git</Link>
@@ -426,14 +632,26 @@ function PromptDemandPage() {
 
           <Card>
             <CardContent className="space-y-2 p-4 text-xs text-muted-foreground">
-              <button type="button" className="text-foreground underline-offset-2 hover:underline" onClick={() => setShowDebug((v) => !v)}>
+              <button
+                type="button"
+                className="text-foreground underline-offset-2 hover:underline"
+                onClick={() => setShowDebug((v) => !v)}
+              >
                 {showDebug ? "Metodoloji detayını gizle" : "Bu sayı nasıl hesaplandı?"}
               </button>
               {showDebug ? (
                 <div className="space-y-1">
-                  <p>Küme güven skoru: {result.confidenceScore} ({LEVEL_LABELS[result.confidence]})</p>
-                  <p>Prompt talebi = Ham arama talebi × AI kullanım katsayısı × Prompt uygunluğu × Semantik güven.</p>
-                  <p>Küme talebi, semantik örtüşme indirimi sonrası benzersiz katkıların toplamıdır; hacimler asla doğrudan toplanmaz.</p>
+                  <p>
+                    Küme güven skoru: {result.confidenceScore} ({LEVEL_LABELS[result.confidence]})
+                  </p>
+                  <p>
+                    Prompt talebi = Ham arama talebi × AI kullanım katsayısı × Prompt uygunluğu ×
+                    Semantik güven.
+                  </p>
+                  <p>
+                    Küme talebi, semantik örtüşme indirimi sonrası benzersiz katkıların toplamıdır;
+                    hacimler asla doğrudan toplanmaz.
+                  </p>
                   <p>{DEMAND_TOOLTIP}</p>
                 </div>
               ) : null}
@@ -446,7 +664,9 @@ function PromptDemandPage() {
         <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
           {selected ? (
             <>
-              <SheetHeader><SheetTitle className="text-base leading-snug">{selected.text}</SheetTitle></SheetHeader>
+              <SheetHeader>
+                <SheetTitle className="text-base leading-snug">{selected.text}</SheetTitle>
+              </SheetHeader>
               <div className="mt-4 space-y-4 text-sm">
                 <div className="grid grid-cols-2 gap-3">
                   <Stat label="AI Talebi" value={number.format(selected.uniqueDemand)} />
@@ -457,7 +677,8 @@ function PromptDemandPage() {
                 <div className="rounded-lg border border-border p-3">
                   <p className="text-xs font-medium">Kaynak durumu</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {CITATION_LABEL[selected.citationStatus]} · Kaynak sınıfı: {rowSourceLabel(selected.origin, selected.source)}
+                    {CITATION_LABEL[selected.citationStatus]} · Kaynak sınıfı:{" "}
+                    {rowSourceLabel(selected.origin, selected.source)}
                   </p>
                 </div>
                 {selected.gsc ? (
@@ -465,8 +686,9 @@ function PromptDemandPage() {
                     <p className="font-medium text-foreground">Search Console eşleşmesi</p>
                     <p className="mt-1">Sorgu: “{selected.gsc.query}”</p>
                     <p>
-                      {number.format(selected.gsc.impressions)} gösterim · {number.format(selected.gsc.clicks)} tıklama · ortalama
-                      sıra {selected.gsc.position}
+                      {number.format(selected.gsc.impressions)} gösterim ·{" "}
+                      {number.format(selected.gsc.clicks)} tıklama · ortalama sıra{" "}
+                      {selected.gsc.position}
                     </p>
                   </div>
                 ) : null}
@@ -482,9 +704,16 @@ function PromptDemandPage() {
                   <p>Prompt uygunluğu: {selected.breakdown.promptSuitability}</p>
                   <p>Semantik güven: {selected.breakdown.semanticConfidence}</p>
                   <p>Örtüşme indirimi: {selected.breakdown.overlapAdjustment}</p>
-                  <p className="text-foreground">Sonuç: {number.format(selected.breakdown.finalDemand)}</p>
+                  <p className="text-foreground">
+                    Sonuç: {number.format(selected.breakdown.finalDemand)}
+                  </p>
                 </div>
-                <Button size="sm" className="w-full" disabled={track.isPending} onClick={() => track.mutate([selected])}>
+                <Button
+                  size="sm"
+                  className="w-full"
+                  disabled={track.isPending}
+                  onClick={() => track.mutate([selected])}
+                >
                   Bu promptu izlemeye al
                 </Button>
               </div>
@@ -527,11 +756,17 @@ function MetricCard({
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Icon className="h-3.5 w-3.5" /> {label}
             <Tooltip>
-              <TooltipTrigger asChild><span className="cursor-help"><Info className="h-3 w-3" /></span></TooltipTrigger>
+              <TooltipTrigger asChild>
+                <span className="cursor-help">
+                  <Info className="h-3 w-3" />
+                </span>
+              </TooltipTrigger>
               <TooltipContent className="max-w-xs text-xs">{hint}</TooltipContent>
             </Tooltip>
           </span>
-          <Badge variant="outline" className="text-[10px]">{badge}</Badge>
+          <Badge variant="outline" className="text-[10px]">
+            {badge}
+          </Badge>
         </div>
         <p className="truncate text-2xl font-semibold tracking-tight">{value}</p>
         <p className="text-xs text-muted-foreground">{foot}</p>

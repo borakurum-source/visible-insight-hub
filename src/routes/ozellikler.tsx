@@ -17,7 +17,13 @@ import {
 import { MarketingShell } from "@/components/site/MarketingShell";
 import { MarketingCta } from "@/components/site/marketing-cta";
 import { VisualHero } from "@/components/site/visual-hero";
-import { FeatureShot, MiniMock, MockBars, MockRows, MockSpark } from "@/components/site/feature-shot";
+import {
+  FeatureShot,
+  MiniMock,
+  MockBars,
+  MockRows,
+  MockSpark,
+} from "@/components/site/feature-shot";
 import { Button } from "@/components/ui/button";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
 import shotDashboard from "@/assets/features/dashboard.webp.asset.json";
@@ -99,7 +105,7 @@ const mainFeatures: MainFeature[] = [
     title: "Markanızın yapay zeka cevaplarında tam olarak nerede geçtiğini görün",
     body: "Satın alma niyetli sorularda hangi modelin sizi seçtiğini, hangisinin görmezden geldiğini tek skorda okuyun. OneCite Score, AI kaynak payınızı beş bileşene bölerek nerede kaybettiğinizi söyler.",
     points: [
-      "Perplexity ve DeepSeek üzerinde düzenli prompt ölçümü",
+      "Perplexity Agent ile kaynaklı web ölçümü ve ayrı etiketlenen model paneli",
       "OneCite Score: bahsedilme, AI kaynak payı, sıralama kalitesi, kanıt kapsamı, iddia kanıtı",
       "Zaman içindeki görünürlük trendi ve zayıf bileşen için doğrudan aksiyon butonu",
     ],
@@ -285,7 +291,12 @@ const deepFeatures = [
     icon: LineChart,
     title: "Trend analizi",
     body: "Görünürlüğünüzün zaman içindeki değişimini ve yaptığınız işin etkisini ölçün.",
-    mock: <MockSpark label="Son 90 gün · AI kaynak payı" points={[6, 8, 7, 11, 14, 13, 18, 22, 27, 31]} />,
+    mock: (
+      <MockSpark
+        label="Son 90 gün · AI kaynak payı"
+        points={[6, 8, 7, 11, 14, 13, 18, 22, 27, 31]}
+      />
+    ),
   },
   {
     icon: KanbanSquare,
@@ -332,7 +343,7 @@ const integrations = [
   "Google Analytics 4",
   "Bing Webmaster Tools",
   "Perplexity",
-  "DeepSeek",
+  "Perplexity Agent",
   "ChatGPT trafiği",
   "Copilot trafiği",
   "Gemini trafiği",
@@ -345,7 +356,8 @@ function FeaturesPage() {
         eyebrow="ÜRÜN · KAYNAK → SİNYAL → UYGULAMA"
         title={
           <>
-            Yapay zeka cevaplarında görünmek için <span className="text-cyan">gereken her şey</span>.
+            Yapay zeka cevaplarında görünmek için <span className="text-cyan">gereken her şey</span>
+            .
           </>
         }
         description="OneCite; prompt takibi, rakip analizi, marka zekası, GEO görevleri, içerik üretimi ve trafik raporlamasını tek panelde birleştirir. Tahminle değil, ölçümle çalışırsınız."
@@ -371,20 +383,25 @@ function FeaturesPage() {
               Kaynak, sinyal ve uygulama tek döngüde.
             </h2>
             <p className="mt-4 max-w-prose text-base leading-7 text-muted-foreground">
-              OneCite yalnızca bir panel değil: yapay zekanın seçebileceği kanıtı kurar, seçim davranışını ölçer ve sonucu
-              uygulanabilir bir iş listesine çevirir.
+              OneCite yalnızca bir panel değil: yapay zekanın seçebileceği kanıtı kurar, seçim
+              davranışını ölçer ve sonucu uygulanabilir bir iş listesine çevirir.
             </p>
           </div>
           <div className="mt-10 grid gap-4 lg:grid-cols-3">
             {workModel.map((step) => (
-              <article key={step.number} className="rounded-2xl border border-border bg-background p-6">
+              <article
+                key={step.number}
+                className="rounded-2xl border border-border bg-background p-6"
+              >
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-sm text-primary">{step.number}</span>
                   <step.icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 </div>
                 <p className="mt-8 editorial-eyebrow text-muted-foreground">{step.label}</p>
                 <h3 className="mt-3 text-xl font-extrabold text-foreground">{step.title}</h3>
-                <p className="mt-3 max-w-prose text-sm leading-6 text-muted-foreground">{step.body}</p>
+                <p className="mt-3 max-w-prose text-sm leading-6 text-muted-foreground">
+                  {step.body}
+                </p>
               </article>
             ))}
           </div>
@@ -398,7 +415,8 @@ function FeaturesPage() {
             Markanızın yapay zeka aramasında kazanması için gereken tüm modüller.
           </h2>
           <p className="mt-5 text-base leading-7 text-muted-foreground">
-            Ölçüm, rakip analizi, kanıt yönetimi, GEO görevleri ve içerik üretimi birbirine bağlı çalışır. Her ekran bir sonraki adımı söyler.
+            Ölçüm, rakip analizi, kanıt yönetimi, GEO görevleri ve içerik üretimi birbirine bağlı
+            çalışır. Her ekran bir sonraki adımı söyler.
           </p>
         </div>
 
@@ -407,7 +425,11 @@ function FeaturesPage() {
             const Icon = feature.icon;
             const reversed = index % 2 === 1;
             return (
-              <article key={feature.id} id={feature.id} className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
+              <article
+                key={feature.id}
+                id={feature.id}
+                className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14"
+              >
                 <div className={reversed ? "lg:order-2" : undefined}>
                   <div className="flex items-center gap-2.5">
                     <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -415,12 +437,17 @@ function FeaturesPage() {
                     </span>
                     <p className="editorial-eyebrow text-primary">{feature.eyebrow}</p>
                   </div>
-                  <h3 className="mt-5 text-2xl font-extrabold tracking-[-0.03em] text-foreground md:text-3xl">{feature.title}</h3>
+                  <h3 className="mt-5 text-2xl font-extrabold tracking-[-0.03em] text-foreground md:text-3xl">
+                    {feature.title}
+                  </h3>
                   <p className="mt-4 text-base leading-7 text-muted-foreground">{feature.body}</p>
                   <ul className="mt-6 space-y-3">
                     {feature.points.map((point) => (
                       <li key={point} className="flex gap-3 text-sm leading-6 text-foreground">
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                        <span
+                          className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                          aria-hidden="true"
+                        />
                         <span>{point}</span>
                       </li>
                     ))}
@@ -455,10 +482,15 @@ function FeaturesPage() {
             {deepFeatures.map((item) => {
               const Icon = item.icon;
               return (
-                <article key={item.title} className="flex flex-col rounded-2xl border border-border bg-background p-5">
+                <article
+                  key={item.title}
+                  className="flex flex-col rounded-2xl border border-border bg-background p-5"
+                >
                   <Icon className="h-5 w-5 text-primary" />
                   <h3 className="mt-4 text-base font-extrabold text-foreground">{item.title}</h3>
-                  <p className="mt-2 flex-1 text-[13px] leading-6 text-muted-foreground">{item.body}</p>
+                  <p className="mt-2 flex-1 text-[13px] leading-6 text-muted-foreground">
+                    {item.body}
+                  </p>
                   <div className="mt-4">
                     <MiniMock>{item.mock}</MiniMock>
                   </div>
@@ -477,7 +509,8 @@ function FeaturesPage() {
               Kullandığınız araçlarla çalışır.
             </h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground">
-              Her marka kendi Google ve Bing hesabını bağlar. Veriler markalar arasında karışmaz, her gece otomatik yenilenir.
+              Her marka kendi Google ve Bing hesabını bağlar. Veriler markalar arasında karışmaz,
+              her gece otomatik yenilenir.
             </p>
             <Button asChild className="mt-7">
               <Link to="/fiyatlandirma">
@@ -487,7 +520,10 @@ function FeaturesPage() {
           </div>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2">
             {integrations.map((name) => (
-              <li key={name} className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-[13px] font-semibold text-foreground">
+              <li
+                key={name}
+                className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-[13px] font-semibold text-foreground"
+              >
                 <BookOpen className="h-4 w-4 shrink-0 text-primary" />
                 <span className="truncate">{name}</span>
               </li>

@@ -6,11 +6,30 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  LayoutDashboard, Sparkles, Settings, Menu, Building2, Gauge,
-  KanbanSquare, BookOpen, PenSquare, Waypoints,
-  Users, Lock, LogOut, Plus, ChevronDown, LifeBuoy,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  LayoutDashboard,
+  Sparkles,
+  Settings,
+  Menu,
+  Building2,
+  Gauge,
+  KanbanSquare,
+  BookOpen,
+  PenSquare,
+  Waypoints,
+  Users,
+  Lock,
+  LogOut,
+  Plus,
+  ChevronDown,
+  LifeBuoy,
 } from "lucide-react";
 import BrandLogo from "@/components/site/BrandLogo";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,55 +48,55 @@ type NavItem = {
 };
 type NavGroup = { label: string; items: NavItem[]; adminOnly?: boolean };
 
-// Yan menü, sayfa içi hap menüleriyle birebir aynı hiyerarşiyi gösterir.
+// Sonuc odakli bes ana urun alani; ayarlar ve yardim ayri arac bolumleridir.
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "İzle",
+    label: "Outcome OS",
     items: [
-      { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { to: "/app", label: "Kontrol Merkezi", icon: LayoutDashboard, exact: true },
       {
         to: "/app/prompts",
         label: "Görünürlük",
         icon: Gauge,
         exact: false,
         children: [
-          { to: "/app/prompts", label: "Promptlar" },
-          { to: "/app/prompt-discovery", label: "Prompt Keşfi" },
-          { to: "/app/prompt-demand", label: "AI Talep Keşfi" },
-          { to: "/app/measurement", label: "Ölçüm & Skor" },
+          { to: "/app/prompts", label: "Promptlar & Ölçüm" },
           { to: "/app/citation-discovery", label: "Seçilen Kaynaklar" },
           { to: "/app/competitors", label: "Rakip Takibi" },
-          { to: "/app/report", label: "Rapor" },
         ],
       },
-    ],
-  },
-  {
-    label: "Anla",
-    items: [
       {
-        to: "/app/graph",
-        label: "Marka Zekası",
-        icon: Waypoints,
-        exact: false,
-      },
-      {
-        to: "/app/knowledge-base",
-        label: "Bilgi Bankası",
-        icon: BookOpen,
+        to: "/app/prompt-demand",
+        label: "Fırsatlar",
+        icon: Sparkles,
         exact: false,
         children: [
-          { to: "/app/knowledge-base", label: "Kaynaklar" },
-          { to: "/app/claims", label: "Marka İddiaları" },
+          { to: "/app/prompt-demand", label: "AI Talep Keşfi" },
+          { to: "/app/prompt-discovery", label: "Prompt Keşfi" },
         ],
       },
-    ],
-  },
-  {
-    label: "Harekete geç",
-    items: [
-      { to: "/app/content", label: "İçerik Üretimi", icon: PenSquare, exact: false },
-      { to: "/app/geo-tasks", label: "Görevler", icon: KanbanSquare, exact: false },
+      {
+        to: "/app/geo-tasks",
+        label: "Aksiyonlar",
+        icon: KanbanSquare,
+        exact: false,
+        children: [
+          { to: "/app/geo-tasks", label: "Bulgular & Görevler" },
+          { to: "/app/content", label: "İçerik Üretimi" },
+          { to: "/app/report", label: "Müşteri Raporu" },
+        ],
+      },
+      {
+        to: "/app/graph",
+        label: "Marka Hafızası",
+        icon: Waypoints,
+        exact: false,
+        children: [
+          { to: "/app/graph", label: "Özet & Varlık Grafiği" },
+          { to: "/app/knowledge-base", label: "Kaynaklar & Crawl" },
+          { to: "/app/claims", label: "Onaylı Gerçekler" },
+        ],
+      },
     ],
   },
   {
@@ -110,7 +129,13 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-const ALWAYS_OPEN = new Set(["/app", "/app/onboarding", "/app/account", "/app/pricing", "/app/help"]);
+const ALWAYS_OPEN = new Set([
+  "/app",
+  "/app/onboarding",
+  "/app/account",
+  "/app/pricing",
+  "/app/help",
+]);
 
 function itemPaths(item: NavItem): string[] {
   return item.children ? item.children.map((child) => child.to) : [item.to];
@@ -125,19 +150,31 @@ function BrandWorkspaceCard() {
         <Select value={brand?.id ?? ""} onValueChange={(value) => selectBrand(value)}>
           <SelectTrigger className="h-9 w-full text-[13px] font-semibold" aria-label="Marka seç">
             <span className="flex min-w-0 items-center gap-2">
-              <Building2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <Building2
+                className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                aria-hidden="true"
+              />
               <SelectValue placeholder="Marka seç" />
             </span>
           </SelectTrigger>
           <SelectContent>
             {brands.map((b) => (
-              <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+              <SelectItem key={b.id} value={b.id}>
+                {b.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       ) : (
-        <Button asChild size="sm" variant="secondary" className="h-9 w-full justify-start text-[13px]">
-          <Link to="/app/onboarding"><Plus className="mr-1.5 h-3.5 w-3.5" /> Marka ekle</Link>
+        <Button
+          asChild
+          size="sm"
+          variant="secondary"
+          className="h-9 w-full justify-start text-[13px]"
+        >
+          <Link to="/app/onboarding">
+            <Plus className="mr-1.5 h-3.5 w-3.5" /> Marka ekle
+          </Link>
         </Button>
       )}
     </section>
@@ -194,7 +231,9 @@ function NavList({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
                       onClick={onNavigate}
                       aria-current={active ? "page" : undefined}
                       className={`flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-[13px] transition-colors ${
-                        active ? "font-medium text-primary" : "text-muted-foreground hover:text-foreground"
+                        active
+                          ? "font-medium text-primary"
+                          : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -226,7 +265,9 @@ function NavList({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
                             onClick={onNavigate}
                             aria-current={childActive ? "page" : undefined}
                             className={`block rounded-md px-2 py-1 text-[12px] transition-colors ${
-                              childActive ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"
+                              childActive
+                                ? "font-medium text-foreground"
+                                : "text-muted-foreground hover:text-foreground"
                             }`}
                           >
                             {child.label}
@@ -261,13 +302,25 @@ function UserFooter() {
     <div className="flex items-center gap-2 border-t border-border px-4 pt-3">
       <Avatar className="h-8 w-8">
         {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="" /> : null}
-        <AvatarFallback className="text-xs">{initials(profile?.full_name, profile?.email)}</AvatarFallback>
+        <AvatarFallback className="text-xs">
+          {initials(profile?.full_name, profile?.email)}
+        </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium text-foreground">{profile?.full_name ?? profile?.email ?? "Kullanıcı"}</p>
-        <p className="truncate text-[10px] text-muted-foreground">{isAdmin ? "Yönetici" : "Çalışma alanı üyesi"}</p>
+        <p className="truncate text-xs font-medium text-foreground">
+          {profile?.full_name ?? profile?.email ?? "Kullanıcı"}
+        </p>
+        <p className="truncate text-[10px] text-muted-foreground">
+          {isAdmin ? "Yönetici" : "Çalışma alanı üyesi"}
+        </p>
       </div>
-      <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Çıkış yap" onClick={handleSignOut}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        aria-label="Çıkış yap"
+        onClick={handleSignOut}
+      >
         <LogOut className="h-4 w-4" />
       </Button>
     </div>
@@ -277,7 +330,12 @@ function UserFooter() {
 function SidebarContent({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   return (
     <div className="flex h-full flex-col gap-3 py-4">
-      <Link to="/app" onClick={onNavigate} className="flex items-center px-4" aria-label="OneCite paneli">
+      <Link
+        to="/app"
+        onClick={onNavigate}
+        className="flex items-center px-4"
+        aria-label="OneCite paneli"
+      >
         <BrandLogo variant="horizontal" size="sm" />
       </Link>
       <BrandWorkspaceCard />

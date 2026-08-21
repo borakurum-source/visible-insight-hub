@@ -2,7 +2,7 @@
 // Buradaki metinler varsayılandır; admin panelden düzenlerse veritabanındaki sürüm kullanılır.
 
 export type SystemPromptStage = "kurulum" | "kesif" | "olcum" | "uretim";
-export type SystemPromptModel = "perplexity" | "deepseek";
+export type SystemPromptModel = "agent_web_grounded" | "bulk_fast";
 
 export type SystemPromptDef = {
   key: string;
@@ -27,9 +27,10 @@ export const SYSTEM_PROMPTS: SystemPromptDef[] = [
   {
     key: "brand_intelligence",
     title: "Marka analizi",
-    description: "Markanın sitesinden konumlandırma, ürün, kitle, rakip ve anahtar kavramları çıkarır. Marka Zekasının temelidir.",
+    description:
+      "Markanın sitesinden konumlandırma, ürün, kitle, rakip ve anahtar kavramları çıkarır. Marka Zekasının temelidir.",
     stage: "kurulum",
-    model: "deepseek",
+    model: "bulk_fast",
     content: `ROL: Yapay zeka görünürlüğü (GEO) odaklı kıdemli marka analistisin.
 
 GÖREV: Verilen marka adı, alan adı ve site metninden markanın kanıta dayalı profilini çıkar.
@@ -50,9 +51,10 @@ Diziler 3-6 kısa madde içersin. Rakiplerde aynı işi yapanlar "direct", ikame
   {
     key: "knowledge_source_pick",
     title: "Bilgi kaynağı seçimi",
-    description: "Site haritasındaki sayfalar arasından bilgi bankasına alınacak en değerli kanıt sayfalarını seçer.",
+    description:
+      "Site haritasındaki sayfalar arasından bilgi bankasına alınacak en değerli kanıt sayfalarını seçer.",
     stage: "kurulum",
-    model: "deepseek",
+    model: "bulk_fast",
     content: `ROL: Kanıt küratörüsün.
 
 GÖREV: Verilen URL listesinden, yapay zeka asistanlarının markayı doğru anlatması için en yüksek kanıt değeri taşıyan en fazla 8 sayfayı seç.
@@ -75,7 +77,7 @@ ${SHARED_RULES}
     title: "Kurulum soru üretimi",
     description: "Kurulum sırasında markanın görünür olması gereken ilk soru setini üretir.",
     stage: "kurulum",
-    model: "deepseek",
+    model: "bulk_fast",
     content: `ROL: Kullanıcı davranışını bilen GEO araştırmacısısın.
 
 GÖREV: Gerçek bir kullanıcının ChatGPT, Gemini veya Perplexity'ye soracağı, markanın cevapta geçmesi gereken 24 Türkçe soru üret.
@@ -95,9 +97,10 @@ Huni dağılımı: yaklaşık üçte biri top (farkındalık), üçte biri middl
   {
     key: "prompt_discovery",
     title: "Prompt keşfi",
-    description: "Mevcut soruların dışında, kazanılabilir yeni fırsat sorularını puanlayarak bulur.",
+    description:
+      "Mevcut soruların dışında, kazanılabilir yeni fırsat sorularını puanlayarak bulur.",
     stage: "kesif",
-    model: "deepseek",
+    model: "bulk_fast",
     content: `ROL: GEO fırsat analistisin.
 
 GÖREV: Marka adı GEÇMEYEN, markanın kaynak gösterilme şansı yüksek 12 yeni Türkçe soru üret.
@@ -118,9 +121,10 @@ ${SHARED_RULES}
   {
     key: "measurement_answer",
     title: "Ölçüm yanıtı",
-    description: "Perplexity üzerinden gerçek web araması yapar; hangi markaların önerildiğini ve kaynakları çıkarır.",
+    description:
+      "Perplexity üzerinden gerçek web araması yapar; hangi markaların önerildiğini ve kaynakları çıkarır.",
     stage: "olcum",
-    model: "perplexity",
+    model: "agent_web_grounded",
     content: `ROL: Tarafsız bir yapay zeka arama asistanısın. Bir kullanıcı sana bu soruyu soruyormuş gibi davran.
 
 KURALLAR
@@ -135,9 +139,10 @@ KURALLAR
   {
     key: "content_draft",
     title: "İçerik taslağı (RAG)",
-    description: "Bilgi bankasından getirilen kanıtlarla, hedef soruya cevap veren içerik taslağı yazar.",
+    description:
+      "Bilgi bankasından getirilen kanıtlarla, hedef soruya cevap veren içerik taslağı yazar.",
     stage: "uretim",
-    model: "deepseek",
+    model: "bulk_fast",
     content: `ROL: GEO içerik editörüsün.
 
 GÖREV: Verilen hedef soruya, yalnızca sana verilen bilgi bankası alıntılarına, marka iddialarına ve marka zekasına dayanarak Türkçe bir içerik taslağı yaz.
@@ -177,6 +182,6 @@ export const STAGE_LABELS: Record<SystemPromptStage, string> = {
 };
 
 export const MODEL_LABELS: Record<SystemPromptModel, string> = {
-  perplexity: "Perplexity (canlı web araması)",
-  deepseek: "DeepSeek (analiz ve üretim)",
+  agent_web_grounded: "Perplexity Agent (kaynaklı web araştırması)",
+  bulk_fast: "Perplexity Router / Agent Luna (hızlı analiz)",
 };

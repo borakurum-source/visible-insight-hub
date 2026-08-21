@@ -8,8 +8,20 @@ import {
   promptDemand,
   similarity,
 } from "./prompt-demand/engine";
-import { GA4_MIN_SESSIONS, GSC_ADD_LIMIT, GSC_ADD_MIN_IMPRESSIONS, MATCHING } from "./prompt-demand/config";
-import type { CitationStatus, Intent, Level, PromptCandidate, PromptShape } from "./prompt-demand/types";
+import {
+  GA4_MIN_SESSIONS,
+  GSC_ADD_LIMIT,
+  GSC_ADD_MIN_IMPRESSIONS,
+  MATCHING,
+} from "./prompt-demand/config";
+import type {
+  CitationStatus,
+  DataSource,
+  Intent,
+  Level,
+  PromptCandidate,
+  PromptShape,
+} from "./prompt-demand/types";
 import type { CalibrationInfo, Ga4Signal, SignalSources } from "./prompt-demand/types";
 
 type OneCiteClient = SupabaseClient<Database, "onecite">;
@@ -23,7 +35,14 @@ const INTENTS: Intent[] = [
   "navigational",
   "brand",
 ];
-const SHAPES: PromptShape[] = ["keyword", "question", "recommendation", "comparison", "research", "navigational"];
+const SHAPES: PromptShape[] = [
+  "keyword",
+  "question",
+  "recommendation",
+  "comparison",
+  "research",
+  "navigational",
+];
 
 type RawPrompt = {
   text?: string;
@@ -37,12 +56,7 @@ type RawPrompt = {
   evidenceGapType?: string;
 };
 
-/**
- * Prompt genisletme saglayicisi.
- * Not: arama hacimleri su an dil modeli tarafindan modellenen tahminlerdir
- * (kaynak sinifi: estimated). Gercek anahtar kelime API'si baglandiginda
- * yalnizca bu fonksiyonun icerigi degisir.
- */
+/** Model yalniz prompt cesitliligi uretir; gozlenmemis mutlak hacim uretemez. */
 export async function expandPrompts(params: {
   topic: string;
   country: string;
@@ -62,13 +76,11 @@ export async function expandPrompts(params: {
           "Tüm metinleri hedef dilde, eksiksiz Türkçe karakterlerle (ç, ğ, ı, İ, ö, ş, ü) yaz; ASCII sadeleştirme yapma.",
           "Her prompt için JSON alanları: text, intent (informational|commercial|commercial_investigation|transactional|comparison|navigational|brand),",
           "shape (keyword|question|recommendation|comparison|research|navigational), semanticConfidence (0-1),",
-          "monthlyVolume (ülke ve dil için tahmini aylık arama hacmi), relatedVolume (ilgili sorular hacmi),",
-          "autocompleteStrength (0-1), trend (0.7-1.4 yıllık değişim çarpanı),",
           "evidenceGapType yalnızca şu değerlerden biri olsun (aynen bu yazımla):",
           "Karşılaştırma içeriği | Bağımsız kanıt | Ürün tanımı | Veri ve araştırma | Vaka çalışması | Dokümantasyon | Yok.",
           "Yanıt tam olarak şu şekilde tek bir JSON nesnesi olsun:",
-          '{"canonicalCluster": "küme adı", "prompts": [{"text": "...", "intent": "...", "shape": "...", "semanticConfidence": 0.8, "monthlyVolume": 100, "relatedVolume": 40, "autocompleteStrength": 0.5, "trend": 1.1, "evidenceGapType": "..."}]}',
-          "En az 20 prompt üret. Hacimleri abartma; küçük pazarlarda düşük sayılar ver.",
+          '{"canonicalCluster": "küme adı", "prompts": [{"text": "...", "intent": "...", "shape": "...", "semanticConfidence": 0.8, "evidenceGapType": "..."}]}',
+          "En az 20 prompt üret. Arama hacmi, trafik veya talep sayısı tahmin etme.",
         ].join(" "),
       },
       {
@@ -81,32 +93,38 @@ export async function expandPrompts(params: {
   );
 
   const candidates = (result.prompts ?? [])
-    .map((raw): PromptCandidate | null => {
-      const text = String(raw.text ?? "").trim();
-      if (text.length < 5) return null;
-      const intent = (INTENTS as string[]).includes(String(raw.intent)) ? (raw.intent as Intent) : "informational";
-      const shape = (SHAPES as string[]).includes(String(raw.shape)) ? (raw.shape as PromptShape) : "question";
-      return {
-        text,
-        intent,
-        shape,
-        semanticConfidence: clamp(Number(raw.semanticConfidence) || 0.7, 0, 1),
-        signal: {
-          directVolume: Math.max(0, Number(raw.monthlyVolume) || 0),
-          relatedVolume: Math.max(0, Number(raw.relatedVolume) || 0),
-          autocompleteStrength: clamp(Number(raw.autocompleteStrength) || 0.5, 0, 1),
-          historicalTrend: clamp(Number(raw.trend) || 1, 0.5, 1.6),
-        },
-        origin: "model",
-        source: "estimated",
-        citationStatus: "not_cited",
-        competitorPresence: "medium",
-        evidenceGapType: normalizeGapType(raw.evidenceGapType),
-      };
-    })
+    .map(candidateFromExpansion)
     .filter((row): row is PromptCandidate => row !== null);
 
   return { canonicalCluster: String(result.canonicalCluster ?? params.topic), candidates };
+}
+
+export function candidateFromExpansion(raw: RawPrompt): PromptCandidate | null {
+  const text = String(raw.text ?? "").trim();
+  if (text.length < 5) return null;
+  const intent = (INTENTS as string[]).includes(String(raw.intent))
+    ? (raw.intent as Intent)
+    : "informational";
+  const shape = (SHAPES as string[]).includes(String(raw.shape))
+    ? (raw.shape as PromptShape)
+    : "question";
+  return {
+    text,
+    intent,
+    shape,
+    semanticConfidence: clamp(Number(raw.semanticConfidence) || 0.7, 0, 1),
+    signal: {
+      directVolume: 0,
+      relatedVolume: 0,
+      autocompleteStrength: 0.5,
+      historicalTrend: 1,
+    },
+    origin: "model",
+    source: "estimated",
+    citationStatus: "not_cited",
+    competitorPresence: "medium",
+    evidenceGapType: normalizeGapType(raw.evidenceGapType),
+  };
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -115,7 +133,15 @@ function clamp(value: number, min: number, max: number): number {
 
 /** Model ASCII yazsa bile kanit boslugu tipini kanonik Turkce yazimina eslestirir. */
 function normalizeGapType(value: unknown): string {
-  const canonical = ["Karşılaştırma içeriği", "Bağımsız kanıt", "Ürün tanımı", "Veri ve araştırma", "Vaka çalışması", "Dokümantasyon", "Yok"];
+  const canonical = [
+    "Karşılaştırma içeriği",
+    "Bağımsız kanıt",
+    "Ürün tanımı",
+    "Veri ve araştırma",
+    "Vaka çalışması",
+    "Dokümantasyon",
+    "Yok",
+  ];
   const input = fold(String(value ?? ""));
   return canonical.find((item) => fold(item) === input) ?? "Yok";
 }
@@ -144,12 +170,21 @@ export async function attachCitationData(
 ): Promise<{
   candidates: PromptCandidate[];
   citationShare: number;
-  citationShareSource: "measured" | "estimated";
-  competitors: Array<{ name: string; share: number; promptsCited: number; topEvidenceType: string }>;
+  citationShareSource: DataSource;
+  competitors: Array<{
+    name: string;
+    share: number;
+    promptsCited: number;
+    topEvidenceType: string;
+  }>;
 }> {
   const [{ data: prompts }, { data: runs }, { data: citations }] = await Promise.all([
     supabase.from("prompts").select("id, text").eq("brand_id", brandId).limit(300),
-    supabase.from("prompt_runs").select("prompt_id, brand_mentioned").eq("brand_id", brandId).limit(1000),
+    supabase
+      .from("prompt_runs")
+      .select("prompt_id, brand_mentioned")
+      .eq("brand_id", brandId)
+      .limit(1000),
     supabase.from("citations").select("domain, is_own_domain").eq("brand_id", brandId).limit(1000),
   ]);
 
@@ -161,7 +196,10 @@ export async function attachCitationData(
 
   const measuredPrompts = (prompts ?? [])
     .filter((prompt) => runByPrompt.has(prompt.id as string))
-    .map((prompt) => ({ text: String(prompt.text), cited: runByPrompt.get(prompt.id as string) === true }));
+    .map((prompt) => ({
+      text: String(prompt.text),
+      cited: runByPrompt.get(prompt.id as string) === true,
+    }));
 
   // Takibe alinmis ama henuz olcumu gelmemis promptlar: "ilk olcum bekleniyor" durumu.
   const pendingPrompts = (prompts ?? [])
@@ -169,7 +207,8 @@ export async function attachCitationData(
     .map((prompt) => String(prompt.text));
 
   const totalRuns = measuredPrompts.length;
-  const measuredShare = totalRuns > 0 ? measuredPrompts.filter((p) => p.cited).length / totalRuns : 0;
+  const measuredShare =
+    totalRuns > 0 ? measuredPrompts.filter((p) => p.cited).length / totalRuns : 0;
 
   const { bestMatch, embedAll, thresholdsFor } = await import("./prompt-demand/matching.server");
   const thresholds = thresholdsFor();
@@ -186,11 +225,17 @@ export async function attachCitationData(
     if (best) {
       const cited = measuredPrompts[best.index]?.cited === true;
       const status: CitationStatus = cited ? "cited" : "competitor_cited";
-      return { ...candidate, origin: "onecite" as const, source: "measured" as const, citationStatus: status };
+      return {
+        ...candidate,
+        origin: "onecite" as const,
+        source: "measured" as const,
+        citationStatus: status,
+      };
     }
     const pending =
       pendingPrompts.length > 0 &&
-      bestMatch(candidate.text, pendingPrompts, vectors, thresholds.measuredPromptMatch, 0.55) !== null;
+      bestMatch(candidate.text, pendingPrompts, vectors, thresholds.measuredPromptMatch, 0.55) !==
+        null;
     // Olculmemis promptlarda durum cikarimdir.
     const inferredStatus: CitationStatus = measuredShare > 0.6 ? "cited" : "not_cited";
     const presence: Level = measuredShare < 0.25 ? "high" : measuredShare < 0.6 ? "medium" : "low";
@@ -215,7 +260,8 @@ export async function attachCitationData(
     .slice(0, 5)
     .map(([domain, count]) => ({
       name: domain,
-      share: totalCompetitorCitations > 0 ? Number((count / totalCompetitorCitations).toFixed(2)) : 0,
+      share:
+        totalCompetitorCitations > 0 ? Number((count / totalCompetitorCitations).toFixed(2)) : 0,
       promptsCited: count,
       topEvidenceType: "Bağımsız kanıt",
     }));
@@ -223,13 +269,19 @@ export async function attachCitationData(
   return {
     candidates: enriched,
     citationShare: Number(measuredShare.toFixed(2)),
-    citationShareSource: totalRuns > 0 ? "measured" : "estimated",
+    citationShareSource: totalRuns > 0 ? "measured" : "inferred",
     competitors,
   };
 }
 
 type GscSnapshot = {
-  queries?: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+  queries?: Array<{
+    query: string;
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
+  }>;
 };
 type Ga4Snapshot = { ai?: { sessions?: number; platforms?: Record<string, number> } };
 
@@ -260,7 +312,9 @@ export async function attachSearchSignals(
 
   const gscRow = (snapshots ?? []).find((row) => row.provider === "gsc");
   const ga4Row = (snapshots ?? []).find((row) => row.provider === "ga4");
-  const gscQueries = ((gscRow?.payload as GscSnapshot | null)?.queries ?? []).filter((q) => q.query);
+  const gscQueries = ((gscRow?.payload as GscSnapshot | null)?.queries ?? []).filter(
+    (q) => q.query,
+  );
   const ga4AiSessions = Number((ga4Row?.payload as Ga4Snapshot | null)?.ai?.sessions ?? 0);
 
   const { bestMatch, embedAll, thresholdsFor } = await import("./prompt-demand/matching.server");
@@ -297,7 +351,10 @@ export async function attachSearchSignals(
     // olculen gosterim uzerine kurulmus tahmindir; bu yuzden source "modeled".
     const modeled = impressionsToDemand(impressions, position);
     // Kalibrasyon icin model tahmini ile gercek gosterim karsilastirilir.
-    calibrationPairs.push({ actual: impressions, predicted: Math.max(1, candidate.signal.directVolume) });
+    calibrationPairs.push({
+      actual: impressions,
+      predicted: Math.max(1, candidate.signal.directVolume),
+    });
 
     return {
       ...candidate,
@@ -308,7 +365,10 @@ export async function attachSearchSignals(
         ...candidate.signal,
         // GSC verisi model tahminini EZER; tahmin yalnizca taban gorevi gorur.
         directVolume: modeled.demand,
-        autocompleteStrength: Math.max(candidate.signal.autocompleteStrength, Math.min(1, best.score + 0.2)),
+        autocompleteStrength: Math.max(
+          candidate.signal.autocompleteStrength,
+          Math.min(1, best.score + 0.2),
+        ),
       },
       gsc: {
         query: row.query,
@@ -391,7 +451,10 @@ export async function attachSearchSignals(
       measuredPrompts,
       matchMethod,
       gscAddedPrompts: unmatched.length,
-      snapshotDate: (gscRow?.snapshot_date as string | undefined) ?? (ga4Row?.snapshot_date as string | undefined) ?? null,
+      snapshotDate:
+        (gscRow?.snapshot_date as string | undefined) ??
+        (ga4Row?.snapshot_date as string | undefined) ??
+        null,
     },
   };
 }

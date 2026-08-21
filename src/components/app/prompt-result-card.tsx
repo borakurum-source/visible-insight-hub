@@ -17,8 +17,9 @@ import {
 import { toPlainText } from "@/lib/plain-text";
 
 const ENGINE_LABEL: Record<string, string> = {
-  perplexity: "Perplexity Sonar",
-  deepseek: "DeepSeek",
+  perplexity: "Legacy Sonar",
+  agent_web_grounded: "Kaynaklı web",
+  model_panel: "Model paneli",
 };
 
 function engineLabel(engine: string) {
@@ -26,7 +27,12 @@ function engineLabel(engine: string) {
 }
 
 function VisibilityBadge({ value }: { value: number }) {
-  const tone = value >= 70 ? "border-success/40 text-success" : value > 0 ? "border-warning/40 text-warning" : "border-border text-muted-foreground";
+  const tone =
+    value >= 70
+      ? "border-success/40 text-success"
+      : value > 0
+        ? "border-warning/40 text-warning"
+        : "border-border text-muted-foreground";
   return (
     <span className={`rounded-md border px-2 py-0.5 font-mono text-[11px] ${tone}`}>
       Görünürlük %{Math.round(value)}
@@ -52,7 +58,9 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
   const { data, isLoading } = useQuery({
     queryKey: ["prompt-insight", promptId, selectedRunId],
     queryFn: () =>
-      fetchInsight({ data: { brandId, promptId, ...(selectedRunId ? { runId: selectedRunId } : {}) } }),
+      fetchInsight({
+        data: { brandId, promptId, ...(selectedRunId ? { runId: selectedRunId } : {}) },
+      }),
   });
 
   const invalidate = () => {
@@ -60,7 +68,13 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
   };
 
   const toggleMutation = useMutation({
-    mutationFn: ({ action, done }: { action: { key: string; title: string; description: string; priority: string }; done: boolean }) =>
+    mutationFn: ({
+      action,
+      done,
+    }: {
+      action: { key: string; title: string; description: string; priority: string };
+      done: boolean;
+    }) =>
       toggleAction({
         data: {
           brandId,
@@ -144,7 +158,9 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
             ) : (
               <Badge variant="secondary">Yanıtta geçmiyor</Badge>
             )}
-            <Badge variant="outline" className="font-mono text-[10px]">{engineLabel(run.engine)}</Badge>
+            <Badge variant="outline" className="font-mono text-[10px]">
+              {engineLabel(run.engine)}
+            </Badge>
             {run.runIndex ? <span className="font-mono text-[11px]">#{run.runIndex}</span> : null}
             <span>{new Date(run.createdAt).toLocaleString("tr-TR")}</span>
             <span className="ml-auto font-mono text-[11px]">{runs.length} çalıştırma</span>
@@ -153,9 +169,14 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
           {runs.length > 1 ? (
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Çalıştırma geçmişi</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Çalıştırma geçmişi
+                </p>
                 <Hint title="Çalıştırma geçmişi">
-                  <p>Her ölçüm turu ayrı bir çalıştırmadır. Bir turu seçtiğinizde o turdaki yanıt ve kaynaklar gösterilir.</p>
+                  <p>
+                    Her ölçüm turu ayrı bir çalıştırmadır. Bir turu seçtiğinizde o turdaki yanıt ve
+                    kaynaklar gösterilir.
+                  </p>
                 </Hint>
               </div>
               <div className="flex flex-wrap items-end gap-1">
@@ -168,7 +189,9 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
                       onClick={() => setSelectedRunId(item.id)}
                       title={`#${item.runIndex} · %${Math.round(item.visibility)} · ${new Date(item.createdAt).toLocaleDateString("tr-TR")}`}
                       className={`flex w-9 flex-col items-center gap-1 rounded-md border p-1 transition-colors ${
-                        active ? "border-primary bg-primary/10" : "border-border bg-background hover:border-primary/50"
+                        active
+                          ? "border-primary bg-primary/10"
+                          : "border-border bg-background hover:border-primary/50"
                       }`}
                     >
                       <span
@@ -176,7 +199,9 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
                         style={{ height: `${Math.max(4, (item.visibility / 100) * 28)}px` }}
                         aria-hidden="true"
                       />
-                      <span className="font-mono text-[9px] text-muted-foreground">#{item.runIndex}</span>
+                      <span className="font-mono text-[9px] text-muted-foreground">
+                        #{item.runIndex}
+                      </span>
                     </button>
                   );
                 })}
@@ -186,7 +211,9 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
 
           {data?.mentionedBrands?.length ? (
             <div className="space-y-1.5">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Yanıtta geçen markalar</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Yanıtta geçen markalar
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {data.mentionedBrands.map((item) => (
                   <span
@@ -210,16 +237,26 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
           {data?.candidates?.length ? (
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Yeni rakipler</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Yeni rakipler
+                </p>
                 <Hint title="Yeni rakipler">
-                  <p>Bu yanıtta geçen ama takip listenizde olmayan markalar. Ekleyince rakip karşılaştırma grafiklerine dahil olur.</p>
+                  <p>
+                    Bu yanıtta geçen ama takip listenizde olmayan markalar. Ekleyince rakip
+                    karşılaştırma grafiklerine dahil olur.
+                  </p>
                 </Hint>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {data.candidates.map((candidate) => (
-                  <span key={candidate.id} className="flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px]">
+                  <span
+                    key={candidate.id}
+                    className="flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px]"
+                  >
                     {candidate.name}
-                    <span className="font-mono text-[10px] text-muted-foreground">×{candidate.promptCount}</span>
+                    <span className="font-mono text-[10px] text-muted-foreground">
+                      ×{candidate.promptCount}
+                    </span>
                     <Button
                       size="icon"
                       variant="ghost"
@@ -247,7 +284,9 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
           ) : null}
 
           <div className="space-y-1.5">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Yapay zeka yanıtı</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Yapay zeka yanıtı
+            </p>
             <div
               className={`whitespace-pre-wrap rounded-md bg-background p-3 text-xs leading-relaxed text-muted-foreground ${
                 isLongAnswer && !expanded ? "max-h-80 overflow-hidden" : ""
@@ -264,7 +303,11 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
         </>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Bu soru henüz ölçülmedi. <Link to="/app/measurement" className="underline">Ölçüm başlatın</Link>.
+          Bu soru henüz ölçülmedi.{" "}
+          <Link to="/app/measurement" className="underline">
+            Ölçüm başlatın
+          </Link>
+          .
         </p>
       )}
 
@@ -298,19 +341,32 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
       {data?.actions?.length ? (
         <div className="space-y-1.5">
           <div className="flex items-center gap-1.5">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Bu soruda görünmek için</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Bu soruda görünmek için
+            </p>
             <Hint title="Kontrol listesi">
-              <p><strong>Tamamlandı</strong> düğmesi adımı bitirdiğinizi işaretler; işaretiniz kaydedilir.</p>
-              <p><strong>Göreve ekle</strong> ile adımı Görevler listenize taşıyıp ekibinizle takip edebilirsiniz.</p>
+              <p>
+                <strong>Tamamlandı</strong> düğmesi adımı bitirdiğinizi işaretler; işaretiniz
+                kaydedilir.
+              </p>
+              <p>
+                <strong>Göreve ekle</strong> ile adımı Görevler listenize taşıyıp ekibinizle takip
+                edebilirsiniz.
+              </p>
             </Hint>
             <span className="ml-auto font-mono text-[11px] text-muted-foreground">
               {doneCount} / {data.actions.length} tamam
             </span>
           </div>
           {data.actions.map((action) => (
-            <div key={action.key} className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5">
+            <div
+              key={action.key}
+              className="flex flex-wrap items-start gap-2 rounded-md border border-border bg-background p-2.5"
+            >
               <div className="min-w-0 flex-1">
-                <p className={`text-xs font-medium ${action.done ? "text-muted-foreground line-through" : ""}`}>
+                <p
+                  className={`text-xs font-medium ${action.done ? "text-muted-foreground line-through" : ""}`}
+                >
                   {action.title}
                 </p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">{action.description}</p>
@@ -322,7 +378,8 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
                   disabled={toggleMutation.isPending}
                   onClick={() => toggleMutation.mutate({ action, done: !action.done })}
                 >
-                  <Check className="mr-1.5 h-3.5 w-3.5" /> {action.done ? "Tamamlandı" : "Tamamlandı işaretle"}
+                  <Check className="mr-1.5 h-3.5 w-3.5" />{" "}
+                  {action.done ? "Tamamlandı" : "Tamamlandı işaretle"}
                 </Button>
                 <Button
                   size="sm"
@@ -330,7 +387,8 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
                   disabled={taskMutation.isPending || addedTasks.includes(action.title)}
                   onClick={() => taskMutation.mutate(action)}
                 >
-                  <ListTodo className="mr-1.5 h-3.5 w-3.5" /> {addedTasks.includes(action.title) ? "Göreve eklendi" : "Göreve ekle"}
+                  <ListTodo className="mr-1.5 h-3.5 w-3.5" />{" "}
+                  {addedTasks.includes(action.title) ? "Göreve eklendi" : "Göreve ekle"}
                 </Button>
                 <Button size="sm" variant="ghost" asChild>
                   <Link to="/app/content">İçerik üret</Link>

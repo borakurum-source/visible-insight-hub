@@ -2,7 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { LayoutDashboard, ListChecks, BookOpen, ShieldCheck, Quote, Gauge, Sparkles } from "lucide-react";
+import {
+  LayoutDashboard,
+  ListChecks,
+  BookOpen,
+  ShieldCheck,
+  Quote,
+  Gauge,
+  Sparkles,
+} from "lucide-react";
 import { PanelPageHeading } from "@/components/app/panel-page-heading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,10 +19,12 @@ import { VisibilityCharts } from "@/components/app/visibility-charts";
 import { CompetitorTrendChart } from "@/components/app/competitor-trend-chart";
 import { TrafficCharts } from "@/components/app/traffic-charts";
 import { GscStatusPanel } from "@/components/app/gsc-status";
+import { OutcomeControlCenter } from "@/components/app/outcome-control-center";
 import {
   getBrandOverview,
   getCompetitorVisibilityTrend,
   getMeasurementState,
+  getOutcomeControlCenter,
   getVisibilityAnalytics,
 } from "@/lib/panel.functions";
 import { getTrafficOverview } from "@/lib/integrations.functions";
@@ -24,7 +34,10 @@ export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({
     meta: [
       { title: "Dashboard — OneCite Paneli" },
-      { name: "description", content: "Marka görünürlüğünüzün, promptlarınızın ve kanıt varlıklarınızın canlı özeti." },
+      {
+        name: "description",
+        content: "Marka görünürlüğünüzün, promptlarınızın ve kanıt varlıklarınızın canlı özeti.",
+      },
       { property: "og:title", content: "Dashboard — OneCite Paneli" },
       { property: "og:description", content: "AI görünürlüğünüzün canlı özeti." },
       { name: "robots", content: "noindex" },
@@ -66,25 +79,45 @@ function DashboardPage() {
     queryFn: () => fetchCompetitorTrend({ data: { brandId: brand!.id, days: rangeDays } }),
     enabled: Boolean(brand?.id),
   });
+  const fetchOutcome = useServerFn(getOutcomeControlCenter);
+  const { data: outcome } = useQuery({
+    queryKey: ["outcome-control-center", brand?.id],
+    queryFn: () => fetchOutcome({ data: { brandId: brand!.id } }),
+    enabled: Boolean(brand?.id),
+  });
 
   const stats = [
-    { label: "Onaylı prompt", value: data?.approvedPrompts ?? 0, icon: ListChecks, to: "/app/prompts" },
-    { label: "Bilgi kaynağı", value: data?.knowledgeSources ?? 0, icon: BookOpen, to: "/app/knowledge-base" },
+    {
+      label: "Onaylı prompt",
+      value: data?.approvedPrompts ?? 0,
+      icon: ListChecks,
+      to: "/app/prompts",
+    },
+    {
+      label: "Bilgi kaynağı",
+      value: data?.knowledgeSources ?? 0,
+      icon: BookOpen,
+      to: "/app/knowledge-base",
+    },
     { label: "Marka iddiası", value: data?.claims ?? 0, icon: ShieldCheck, to: "/app/claims" },
-    { label: "Kaynak gösterimi", value: data?.citations ?? 0, icon: Quote, to: "/app/measurement" },
+    { label: "Kaynak gösterimi", value: data?.citations ?? 0, icon: Quote, to: "/app/prompts" },
   ] as const;
 
   return (
     <>
       <PanelPageHeading
         meta={{
-          title: "Dashboard",
-          description: brand ? `${brand.name} · ${brand.domain}` : "Başlamak için bir marka ekleyin.",
+          title: "Kontrol Merkezi",
+          description: brand
+            ? `${brand.name} · ${brand.domain}`
+            : "Başlamak için bir marka ekleyin.",
           icon: LayoutDashboard,
         }}
         action={
           <Button asChild variant="outline" size="sm">
-            <Link to="/app/onboarding"><Sparkles className="mr-1.5 h-4 w-4" /> Kurulum</Link>
+            <Link to="/app/onboarding">
+              <Sparkles className="mr-1.5 h-4 w-4" /> Kurulum
+            </Link>
           </Button>
         }
       />
@@ -93,7 +126,9 @@ function DashboardPage() {
         <Card>
           <CardContent className="space-y-3 py-10 text-center">
             <p className="text-sm text-muted-foreground">Henüz bir marka eklemediniz.</p>
-            <Button asChild><Link to="/app/onboarding">Markanı ekle</Link></Button>
+            <Button asChild>
+              <Link to="/app/onboarding">Markanı ekle</Link>
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -107,12 +142,16 @@ function DashboardPage() {
             />
           ) : null}
 
+          {outcome ? <OutcomeControlCenter data={outcome} /> : null}
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map(({ label, value, icon: Icon, to }) => (
               <Link key={label} to={to} className="group">
                 <Card className="h-full transition-colors group-hover:border-primary/40">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-xs font-medium text-muted-foreground">{label}</CardTitle>
+                    <CardTitle className="text-xs font-medium text-muted-foreground">
+                      {label}
+                    </CardTitle>
                     <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   </CardHeader>
                   <CardContent>
@@ -143,7 +182,9 @@ function DashboardPage() {
           {traffic ? <TrafficCharts data={traffic} /> : null}
 
           {data && data.runs > 0 ? (
-            analytics ? <VisibilityCharts data={analytics} /> : null
+            analytics ? (
+              <VisibilityCharts data={analytics} />
+            ) : null
           ) : (
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 space-y-0">
@@ -152,10 +193,13 @@ function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Onaylı promptlarınızı yapay zeka asistanlarında çalıştırıp görünürlük skorunuzu ve kırılımını çıkarıyoruz.
+                  Onaylı promptlarınızı yapay zeka asistanlarında çalıştırıp görünürlük skorunuzu ve
+                  kırılımını çıkarıyoruz.
                 </p>
                 <Button asChild size="sm">
-                  <Link to="/app/measurement"><Gauge className="mr-1.5 h-4 w-4" /> Ölçümü başlat</Link>
+                  <Link to="/app/prompts">
+                    <Gauge className="mr-1.5 h-4 w-4" /> Ölçümü başlat
+                  </Link>
                 </Button>
               </CardContent>
             </Card>

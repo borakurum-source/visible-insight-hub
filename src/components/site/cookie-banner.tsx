@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import {
-  CONSENT_EVENT,
-  CONSENT_OPEN_EVENT,
-  readConsent,
-  writeConsent,
-} from "@/lib/consent";
+import { CONSENT_EVENT, CONSENT_OPEN_EVENT, readConsent, writeConsent } from "@/lib/consent";
 
 export function CookieBanner() {
   const [mounted, setMounted] = useState(false);
@@ -58,8 +53,8 @@ export function CookieBanner() {
       <div className="mx-auto max-w-3xl rounded-xl border border-border bg-card/95 p-4 shadow-lg backdrop-blur sm:p-5">
         <p className="text-sm font-semibold text-foreground">Çerez ve veri işleme tercihleri</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Zorunlu çerezler sitenin çalışması için gereklidir. Analitik ölçüm ile site tarama/embedding
-          işlemleri yalnızca siz onay verirseniz başlatılır. Ayrıntılar için{" "}
+          Zorunlu çerezler sitenin çalışması için gereklidir. Analitik ölçüm ile site
+          tarama/embedding işlemleri yalnızca siz onay verirseniz başlatılır. Ayrıntılar için{" "}
           <Link to="/data-processing" className="underline hover:text-foreground">
             veri işleme metnimize
           </Link>{" "}
@@ -75,7 +70,9 @@ export function CookieBanner() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium">Zorunlu</p>
-                <p className="text-xs text-muted-foreground">Oturum, güvenlik ve tercih saklama. Kapatılamaz.</p>
+                <p className="text-xs text-muted-foreground">
+                  Oturum, güvenlik ve tercih saklama. Kapatılamaz.
+                </p>
               </div>
               <Switch checked disabled aria-label="Zorunlu çerezler" />
             </div>
@@ -86,17 +83,25 @@ export function CookieBanner() {
                   Sayfa ve ürün kullanım ölçümü. Kapalıyken hiçbir izleme çağrısı tetiklenmez.
                 </p>
               </div>
-              <Switch checked={analytics} onCheckedChange={setAnalytics} aria-label="Analitik çerezler" />
+              <Switch
+                checked={analytics}
+                onCheckedChange={setAnalytics}
+                aria-label="Analitik çerezler"
+              />
             </div>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium">Site tarama ve embedding</p>
                 <p className="text-xs text-muted-foreground">
-                  Girdiğiniz alan adının taranması ve içeriğin Perplexity/DeepSeek/Firecrawl ile
+                  Girdiğiniz alan adının taranması ve içeriğin Perplexity Agent/Firecrawl ile
                   işlenip vektör (embedding) olarak saklanması.
                 </p>
               </div>
-              <Switch checked={processing} onCheckedChange={setProcessing} aria-label="Tarama ve embedding" />
+              <Switch
+                checked={processing}
+                onCheckedChange={setProcessing}
+                aria-label="Tarama ve embedding"
+              />
             </div>
           </div>
         ) : null}
@@ -105,7 +110,11 @@ export function CookieBanner() {
           <Button size="sm" onClick={() => save({ analytics: true, processing: true })}>
             Tümünü kabul et
           </Button>
-          <Button size="sm" variant="outline" onClick={() => save({ analytics: false, processing: false })}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => save({ analytics: false, processing: false })}
+          >
             Yalnızca zorunlu
           </Button>
           {details ? (

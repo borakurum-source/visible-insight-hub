@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import BrandLogo from "@/components/site/BrandLogo";
 
 const CONTROLLER_NAME = "OneCite adına Bora Kurum";
-const CONTROLLER_ADDRESS = "Kozyatağı Mah., Kaya Sultan Sok., Hayriye İş Merkezi No:83/3, Kadıköy, İstanbul, TR";
+const CONTROLLER_ADDRESS =
+  "Kozyatağı Mah., Kaya Sultan Sok., Hayriye İş Merkezi No:83/3, Kadıköy, İstanbul, TR";
 const CONTACT_EMAIL = "info@ragsignal.com";
 const LAST_UPDATED = "17 Ağustos 2026";
 
@@ -10,9 +11,16 @@ export const Route = createFileRoute("/kvkk")({
   head: () => ({
     meta: [
       { title: "KVKK Aydınlatma Metni | OneCite" },
-      { name: "description", content: "OneCite KVKK aydınlatma metni: veri sorumlusu, işlenen kişisel veriler, işleme amaçları ve haklarınız." },
+      {
+        name: "description",
+        content:
+          "OneCite KVKK aydınlatma metni: veri sorumlusu, işlenen kişisel veriler, işleme amaçları ve haklarınız.",
+      },
       { property: "og:title", content: "KVKK Aydınlatma Metni | OneCite" },
-      { property: "og:description", content: "OneCite'ın KVKK kapsamında kişisel verilerinizi nasıl işlediğini öğrenin." },
+      {
+        property: "og:description",
+        content: "OneCite'ın KVKK kapsamında kişisel verilerinizi nasıl işlediğini öğrenin.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:url", content: "https://1cite.com/kvkk" },
     ],
@@ -27,7 +35,10 @@ function LegalShell({ title, children }: { title: string; children: React.ReactN
       <header className="border-b border-border">
         <div className="max-w-3xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <BrandLogo variant="horizontal" size="sm" linkTo="/" />
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            to="/"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
             ← Ana sayfaya dön
           </Link>
         </div>
@@ -61,7 +72,9 @@ function KvkkPage() {
         <p>Adres: {CONTROLLER_ADDRESS}</p>
         <p>
           E-posta:{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-foreground">{CONTACT_EMAIL}</a>
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-foreground">
+            {CONTACT_EMAIL}
+          </a>
         </p>
       </Section>
 
@@ -69,16 +82,19 @@ function KvkkPage() {
         <ul className="list-disc pl-5 space-y-1">
           <li>Kimlik ve iletişim verisi: ad, e-posta adresi.</li>
           <li>Müşteri ilişkisi verisi: temsil ettiğiniz şirket adı, plan/abonelik bilgisi.</li>
-          <li>İşlem güvenliği verisi: oturum ve giriş kayıtları (Lovable Cloud kimlik doğrulama altyapısı üzerinden).</li>
           <li>
-            Entegrasyon verisi: kendi isteğinizle bağladığınız Google Search Console / Google Analytics 4 ve Bing
-            Webmaster Tools hesaplarından okunan, yalnızca kendi sitenize ait performans verileri ve bu bağlantılar
-            için saklanan erişim anahtarları.
+            İşlem güvenliği verisi: oturum ve giriş kayıtları (Lovable Cloud kimlik doğrulama
+            altyapısı üzerinden).
           </li>
           <li>
-            Not: Hizmete girdiğiniz müşteri marka/prompt verisi genellikle kurumsal niteliktedir; ancak marka adı
-            veya prompt içeriği dolaylı olarak bir gerçek kişiyle ilişkilendirilebilirse (örn. serbest çalışan adı),
-            bu veri de aynı koruma kapsamındadır.
+            Entegrasyon verisi: kendi isteğinizle bağladığınız Google Search Console / Google
+            Analytics 4 ve Bing Webmaster Tools hesaplarından okunan, yalnızca kendi sitenize ait
+            performans verileri ve bu bağlantılar için saklanan erişim anahtarları.
+          </li>
+          <li>
+            Not: Hizmete girdiğiniz müşteri marka/prompt verisi genellikle kurumsal niteliktedir;
+            ancak marka adı veya prompt içeriği dolaylı olarak bir gerçek kişiyle
+            ilişkilendirilebilirse (örn. serbest çalışan adı), bu veri de aynı koruma kapsamındadır.
           </li>
         </ul>
       </Section>
@@ -86,9 +102,18 @@ function KvkkPage() {
       <Section title="3. İşleme Amaçları">
         <ul className="list-disc pl-5 space-y-1">
           <li>Hizmetin sunulması: hesabınızın oluşturulması, oturum açma, plan/yetki yönetimi.</li>
-          <li>AI görünürlük ölçümü: tanımladığınız promptların Perplexity Sonar API'si üzerinden çalıştırılması ve sonuçların panelinizde raporlanması.</li>
-          <li>Marka zekası ve bilgi bankası: belirttiğiniz web sitesinin herkese açık sayfalarının taranması, metne dönüştürülmesi ve vektör (embedding) olarak saklanması.</li>
-          <li>İçerik ve aksiyon önerisi üretimi: ölçüm sonuçlarının DeepSeek API'si ile analiz edilip öneriye dönüştürülmesi.</li>
+          <li>
+            AI görünürlük ölçümü: tanımladığınız promptların Perplexity Sonar API'si üzerinden
+            çalıştırılması ve sonuçların panelinizde raporlanması.
+          </li>
+          <li>
+            Marka zekası ve bilgi bankası: belirttiğiniz web sitesinin herkese açık sayfalarının
+            taranması, metne dönüştürülmesi ve vektör (embedding) olarak saklanması.
+          </li>
+          <li>
+            İçerik ve aksiyon önerisi üretimi: ölçüm sonuçlarının Perplexity Agent API üzerinden
+            seçilen modellerle analiz edilip öneriye dönüştürülmesi.
+          </li>
           <li>Faturalandırma ve plan takibi.</li>
           <li>Destek taleplerinin yanıtlanması.</li>
           <li>Hizmetin güvenliğinin ve sürekliliğinin sağlanması.</li>
@@ -97,21 +122,40 @@ function KvkkPage() {
 
       <Section title="4. İşlemenin Hukuki Sebebi">
         <p>
-          Kişisel verileriniz, KVKK m.5/2 kapsamında "bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya
-          ilgili olma" ve "veri sorumlusunun meşru menfaati" hukuki sebeplerine dayanılarak işlenmektedir.
-          Yurt dışına aktarım söz konusu olduğunda (bkz. madde 6), açık rızanız alınır.
+          Kişisel verileriniz, KVKK m.5/2 kapsamında "bir sözleşmenin kurulması veya ifasıyla
+          doğrudan doğruya ilgili olma" ve "veri sorumlusunun meşru menfaati" hukuki sebeplerine
+          dayanılarak işlenmektedir. Yurt dışına aktarım söz konusu olduğunda (bkz. madde 6), açık
+          rızanız alınır.
         </p>
       </Section>
 
       <Section title="5. Kişisel Verilerin Aktarıldığı Taraflar">
-        <p>Verileriniz, hizmetin sunulması amacıyla sınırlı olarak aşağıdaki alt yüklenicilerle paylaşılır:</p>
+        <p>
+          Verileriniz, hizmetin sunulması amacıyla sınırlı olarak aşağıdaki alt yüklenicilerle
+          paylaşılır:
+        </p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>Lovable Cloud / Supabase — kimlik doğrulama, oturum yönetimi ve veritabanı barındırma (AB bölgesi).</li>
-          <li>Paddle.com Market Ltd. — Kayıtlı Satıcı (Merchant of Record): abonelik, ödeme, vergi ve faturalandırma.</li>
+          <li>
+            Lovable Cloud / Supabase — kimlik doğrulama, oturum yönetimi ve veritabanı barındırma
+            (AB bölgesi).
+          </li>
+          <li>
+            Paddle.com Market Ltd. — Kayıtlı Satıcı (Merchant of Record): abonelik, ödeme, vergi ve
+            faturalandırma.
+          </li>
           <li>Perplexity — Sonar API ile prompt çalıştırma ve embedding üretimi.</li>
-          <li>DeepSeek — ölçüm sonuçlarının analizi ve içerik/aksiyon önerisi üretimi.</li>
-          <li>Firecrawl — yalnızca JavaScript ile yüklenen sayfaların okunabilir metne dönüştürülmesi (gerektiğinde).</li>
-          <li>Google ve Microsoft (Bing) — yalnızca sizin bağladığınız hesaplar üzerinden kendi sitenizin performans verisinin okunması.</li>
+          <li>
+            Perplexity Agent ve Router — kaynaklı araştırma, ölçüm analizi ve içerik/aksiyon önerisi
+            üretimi.
+          </li>
+          <li>
+            Firecrawl — yalnızca JavaScript ile yüklenen sayfaların okunabilir metne dönüştürülmesi
+            (gerektiğinde).
+          </li>
+          <li>
+            Google ve Microsoft (Bing) — yalnızca sizin bağladığınız hesaplar üzerinden kendi
+            sitenizin performans verisinin okunması.
+          </li>
           <li>E-posta altyapısı (notify.1cite.com) — işlemsel bildirim gönderimi.</li>
         </ul>
         <p>Verileriniz pazarlama amacıyla üçüncü taraflara satılmaz veya kiralanmaz.</p>
@@ -119,9 +163,9 @@ function KvkkPage() {
 
       <Section title="6. Yurt Dışına Aktarım">
         <p>
-          Madde 5'te sayılan alt yükleniciler altyapılarını Türkiye dışında (AB ve/veya ABD) barındırdığından,
-          kişisel verileriniz KVKK m.9 kapsamında yurt dışına aktarılabilir. Hizmete kayıt olarak bu aktarıma
-          açık rıza vermiş olursunuz.
+          Madde 5'te sayılan alt yükleniciler altyapılarını Türkiye dışında (AB ve/veya ABD)
+          barındırdığından, kişisel verileriniz KVKK m.9 kapsamında yurt dışına aktarılabilir.
+          Hizmete kayıt olarak bu aktarıma açık rıza vermiş olursunuz.
         </p>
       </Section>
 
@@ -140,8 +184,11 @@ function KvkkPage() {
         </ul>
         <p>
           Bu haklarınızı kullanmak için{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-foreground">{CONTACT_EMAIL}</a>{" "}
-          adresine yazılı olarak başvurabilirsiniz. Başvurunuz en geç 30 gün içinde ücretsiz olarak sonuçlandırılır.
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-foreground">
+            {CONTACT_EMAIL}
+          </a>{" "}
+          adresine yazılı olarak başvurabilirsiniz. Başvurunuz en geç 30 gün içinde ücretsiz olarak
+          sonuçlandırılır.
         </p>
       </Section>
     </LegalShell>

@@ -19,7 +19,7 @@ export type EvidenceSynthesis = {
 /**
  * Aşama 1 (AI cevapı + brand nedenleri) ve Aşama 2 (Firecrawl kanıt çıkarımı)
  * sonuçlarını sentezleyerek, marka için üretilmesi gereken içerik listesini
- * DeepSeek + aiJson ile oluştur.
+ * Merkezi Perplexity model gateway'i ile olustur.
  */
 export async function synthesizeEvidenceGap(input: {
   brandName: string;
@@ -96,15 +96,19 @@ Yanıt JSON: {"content_priorities": [{gap, linked_reason, suggested_format, page
   return (result.content_priorities ?? []).map((item) => ({
     gap: String(item.gap).slice(0, 500),
     linked_reason: String(item.linked_reason).slice(0, 300),
-    suggested_format: (
-      ["article", "faq", "case-study", "pricing-page", "comparison", "other"].includes(String(item.suggested_format))
-        ? item.suggested_format
-        : "other"
-    ) as ContentPriority["suggested_format"],
+    suggested_format: ([
+      "article",
+      "faq",
+      "case-study",
+      "pricing-page",
+      "comparison",
+      "other",
+    ].includes(String(item.suggested_format))
+      ? item.suggested_format
+      : "other") as ContentPriority["suggested_format"],
     page_type: String(item.page_type).slice(0, 100),
-    priority: (["high", "medium", "low"].includes(String(item.priority)) ? item.priority : "medium") as
-      | "high"
-      | "medium"
-      | "low",
+    priority: (["high", "medium", "low"].includes(String(item.priority))
+      ? item.priority
+      : "medium") as "high" | "medium" | "low",
   }));
 }

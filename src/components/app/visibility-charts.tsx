@@ -6,6 +6,7 @@ import {
   Cell,
   Pie,
   PieChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -14,7 +15,13 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export type VisibilityAnalytics = {
-  trend: Array<{ date: string; score: number }>;
+  trend: Array<{
+    date: string;
+    score: number;
+    promptSetChanged?: boolean;
+    confidence?: number | null;
+    coverage?: number | null;
+  }>;
   share: Array<{ name: string; mentions: number; isOwn: boolean }>;
   mix: Array<{ name: string; value: number }>;
   categories: Array<{ category: string; total: number; mentioned: number; rate: number }>;
@@ -33,7 +40,15 @@ const tooltipStyle = {
   color: "var(--popover-foreground)",
 } as const;
 
-function ChartCard({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+function ChartCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -54,7 +69,11 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
     <div className="grid gap-4 lg:grid-cols-2">
       <ChartCard
         title="Görünürlük skoru trendi"
-        description={hasTrend ? "Her tamamlanan ölçüm turu bir nokta." : "İkinci ölçümden sonra trend çizgisi oluşur."}
+        description={
+          hasTrend
+            ? "Yalnız tam turlar. Kesikli çizgi prompt kümesi değişimini gösterir."
+            : "İkinci tam ölçümden sonra trend çizgisi oluşur."
+        }
       >
         {hasTrend ? (
           <ResponsiveContainer width="100%" height="100%">
@@ -65,10 +84,38 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
                   <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value} puan`, "Skor"]} />
-              <Area type="monotone" dataKey="score" stroke="var(--chart-1)" strokeWidth={2} fill="url(#scoreFill)" />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                domain={[0, 100]}
+                tick={{ fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip content={<TrendTooltip />} />
+              {data.trend
+                .filter((point) => point.promptSetChanged)
+                .map((point) => (
+                  <ReferenceLine
+                    key={`set-${point.date}`}
+                    x={point.date}
+                    stroke="var(--destructive)"
+                    strokeDasharray="4 4"
+                  />
+                ))}
+              <Area
+                type="monotone"
+                dataKey="score"
+                stroke="var(--chart-1)"
+                strokeWidth={2}
+                fill="url(#scoreFill)"
+              />
             </AreaChart>
           </ResponsiveContainer>
         ) : (
@@ -76,13 +123,38 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
         )}
       </ChartCard>
 
-      <ChartCard title="Rakip payı" description="Yanıtlarda kaç kez geçildiği — siz ve rakipleriniz.">
+      <ChartCard
+        title="Rakip payı"
+        description="Yanıtlarda kaç kez geçildiği — siz ve rakipleriniz."
+      >
         {shareData.length ? (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={shareData} layout="vertical" margin={{ top: 4, right: 12, left: 8, bottom: 0 }}>
-              <XAxis type="number" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} allowDecimals={false} />
-              <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`${value} yanıt`, "Geçme"]} />
+            <BarChart
+              data={shareData}
+              layout="vertical"
+              margin={{ top: 4, right: 12, left: 8, bottom: 0 }}
+            >
+              <XAxis
+                type="number"
+                tick={{ fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tickLine={false}
+                axisLine={false}
+                allowDecimals={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={110}
+                tick={{ fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                formatter={(value: number) => [`${value} yanıt`, "Geçme"]}
+              />
               <Bar dataKey="mentions" radius={[0, 4, 4, 0]}>
                 {shareData.map((row) => (
                   <Cell key={row.name} fill={row.isOwn ? "var(--chart-1)" : "var(--chart-3)"} />
@@ -95,16 +167,29 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
         )}
       </ChartCard>
 
-      <ChartCard title="Seçilen kaynak dağılımı" description="Yapay zekanın gösterdiği kaynaklar kimin sitesinden geliyor?">
+      <ChartCard
+        title="Seçilen kaynak dağılımı"
+        description="Yapay zekanın gösterdiği kaynaklar kimin sitesinden geliyor?"
+      >
         {mixData.length ? (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={mixData} dataKey="value" nameKey="name" innerRadius={45} outerRadius={75} paddingAngle={2}>
+              <Pie
+                data={mixData}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={45}
+                outerRadius={75}
+                paddingAngle={2}
+              >
                 {mixData.map((entry, index) => (
                   <Cell key={entry.name} fill={MIX_COLORS[index % MIX_COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number, name: string) => [`${value} kaynak gösterimi`, name]} />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                formatter={(value: number, name: string) => [`${value} kaynak gösterimi`, name]}
+              />
             </PieChart>
           </ResponsiveContainer>
         ) : (
@@ -112,13 +197,31 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
         )}
       </ChartCard>
 
-      <ChartCard title="Soru kategorisi kırılımı" description="Hangi soru tipinde görünürlüğünüz güçlü?">
+      <ChartCard
+        title="Soru kategorisi kırılımı"
+        description="Hangi soru tipinde görünürlüğünüz güçlü?"
+      >
         {data.categories.length ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.categories} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <XAxis dataKey="category" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`%${value}`, "Görünürlük"]} />
+              <XAxis
+                dataKey="category"
+                tick={{ fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                domain={[0, 100]}
+                tick={{ fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                formatter={(value: number) => [`%${value}`, "Görünürlük"]}
+              />
               <Bar dataKey="rate" radius={[4, 4, 0, 0]} fill="var(--chart-2)" />
             </BarChart>
           </ResponsiveContainer>
@@ -130,6 +233,39 @@ export function VisibilityCharts({ data }: { data: VisibilityAnalytics }) {
   );
 }
 
+function TrendTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload?: VisibilityAnalytics["trend"][number] }>;
+  label?: string;
+}) {
+  if (!active || !payload?.[0]?.payload) return null;
+  const point = payload[0].payload;
+  return (
+    <div className="space-y-1 rounded-lg border border-border bg-popover p-2 text-xs text-popover-foreground shadow-md">
+      <p className="font-medium">{label}</p>
+      <p>Skor: {point.score}</p>
+      <p>
+        Kapsam:{" "}
+        {point.coverage === null ? "veri yok" : `%${Math.round((point.coverage ?? 0) * 100)}`}
+      </p>
+      <p>
+        Güven:{" "}
+        {point.confidence === null ? "veri yok" : `%${Math.round((point.confidence ?? 0) * 100)}`}
+      </p>
+      {point.promptSetChanged ? <p className="text-destructive">Prompt kümesi değişti</p> : null}
+      <p className="text-muted-foreground">Kaynak: agent_web_grounded · tam tur</p>
+    </div>
+  );
+}
+
 function EmptyChart({ label }: { label: string }) {
-  return <div className="flex h-full items-center justify-center text-xs text-muted-foreground">{label}</div>;
+  return (
+    <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+      {label}
+    </div>
+  );
 }

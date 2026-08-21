@@ -14,12 +14,13 @@ export const Route = createFileRoute("/data-processing")({
       {
         name: "description",
         content:
-          "OneCite'ın Perplexity, DeepSeek, Firecrawl, Google ve Bing gibi sağlayıcılarla veri işleme amaçları, hukuki dayanakları ve veri sorumlusu/işleyen rol tanımları.",
+          "OneCite'ın Perplexity Agent/Router, Firecrawl, Google ve Bing gibi sağlayıcılarla veri işleme amaçları, hukuki dayanakları ve veri sorumlusu/işleyen rol tanımları.",
       },
       { property: "og:title", content: "Veri İşleme Metni | OneCite" },
       {
         property: "og:description",
-        content: "İşleme amaçları, aktarılan veri türleri ve sağlayıcı rol tanımları (sorumlu/işleyen).",
+        content:
+          "İşleme amaçları, aktarılan veri türleri ve sağlayıcı rol tanımları (sorumlu/işleyen).",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -48,12 +49,12 @@ const PROVIDERS: Row[] = [
     location: "ABD",
   },
   {
-    provider: "DeepSeek",
+    provider: "Perplexity Agent ve Router",
     purpose:
       "İçerik önerisi, aksiyon planı ve marka iddialarına dayalı metin üretimi; sınıflandırma ve özetleme.",
     data: "Prompt metinleri, bilgi bankası pasajları, marka iddiaları ve ölçüm çıktıları.",
     role: "Veri işleyen",
-    location: "Çin / bölgesel uç noktalar",
+    location: "ABD / sağlayıcının sözleşmeli bölgesel uç noktaları",
   },
   {
     provider: "Firecrawl",
@@ -73,15 +74,15 @@ const PROVIDERS: Row[] = [
   },
   {
     provider: "Bing Webmaster Tools (Microsoft)",
-    purpose:
-      "Bing organik performansı ile Copilot ve iş ortağı seçilen kaynaklarnın okunması.",
+    purpose: "Bing organik performansı ile Copilot ve iş ortağı seçilen kaynaklarnın okunması.",
     data: "API anahtarı, site kimliği, sorgu ve tıklama metrikleri.",
     role: "Bağımsız veri sorumlusu (Microsoft) + OneCite yönünden veri işleyen ilişkisi",
     location: "AB / ABD",
   },
   {
     provider: "Lovable Cloud (Supabase altyapısı)",
-    purpose: "Veritabanı, kimlik doğrulama, dosya saklama ve sunucu fonksiyonlarının çalıştırılması.",
+    purpose:
+      "Veritabanı, kimlik doğrulama, dosya saklama ve sunucu fonksiyonlarının çalıştırılması.",
     data: "Hesap bilgileri, marka ve ölçüm kayıtları, bilgi bankası içerikleri ve embedding vektörleri, entegrasyon anahtarları.",
     role: "Veri işleyen",
     location: "AB",
@@ -103,8 +104,7 @@ const PURPOSES = [
   },
   {
     title: "Site tarama, chunking ve embedding",
-    body:
-      "Bildirdiğiniz alan adlarının taranması, içeriğin bölümlenmesi ve marka zekası için vektörleştirilmesi. Ziyaretçi tarafındaki tetikleme yalnızca açık onay verildiğinde başlar.",
+    body: "Bildirdiğiniz alan adlarının taranması, içeriğin bölümlenmesi ve marka zekası için vektörleştirilmesi. Ziyaretçi tarafındaki tetikleme yalnızca açık onay verildiğinde başlar.",
     basis: "Açık rıza (ziyaretçi) / sözleşmenin ifası (müşteri hesabı)",
   },
   {
@@ -139,7 +139,10 @@ function DataProcessingPage() {
       <header className="border-b border-border">
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 md:px-6">
           <BrandLogo variant="horizontal" size="sm" linkTo="/" />
-          <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <Link
+            to="/"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
             ← Ana sayfaya dön
           </Link>
         </div>
@@ -152,10 +155,11 @@ function DataProcessingPage() {
         <div className="space-y-8 text-sm leading-relaxed">
           <Section title="1. Roller">
             <p className="text-muted-foreground">
-              OneCite hizmetini {CONTROLLER_NAME} sunar. Hesap sahibi müşterilerimizin panellerine yükledikleri
-              içerik, bilgi bankası ve entegrasyon verileri bakımından <strong>müşteri veri sorumlusudur</strong>,
-              OneCite ise bu verileri yalnızca müşterinin talimatıyla işleyen <strong>veri işleyendir</strong>.
-              OneCite kendi web sitesi ziyaretçileri, pazarlama ve faturalandırma faaliyetleri bakımından{" "}
+              OneCite hizmetini {CONTROLLER_NAME} sunar. Hesap sahibi müşterilerimizin panellerine
+              yükledikleri içerik, bilgi bankası ve entegrasyon verileri bakımından{" "}
+              <strong>müşteri veri sorumlusudur</strong>, OneCite ise bu verileri yalnızca
+              müşterinin talimatıyla işleyen <strong>veri işleyendir</strong>. OneCite kendi web
+              sitesi ziyaretçileri, pazarlama ve faturalandırma faaliyetleri bakımından{" "}
               <strong>veri sorumlusu</strong> sıfatıyla hareket eder.
             </p>
           </Section>
@@ -166,7 +170,9 @@ function DataProcessingPage() {
                 <div key={item.title} className="rounded-lg border border-border/60 p-3">
                   <p className="font-medium">{item.title}</p>
                   <p className="mt-1 text-muted-foreground">{item.body}</p>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">Dayanak: {item.basis}</p>
+                  <p className="mt-1 font-mono text-xs text-muted-foreground">
+                    Dayanak: {item.basis}
+                  </p>
                 </div>
               ))}
             </div>
@@ -198,9 +204,9 @@ function DataProcessingPage() {
               </table>
             </div>
             <p className="text-xs text-muted-foreground">
-              Yurt dışına aktarımlarda standart sözleşme hükümleri ve sağlayıcıların kendi veri işleme
-              taahhütlerine dayanılır. Yapay zeka sağlayıcılarına gönderilen içeriklerin model eğitiminde
-              kullanılmaması için kurumsal/API uç noktaları tercih edilir.
+              Yurt dışına aktarımlarda standart sözleşme hükümleri ve sağlayıcıların kendi veri
+              işleme taahhütlerine dayanılır. Yapay zeka sağlayıcılarına gönderilen içeriklerin
+              model eğitiminde kullanılmaması için kurumsal/API uç noktaları tercih edilir.
             </p>
           </Section>
 
@@ -216,9 +222,9 @@ function DataProcessingPage() {
 
           <Section title="5. Onay yönetimi">
             <p className="text-muted-foreground">
-              Analitik izleme ile ziyaretçi tarafındaki site tarama/embedding işlemleri yalnızca açık onayınızla
-              çalışır. Onayınızı istediğiniz zaman geri alabilirsiniz; geri alma, önceki işlemelerin hukuka
-              uygunluğunu etkilemez.
+              Analitik izleme ile ziyaretçi tarafındaki site tarama/embedding işlemleri yalnızca
+              açık onayınızla çalışır. Onayınızı istediğiniz zaman geri alabilirsiniz; geri alma,
+              önceki işlemelerin hukuka uygunluğunu etkilemez.
             </p>
             <Button variant="outline" size="sm" onClick={() => openConsentPreferences()}>
               Çerez tercihlerini yönet

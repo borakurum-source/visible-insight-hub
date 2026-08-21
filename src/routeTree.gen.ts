@@ -72,12 +72,21 @@ import { Route as AuthenticatedAppPromptsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppReportRouteImport } from './routes/_authenticated/app.report'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedAppSystemPromptsRouteImport } from './routes/_authenticated/app.system-prompts'
+import { Route as ApiV1ReportsRouteImport } from './routes/api/v1/reports'
 import { Route as AuthenticatedAppTrafficMetricRouteImport } from './routes/_authenticated/app.traffic.$metric'
 import { Route as ApiPublicBlogMediaSplatRouteImport } from './routes/api/public/blog-media.$'
 import { Route as ApiPublicCronSyncAnalyticsRouteImport } from './routes/api/public/cron/sync-analytics'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiV1ReportsTokenRouteImport } from './routes/api/v1/reports/$token'
+import { Route as ApiV1RunsRunIdRouteImport } from './routes/api/v1/runs/$runId'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicOauthGoogleCallbackRouteImport } from './routes/api/public/oauth/google/callback'
+import { Route as ApiV1FindingsFindingIdApproveRouteImport } from './routes/api/v1/findings/$findingId/approve'
+import { Route as ApiV1ProjectsBrandIdFindingsRouteImport } from './routes/api/v1/projects/$brandId/findings'
+import { Route as ApiV1ProjectsBrandIdRunsRouteImport } from './routes/api/v1/projects/$brandId/runs'
+import { Route as ApiV1ProjectsBrandIdVisibilityRouteImport } from './routes/api/v1/projects/$brandId/visibility'
+import { Route as ApiV1PromptsPromptIdMeasureRouteImport } from './routes/api/v1/prompts/$promptId/measure'
+import { Route as ApiV1TasksTaskIdRemeasureRouteImport } from './routes/api/v1/tasks/$taskId/remeasure'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -408,6 +417,11 @@ const AuthenticatedAppSystemPromptsRoute =
     path: '/system-prompts',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const ApiV1ReportsRoute = ApiV1ReportsRouteImport.update({
+  id: '/api/v1/reports',
+  path: '/api/v1/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAppTrafficMetricRoute =
   AuthenticatedAppTrafficMetricRouteImport.update({
     id: '/traffic/$metric',
@@ -431,6 +445,16 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV1ReportsTokenRoute = ApiV1ReportsTokenRouteImport.update({
+  id: '/$token',
+  path: '/$token',
+  getParentRoute: () => ApiV1ReportsRoute,
+} as any)
+const ApiV1RunsRunIdRoute = ApiV1RunsRunIdRouteImport.update({
+  id: '/api/v1/runs/$runId',
+  path: '/api/v1/runs/$runId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -441,6 +465,42 @@ const ApiPublicOauthGoogleCallbackRoute =
   ApiPublicOauthGoogleCallbackRouteImport.update({
     id: '/api/public/oauth/google/callback',
     path: '/api/public/oauth/google/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1FindingsFindingIdApproveRoute =
+  ApiV1FindingsFindingIdApproveRouteImport.update({
+    id: '/api/v1/findings/$findingId/approve',
+    path: '/api/v1/findings/$findingId/approve',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1ProjectsBrandIdFindingsRoute =
+  ApiV1ProjectsBrandIdFindingsRouteImport.update({
+    id: '/api/v1/projects/$brandId/findings',
+    path: '/api/v1/projects/$brandId/findings',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1ProjectsBrandIdRunsRoute =
+  ApiV1ProjectsBrandIdRunsRouteImport.update({
+    id: '/api/v1/projects/$brandId/runs',
+    path: '/api/v1/projects/$brandId/runs',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1ProjectsBrandIdVisibilityRoute =
+  ApiV1ProjectsBrandIdVisibilityRouteImport.update({
+    id: '/api/v1/projects/$brandId/visibility',
+    path: '/api/v1/projects/$brandId/visibility',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1PromptsPromptIdMeasureRoute =
+  ApiV1PromptsPromptIdMeasureRouteImport.update({
+    id: '/api/v1/prompts/$promptId/measure',
+    path: '/api/v1/prompts/$promptId/measure',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV1TasksTaskIdRemeasureRoute =
+  ApiV1TasksTaskIdRemeasureRouteImport.update({
+    id: '/api/v1/tasks/$taskId/remeasure',
+    path: '/api/v1/tasks/$taskId/remeasure',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -506,13 +566,22 @@ export interface FileRoutesByFullPath {
   '/app/report': typeof AuthenticatedAppReportRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
+  '/api/v1/reports': typeof ApiV1ReportsRouteWithChildren
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/blog-media/$': typeof ApiPublicBlogMediaSplatRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/v1/reports/$token': typeof ApiV1ReportsTokenRoute
+  '/api/v1/runs/$runId': typeof ApiV1RunsRunIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
+  '/api/v1/findings/$findingId/approve': typeof ApiV1FindingsFindingIdApproveRoute
+  '/api/v1/projects/$brandId/findings': typeof ApiV1ProjectsBrandIdFindingsRoute
+  '/api/v1/projects/$brandId/runs': typeof ApiV1ProjectsBrandIdRunsRoute
+  '/api/v1/projects/$brandId/visibility': typeof ApiV1ProjectsBrandIdVisibilityRoute
+  '/api/v1/prompts/$promptId/measure': typeof ApiV1PromptsPromptIdMeasureRoute
+  '/api/v1/tasks/$taskId/remeasure': typeof ApiV1TasksTaskIdRemeasureRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -572,13 +641,22 @@ export interface FileRoutesByTo {
   '/app/report': typeof AuthenticatedAppReportRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
+  '/api/v1/reports': typeof ApiV1ReportsRouteWithChildren
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/blog-media/$': typeof ApiPublicBlogMediaSplatRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/v1/reports/$token': typeof ApiV1ReportsTokenRoute
+  '/api/v1/runs/$runId': typeof ApiV1RunsRunIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
+  '/api/v1/findings/$findingId/approve': typeof ApiV1FindingsFindingIdApproveRoute
+  '/api/v1/projects/$brandId/findings': typeof ApiV1ProjectsBrandIdFindingsRoute
+  '/api/v1/projects/$brandId/runs': typeof ApiV1ProjectsBrandIdRunsRoute
+  '/api/v1/projects/$brandId/visibility': typeof ApiV1ProjectsBrandIdVisibilityRoute
+  '/api/v1/prompts/$promptId/measure': typeof ApiV1PromptsPromptIdMeasureRoute
+  '/api/v1/tasks/$taskId/remeasure': typeof ApiV1TasksTaskIdRemeasureRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -644,13 +722,22 @@ export interface FileRoutesById {
   '/_authenticated/app/report': typeof AuthenticatedAppReportRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
+  '/api/v1/reports': typeof ApiV1ReportsRouteWithChildren
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/traffic/$metric': typeof AuthenticatedAppTrafficMetricRoute
   '/api/public/blog-media/$': typeof ApiPublicBlogMediaSplatRoute
   '/api/public/cron/sync-analytics': typeof ApiPublicCronSyncAnalyticsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/v1/reports/$token': typeof ApiV1ReportsTokenRoute
+  '/api/v1/runs/$runId': typeof ApiV1RunsRunIdRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
+  '/api/v1/findings/$findingId/approve': typeof ApiV1FindingsFindingIdApproveRoute
+  '/api/v1/projects/$brandId/findings': typeof ApiV1ProjectsBrandIdFindingsRoute
+  '/api/v1/projects/$brandId/runs': typeof ApiV1ProjectsBrandIdRunsRoute
+  '/api/v1/projects/$brandId/visibility': typeof ApiV1ProjectsBrandIdVisibilityRoute
+  '/api/v1/prompts/$promptId/measure': typeof ApiV1PromptsPromptIdMeasureRoute
+  '/api/v1/tasks/$taskId/remeasure': typeof ApiV1TasksTaskIdRemeasureRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -716,13 +803,22 @@ export interface FileRouteTypes {
     | '/app/report'
     | '/app/settings'
     | '/app/system-prompts'
+    | '/api/v1/reports'
     | '/app/'
     | '/app/traffic/$metric'
     | '/api/public/blog-media/$'
     | '/api/public/cron/sync-analytics'
     | '/api/public/payments/webhook'
+    | '/api/v1/reports/$token'
+    | '/api/v1/runs/$runId'
     | '/lovable/email/transactional/preview'
     | '/api/public/oauth/google/callback'
+    | '/api/v1/findings/$findingId/approve'
+    | '/api/v1/projects/$brandId/findings'
+    | '/api/v1/projects/$brandId/runs'
+    | '/api/v1/projects/$brandId/visibility'
+    | '/api/v1/prompts/$promptId/measure'
+    | '/api/v1/tasks/$taskId/remeasure'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -782,13 +878,22 @@ export interface FileRouteTypes {
     | '/app/report'
     | '/app/settings'
     | '/app/system-prompts'
+    | '/api/v1/reports'
     | '/app'
     | '/app/traffic/$metric'
     | '/api/public/blog-media/$'
     | '/api/public/cron/sync-analytics'
     | '/api/public/payments/webhook'
+    | '/api/v1/reports/$token'
+    | '/api/v1/runs/$runId'
     | '/lovable/email/transactional/preview'
     | '/api/public/oauth/google/callback'
+    | '/api/v1/findings/$findingId/approve'
+    | '/api/v1/projects/$brandId/findings'
+    | '/api/v1/projects/$brandId/runs'
+    | '/api/v1/projects/$brandId/visibility'
+    | '/api/v1/prompts/$promptId/measure'
+    | '/api/v1/tasks/$taskId/remeasure'
   id:
     | '__root__'
     | '/'
@@ -853,13 +958,22 @@ export interface FileRouteTypes {
     | '/_authenticated/app/report'
     | '/_authenticated/app/settings'
     | '/_authenticated/app/system-prompts'
+    | '/api/v1/reports'
     | '/_authenticated/app/'
     | '/_authenticated/app/traffic/$metric'
     | '/api/public/blog-media/$'
     | '/api/public/cron/sync-analytics'
     | '/api/public/payments/webhook'
+    | '/api/v1/reports/$token'
+    | '/api/v1/runs/$runId'
     | '/lovable/email/transactional/preview'
     | '/api/public/oauth/google/callback'
+    | '/api/v1/findings/$findingId/approve'
+    | '/api/v1/projects/$brandId/findings'
+    | '/api/v1/projects/$brandId/runs'
+    | '/api/v1/projects/$brandId/visibility'
+    | '/api/v1/prompts/$promptId/measure'
+    | '/api/v1/tasks/$taskId/remeasure'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -891,11 +1005,19 @@ export interface RootRouteChildren {
   SolutionsAgenciesRoute: typeof SolutionsAgenciesRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiV1ReportsRoute: typeof ApiV1ReportsRouteWithChildren
   ApiPublicBlogMediaSplatRoute: typeof ApiPublicBlogMediaSplatRoute
   ApiPublicCronSyncAnalyticsRoute: typeof ApiPublicCronSyncAnalyticsRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiV1RunsRunIdRoute: typeof ApiV1RunsRunIdRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicOauthGoogleCallbackRoute: typeof ApiPublicOauthGoogleCallbackRoute
+  ApiV1FindingsFindingIdApproveRoute: typeof ApiV1FindingsFindingIdApproveRoute
+  ApiV1ProjectsBrandIdFindingsRoute: typeof ApiV1ProjectsBrandIdFindingsRoute
+  ApiV1ProjectsBrandIdRunsRoute: typeof ApiV1ProjectsBrandIdRunsRoute
+  ApiV1ProjectsBrandIdVisibilityRoute: typeof ApiV1ProjectsBrandIdVisibilityRoute
+  ApiV1PromptsPromptIdMeasureRoute: typeof ApiV1PromptsPromptIdMeasureRoute
+  ApiV1TasksTaskIdRemeasureRoute: typeof ApiV1TasksTaskIdRemeasureRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1341,6 +1463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSystemPromptsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/api/v1/reports': {
+      id: '/api/v1/reports'
+      path: '/api/v1/reports'
+      fullPath: '/api/v1/reports'
+      preLoaderRoute: typeof ApiV1ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app/traffic/$metric': {
       id: '/_authenticated/app/traffic/$metric'
       path: '/traffic/$metric'
@@ -1369,6 +1498,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v1/reports/$token': {
+      id: '/api/v1/reports/$token'
+      path: '/$token'
+      fullPath: '/api/v1/reports/$token'
+      preLoaderRoute: typeof ApiV1ReportsTokenRouteImport
+      parentRoute: typeof ApiV1ReportsRoute
+    }
+    '/api/v1/runs/$runId': {
+      id: '/api/v1/runs/$runId'
+      path: '/api/v1/runs/$runId'
+      fullPath: '/api/v1/runs/$runId'
+      preLoaderRoute: typeof ApiV1RunsRunIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -1381,6 +1524,48 @@ declare module '@tanstack/react-router' {
       path: '/api/public/oauth/google/callback'
       fullPath: '/api/public/oauth/google/callback'
       preLoaderRoute: typeof ApiPublicOauthGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/findings/$findingId/approve': {
+      id: '/api/v1/findings/$findingId/approve'
+      path: '/api/v1/findings/$findingId/approve'
+      fullPath: '/api/v1/findings/$findingId/approve'
+      preLoaderRoute: typeof ApiV1FindingsFindingIdApproveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/projects/$brandId/findings': {
+      id: '/api/v1/projects/$brandId/findings'
+      path: '/api/v1/projects/$brandId/findings'
+      fullPath: '/api/v1/projects/$brandId/findings'
+      preLoaderRoute: typeof ApiV1ProjectsBrandIdFindingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/projects/$brandId/runs': {
+      id: '/api/v1/projects/$brandId/runs'
+      path: '/api/v1/projects/$brandId/runs'
+      fullPath: '/api/v1/projects/$brandId/runs'
+      preLoaderRoute: typeof ApiV1ProjectsBrandIdRunsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/projects/$brandId/visibility': {
+      id: '/api/v1/projects/$brandId/visibility'
+      path: '/api/v1/projects/$brandId/visibility'
+      fullPath: '/api/v1/projects/$brandId/visibility'
+      preLoaderRoute: typeof ApiV1ProjectsBrandIdVisibilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/prompts/$promptId/measure': {
+      id: '/api/v1/prompts/$promptId/measure'
+      path: '/api/v1/prompts/$promptId/measure'
+      fullPath: '/api/v1/prompts/$promptId/measure'
+      preLoaderRoute: typeof ApiV1PromptsPromptIdMeasureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/tasks/$taskId/remeasure': {
+      id: '/api/v1/tasks/$taskId/remeasure'
+      path: '/api/v1/tasks/$taskId/remeasure'
+      fullPath: '/api/v1/tasks/$taskId/remeasure'
+      preLoaderRoute: typeof ApiV1TasksTaskIdRemeasureRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1507,6 +1692,18 @@ const PlatformRouteWithChildren = PlatformRoute._addFileChildren(
   PlatformRouteChildren,
 )
 
+interface ApiV1ReportsRouteChildren {
+  ApiV1ReportsTokenRoute: typeof ApiV1ReportsTokenRoute
+}
+
+const ApiV1ReportsRouteChildren: ApiV1ReportsRouteChildren = {
+  ApiV1ReportsTokenRoute: ApiV1ReportsTokenRoute,
+}
+
+const ApiV1ReportsRouteWithChildren = ApiV1ReportsRoute._addFileChildren(
+  ApiV1ReportsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -1538,11 +1735,19 @@ const rootRouteChildren: RootRouteChildren = {
   SolutionsAgenciesRoute: SolutionsAgenciesRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiV1ReportsRoute: ApiV1ReportsRouteWithChildren,
   ApiPublicBlogMediaSplatRoute: ApiPublicBlogMediaSplatRoute,
   ApiPublicCronSyncAnalyticsRoute: ApiPublicCronSyncAnalyticsRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiV1RunsRunIdRoute: ApiV1RunsRunIdRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicOauthGoogleCallbackRoute: ApiPublicOauthGoogleCallbackRoute,
+  ApiV1FindingsFindingIdApproveRoute: ApiV1FindingsFindingIdApproveRoute,
+  ApiV1ProjectsBrandIdFindingsRoute: ApiV1ProjectsBrandIdFindingsRoute,
+  ApiV1ProjectsBrandIdRunsRoute: ApiV1ProjectsBrandIdRunsRoute,
+  ApiV1ProjectsBrandIdVisibilityRoute: ApiV1ProjectsBrandIdVisibilityRoute,
+  ApiV1PromptsPromptIdMeasureRoute: ApiV1PromptsPromptIdMeasureRoute,
+  ApiV1TasksTaskIdRemeasureRoute: ApiV1TasksTaskIdRemeasureRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

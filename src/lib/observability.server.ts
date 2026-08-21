@@ -12,12 +12,21 @@ async function admin(): Promise<Sb | null> {
   }
 }
 
-export type ApiProvider = "perplexity" | "deepseek" | "lovable-ai" | "firecrawl" | "google" | "bing" | "paddle";
+export type ApiProvider =
+  | "perplexity"
+  | "perplexity-agent"
+  | "perplexity-router"
+  | "lovable-ai"
+  | "firecrawl"
+  | "google"
+  | "bing"
+  | "paddle";
 
 // 1M token basina yaklasik USD maliyet (tahmini; panelde "tahmini" olarak gosterilir).
 const TOKEN_PRICING: Record<string, { input: number; output: number }> = {
   perplexity: { input: 1, output: 1 },
-  deepseek: { input: 0.27, output: 1.1 },
+  "perplexity-agent": { input: 1, output: 1 },
+  "perplexity-router": { input: 1, output: 1 },
   "lovable-ai": { input: 0.15, output: 0.6 },
 };
 
@@ -31,7 +40,8 @@ const CALL_PRICING: Record<string, number> = {
 
 export function estimateCost(provider: string, inputTokens: number, outputTokens: number): number {
   const tokens = TOKEN_PRICING[provider];
-  if (tokens) return (inputTokens / 1_000_000) * tokens.input + (outputTokens / 1_000_000) * tokens.output;
+  if (tokens)
+    return (inputTokens / 1_000_000) * tokens.input + (outputTokens / 1_000_000) * tokens.output;
   return CALL_PRICING[provider] ?? 0;
 }
 
@@ -47,6 +57,12 @@ export interface ApiUsageEntry {
   cached?: boolean;
   status?: "ok" | "error" | "rate_limited";
   error?: string | null;
+  costUsd?: number;
+  fallback?: boolean;
+  tools?: string[];
+  preset?: string;
+  surface?: "agent" | "router";
+  schemaValid?: boolean;
 }
 
 /** Ates-ve-unut: kayit hatasi asla cagriyi bozmaz. */
@@ -66,10 +82,19 @@ export function recordApiUsage(entry: ApiUsageEntry): void {
         duration_ms: Math.max(0, Math.round(entry.durationMs ?? 0)),
         input_tokens: inputTokens,
         output_tokens: outputTokens,
-        cost_usd: entry.cached ? 0 : estimateCost(entry.provider, inputTokens, outputTokens),
+        cost_usd: entry.cached
+          ? 0
+          : (entry.costUsd ?? estimateCost(entry.provider, inputTokens, outputTokens)),
         cached: entry.cached ?? false,
         status: entry.status ?? "ok",
         error: entry.error ? String(entry.error).slice(0, 2000) : null,
+        metadata: {
+          fallback: entry.fallback ?? false,
+          tools: entry.tools ?? [],
+          preset: entry.preset ?? null,
+          surface: entry.surface ?? null,
+          schema_valid: entry.schemaValid ?? null,
+        } as never,
       });
     } catch {
       /* yoksay */
