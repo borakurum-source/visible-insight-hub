@@ -991,11 +991,8 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         failedPromptIds.push(prompt.id);
         continue;
       }
-      const { count: previousRuns } = await context.supabase
-        .from("prompt_runs")
-        .select("id", { count: "exact", head: true })
-        .eq("prompt_id", prompt.id);
-      const runIndex = (previousRuns ?? 0) + 1;
+      // Atomik run_index (Task 1.4, Finding C6): DB tarafında prompt satırını kilitleyip hesaplar, count-sonra-yaz yarışını önler.
+      const { data: runIndex } = await context.supabase.rpc("next_run_index", { p_prompt_id: prompt.id });
       const visibility = !measured.brandMentioned
         ? 0
         : measured.position
@@ -1016,34 +1013,19 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
         visibility,
       }).select("id").single();
 
-      // Yanıtta geçen, bilinmeyen markaları rakip adayı olarak biriktir.
+      // Yanıtta geçen, bilinmeyen markaları rakip adayı olarak biriktir (Task 1.4, Finding C7: atomik upsert, select-sonra-yaz yarışı yok).
       const ownNeedle = brand.name.toLowerCase();
       for (const brandObj of measured.mentionedBrands) {
         const name = (typeof brandObj === "string" ? brandObj : brandObj.name).trim();
         const lower = name.toLowerCase();
         if (!name || lower.includes(ownNeedle) || ownNeedle.includes(lower)) continue;
         if (competitors.some((competitor) => competitorMatches(competitor, { answer: name, domains: [] }))) continue;
-        const { data: existing } = await context.supabase
-          .from("competitor_candidates")
-          .select("id, prompt_count, status")
-          .eq("brand_id", data.brandId)
-          .eq("name", name)
-          .maybeSingle();
-        if (existing) {
-          await context.supabase
-            .from("competitor_candidates")
-            .update({ prompt_count: (existing.prompt_count ?? 1) + 1, updated_at: new Date().toISOString() })
-            .eq("id", existing.id);
-        } else {
-          await context.supabase.from("competitor_candidates").insert({
-            brand_id: data.brandId,
-            name,
-            first_seen_run_id: run?.id ?? null,
-            first_seen_prompt_id: prompt.id,
-            prompt_count: 1,
-            status: "new",
-          });
-        }
+        await context.supabase.rpc("upsert_competitor_candidate", {
+          p_brand_id: data.brandId,
+          p_name: name,
+          p_run_id: run?.id ?? null,
+          p_prompt_id: prompt.id,
+        });
       }
 
       const seen = new Set<string>();
@@ -1072,12 +1054,11 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
       }
     }
 
+    // Atomik completed_prompts artışı (Task 1.4, Finding C5): oku-değiştir-yaz yerine tek UPDATE, eşzamanlı chunk'larda kayıp güncelleme olmaz.
+    await context.supabase.rpc("increment_completed_prompts", { p_batch_id: data.batchId, p_delta: prompts?.length ?? 0 });
     const { data: current } = await context.supabase
       .from("measurement_batches").select("completed_prompts, total_prompts").eq("id", data.batchId).single();
-    const completed = (current?.completed_prompts ?? 0) + (prompts?.length ?? 0);
-    await context.supabase.from("measurement_batches")
-      .update({ completed_prompts: completed }).eq("id", data.batchId);
-    return { completed, total: current?.total_prompts ?? 0, failedPromptIds };
+    return { completed: current?.completed_prompts ?? 0, total: current?.total_prompts ?? 0, failedPromptIds };
   });
 
 export const finishMeasurement = createServerFn({ method: "POST" })
