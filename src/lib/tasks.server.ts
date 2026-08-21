@@ -6,10 +6,12 @@ export async function createPriorityTasks(
   citationRows: Array<{ is_own_domain: boolean }>,
 ) {
   const [{ data: prompts }, { data: runs }, { data: sources }, { data: existing }] = await Promise.all([
-    supabase.from("prompts").select("id, text").eq("brand_id", brandId).eq("status", "approved"),
-    supabase.from("prompt_runs").select("prompt_id, brand_mentioned").eq("brand_id", brandId),
-    supabase.from("knowledge_sources").select("id, index_status").eq("brand_id", brandId),
-    supabase.from("geo_tasks").select("title").eq("brand_id", brandId).neq("status", "done"),
+    // Onaylı prompt sayısı planın maxPrompts sınırıyla zaten sınırlı, yine de PostgREST'in 1000 satır tavanına karşı açıkça belirtiyoruz.
+    supabase.from("prompts").select("id, text").eq("brand_id", brandId).eq("status", "approved").limit(1000),
+    supabase.from("prompt_runs").select("prompt_id, brand_mentioned").eq("brand_id", brandId).limit(1000),
+    supabase.from("knowledge_sources").select("id, index_status").eq("brand_id", brandId).limit(1000),
+    // Açık (done olmayan) görev listesi pratikte küçük kalır; yine de tavana karşı açık bir sınır koyuyoruz.
+    supabase.from("geo_tasks").select("title").eq("brand_id", brandId).neq("status", "done").limit(200),
   ]);
 
   const promptById = new Map<string, string>(((prompts ?? []) as Array<{ id: string; text: string }>).map((p) => [p.id, p.text]));

@@ -915,7 +915,7 @@ export const startMeasurement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string }) => input)
   .handler(async ({ data, context }) => {
-    const { assertBrandActive } = await import("./plan.server");
+    const { assertBrandActive, assertAnswerQuota } = await import("./plan.server");
     await assertBrandActive(context.supabase, context.userId, data.brandId);
 
     const { data: prompts } = await context.supabase
@@ -951,6 +951,8 @@ export const startMeasurement = createServerFn({ method: "POST" })
         .eq("id", openBatch.id);
     }
 
+    await assertAnswerQuota(context.supabase, context.userId, ids.length);
+
     const { data: batch, error } = await context.supabase
       .from("measurement_batches")
       .insert({ brand_id: data.brandId, status: "running", total_prompts: ids.length, completed_prompts: 0 })
@@ -963,6 +965,12 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { batchId: string; brandId: string; promptIds: string[] }) => input)
   .handler(async ({ data, context }) => {
+    const { assertBrandActive } = await import("./plan.server");
+    const { data: batchRow } = await context.supabase
+      .from("measurement_batches").select("brand_id").eq("id", data.batchId).maybeSingle();
+    if (!batchRow || batchRow.brand_id !== data.brandId) throw new Error("Bu tur bu markaya ait değil");
+    await assertBrandActive(context.supabase, context.userId, data.brandId);
+
     const { measurePrompt } = await import("./measurement.server");
     const { normalizeCompetitors, competitorMatches, competitorNames } = await import("./competitors");
     const { resolveSystemPrompt } = await import("./system-prompts.server");
@@ -1065,15 +1073,20 @@ export const finishMeasurement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { batchId: string; brandId: string; failedCount?: number }) => input)
   .handler(async ({ data, context }) => {
+    const { assertBrandActive } = await import("./plan.server");
     const { computeVisibilityScore } = await import("./score-model");
-    const [runs, citations, sources, claims] = await Promise.all([
+    // Batch↔brand sahiplik kontrolünü mevcut paralel okumaya katıyoruz (ekstra round-trip yok).
+    const [batchRow, runs, citations, sources, claims] = await Promise.all([
+      context.supabase.from("measurement_batches").select("brand_id").eq("id", data.batchId).maybeSingle(),
       // Bu turun skoru sadece bu batch'in çalışmalarından hesaplanır; kaynak/kanıt bileşenleri markanın genel (kümülatif) durumunu yansıtmaya devam eder.
       context.supabase.from("prompt_runs").select("brand_mentioned, position")
         .eq("brand_id", data.brandId).eq("batch_id", data.batchId),
-      context.supabase.from("citations").select("is_own_domain").eq("brand_id", data.brandId),
+      context.supabase.from("citations").select("is_own_domain").eq("brand_id", data.brandId).limit(1000),
       context.supabase.from("knowledge_sources").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
-      context.supabase.from("claims").select("evidence_url").eq("brand_id", data.brandId),
+      context.supabase.from("claims").select("evidence_url").eq("brand_id", data.brandId).limit(1000),
     ]);
+    if (!batchRow.data || batchRow.data.brand_id !== data.brandId) throw new Error("Bu tur bu markaya ait değil");
+    await assertBrandActive(context.supabase, context.userId, data.brandId);
     const citationRows = citations.data ?? [];
     const score = computeVisibilityScore({
       runs: runs.data ?? [],

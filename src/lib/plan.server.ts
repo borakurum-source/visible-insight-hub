@@ -41,6 +41,36 @@ export async function assertPromptQuota(
   return { limits, used, remaining };
 }
 
+// Ay içinde ölçülen yapay zeka yanıtı sayısı: kullanıcının üye olduğu TÜM markalar
+// (sadece kendi oluşturduğu değil — brand_members, RLS'te de kullanılan üyelik tablosu).
+export async function assertAnswerQuota(supabase: Sb, userId: string, adding: number) {
+  const limits = await getUserPlan(supabase, userId);
+  if (isUnlimited(limits.monthlyAnswers)) return { limits, used: 0, remaining: Infinity };
+  const monthStart = new Date();
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
+  const { data: memberships } = await supabase.from("brand_members").select("brand_id").eq("user_id", userId);
+  const brandIds = ((memberships ?? []) as Array<{ brand_id: string }>).map((m) => m.brand_id);
+  let used = 0;
+  if (brandIds.length) {
+    const { count } = await supabase
+      .from("prompt_runs")
+      .select("id", { count: "exact", head: true })
+      .in("brand_id", brandIds)
+      .gte("created_at", monthStart.toISOString());
+    used = count ?? 0;
+  }
+  const remaining = limits.monthlyAnswers - used;
+  if (adding > remaining) {
+    throw new Error(
+      `${limits.label} planınızda ayda ${limits.monthlyAnswers} yapay zeka yanıtı ölçebilirsiniz. ` +
+        `Bu ay ${used} yanıt ölçüldü, ${Math.max(0, remaining)} hakkınız kaldı. ` +
+        `Daha fazlası için planınızı yükseltin.`,
+    );
+  }
+  return { limits, used, remaining };
+}
+
 export async function assertBrandQuota(supabase: Sb, userId: string) {
   const limits = await getUserPlan(supabase, userId);
   if (isUnlimited(limits.maxBrands)) return limits;
