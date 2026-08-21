@@ -975,14 +975,22 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
     if (!brand) throw new Error("Marka bulunamadı");
     const competitors = normalizeCompetitors(intel?.competitors);
 
+    const failedPromptIds: string[] = [];
     for (const prompt of prompts ?? []) {
-      const measured = await measurePrompt({
-        brandName: brand.name,
-        brandDomain: brand.domain,
-        competitors: competitorNames(competitors),
-        promptText: prompt.text,
-        systemPrompt,
-      });
+      let measured: Awaited<ReturnType<typeof measurePrompt>>;
+      try {
+        measured = await measurePrompt({
+          brandName: brand.name,
+          brandDomain: brand.domain,
+          competitors: competitorNames(competitors),
+          promptText: prompt.text,
+          systemPrompt,
+        });
+      } catch (error) {
+        console.error(`Measurement failed for prompt ${prompt.id}`, error);
+        failedPromptIds.push(prompt.id);
+        continue;
+      }
       const { count: previousRuns } = await context.supabase
         .from("prompt_runs")
         .select("id", { count: "exact", head: true })
@@ -1069,12 +1077,12 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
     const completed = (current?.completed_prompts ?? 0) + (prompts?.length ?? 0);
     await context.supabase.from("measurement_batches")
       .update({ completed_prompts: completed }).eq("id", data.batchId);
-    return { completed, total: current?.total_prompts ?? 0 };
+    return { completed, total: current?.total_prompts ?? 0, failedPromptIds };
   });
 
 export const finishMeasurement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { batchId: string; brandId: string }) => input)
+  .inputValidator((input: { batchId: string; brandId: string; failedCount?: number }) => input)
   .handler(async ({ data, context }) => {
     const { computeVisibilityScore } = await import("./score-model");
     const [runs, citations, sources, claims] = await Promise.all([
@@ -1098,6 +1106,7 @@ export const finishMeasurement = createServerFn({ method: "POST" })
       score: score.total,
       components: score.components,
       finished_at: new Date().toISOString(),
+      ...(data.failedCount ? { error: `${data.failedCount} soru ölçülemedi` } : {}),
     }).eq("id", data.batchId);
     if (error) throw new Error(error.message);
 

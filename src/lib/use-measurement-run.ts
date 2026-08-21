@@ -28,13 +28,22 @@ export function useMeasurementRun(brandId: string | undefined) {
         return;
       }
       setProgress({ done: 0, total: promptIds.length });
+      let totalFailed = 0;
       for (let i = 0; i < promptIds.length; i += CHUNK) {
         const slice = promptIds.slice(i, i + CHUNK);
-        await runChunk({ data: { batchId: batch.id, brandId, promptIds: slice } });
+        const result = await runChunk({ data: { batchId: batch.id, brandId, promptIds: slice } });
+        totalFailed += result.failedPromptIds?.length ?? 0;
         setProgress({ done: Math.min(i + CHUNK, promptIds.length), total: promptIds.length });
       }
-      await finish({ data: { batchId: batch.id, brandId } });
-      toast.success("Ölçüm tamamlandı, skorunuz güncellendi.");
+      await finish({
+        data: { batchId: batch.id, brandId, ...(totalFailed > 0 ? { failedCount: totalFailed } : {}) },
+      });
+      if (totalFailed > 0) {
+        const measured = promptIds.length - totalFailed;
+        toast.warning(`${totalFailed} soru ölçülemedi, ${measured} soru başarıyla ölçüldü.`);
+      } else {
+        toast.success("Ölçüm tamamlandı, skorunuz güncellendi.");
+      }
       await queryClient.invalidateQueries({ queryKey: ["measurement-state", brandId] });
       await queryClient.invalidateQueries({ queryKey: ["brand-overview", brandId] });
     } catch (error) {

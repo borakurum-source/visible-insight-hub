@@ -61,7 +61,7 @@ async function perplexityJsonUncached<T>(
   const key = process.env["PERPLEXITY_API_KEY"];
   if (!key) {
     console.warn("PERPLEXITY_API_KEY missing");
-    return { result: fallback, citations: [], sources: [] };
+    throw new Error("PERPLEXITY_API_KEY missing");
   }
   try {
     const res = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -74,6 +74,7 @@ async function perplexityJsonUncached<T>(
         max_tokens: 1024,
         temperature: 0.2,
       }),
+      signal: AbortSignal.timeout(30000),
     });
     const bodyText = await res.text();
     if (!res.ok) {
@@ -87,7 +88,7 @@ async function perplexityJsonUncached<T>(
       if (res.status === 401 && bodyText.includes("insufficient_quota")) {
         throw new Error("Perplexity API credits exhausted. Buy credits at https://console.perplexity.ai");
       }
-      return { result: fallback, citations: [], sources: [] };
+      throw new Error(`Perplexity request failed [${res.status}]: ${bodyText}`);
     }
     const json = JSON.parse(bodyText) as {
       choices?: Array<{ message?: { content?: string } }>;
@@ -107,7 +108,7 @@ async function perplexityJsonUncached<T>(
     return { result: JSON.parse(content) as T, citations: json.citations ?? [], sources };
   } catch (error) {
     console.error("Perplexity failure", error);
-    return { result: fallback, citations: [], sources: [] };
+    throw error;
   }
 }
 
