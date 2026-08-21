@@ -22,3 +22,4 @@ Task 0.3: fix round 1/5 (3 addressed, 0 open — normalizePromptText order bug, 
 Task 0.3: complete (commits e1b6345..64a5f00, fix round 1 self-verified: unique index live-tested against duplicate insert, build 0 errors)
 Task 0.4: complete (data cleanup: ABS Kör Kalıp batch running→failed)
 Task 1.1: complete (commit c4aded7, controller-executed — live-DB migration+backfill, same classifier-block reason as Task 0.3; 73/73 rows backfilled, regression-checked against real data; not yet deployed to running PM2 process)
+Task 1.2: complete (commit f3be738, subagent-dispatched — pure code fix, not classifier-blocked; review clean/Approved; minor deferred: use-measurement-run.ts:23-28 progress stays 0/0 during the new finalize-on-resume branch, cosmetic only)
