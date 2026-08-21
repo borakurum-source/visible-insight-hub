@@ -104,7 +104,7 @@ async function perplexityJsonUncached<T>(
     });
     const sources = buildCitationSources(json.citations, json.search_results);
     const content = json.choices?.[0]?.message?.content;
-    if (!content) return { result: fallback, citations: json.citations ?? [], sources };
+    if (!content) throw new Error("Perplexity response missing content");
     return { result: JSON.parse(content) as T, citations: json.citations ?? [], sources };
   } catch (error) {
     console.error("Perplexity failure", error);
