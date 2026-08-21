@@ -21,3 +21,4 @@ Task 0.2: complete (commits ee26d37..f4cfb5e, review clean; minor: N+1 query def
 Task 0.3: fix round 1/5 (3 addressed, 0 open — normalizePromptText order bug, migration never applied to live DB, data cleanup never executed + 1 undocumented Filmfolk duplicate found; commits ca64849..64a5f00) — controller-executed, not subagent (Agent dispatch blocked by auto-mode classifier for live-DB delete+migration; human chose direct execution)
 Task 0.3: complete (commits e1b6345..64a5f00, fix round 1 self-verified: unique index live-tested against duplicate insert, build 0 errors)
 Task 0.4: complete (data cleanup: ABS Kör Kalıp batch running→failed)
+Task 1.1: complete (commit c4aded7, controller-executed — live-DB migration+backfill, same classifier-block reason as Task 0.3; 73/73 rows backfilled, regression-checked against real data; not yet deployed to running PM2 process)
