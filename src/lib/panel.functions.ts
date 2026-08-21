@@ -43,6 +43,10 @@ export const createBrand = createServerFn({ method: "POST" })
     await context.supabase
       .from("brand_domains")
       .insert({ brand_id: brand.id, domain, is_primary: true });
+    // Add creator as owner in brand_members for RLS
+    await context.supabase
+      .from("brand_members")
+      .insert({ brand_id: brand.id, user_id: context.userId, role: "owner" });
     return brand;
   });
 
@@ -2028,8 +2032,7 @@ export const getPlanUsage = createServerFn({ method: "POST" })
     const [{ count: brandCount }, approvedPrompts] = await Promise.all([
       context.supabase
         .from("brands")
-        .select("id", { count: "exact", head: true })
-        .eq("created_by", context.userId),
+        .select("id", { count: "exact", head: true }),
       data.brandId ? countApprovedPrompts(context.supabase, data.brandId) : Promise.resolve(0),
     ]);
     return {

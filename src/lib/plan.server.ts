@@ -74,11 +74,9 @@ export async function assertAnswerQuota(supabase: Sb, userId: string, adding: nu
 export async function assertBrandQuota(supabase: Sb, userId: string) {
   const limits = await getUserPlan(supabase, userId);
   if (isUnlimited(limits.maxBrands)) return limits;
-  const { count } = await supabase
-    .from("brands")
-    .select("id", { count: "exact", head: true })
-    .eq("created_by", userId);
-  if ((count ?? 0) >= limits.maxBrands) {
+  const { data: memberships } = await supabase.from("brand_members").select("brand_id").eq("user_id", userId);
+  const brandCount = ((memberships ?? []) as Array<{ brand_id: string }>).length;
+  if (brandCount >= limits.maxBrands) {
     throw new Error(
       `${limits.label} planınızda ${limits.maxBrands} marka ekleyebilirsiniz. Daha fazlası için planınızı yükseltin.`,
     );
