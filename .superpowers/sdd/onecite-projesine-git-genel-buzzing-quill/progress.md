@@ -18,3 +18,6 @@
 
 Task 0.1: complete (commits e1b6345..ee26d37, review clean)
 Task 0.2: complete (commits ee26d37..f4cfb5e, review clean; minor: N+1 query deferred to Phase 1)
+Task 0.3: fix round 1/5 (3 addressed, 0 open — normalizePromptText order bug, migration never applied to live DB, data cleanup never executed + 1 undocumented Filmfolk duplicate found; commits ca64849..64a5f00) — controller-executed, not subagent (Agent dispatch blocked by auto-mode classifier for live-DB delete+migration; human chose direct execution)
+Task 0.3: complete (commits e1b6345..64a5f00, fix round 1 self-verified: unique index live-tested against duplicate insert, build 0 errors)
+Task 0.4: complete (data cleanup: ABS Kör Kalıp batch running→failed)
