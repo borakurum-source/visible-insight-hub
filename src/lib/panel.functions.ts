@@ -416,16 +416,14 @@ export const listMeasurementRounds = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .limit(10);
 
-    // Her batch için o batch aralığında ölçülen run sayısını bul.
+    // Her batch için o batch'te ölçülen run sayısını bul (Task 1.1: batch_id ile doğrudan, zaman damgası tahmini yerine).
     const rounds = [];
     for (const batch of batches ?? []) {
-      const endTime = batch.finished_at ?? new Date().toISOString();
       const { count: runCount } = await context.supabase
         .from("prompt_runs")
         .select("id", { count: "exact", head: true })
         .eq("brand_id", data.brandId)
-        .gte("created_at", batch.created_at)
-        .lte("created_at", endTime);
+        .eq("batch_id", batch.id);
 
       rounds.push({
         batchId: batch.id,
@@ -445,25 +443,14 @@ export const listRunCitations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { brandId: string; batchId?: string; limit?: number }) => input)
   .handler(async ({ data, context }) => {
-    // Eğer batchId verilmişse, o batch'in zaman aralığında ölçülen runları al.
+    // Eğer batchId verilmişse, o batch'te ölçülen runları al (Task 1.1: batch_id ile doğrudan, zaman damgası tahmini yerine).
     let query = context.supabase
       .from("prompt_runs")
       .select("id, prompt_id, brand_mentioned, position, answer_summary, raw_answer, created_at, prompts(text)")
       .eq("brand_id", data.brandId);
 
     if (data.batchId) {
-      const { data: batch } = await context.supabase
-        .from("measurement_batches")
-        .select("created_at, finished_at")
-        .eq("id", data.batchId)
-        .maybeSingle();
-
-      if (batch) {
-        const endTime = batch.finished_at ?? new Date().toISOString();
-        query = query
-          .gte("created_at", batch.created_at)
-          .lte("created_at", endTime);
-      }
+      query = query.eq("batch_id", data.batchId);
     }
 
     const limit = Math.min(Math.max(data.limit ?? 25, 1), 60);
@@ -953,7 +940,7 @@ export const startMeasurement = createServerFn({ method: "POST" })
           .from("prompt_runs")
           .select("prompt_id")
           .eq("brand_id", data.brandId)
-          .gte("created_at", openBatch.created_at);
+          .eq("batch_id", openBatch.id);
         const doneSet = new Set((doneRuns ?? []).map((r) => r.prompt_id));
         const remaining = ids.filter((id) => !doneSet.has(id));
         return { batch: openBatch, promptIds: remaining.length ? remaining : ids };
@@ -1009,6 +996,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
       const { data: run } = await context.supabase.from("prompt_runs").insert({
         brand_id: data.brandId,
         prompt_id: prompt.id,
+        batch_id: data.batchId,
         engine: "perplexity",
         brand_mentioned: measured.brandMentioned,
         position: measured.position,
@@ -1090,7 +1078,9 @@ export const finishMeasurement = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { computeVisibilityScore } = await import("./score-model");
     const [runs, citations, sources, claims] = await Promise.all([
-      context.supabase.from("prompt_runs").select("brand_mentioned, position").eq("brand_id", data.brandId),
+      // Bu turun skoru sadece bu batch'in çalışmalarından hesaplanır; kaynak/kanıt bileşenleri markanın genel (kümülatif) durumunu yansıtmaya devam eder.
+      context.supabase.from("prompt_runs").select("brand_mentioned, position")
+        .eq("brand_id", data.brandId).eq("batch_id", data.batchId),
       context.supabase.from("citations").select("is_own_domain").eq("brand_id", data.brandId),
       context.supabase.from("knowledge_sources").select("id", { count: "exact", head: true }).eq("brand_id", data.brandId),
       context.supabase.from("claims").select("evidence_url").eq("brand_id", data.brandId),
