@@ -21,7 +21,10 @@ export function useMeasurementRun(brandId: string | undefined) {
     try {
       const { batch, promptIds } = await start({ data: { brandId } });
       if (promptIds.length === 0) {
-        toast.error("Ölçüm için onaylı prompt bulunamadı.");
+        await finish({ data: { batchId: batch.id, brandId } });
+        toast.success("Ölçüm tamamlandı, skorunuz güncellendi.");
+        await queryClient.invalidateQueries({ queryKey: ["measurement-state", brandId] });
+        await queryClient.invalidateQueries({ queryKey: ["brand-overview", brandId] });
         return;
       }
       setProgress({ done: 0, total: promptIds.length });

@@ -943,7 +943,7 @@ export const startMeasurement = createServerFn({ method: "POST" })
           .eq("batch_id", openBatch.id);
         const doneSet = new Set((doneRuns ?? []).map((r) => r.prompt_id));
         const remaining = ids.filter((id) => !doneSet.has(id));
-        return { batch: openBatch, promptIds: remaining.length ? remaining : ids };
+        return { batch: openBatch, promptIds: remaining };
       }
       await context.supabase
         .from("measurement_batches")
