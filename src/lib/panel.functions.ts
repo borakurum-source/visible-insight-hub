@@ -1480,10 +1480,19 @@ export const adminListBrands = createServerFn({ method: "GET" })
 
 // ---------- Ölçüm motoru ----------
 
+const GROUNDED_MODEL_WHITELIST = ["perplexity/sonar", "openai/gpt-5.6-luna"] as const;
+
+function sanitizeModel(model: string | undefined): string | undefined {
+  return model && (GROUNDED_MODEL_WHITELIST as readonly string[]).includes(model)
+    ? model
+    : undefined;
+}
+
 export const startMeasurement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string }) => input)
+  .inputValidator((input: { brandId: string; model?: string }) => input)
   .handler(async ({ data, context }) => {
+    const model = sanitizeModel(data.model);
     const { assertBrandActive, assertAnswerQuota } = await import("./plan.server");
     await assertBrandActive(context.supabase, context.userId, data.brandId);
 
@@ -1544,6 +1553,7 @@ export const startMeasurement = createServerFn({ method: "POST" })
         measurement_mode: "full",
         prompt_set_hash: promptSetHash,
         prompt_ids: ids,
+        model_id: model ?? null,
       } as never)
       .select("*")
       .single();
@@ -1558,7 +1568,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
     const { assertBrandActive } = await import("./plan.server");
     const { data: batchRow } = await context.supabase
       .from("measurement_batches")
-      .select("brand_id,status,measurement_mode,prompt_ids")
+      .select("brand_id,status,measurement_mode,prompt_ids,model_id")
       .eq("id", data.batchId)
       .maybeSingle();
     if (!batchRow || batchRow.brand_id !== data.brandId)
@@ -1597,6 +1607,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
     if (batchPromptIds.size && data.promptIds.some((promptId) => !batchPromptIds.has(promptId)))
       throw new Error("Bu prompt bu ölçüm turunun başlangıç kümesinde değil");
     const competitors = normalizeCompetitors(intel?.competitors);
+    const model = (batchRow as unknown as { model_id?: string | null }).model_id ?? undefined;
 
     const failedPromptIds: string[] = [];
     let completedDelta = 0;
@@ -1616,6 +1627,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
           competitors: competitorNames(competitors),
           promptText: prompt.text,
           systemPrompt,
+          ...(model ? { model } : {}),
         });
       } catch (error) {
         console.error(`Measurement failed for prompt ${prompt.id}`, error);
@@ -1641,7 +1653,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
           engine: "agent_web_grounded",
           measurement_mode: "full",
           measurement_surface: "agent_web_grounded",
-          model_id: "perplexity/preset-fast",
+          model_id: measured.model ?? "perplexity/preset-fast",
           brand_mentioned: measured.brandMentioned,
           position: measured.position,
           raw_answer: measured.answer,
