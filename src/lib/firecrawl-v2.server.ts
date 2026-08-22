@@ -119,6 +119,24 @@ export function createFirecrawlV2(options: FirecrawlOptions = {}) {
     });
   }
 
+  async function scrapeDocument(url: string): Promise<{ html: string; markdown: string }> {
+    const payload = await request<{
+      data?: { html?: string; markdown?: string };
+      html?: string;
+      markdown?: string;
+    }>("scrape", {
+      url,
+      formats: ["markdown", "html"],
+      onlyMainContent: false,
+      maxAge: 86_400_000,
+      storeInCache: true,
+      timeout: 60_000,
+    });
+    const html = payload.data?.html ?? payload.html ?? "";
+    const markdown = payload.data?.markdown ?? payload.markdown ?? "";
+    return { html, markdown };
+  }
+
   return {
     map,
     crawl,
@@ -126,6 +144,7 @@ export function createFirecrawlV2(options: FirecrawlOptions = {}) {
     search,
     /** Firecrawl v2 degisim izleme, scrape'in changeTracking formatiyla yapilir. */
     monitor: (url: string) => scrape(url, true),
+    scrapeDocument,
   };
 }
 
