@@ -30,6 +30,13 @@ export default tseslint.config(
                 "TanStack Start does not use the Next.js `server-only` package. Rename the module to `*.server.ts` or mark it with `@tanstack/react-start/server-only`.",
             },
           ],
+          patterns: [
+            {
+              group: ["*.asset.json"],
+              message:
+                "*.asset.json manifests resolve to Lovable's sandbox-only asset CDN (/__l5e/...), which 404s on this self-hosted deployment. Import the local .webp/.png file directly instead (see src/lib/caseLogos.ts).",
+            },
+          ],
         },
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
