@@ -1621,7 +1621,9 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
     if (batchPromptIds.size && data.promptIds.some((promptId) => !batchPromptIds.has(promptId)))
       throw new Error("Bu prompt bu ölçüm turunun başlangıç kümesinde değil");
     const competitors = normalizeCompetitors(intel?.competitors);
-    const model = (batchRow as unknown as { model_id?: string | null }).model_id ?? undefined;
+    const model = sanitizeModel(
+      (batchRow as unknown as { model_id?: string | null }).model_id ?? undefined,
+    );
 
     const failedPromptIds: string[] = [];
     let completedDelta = 0;
