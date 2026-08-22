@@ -5,7 +5,12 @@ import { aiGateway, type AiMessage } from "./ai-gateway.server";
 type ChatMessage = { role: "system" | "user"; content: string };
 
 export type CitationSource = { url: string; domain: string; title: string };
-export type PerplexityResult<T> = { result: T; citations: string[]; sources: CitationSource[] };
+export type PerplexityResult<T> = {
+  result: T;
+  citations: string[];
+  sources: CitationSource[];
+  model: string | null;
+};
 
 function normalizeDomainFromUrl(raw: string): string {
   try {
@@ -83,11 +88,12 @@ export async function perplexityJson<T>(
   messages: ChatMessage[],
   schema: { name: string; schema: object },
   _legacyFallbackShape: T,
+  model?: string,
 ): Promise<PerplexityResult<T>> {
   const { withCache, CACHE_TTL } = await import("./cache.server");
   return withCache<PerplexityResult<T>>(
     "perplexity",
-    { messages, schema, surface: "agent_web_grounded" },
+    { messages, schema, surface: "agent_web_grounded", model: model ?? "auto" },
     CACHE_TTL.perplexity,
     async () => {
       const response = await aiGateway.json({
@@ -99,11 +105,13 @@ export async function perplexityJson<T>(
         }),
         jsonSchema: schema,
         maxOutputTokens: 2048,
+        ...(model ? { model } : {}),
       });
       return {
         result: response.data,
         citations: response.citations,
         sources: response.sources.map(({ url, domain, title }) => ({ url, domain, title })),
+        model: response.model,
       };
     },
     (value) => Boolean(value.result),
