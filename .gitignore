@@ -33,3 +33,6 @@ dist-ssr
 
 # Isolated git worktrees for plan execution
 .worktrees/
+
+# Old credential backups — never commit
+.env.lovable-old-backup
