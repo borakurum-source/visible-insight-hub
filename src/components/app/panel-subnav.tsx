@@ -14,6 +14,7 @@ export const OPPORTUNITY_SUBNAV = [
 
 export const ACTIONS_SUBNAV = [
   { to: "/app/geo-tasks", label: "Bulgular & Aksiyonlar" },
+  { to: "/app/site-health", label: "Site Sağlığı" },
   { to: "/app/report", label: "Müşteri Raporu" },
 ];
 
