@@ -80,6 +80,11 @@ function resolveAgentFallback(role: AiRole): { route: AiRoute; label: string } |
   return null;
 }
 
+function applyModelOverride(route: AiRoute, model?: string): AiRoute {
+  if (!model || route.surface !== "agent") return route;
+  return { surface: route.surface, models: [model], tools: route.tools };
+}
+
 export type AiSource = {
   url: string;
   domain: string;
@@ -122,6 +127,7 @@ export type AiRequestBase = {
   maxOutputTokens?: number;
   brandId?: string;
   userId?: string;
+  model?: string;
 };
 
 export type AiJsonRequest<T> = AiRequestBase & {
@@ -338,7 +344,10 @@ export function createAiGateway(dependencies: AiGatewayDependencies = {}) {
 
   async function execute<T>(request: AiJsonRequest<T>): Promise<AiGatewayResponse<T>> {
     const routerAvailable = await hasRouterModel();
-    const primary = resolveAiRoute(request.role, routerAvailable);
+    const primary = applyModelOverride(
+      resolveAiRoute(request.role, routerAvailable),
+      request.model,
+    );
     const startedAt = now();
     let route = primary;
     let fallbackFrom: string | undefined;
@@ -451,7 +460,7 @@ export function createAiGateway(dependencies: AiGatewayDependencies = {}) {
 
   async function executeText(request: AiRequestBase): Promise<AiGatewayResponse<string>> {
     const routerAvailable = await hasRouterModel();
-    let route = resolveAiRoute(request.role, routerAvailable);
+    let route = applyModelOverride(resolveAiRoute(request.role, routerAvailable), request.model);
     const startedAt = now();
     let fallbackFrom: string | undefined;
     let raw: RawResponse;
