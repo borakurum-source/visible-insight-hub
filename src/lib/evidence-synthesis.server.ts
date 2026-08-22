@@ -90,7 +90,20 @@ ${input.brandName} için AI yanıtında kaynak olarak seçilmesi için hangi iç
 Yanıt JSON: {"content_priorities": [{gap, linked_reason, suggested_format, page_type, priority}...]}`,
       },
     ],
-    { content_priorities: [] },
+    {
+      // Boş dizi yerine örnek bir öge veriyoruz: aiJson bu örnekten JSON şemasını
+      // türetiyor, boş dizi "items" alanını şemasız bırakıp sağlayıcıdan
+      // "invalid request" almamıza yol açıyordu.
+      content_priorities: [
+        {
+          gap: "",
+          linked_reason: "",
+          suggested_format: "other",
+          page_type: "",
+          priority: "medium",
+        },
+      ],
+    },
   );
 
   return (result.content_priorities ?? []).map((item) => ({

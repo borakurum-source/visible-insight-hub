@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { ContentPriority } from "./evidence-synthesis.server";
 
 export const getPanelSession = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -153,6 +154,31 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
       detailedDescription?: string;
       keyFeatures?: string[];
       brandName?: string;
+      scope?: string;
+      voiceNotes?: string;
+      socialLinks?: Record<string, string>;
+      namingAliases?: string[];
+      namingExcludeTerms?: string[];
+      aliasCaseSensitive?: boolean;
+      contentOwnerType?: string;
+      reviewCadence?: string;
+      authorProfiles?: string[];
+      experienceRoleType?: string;
+      experienceMethodologies?: string[];
+      leadership?: string[];
+      partnerships?: string[];
+      externalRecognition?: string[];
+      dataSourcingNotes?: string;
+      factCheckingNotes?: string;
+      disclosurePolicy?: string;
+      contentTypeFocus?: string[];
+      updateTriggers?: string[];
+      contactPoints?: Record<string, string>;
+      defaultSchemaTypes?: string[];
+      testimonials?: string[];
+      thirdPartyReviews?: string[];
+      externalCitations?: string[];
+      aiDisclosureNote?: string;
     }) => input,
   )
   .handler(async ({ data, context }) => {
@@ -171,6 +197,31 @@ export const saveBrandIntelligence = createServerFn({ method: "POST" })
         location: data.location ?? null,
         detailed_description: data.detailedDescription ?? null,
         key_features: data.keyFeatures ?? [],
+        scope: data.scope ?? null,
+        voice_notes: data.voiceNotes ?? null,
+        social_links: data.socialLinks ?? {},
+        naming_aliases: data.namingAliases ?? [],
+        naming_exclude_terms: data.namingExcludeTerms ?? [],
+        alias_case_sensitive: data.aliasCaseSensitive ?? false,
+        content_owner_type: data.contentOwnerType ?? null,
+        review_cadence: data.reviewCadence ?? null,
+        author_profiles: data.authorProfiles ?? [],
+        experience_role_type: data.experienceRoleType ?? null,
+        experience_methodologies: data.experienceMethodologies ?? [],
+        leadership: data.leadership ?? [],
+        partnerships: data.partnerships ?? [],
+        external_recognition: data.externalRecognition ?? [],
+        data_sourcing_notes: data.dataSourcingNotes ?? null,
+        fact_checking_notes: data.factCheckingNotes ?? null,
+        disclosure_policy: data.disclosurePolicy ?? null,
+        content_type_focus: data.contentTypeFocus ?? [],
+        update_triggers: data.updateTriggers ?? [],
+        contact_points: data.contactPoints ?? {},
+        default_schema_types: data.defaultSchemaTypes ?? [],
+        testimonials: data.testimonials ?? [],
+        third_party_reviews: data.thirdPartyReviews ?? [],
+        external_citations: data.externalCitations ?? [],
+        ai_disclosure_note: data.aiDisclosureNote ?? null,
         approved: true,
       },
       { onConflict: "brand_id" },
@@ -528,6 +579,57 @@ export const listCitationSources = createServerFn({ method: "POST" })
       }
     }
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
+  });
+
+// Kaynak Keşfi görselleştirmesi: own/rakip/tarafsız dağılımı, en çok atıf yapılan domainler, haftalık trend.
+export const getCitationDiscoveryAnalytics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: rows } = await context.supabase
+      .from("citations")
+      .select("domain, is_own_domain, citation_type, created_at")
+      .eq("brand_id", data.brandId)
+      .order("created_at", { ascending: false })
+      .limit(500);
+    const citationRows = rows ?? [];
+
+    const mix = [
+      { name: "Kendi siteniz", value: citationRows.filter((c) => c.is_own_domain).length },
+      {
+        name: "Rakip",
+        value: citationRows.filter((c) => !c.is_own_domain && c.citation_type === "competitor").length,
+      },
+      {
+        name: "Tarafsız kaynak",
+        value: citationRows.filter((c) => !c.is_own_domain && c.citation_type !== "competitor").length,
+      },
+    ];
+
+    const domainCounts = new Map<string, { domain: string; count: number; isOwn: boolean }>();
+    for (const row of citationRows) {
+      const current = domainCounts.get(row.domain);
+      if (current) current.count += 1;
+      else domainCounts.set(row.domain, { domain: row.domain, count: 1, isOwn: row.is_own_domain });
+    }
+    const topDomains = Array.from(domainCounts.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    const weekBuckets = new Map<string, { week: string; own: number; thirdParty: number }>();
+    for (const row of citationRows) {
+      const d = new Date(row.created_at);
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      const week = monday.toISOString().slice(0, 10);
+      const bucket = weekBuckets.get(week) ?? { week, own: 0, thirdParty: 0 };
+      if (row.is_own_domain) bucket.own += 1;
+      else bucket.thirdParty += 1;
+      weekBuckets.set(week, bucket);
+    }
+    const trend = Array.from(weekBuckets.values()).sort((a, b) => a.week.localeCompare(b.week));
+
+    return { mix, topDomains, trend, totalCitations: citationRows.length };
   });
 
 // Ölçüm ekranı: ölçüm turlarını (batch'leri) listele — her tur için tur tarihi, skoru, ölçülen prompt sayısı.
@@ -2777,4 +2879,30 @@ export const finishEvidenceBridge = createServerFn({ method: "POST" })
 
     if (error) throw new Error(error.message);
     return { status, completed, failed };
+  });
+
+// Bir soru için geçmiş Kanıt Köprüsü çalıştırmalarını (en yeniden eskiye) döner.
+export const getEvidenceBridgeResult = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { brandId: string; promptId: string }) => input)
+  .handler(async ({ data, context }) => {
+    const { data: rows } = await context.supabase
+      .from("evidence_bridge_runs")
+      .select("id, competitor_domain, status, error, content_priorities, created_at, finished_at")
+      .eq("brand_id", data.brandId)
+      .eq("prompt_id", data.promptId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    return {
+      runs: (rows ?? []).map((row) => ({
+        id: row.id,
+        competitorDomain: row.competitor_domain,
+        status: row.status as "pending" | "completed" | "failed",
+        error: row.error,
+        contentPriorities: (row.content_priorities ?? []) as ContentPriority[],
+        createdAt: row.created_at,
+        finishedAt: row.finished_at,
+      })),
+    };
   });

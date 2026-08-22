@@ -324,32 +324,35 @@ export async function extractEvidence(
     urls.map(async (url) => {
       const startedAt = Date.now();
       try {
-        const cached = await withCache("firecrawl-extract", { url, schema: schema.name }, () =>
-          (async () => {
-            const res = await fetch(endpoint, {
-              method: "POST",
-              headers,
-              body: JSON.stringify({ url, schema }),
-              signal: AbortSignal.timeout(60000),
-            });
-            const payload = (await res.json().catch(() => null)) as
-              | { data?: ExtractedEvidence; error?: string }
-              | null;
-            if (!res.ok) {
-              console.error(`Firecrawl extract failed for ${url} [${res.status}]: ${payload?.error ?? "unknown"}`);
-              recordApiUsage({
-                provider: "firecrawl",
-                operation: "extract",
-                durationMs: Date.now() - startedAt,
-                status: res.status === 429 ? "rate_limited" : "error",
-                error: `${res.status} ${payload?.error ?? ""}`,
-              });
-              return null;
-            }
-            recordApiUsage({ provider: "firecrawl", operation: "extract", durationMs: Date.now() - startedAt });
-            return payload?.data ?? null;
-          })(),
+        const cached = await withCache(
+          "firecrawl-extract",
+          { url, schema: schema.name },
           3600,
+          () =>
+            (async () => {
+              const res = await fetch(endpoint, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({ url, schema }),
+                signal: AbortSignal.timeout(60000),
+              });
+              const payload = (await res.json().catch(() => null)) as
+                | { data?: ExtractedEvidence; error?: string }
+                | null;
+              if (!res.ok) {
+                console.error(`Firecrawl extract failed for ${url} [${res.status}]: ${payload?.error ?? "unknown"}`);
+                recordApiUsage({
+                  provider: "firecrawl",
+                  operation: "extract",
+                  durationMs: Date.now() - startedAt,
+                  status: res.status === 429 ? "rate_limited" : "error",
+                  error: `${res.status} ${payload?.error ?? ""}`,
+                });
+                return null;
+              }
+              recordApiUsage({ provider: "firecrawl", operation: "extract", durationMs: Date.now() - startedAt });
+              return payload?.data ?? null;
+            })(),
         );
         return cached;
       } catch (error) {

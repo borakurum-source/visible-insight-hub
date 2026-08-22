@@ -39,7 +39,15 @@ function zodFromSample(sample: unknown): ZodType {
 
 function jsonSchemaFromSample(sample: unknown): object {
   if (Array.isArray(sample))
-    return { type: "array", items: sample.length ? jsonSchemaFromSample(sample[0]) : {} };
+    return {
+      type: "array",
+      // Boş bir örnek dizi için { type: "object" } yeterli değil — bazı sağlayıcılar
+      // (Perplexity agent / OpenAI structured outputs) "properties" alanı olmayan bir
+      // object şemasını "invalid request" ile reddediyor; boş de olsa eklenmeli.
+      items: sample.length
+        ? jsonSchemaFromSample(sample[0])
+        : { type: "object", properties: {}, additionalProperties: true },
+    };
   if (sample === null || sample === undefined) return {};
   if (typeof sample !== "object") return { type: typeof sample };
   const entries = Object.entries(sample);

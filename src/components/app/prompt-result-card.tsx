@@ -3,18 +3,39 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Check, ExternalLink, ListTodo, Loader2, Plus, X } from "lucide-react";
+import { Check, ExternalLink, ListTodo, Loader2, Plus, Sparkles, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Hint } from "@/components/app/hint";
 import {
   createGeoTask,
   dismissCompetitorCandidate,
+  getEvidenceBridgeResult,
   getPromptInsight,
   promoteCompetitorCandidate,
   setPromptActionDone,
 } from "@/lib/panel.functions";
+import { useEvidenceBridge } from "@/lib/use-evidence-bridge";
 import { toPlainText } from "@/lib/plain-text";
+
+const PRIORITY_TONE: Record<string, string> = {
+  high: "border-destructive/40 text-destructive",
+  medium: "border-warning/40 text-warning",
+  low: "border-border text-muted-foreground",
+};
+
+const EVIDENCE_STATUS_TONE: Record<string, string> = {
+  completed: "border-success/40 text-success",
+  failed: "border-destructive/40 text-destructive",
+  pending: "border-warning/40 text-warning",
+};
+
+const EVIDENCE_STATUS_LABEL: Record<string, string> = {
+  completed: "Tamamlandı",
+  failed: "Başarısız",
+  pending: "Sürüyor",
+};
 
 const ENGINE_LABEL: Record<string, string> = {
   perplexity: "Legacy Sonar",
@@ -48,12 +69,15 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
   const promoteCandidate = useServerFn(promoteCompetitorCandidate);
   const dismissCandidate = useServerFn(dismissCompetitorCandidate);
   const toggleAction = useServerFn(setPromptActionDone);
+  const fetchEvidenceBridge = useServerFn(getEvidenceBridgeResult);
+  const evidenceBridge = useEvidenceBridge(brandId);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [addedTasks, setAddedTasks] = useState<string[]>([]);
   const [expanded, setExpanded] = useState(false);
+  const [manualDomains, setManualDomains] = useState<Record<string, string>>({});
 
   const { data, isLoading } = useQuery({
     queryKey: ["prompt-insight", promptId, selectedRunId],
@@ -61,6 +85,11 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
       fetchInsight({
         data: { brandId, promptId, ...(selectedRunId ? { runId: selectedRunId } : {}) },
       }),
+  });
+
+  const { data: evidenceData } = useQuery({
+    queryKey: ["evidence-bridge", brandId, promptId],
+    queryFn: () => fetchEvidenceBridge({ data: { brandId, promptId } }),
   });
 
   const invalidate = () => {
@@ -277,6 +306,52 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
                     >
                       <X className="h-3 w-3" />
                     </Button>
+                    {candidate.domain ? (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-5 w-5"
+                        aria-label={`${candidate.name} ile kanıt köprüsü çalıştır`}
+                        disabled={evidenceBridge.running}
+                        onClick={() => evidenceBridge.run(promptId, candidate.domain)}
+                      >
+                        {evidenceBridge.running ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-3 w-3" />
+                        )}
+                      </Button>
+                    ) : (
+                      <>
+                        <Input
+                          value={manualDomains[candidate.id] ?? ""}
+                          onChange={(event) =>
+                            setManualDomains((prev) => ({
+                              ...prev,
+                              [candidate.id]: event.target.value,
+                            }))
+                          }
+                          placeholder="rakip-domain.com"
+                          className="h-5 w-28 px-1.5 text-[10px]"
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-5 w-5"
+                          aria-label={`${candidate.name} ile kanıt köprüsü çalıştır`}
+                          disabled={evidenceBridge.running || !manualDomains[candidate.id]?.trim()}
+                          onClick={() =>
+                            evidenceBridge.run(promptId, manualDomains[candidate.id]!.trim())
+                          }
+                        >
+                          {evidenceBridge.running ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </>
+                    )}
                   </span>
                 ))}
               </div>
@@ -394,6 +469,71 @@ export function PromptResultCard({ brandId, promptId }: { brandId: string; promp
                   <Link to="/app/content">İçerik üret</Link>
                 </Button>
               </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {evidenceData?.runs?.length ? (
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Kanıt Köprüsü
+            </p>
+            <Hint title="Kanıt Köprüsü">
+              <p>
+                Seçilen rakip domain ile markanızın kanıt/içerik farkını karşılaştırır ve AI
+                yanıtlarında kaynak gösterilmek için üretilmesi gereken içerikleri önerir.
+              </p>
+            </Hint>
+          </div>
+          {evidenceData.runs.map((run) => (
+            <div
+              key={run.id}
+              className="space-y-2 rounded-md border border-border bg-background p-2.5"
+            >
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-mono text-[11px]">{run.competitorDomain}</span>
+                <Badge
+                  variant="outline"
+                  className={`text-[10px] ${EVIDENCE_STATUS_TONE[run.status] ?? ""}`}
+                >
+                  {EVIDENCE_STATUS_LABEL[run.status] ?? run.status}
+                </Badge>
+                <span>{new Date(run.createdAt).toLocaleString("tr-TR")}</span>
+              </div>
+
+              {run.status === "failed" ? (
+                <p className="text-[11px] text-destructive">{run.error ?? "Bilinmeyen hata."}</p>
+              ) : null}
+
+              {run.status === "completed" && run.contentPriorities.length ? (
+                <div className="space-y-1.5">
+                  {run.contentPriorities.map((item, index) => (
+                    <div
+                      key={`${run.id}-${index}`}
+                      className="space-y-1 rounded-md border border-border bg-muted/20 p-2"
+                    >
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] ${PRIORITY_TONE[item.priority] ?? ""}`}
+                        >
+                          {item.priority}
+                        </Badge>
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          {item.suggested_format} · {item.page_type}
+                        </span>
+                      </div>
+                      <p className="text-xs font-medium">{item.gap}</p>
+                      <p className="text-[11px] text-muted-foreground">{item.linked_reason}</p>
+                      <Button size="sm" variant="ghost" asChild>
+                        <Link to="/app/content">İçerik üret</Link>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           ))}
         </div>
