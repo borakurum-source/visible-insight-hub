@@ -10,6 +10,7 @@ export type MeasuredAnswer = {
   position: number | null;
   sources: MeasuredSource[];
   mentionedBrands: BrandMention[];
+  model: string | null;
 };
 
 export async function measurePrompt(input: {
@@ -18,10 +19,11 @@ export async function measurePrompt(input: {
   competitors: string[];
   promptText: string;
   systemPrompt?: string;
+  model?: string;
 }): Promise<MeasuredAnswer> {
   const { perplexityJson } = await import("./perplexity.server");
 
-  const { result, sources } = await perplexityJson<{
+  const { result, sources, model } = await perplexityJson<{
     answer: string;
     mentionedBrands: Array<{ name: string; reason?: string }>;
   }>(
@@ -56,6 +58,7 @@ export async function measurePrompt(input: {
       },
     },
     { answer: "", mentionedBrands: [] },
+    input.model,
   );
 
   const brands = (result.mentionedBrands ?? []).map((b) => String(b.name ?? b).toLowerCase());
@@ -77,6 +80,7 @@ export async function measurePrompt(input: {
     position: idx >= 0 ? idx + 1 : null,
     sources: sources.slice(0, 10),
     mentionedBrands: cleanBrands,
+    model,
   };
 }
 

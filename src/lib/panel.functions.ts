@@ -395,12 +395,24 @@ export const listPrompts = createServerFn({ method: "POST" })
     const prompts = rows ?? [];
     if (!prompts.length) return prompts.map((row) => ({ ...row, lastRun: null }));
 
-    const { data: runs } = await context.supabase
+    const { data: runsData } = await context.supabase
       .from("prompt_runs")
-      .select("prompt_id, engine, created_at, brand_mentioned, position, visibility, run_index")
+      .select(
+        "prompt_id, engine, created_at, brand_mentioned, position, visibility, run_index, model_id",
+      )
       .eq("brand_id", data.brandId)
       .order("created_at", { ascending: false })
       .limit(2000);
+    const runs = (runsData ?? []) as unknown as Array<{
+      prompt_id: string;
+      engine: string;
+      created_at: string;
+      brand_mentioned: boolean;
+      position: number | null;
+      visibility: number | null;
+      run_index: number | null;
+      model_id: string | null;
+    }>;
 
     const latest = new Map<
       string,
@@ -411,9 +423,10 @@ export const listPrompts = createServerFn({ method: "POST" })
         position: number | null;
         visibility: number;
         runIndex: number | null;
+        modelId: string | null;
       }
     >();
-    for (const run of runs ?? []) {
+    for (const run of runs) {
       if (!run.prompt_id || latest.has(run.prompt_id)) continue;
       const visibility =
         run.visibility === null || run.visibility === undefined
@@ -430,6 +443,7 @@ export const listPrompts = createServerFn({ method: "POST" })
         position: run.position,
         visibility,
         runIndex: run.run_index ?? null,
+        modelId: run.model_id ?? null,
       });
     }
 
@@ -1582,10 +1596,19 @@ export const adminListBrands = createServerFn({ method: "GET" })
 
 // ---------- Ölçüm motoru ----------
 
+const GROUNDED_MODEL_WHITELIST = ["perplexity/sonar", "openai/gpt-5.6-luna"] as const;
+
+function sanitizeModel(model: string | undefined): string | undefined {
+  return model && (GROUNDED_MODEL_WHITELIST as readonly string[]).includes(model)
+    ? model
+    : undefined;
+}
+
 export const startMeasurement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string }) => input)
+  .inputValidator((input: { brandId: string; model?: string }) => input)
   .handler(async ({ data, context }) => {
+    const model = sanitizeModel(data.model);
     const { assertBrandActive, assertAnswerQuota } = await import("./plan.server");
     await assertBrandActive(context.supabase, context.userId, data.brandId);
 
@@ -1646,6 +1669,7 @@ export const startMeasurement = createServerFn({ method: "POST" })
         measurement_mode: "full",
         prompt_set_hash: promptSetHash,
         prompt_ids: ids,
+        model_id: model ?? null,
       } as never)
       .select("*")
       .single();
@@ -1660,7 +1684,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
     const { assertBrandActive } = await import("./plan.server");
     const { data: batchRow } = await context.supabase
       .from("measurement_batches")
-      .select("brand_id,status,measurement_mode,prompt_ids")
+      .select("brand_id,status,measurement_mode,prompt_ids,model_id")
       .eq("id", data.batchId)
       .maybeSingle();
     if (!batchRow || batchRow.brand_id !== data.brandId)
@@ -1699,6 +1723,9 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
     if (batchPromptIds.size && data.promptIds.some((promptId) => !batchPromptIds.has(promptId)))
       throw new Error("Bu prompt bu ölçüm turunun başlangıç kümesinde değil");
     const competitors = normalizeCompetitors(intel?.competitors);
+    const model = sanitizeModel(
+      (batchRow as unknown as { model_id?: string | null }).model_id ?? undefined,
+    );
 
     const failedPromptIds: string[] = [];
     let completedDelta = 0;
@@ -1718,6 +1745,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
           competitors: competitorNames(competitors),
           promptText: prompt.text,
           systemPrompt,
+          ...(model ? { model } : {}),
         });
       } catch (error) {
         console.error(`Measurement failed for prompt ${prompt.id}`, error);
@@ -1743,7 +1771,7 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
           engine: "agent_web_grounded",
           measurement_mode: "full",
           measurement_surface: "agent_web_grounded",
-          model_id: "perplexity/preset-fast",
+          model_id: measured.model ?? "perplexity/preset-fast",
           brand_mentioned: measured.brandMentioned,
           position: measured.position,
           raw_answer: measured.answer,
@@ -1835,8 +1863,9 @@ export const runMeasurementChunk = createServerFn({ method: "POST" })
 // Tek prompt yeniden olcumu ayri bir batch'tir; tam tur trendini ve skor snapshot'ini degistirmez.
 export const measureSinglePrompt = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; promptId: string }) => input)
+  .inputValidator((input: { brandId: string; promptId: string; model?: string }) => input)
   .handler(async ({ data, context }) => {
+    const model = sanitizeModel(data.model);
     const { assertBrandActive, assertAnswerQuota } = await import("./plan.server");
     await assertBrandActive(context.supabase, context.userId, data.brandId);
     await assertAnswerQuota(context.supabase, context.userId, 1);
@@ -1867,6 +1896,7 @@ export const measureSinglePrompt = createServerFn({ method: "POST" })
         completed_prompts: 0,
         measurement_mode: "single",
         prompt_ids: [data.promptId],
+        model_id: model ?? null,
       } as never)
       .select("id")
       .single();
@@ -1885,6 +1915,7 @@ export const measureSinglePrompt = createServerFn({ method: "POST" })
         competitors: competitorNames(competitors),
         promptText: prompt.text,
         systemPrompt: await resolveSystemPrompt(context.supabase, "measurement_answer"),
+        ...(model ? { model } : {}),
       });
       const { data: runIndex } = await context.supabase.rpc("next_run_index", {
         p_prompt_id: prompt.id,
@@ -1904,7 +1935,7 @@ export const measureSinglePrompt = createServerFn({ method: "POST" })
           engine: "agent_web_grounded",
           measurement_mode: "single",
           measurement_surface: "agent_web_grounded",
-          model_id: "perplexity/preset-fast",
+          model_id: measured.model ?? "perplexity/preset-fast",
           brand_mentioned: measured.brandMentioned,
           position: measured.position,
           raw_answer: measured.answer,

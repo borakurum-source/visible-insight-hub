@@ -212,4 +212,61 @@ describe("Perplexity AI gateway", () => {
       expect.objectContaining({ fallback: true, model: "openai/gpt-5.6-luna" }),
     );
   });
+
+  it("honors an explicit model override on the agent surface and drops the preset", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      jsonResponse({
+        model: "openai/gpt-5.6-luna",
+        output: [{ type: "message", content: [{ type: "output_text", text: "Luna yanit" }] }],
+      }),
+    );
+    const gateway = createAiGateway({
+      apiKey: "test-key",
+      fetch: fetchMock,
+      routerAvailable: false,
+      recordUsage: vi.fn(),
+    });
+
+    const response = await gateway.text({
+      role: "search_fast",
+      messages,
+      model: "openai/gpt-5.6-luna",
+    });
+
+    expect(response.data).toBe("Luna yanit");
+    expect(response.model).toBe("openai/gpt-5.6-luna");
+    const sentBody = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    expect(sentBody.models).toEqual(["openai/gpt-5.6-luna"]);
+    expect(sentBody.preset).toBeUndefined();
+  });
+
+  it("ignores a model override on the router surface", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      jsonResponse({
+        model: "perplexity/deepseek-v4-flash-0731",
+        choices: [{ message: { content: '{"label":"ok"}' } }],
+      }),
+    );
+    const gateway = createAiGateway({
+      apiKey: "test-key",
+      fetch: fetchMock,
+      routerAvailable: true,
+      recordUsage: vi.fn(),
+    });
+
+    const response = await gateway.json({
+      role: "bulk_fast",
+      messages,
+      model: "openai/gpt-5.6-luna",
+      schema: z.object({ label: z.string() }),
+      jsonSchema: {
+        name: "label",
+        schema: { type: "object", properties: { label: { type: "string" } } },
+      },
+    });
+
+    expect(response.surface).toBe("router");
+    const sentBody = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    expect(sentBody.model).toBe("perplexity/deepseek-v4-flash-0731");
+  });
 });

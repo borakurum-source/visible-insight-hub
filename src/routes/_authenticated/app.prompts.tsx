@@ -28,6 +28,13 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   createPrompt,
   deletePrompt,
   getPlanUsage,
@@ -64,6 +71,12 @@ const FILTERS = [
   { value: "inactive", label: "Pasif" },
 ] as const;
 
+const MEASUREMENT_MODELS = [
+  { value: "auto", label: "Otomatik" },
+  { value: "perplexity/sonar", label: "Sonar (hızlı)" },
+  { value: "openai/gpt-5.6-luna", label: "GPT-5.6 Luna (orta)" },
+] as const;
+
 function PromptsPage() {
   const { brand } = useActiveBrand();
   const { prompt: promptFromSearch } = Route.useSearch();
@@ -81,6 +94,7 @@ function PromptsPage() {
   const [draft, setDraft] = useState("");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [openPrompt, setOpenPrompt] = useState<string | null>(promptFromSearch ?? null);
+  const [selectedModel, setSelectedModel] = useState<string>("auto");
 
   const key = ["prompts", brand?.id];
   const { data = [], isLoading } = useQuery({
@@ -135,7 +149,14 @@ function PromptsPage() {
     onError: (error: Error) => toast.error(error.message),
   });
   const singleMeasurement = useMutation({
-    mutationFn: (promptId: string) => remeasurePrompt({ data: { brandId: brand!.id, promptId } }),
+    mutationFn: (promptId: string) =>
+      remeasurePrompt({
+        data: {
+          brandId: brand!.id,
+          promptId,
+          ...(selectedModel !== "auto" ? { model: selectedModel } : {}),
+        },
+      }),
     onSuccess: (_result, promptId) => {
       toast.success("Prompt yeniden ölçüldü; tam tur trendi değiştirilmedi.");
       void queryClient.invalidateQueries({ queryKey: ["prompts", brand?.id] });
@@ -161,6 +182,7 @@ function PromptsPage() {
       prompt.lastRun?.position ?? "",
       prompt.lastRun?.createdAt ?? "",
       prompt.lastRun?.engine ?? "agent_web_grounded",
+      prompt.lastRun?.modelId ?? "auto",
     ]);
     const csv = [
       [
@@ -173,6 +195,7 @@ function PromptsPage() {
         "position",
         "measured_at",
         "measurement_surface",
+        "model",
       ],
       ...rows,
     ]
@@ -215,18 +238,32 @@ function PromptsPage() {
           icon: ListChecks,
         }}
         action={
-          <Button
-            size="sm"
-            onClick={() => void runAll()}
-            disabled={measuringAll || !data.some((item) => item.status === "approved")}
-          >
-            {measuringAll ? (
-              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Play className="mr-2 h-3.5 w-3.5" />
-            )}
-            {measuringAll ? "Ölçülüyor…" : "Tümünü ölç"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger className="h-8 w-[190px] text-xs" aria-label="Ölçüm modeli">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {MEASUREMENT_MODELS.map((option) => (
+                  <SelectItem key={option.value} value={option.value} className="text-xs">
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              onClick={() => void runAll(selectedModel !== "auto" ? selectedModel : undefined)}
+              disabled={measuringAll || !data.some((item) => item.status === "approved")}
+            >
+              {measuringAll ? (
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Play className="mr-2 h-3.5 w-3.5" />
+              )}
+              {measuringAll ? "Ölçülüyor…" : "Tümünü ölç"}
+            </Button>
+          </div>
         }
       />
 
