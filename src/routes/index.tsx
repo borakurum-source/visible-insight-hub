@@ -29,9 +29,9 @@ import { formatUsd, pricingPlans } from "@/lib/pricingData";
 import shotMetrics from "@/assets/landing/shot-metrics.webp";
 import shotKb from "@/assets/landing/shot-kb.webp";
 import shotContent from "@/assets/landing/shot-content.webp";
-import shotDashboard from "@/assets/features/dashboard.webp.asset.json";
-import shotCompetitors from "@/assets/features/competitors.webp.asset.json";
-import shotTasks from "@/assets/features/tasks.webp.asset.json";
+import shotDashboard from "@/assets/features/dashboard.webp";
+import shotCompetitors from "@/assets/features/competitors.webp";
+import shotTasks from "@/assets/features/tasks.webp";
 import heroEvidenceGap from "@/assets/landing/hero-evidence-gap.webp";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
 
@@ -74,7 +74,7 @@ const PRODUCT_TABS: ProductTab[] = [
     headline: "Tek skorda: yapay zeka cevaplarında neredesiniz?",
     body: "Bahsedilme, AI kaynak payı, sıralama kalitesi, kanıt kapsamı ve iddia kanıtı olarak beş bileşene bölünür. Zayıf bileşenin yanında ne yapmanız gerektiği yazar.",
     highlight: "AI Kaynak Payı %58,9",
-    shot: shotDashboard.url,
+    shot: shotDashboard,
     alt: "OneCite komuta merkezi ekranı: OneCite Score ve görünürlük kırılımı",
   },
   {
@@ -83,7 +83,7 @@ const PRODUCT_TABS: ProductTab[] = [
     headline: "Aynı sorularda rakibiniz seçiliyorsa bunu görürsünüz",
     body: "Takip ettiğiniz her soruda hangi alan adının kaynak olarak seçildiğini sayar, karşılaştırmalı trend çizgisiyle kaybettiğiniz payı gösteririz.",
     highlight: "3 rakip, tek grafik",
-    shot: shotCompetitors.url,
+    shot: shotCompetitors,
     alt: "OneCite rakip takibi ekranı: karşılaştırmalı görünürlük trendi",
   },
   {
@@ -92,7 +92,7 @@ const PRODUCT_TABS: ProductTab[] = [
     headline: "Ölçüm biter bitmez sıradaki iş listeniz hazır",
     body: "Görünmediğiniz her soru; içerik, kanıt veya teknik iyileştirme görevine dönüşür. Tamamladıkça skorun nasıl değiştiğini izlersiniz.",
     highlight: "Bu hafta 3 öncelik",
-    shot: shotTasks.url,
+    shot: shotTasks,
     alt: "OneCite görev listesi ekranı: öncelikli aksiyonlar",
   },
 ];

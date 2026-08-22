@@ -26,12 +26,12 @@ import {
 } from "@/components/site/feature-shot";
 import { Button } from "@/components/ui/button";
 import heroSignalAction from "@/assets/landing/hero-signal-action.webp";
-import shotDashboard from "@/assets/features/dashboard.webp.asset.json";
-import shotPrompts from "@/assets/features/prompts.webp.asset.json";
-import shotCompetitors from "@/assets/features/competitors.webp.asset.json";
-import shotGraph from "@/assets/features/graph.webp.asset.json";
-import shotContent from "@/assets/features/content.webp.asset.json";
-import shotTasks from "@/assets/features/tasks.webp.asset.json";
+import shotDashboard from "@/assets/features/dashboard.webp";
+import shotPrompts from "@/assets/features/prompts.webp";
+import shotCompetitors from "@/assets/features/competitors.webp";
+import shotGraph from "@/assets/features/graph.webp";
+import shotContent from "@/assets/features/content.webp";
+import shotTasks from "@/assets/features/tasks.webp";
 
 const TITLE = "Özellikler | Yapay Zeka Görünürlük Platformu — OneCite";
 const DESCRIPTION =
@@ -109,7 +109,7 @@ const mainFeatures: MainFeature[] = [
       "OneCite Score: bahsedilme, AI kaynak payı, sıralama kalitesi, kanıt kapsamı, iddia kanıtı",
       "Zaman içindeki görünürlük trendi ve zayıf bileşen için doğrudan aksiyon butonu",
     ],
-    shot: shotDashboard.url,
+    shot: shotDashboard,
     alt: "OneCite komuta merkezi: OneCite Score kırılımı ve görünürlük metrikleri",
     caption: "Komuta Merkezi — OneCite Score ve görünürlük kırılımı",
     href: "/platform/citation-share",
@@ -126,7 +126,7 @@ const mainFeatures: MainFeature[] = [
       "Yanıtın tamamı ve seçilen kaynaklar tek ekranda",
       "Görünmediğiniz sorular için tek tıkla görev oluşturma",
     ],
-    shot: shotPrompts.url,
+    shot: shotPrompts,
     alt: "OneCite prompt takip ekranı: izlenen sorular ve yanıt detayları",
     caption: "Promptlar — izlenen sorular, yanıtlar ve kaynaklar",
     href: "/platform/evidence-gaps",
@@ -143,7 +143,7 @@ const mainFeatures: MainFeature[] = [
       "Rakiplerle karşılaştırmalı görünürlük trendi",
       "Sorgu sonuçlarından çıkan yeni rakip adaylarını tek tıkla takibe alma",
     ],
-    shot: shotCompetitors.url,
+    shot: shotCompetitors,
     alt: "OneCite rakip takibi ekranı: rakip listesi ve karşılaştırmalı görünürlük",
     caption: "Rakip Takibi — pay dağılımı ve aday rakipler",
     href: "/fiyatlandirma",
@@ -160,7 +160,7 @@ const mainFeatures: MainFeature[] = [
       "Marka iddiaları ve kanıt bağlantıları ile kaynak gösterilebilirlik",
       "RAG altyapısı: her içerik ve analiz kendi bilgi bankanızdan beslenir",
     ],
-    shot: shotGraph.url,
+    shot: shotGraph,
     alt: "OneCite marka zekası ekranı: 3D vektör haritası ve bilgi parçaları",
     caption: "Marka Zekası — canlı 3B vektör haritası",
     href: "/platform/evidence-gaps",
@@ -177,7 +177,7 @@ const mainFeatures: MainFeature[] = [
       "Marka iddiaları ve kanıt bağlantılarıyla desteklenen taslak",
       "AEO uyumlu SSS bloğu ve iç linkleme önerileri",
     ],
-    shot: shotContent.url,
+    shot: shotContent,
     alt: "OneCite içerik üretimi ekranı: taslak oluşturma ve kaynaklar",
     caption: "İçerik Üretimi — brief'ten kaynak gösterilebilir taslağa",
     href: "/makaleler",
@@ -194,7 +194,7 @@ const mainFeatures: MainFeature[] = [
       "AI trafiğinden gelen dönüşüm ve gelir analizi (GA4)",
       "Paylaşılabilir müşteri raporu ve günlük otomatik veri yenileme",
     ],
-    shot: shotTasks.url,
+    shot: shotTasks,
     alt: "OneCite GEO görevleri ekranı: öncelikli aksiyon listesi",
     caption: "GEO Görevleri — ölçümden çıkan öncelikli aksiyonlar",
     href: "/solutions/agencies",
