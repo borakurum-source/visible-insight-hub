@@ -1211,7 +1211,7 @@ export const getOutcomeControlCenter = createServerFn({ method: "POST" })
 
 export const listFindings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; status?: string }) => input)
+  .inputValidator((input: { brandId: string; status?: string; excludeType?: string }) => input)
   .handler(async ({ data, context }) => {
     let query = context.supabase
       .from("findings" as never)
@@ -1221,6 +1221,7 @@ export const listFindings = createServerFn({ method: "POST" })
       .eq("brand_id" as never, data.brandId)
       .order("created_at" as never, { ascending: false });
     if (data.status) query = query.eq("status" as never, data.status);
+    if (data.excludeType) query = query.neq("finding_type" as never, data.excludeType);
     const { data: rows, error } = await query.limit(100);
     if (error) throw new Error(error.message);
     return (rows ?? []) as unknown as Array<Record<string, unknown>>;

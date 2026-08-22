@@ -68,7 +68,7 @@ function GeoTasksPage() {
   });
   const findings = useQuery({
     queryKey: ["findings", brand?.id],
-    queryFn: () => fetchFindings({ data: { brandId: brand!.id, status: "open" } }),
+    queryFn: () => fetchFindings({ data: { brandId: brand!.id, status: "open", excludeType: "site_health" } }),
     enabled: Boolean(brand?.id),
   });
 
