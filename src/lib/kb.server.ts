@@ -13,6 +13,75 @@ export type IndexResult = {
   noiseRatio?: number;
 };
 
+export type BrandEeatSignals = {
+  scope?: string | null;
+  naming_aliases?: unknown;
+  voice_notes?: string | null;
+  author_profiles?: unknown;
+  experience_role_type?: string | null;
+  experience_methodologies?: unknown;
+  leadership?: unknown;
+  partnerships?: unknown;
+  external_recognition?: unknown;
+  content_owner_type?: string | null;
+  review_cadence?: string | null;
+  data_sourcing_notes?: string | null;
+  disclosure_policy?: string | null;
+  testimonials?: unknown;
+  third_party_reviews?: unknown;
+  external_citations?: unknown;
+  ai_disclosure_note?: string | null;
+  default_schema_types?: unknown;
+};
+
+function asStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+}
+
+/**
+ * Dolu olmayan E-E-A-T alanları için hiç satır üretmez — modelin boş alanı
+ * "bilgi" sanıp uydurmasını önlemek amacıyla, sadece gerçekten dolu olan
+ * alanlar promptun user mesajına eklenir.
+ */
+export function buildBrandSignalsBlock(intel: BrandEeatSignals | null | undefined): string {
+  if (!intel) return "";
+  const lines: string[] = [];
+
+  if (intel.scope) lines.push(`- Etki alanı: ${intel.scope}`);
+  const aliases = asStringList(intel.naming_aliases);
+  if (aliases.length) lines.push(`- Marka takma adları: ${aliases.join(", ")}`);
+  if (intel.voice_notes) lines.push(`- Marka sesi: ${intel.voice_notes}`);
+
+  const authors = asStringList(intel.author_profiles);
+  if (authors.length) lines.push(`- Yazar profilleri: ${authors.join("; ")}`);
+  if (intel.experience_role_type) lines.push(`- Deneyim rolü: ${intel.experience_role_type}`);
+  const methodologies = asStringList(intel.experience_methodologies);
+  if (methodologies.length) lines.push(`- Metodolojiler: ${methodologies.join("; ")}`);
+  const leadership = asStringList(intel.leadership);
+  if (leadership.length) lines.push(`- Liderlik: ${leadership.join("; ")}`);
+  const partnerships = asStringList(intel.partnerships);
+  if (partnerships.length) lines.push(`- Ortaklıklar: ${partnerships.join("; ")}`);
+  const recognition = asStringList(intel.external_recognition);
+  if (recognition.length) lines.push(`- Dış tanınırlık: ${recognition.join("; ")}`);
+
+  if (intel.content_owner_type) lines.push(`- İçerik sahipliği: ${intel.content_owner_type}`);
+  if (intel.review_cadence) lines.push(`- İnceleme sıklığı: ${intel.review_cadence}`);
+  if (intel.data_sourcing_notes) lines.push(`- Veri kaynağı notları: ${intel.data_sourcing_notes}`);
+  if (intel.disclosure_policy) lines.push(`- Açıklama politikası: ${intel.disclosure_policy}`);
+  if (intel.ai_disclosure_note) lines.push(`- AI açıklama notu: ${intel.ai_disclosure_note}`);
+
+  const testimonials = asStringList(intel.testimonials);
+  if (testimonials.length) lines.push(`- Referanslar: ${testimonials.join("; ")}`);
+  const thirdPartyReviews = asStringList(intel.third_party_reviews);
+  if (thirdPartyReviews.length) lines.push(`- Üçüncü taraf incelemeler: ${thirdPartyReviews.join("; ")}`);
+  const citations = asStringList(intel.external_citations);
+  if (citations.length) lines.push(`- Dış atıflar: ${citations.join("; ")}`);
+
+  if (!lines.length) return "";
+  return `Marka E-E-A-T sinyalleri (yalnızca aşağıdakileri kullan, eksik olanı uydurma):\n${lines.join("\n")}`;
+}
+
 /** Sabit genislikte paralel havuz: sayfalari tek tek beklemek yerine 4'lu isler. */
 export async function runPool<T, R>(items: T[], size: number, worker: (item: T) => Promise<R>): Promise<R[]> {
   const results = new Array<R>(items.length);

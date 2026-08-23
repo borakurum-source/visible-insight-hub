@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { MiniMarkdown } from "@/components/site/mini-markdown";
 import { deleteDraft, generateDraft, listContentGaps, listDrafts, setDraftStatus } from "@/lib/kb.functions";
 import { useActiveBrand } from "@/lib/use-panel";
@@ -74,6 +75,7 @@ function ContentPage() {
   const [format, setFormat] = useState("blog");
   const [length, setLength] = useState("orta");
   const [statusFilter, setStatusFilter] = useState("hepsi");
+  const [topic, setTopic] = useState("");
 
   const gapsKey = ["content-gaps", brand?.id];
   const draftsKey = ["content-drafts", brand?.id];
@@ -92,11 +94,13 @@ function ContentPage() {
   });
 
   const draftMutation = useMutation({
-    mutationFn: (promptId: string) => createDraft({ data: { brandId: brand!.id, promptId, format, length } }),
+    mutationFn: (input: { promptId: string } | { topic: string }) =>
+      createDraft({ data: { brandId: brand!.id, format, length, ...input } }),
     onSuccess: () => {
       toast.success("Taslak üretildi");
       void queryClient.invalidateQueries({ queryKey: draftsKey });
       void queryClient.invalidateQueries({ queryKey: gapsKey });
+      setTopic("");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -165,6 +169,38 @@ function ContentPage() {
 
       <Card>
         <CardContent className="space-y-3 p-6">
+          <div className="flex items-center justify-between gap-3">
+            <p className="flex items-center gap-1.5 text-sm font-medium">
+              <PenSquare className="h-4 w-4" /> Manuel Konu
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Kanıt boşluklarında görünmeyen bir konu için doğrudan taslak üretin. Bu tek seferlik bir
+            üretimdir — prompt takibine veya ölçüme eklenmez.
+          </p>
+          <Textarea
+            value={topic}
+            onChange={(event) => setTopic(event.target.value)}
+            placeholder="Hedef soru veya konu yazın…"
+            rows={2}
+          />
+          <Button
+            size="sm"
+            disabled={draftMutation.isPending || !topic.trim()}
+            onClick={() => draftMutation.mutate({ topic: topic.trim() })}
+          >
+            {draftMutation.isPending && draftMutation.variables && "topic" in draftMutation.variables ? (
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-1.5 h-4 w-4" />
+            )}
+            Taslak üret
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-3 p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="flex items-center gap-1.5 text-sm font-medium"><Sparkles className="h-4 w-4" /> Kanıt Boşlukları</p>
             <div className="flex flex-wrap items-center gap-2">
@@ -213,9 +249,12 @@ function ContentPage() {
                       size="sm"
                       variant="secondary"
                       disabled={draftMutation.isPending}
-                      onClick={() => draftMutation.mutate(gap.promptId)}
+                      onClick={() => draftMutation.mutate({ promptId: gap.promptId })}
                     >
-                      {draftMutation.isPending && draftMutation.variables === gap.promptId ? (
+                      {draftMutation.isPending &&
+                      draftMutation.variables &&
+                      "promptId" in draftMutation.variables &&
+                      draftMutation.variables.promptId === gap.promptId ? (
                         <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                       ) : (
                         <Sparkles className="mr-1.5 h-3.5 w-3.5" />
@@ -281,7 +320,7 @@ function ContentPage() {
                           variant="ghost"
                           aria-label="Yeniden üret"
                           disabled={draftMutation.isPending}
-                          onClick={() => draftMutation.mutate(draft.prompt_id as string)}
+                          onClick={() => draftMutation.mutate({ promptId: draft.prompt_id as string })}
                         >
                           <RefreshCw className="h-4 w-4" />
                         </Button>

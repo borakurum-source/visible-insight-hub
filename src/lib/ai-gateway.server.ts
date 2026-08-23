@@ -6,6 +6,7 @@ export type AiRole =
   | "research_standard"
   | "structured_strong"
   | "editorial_premium"
+  | "editorial_content"
   | "audit_critical";
 
 export type AiSurface = "agent" | "router";
@@ -45,6 +46,12 @@ export function resolveAiRoute(role: AiRole, routerAvailable: boolean): AiRoute 
       return {
         surface: "agent",
         models: ["anthropic/claude-sonnet-5", "openai/gpt-5.6-sol"],
+        tools: [],
+      };
+    case "editorial_content":
+      return {
+        surface: "agent",
+        models: ["openai/gpt-5.6-terra", "openai/gpt-5.6-luna"],
         tools: [],
       };
     case "audit_critical":

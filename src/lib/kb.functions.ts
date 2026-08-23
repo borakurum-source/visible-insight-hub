@@ -393,35 +393,58 @@ export const listContentGaps = createServerFn({ method: "POST" })
     return gaps.sort((a, b) => a.coverage - b.coverage);
   });
 
+const BRAND_INTELLIGENCE_DRAFT_COLUMNS =
+  "summary, positioning, tone, products, scope, naming_aliases, voice_notes, author_profiles, " +
+  "experience_role_type, experience_methodologies, leadership, partnerships, external_recognition, " +
+  "content_owner_type, review_cadence, data_sourcing_notes, disclosure_policy, testimonials, " +
+  "third_party_reviews, external_citations, ai_disclosure_note, default_schema_types";
+
 export const generateDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string; promptId: string; format?: string; length?: string; tone?: string }) => input)
+  .inputValidator(
+    (input: { brandId: string; promptId?: string; topic?: string; format?: string; length?: string; tone?: string }) =>
+      input,
+  )
   .handler(async ({ data, context }) => {
+    const hasPromptId = Boolean(data.promptId);
+    const hasTopic = Boolean(data.topic?.trim());
+    if (hasPromptId === hasTopic) {
+      throw new Error("Ya bir prompt seçin ya da manuel bir konu girin (ikisi birden değil).");
+    }
+
     const { embedOne } = await import("./embeddings.server");
     const { aiJson } = await import("./ai.server");
     const { resolveSystemPrompt } = await import("./system-prompts.server");
+    const { buildBrandSignalsBlock } = await import("./kb.server");
     const { supabase } = context;
 
     const [{ data: prompt }, { data: brand }, { data: intel }, { data: claimRows }] = await Promise.all([
-      supabase.from("prompts").select("id, text").eq("id", data.promptId).single(),
+      hasPromptId
+        ? supabase.from("prompts").select("id, text").eq("id", data.promptId!).single()
+        : Promise.resolve({ data: null }),
       supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
-      supabase.from("brand_intelligence").select("summary, positioning, tone, products").eq("brand_id", data.brandId).maybeSingle(),
+      supabase.from("brand_intelligence").select(BRAND_INTELLIGENCE_DRAFT_COLUMNS).eq("brand_id", data.brandId).maybeSingle(),
       supabase.from("claims").select("statement, evidence_url").eq("brand_id", data.brandId).limit(20),
     ]);
-    if (!prompt || !brand) throw new Error("Prompt veya marka bulunamadı");
+    if (hasPromptId && !prompt) throw new Error("Prompt bulunamadı");
+    if (!brand) throw new Error("Marka bulunamadı");
+
+    const questionText = prompt?.text ?? data.topic!.trim();
 
     // Marka iddialari taslakta birebir tekrar edilmeli: alintilanabilirligin cekirdegi bu cumleler.
     const claimsText = (claimRows ?? [])
       .map((c: { statement: string; evidence_url: string | null }) => `- ${c.statement}${c.evidence_url ? ` (kaynak: ${c.evidence_url})` : ""}`)
       .join("\n");
 
+    const brandSignals = buildBrandSignalsBlock(intel as any);
+
     let evidence: Array<{ content: string; source_id: string | null }> = [];
-    const vector = await embedOne(prompt.text);
+    const vector = await embedOne(questionText);
     if (vector) {
       const { data: matches } = await (supabase.rpc as any)("match_kb_hybrid", {
         _brand_id: data.brandId,
         query_embedding: JSON.stringify(vector) as unknown as string,
-        query_text: prompt.text,
+        query_text: questionText,
         match_count: 8,
         min_similarity: 0.15,
         per_source_limit: 3,
@@ -447,7 +470,7 @@ export const generateDraft = createServerFn({ method: "POST" })
       orta: "yaklaşık 800 kelime",
       uzun: "yaklaşık 1400 kelime",
     };
-    const briefing = `İçerik biçimi: ${formatLabel[data.format ?? "blog"] ?? formatLabel["blog"]}\nUzunluk hedefi: ${lengthLabel[data.length ?? "orta"] ?? lengthLabel["orta"]}\nTon tercihi: ${data.tone ?? intel?.tone ?? "marka tonuna sadık"}`;
+    const briefing = `İçerik biçimi: ${formatLabel[data.format ?? "blog"] ?? formatLabel["blog"]}\nUzunluk hedefi: ${lengthLabel[data.length ?? "orta"] ?? lengthLabel["orta"]}\nTon tercihi: ${data.tone ?? (intel as any)?.tone ?? "marka tonuna sadık"}`;
 
     const result = await aiJson<{ title: string; body: string }>(
       [
@@ -457,14 +480,15 @@ export const generateDraft = createServerFn({ method: "POST" })
         },
         {
           role: "user",
-          content: `Marka: ${brand.name} (${brand.domain})\nKonumlandırma: ${intel?.positioning ?? "-"}\nTon: ${intel?.tone ?? "-"}\nÖzet: ${intel?.summary ?? "-"}\n\n${briefing}\n\nHedef soru: ${prompt.text}\n\nBilgi bankası alıntıları:\n${context_text}${
+          content: `Marka: ${brand.name} (${brand.domain})\nKonumlandırma: ${(intel as any)?.positioning ?? "-"}\nTon: ${(intel as any)?.tone ?? "-"}\nÖzet: ${(intel as any)?.summary ?? "-"}\n\n${briefing}\n\nHedef soru: ${questionText}\n\nBilgi bankası alıntıları:\n${context_text}${
             claimsText
               ? `\n\nMarka iddiaları (metinde birebir veya çok yakın biçimde geçmeli, varsa kaynak bağlantısını referans göster):\n${claimsText}`
               : ""
-          }`,
+          }${brandSignals ? `\n\n${brandSignals}` : ""}`,
         },
       ],
-      { title: prompt.text, body: "" },
+      { title: questionText, body: "" },
+      { role: "editorial_content", brandId: data.brandId },
     );
 
     if (!result.body) throw new Error("Taslak üretilemedi, tekrar deneyin");
@@ -473,10 +497,10 @@ export const generateDraft = createServerFn({ method: "POST" })
       .from("content_drafts")
       .insert({
         brand_id: data.brandId,
-        prompt_id: prompt.id,
-        title: result.title || prompt.text,
+        prompt_id: prompt?.id ?? null,
+        title: result.title || questionText,
         body: result.body,
-        target_prompt: prompt.text,
+        target_prompt: questionText,
         status: "taslak",
         word_count: result.body.split(/\s+/).filter(Boolean).length,
         sources: (sourceRows ?? []).map((s) => ({ title: s.title, url: s.url })),
