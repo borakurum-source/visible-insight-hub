@@ -331,61 +331,136 @@ export type Database = {
       }
       brand_intelligence: {
         Row: {
+          ai_disclosure_note: string | null
+          alias_case_sensitive: boolean
           approved: boolean
           audiences: Json
+          author_profiles: Json
           brand_id: string
           competitors: Json
+          contact_points: Json
+          content_owner_type: string | null
+          content_type_focus: Json
           created_at: string
+          data_sourcing_notes: string | null
+          default_schema_types: string[]
           detailed_description: string | null
+          disclosure_policy: string | null
+          experience_methodologies: Json
+          experience_role_type: string | null
+          external_citations: Json
+          external_recognition: Json
+          fact_checking_notes: string | null
           id: string
           industry: string | null
           key_features: Json
           keywords: Json
           language: string | null
+          leadership: Json
           location: string | null
+          naming_aliases: Json
+          naming_exclude_terms: Json
+          partnerships: Json
           positioning: string | null
           products: Json
+          review_cadence: string | null
+          scope: string | null
+          social_links: Json
           summary: string | null
+          testimonials: Json
+          third_party_reviews: Json
           tone: string | null
+          update_triggers: Json
           updated_at: string
+          voice_notes: string | null
         }
         Insert: {
+          ai_disclosure_note?: string | null
+          alias_case_sensitive?: boolean
           approved?: boolean
           audiences?: Json
+          author_profiles?: Json
           brand_id: string
           competitors?: Json
+          contact_points?: Json
+          content_owner_type?: string | null
+          content_type_focus?: Json
           created_at?: string
+          data_sourcing_notes?: string | null
+          default_schema_types?: string[]
           detailed_description?: string | null
+          disclosure_policy?: string | null
+          experience_methodologies?: Json
+          experience_role_type?: string | null
+          external_citations?: Json
+          external_recognition?: Json
+          fact_checking_notes?: string | null
           id?: string
           industry?: string | null
           key_features?: Json
           keywords?: Json
           language?: string | null
+          leadership?: Json
           location?: string | null
+          naming_aliases?: Json
+          naming_exclude_terms?: Json
+          partnerships?: Json
           positioning?: string | null
           products?: Json
+          review_cadence?: string | null
+          scope?: string | null
+          social_links?: Json
           summary?: string | null
+          testimonials?: Json
+          third_party_reviews?: Json
           tone?: string | null
+          update_triggers?: Json
           updated_at?: string
+          voice_notes?: string | null
         }
         Update: {
+          ai_disclosure_note?: string | null
+          alias_case_sensitive?: boolean
           approved?: boolean
           audiences?: Json
+          author_profiles?: Json
           brand_id?: string
           competitors?: Json
+          contact_points?: Json
+          content_owner_type?: string | null
+          content_type_focus?: Json
           created_at?: string
+          data_sourcing_notes?: string | null
+          default_schema_types?: string[]
           detailed_description?: string | null
+          disclosure_policy?: string | null
+          experience_methodologies?: Json
+          experience_role_type?: string | null
+          external_citations?: Json
+          external_recognition?: Json
+          fact_checking_notes?: string | null
           id?: string
           industry?: string | null
           key_features?: Json
           keywords?: Json
           language?: string | null
+          leadership?: Json
           location?: string | null
+          naming_aliases?: Json
+          naming_exclude_terms?: Json
+          partnerships?: Json
           positioning?: string | null
           products?: Json
+          review_cadence?: string | null
+          scope?: string | null
+          social_links?: Json
           summary?: string | null
+          testimonials?: Json
+          third_party_reviews?: Json
           tone?: string | null
+          update_triggers?: Json
           updated_at?: string
+          voice_notes?: string | null
         }
         Relationships: [
           {
