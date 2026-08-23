@@ -15,6 +15,9 @@ CREATE TABLE onecite.site_health_pages (
 
 ALTER TABLE onecite.site_health_pages ENABLE ROW LEVEL SECURITY;
 
+-- RLS policies call is_brand_member, so authenticated role needs execute permission.
+GRANT EXECUTE ON FUNCTION onecite.is_brand_member(uuid, uuid) TO authenticated;
+
 -- Read: brand members. Write: service_role only (audit results are system-written,
 -- same posture as onecite.findings, not the fully user-writable geo_tasks pattern).
 CREATE POLICY site_health_pages_select ON onecite.site_health_pages
