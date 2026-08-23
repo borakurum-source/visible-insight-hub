@@ -86,7 +86,8 @@ function collectJsonLdNodes($: CheerioAPI): JsonLdNode[] {
 function jsonLdTypesOf(node: JsonLdNode): string[] {
   const type = node["@type"];
   if (typeof type === "string") return [type];
-  if (Array.isArray(type)) return type.filter((value): value is string => typeof value === "string");
+  if (Array.isArray(type))
+    return type.filter((value): value is string => typeof value === "string");
   return [];
 }
 
@@ -95,8 +96,8 @@ function hasType(nodes: JsonLdNode[], pattern: RegExp): boolean {
 }
 
 function organizationNodes(nodes: JsonLdNode[]): JsonLdNode[] {
-  return nodes.filter(
-    (node) => jsonLdTypesOf(node).some((type) => /organization/i.test(type) || /localbusiness/i.test(type)),
+  return nodes.filter((node) =>
+    jsonLdTypesOf(node).some((type) => /organization/i.test(type) || /localbusiness/i.test(type)),
   );
 }
 
@@ -120,7 +121,10 @@ function checkWebsiteSchema(nodes: JsonLdNode[]): boolean {
   return hasType(nodes, /^website$/i);
 }
 
-function checkOrganizationSchema(nodes: JsonLdNode[]): { passed: boolean; reason: "missing" | "no-logo" | null } {
+function checkOrganizationSchema(nodes: JsonLdNode[]): {
+  passed: boolean;
+  reason: "missing" | "no-logo" | null;
+} {
   const orgs = organizationNodes(nodes);
   if (!orgs.length) return { passed: false, reason: "missing" };
   if (!orgs.some(hasNonEmptyLogo)) return { passed: false, reason: "no-logo" };
@@ -376,7 +380,10 @@ async function fetchLlmsTxt(domain: string): Promise<boolean> {
 // Skorlama: her kategori 100'den başlar, fail eden her kural ağırlığı kadar düşer.
 // ---------------------------------------------------------------------------
 
-export function computeScores(results: SiteHealthRuleResult[]): { technicalScore: number; aeoScore: number } {
+export function computeScores(results: SiteHealthRuleResult[]): {
+  technicalScore: number;
+  aeoScore: number;
+} {
   let technical = 100;
   let aeo = 100;
   for (const result of results) {
@@ -389,40 +396,61 @@ export function computeScores(results: SiteHealthRuleResult[]): { technicalScore
 }
 
 // ---------------------------------------------------------------------------
-// findings idempotency: (brand_id, rule_id, url, finding_type='site_health',
-// status='open') anahtarıyla açık kayıt var mı diye bakılır. url, findings
-// tablosunda ayrı bir kolon değil; affected_entities jsonb'sinde [{url}]
-// olarak tutulduğundan jsonb containment (@>, .contains()) ile aranır.
+// findings idempotency: (brand_id, rule_id, url, finding_type='site_health')
+// anahtarıyla — DURUMU NE OLURSA OLSUN — mevcut kayıt var mı diye bakılır. url,
+// findings tablosunda ayrı bir kolon değil; affected_entities jsonb'sinde
+// [{url}] olarak tutulduğundan jsonb containment (@>, .contains()) ile aranır.
+//
+// Durum (status) burada kasıtlı olarak filtrelenmez (eskiden sadece 'open'
+// aranıyordu): manuel "Mark Fixed" ile resolved edilmiş bir bulgu, kural
+// yeniden taramada hâlâ fail oluyorsa bile SESSİZCE yeniden açılmamalı — bkz.
+// reconcileFinding'deki dallanma.
 // ---------------------------------------------------------------------------
 
-async function findOpenFinding(
+async function findExistingFinding(
   brandId: string,
   ruleId: SiteHealthRuleId,
   url: string,
-): Promise<{ id: string } | null> {
+): Promise<{ id: string; status: string } | null> {
   const { data, error } = await supabaseAdmin
     .from("findings" as never)
-    .select("id" as never)
+    .select("id,status" as never)
     .eq("brand_id" as never, brandId)
     .eq("rule_id" as never, ruleId)
     .eq("finding_type" as never, "site_health")
-    .eq("status" as never, "open")
     .contains("affected_entities" as never, [{ url }] as never)
+    .limit(1)
     .maybeSingle();
   if (error) {
-    console.error(`site-health: açık bulgu sorgusu başarısız (${ruleId}, ${url})`, error);
-    return null;
+    // Gerçek bir sorgu hatası (network/DB) — "kayıt yok" ile karıştırılmamalı,
+    // çağıran bunu yakalayıp sadece bu kural/sayfa çiftini atlar (Fix 5).
+    throw new Error(
+      `site-health: mevcut bulgu sorgusu başarısız (${ruleId}, ${url}): ${error.message}`,
+    );
   }
-  return data as unknown as { id: string } | null;
+  return data as unknown as { id: string; status: string } | null;
 }
 
-async function reconcileFinding(
+export async function reconcileFinding(
   brandId: string,
   url: string,
   result: SiteHealthRuleResult,
 ): Promise<"opened" | "resolved" | "unchanged"> {
-  const existing = await findOpenFinding(brandId, result.ruleId, url);
+  let existing: { id: string; status: string } | null;
+  try {
+    existing = await findExistingFinding(brandId, result.ruleId, url);
+  } catch (error) {
+    console.error(
+      `site-health: bulgu sorgulanamadı, bu kural bu sayfa için atlanıyor (${result.ruleId}, ${url})`,
+      error,
+    );
+    return "unchanged";
+  }
+
   if (!result.passed) {
+    // Herhangi bir mevcut kayıt varsa (open VEYA resolved) dokunma: open ise
+    // zaten idempotent no-duplicate davranışı, resolved ise manuel "Mark
+    // Fixed" kararına saygı — sessizce yeniden açma (Fix 4).
     if (existing) return "unchanged";
     const { error } = await supabaseAdmin.from("findings" as never).insert({
       brand_id: brandId,
@@ -442,7 +470,7 @@ async function reconcileFinding(
     }
     return "opened";
   }
-  if (existing) {
+  if (existing && existing.status === "open") {
     const { error } = await supabaseAdmin
       .from("findings" as never)
       .update({ status: "resolved" } as never)
@@ -478,7 +506,14 @@ export async function runAudit(brandId: string, domain: string): Promise<RunAudi
     console.error(`site-health: URL keşfi başarısız (${domain})`, error);
     return [];
   });
-  const urls = discovered.slice(0, 20).map((page) => page.url);
+  // Aynı sayfanın farklı varyantları (ör. https://x.com ve https://x.com/) tek
+  // bir URL olarak sayılır — hem tarama bütçesi israf edilmez hem de aynı
+  // efektif sayfa için mükerrer-anahtar yarışı riski ortadan kalkar (Fix 6).
+  const discoveredUrls = [...new Set(discovered.map((page) => page.url))];
+  if (discoveredUrls.length === 0) {
+    throw new Error(`Site taranamadı: hiçbir sayfa bulunamadı (${domain})`);
+  }
+  const urls = discoveredUrls.slice(0, 20);
 
   let findingsOpened = 0;
   let findingsResolved = 0;
@@ -537,6 +572,14 @@ export async function runAudit(brandId: string, domain: string): Promise<RunAudi
   else if (llmsOutcome === "resolved") findingsResolved += 1;
 
   const pagesAudited = pageScores.length;
+  if (pagesAudited === 0) {
+    // urls.length > 0 buraya kadar garanti (boşsa yukarıda zaten fırlatıldı) —
+    // yani URL'ler bulundu ama HEPSİNİN taraması/parse'ı başarısız oldu. Bunu
+    // "0 sayfa" gibi sessizce başarı olarak raporlamak yanıltıcı (Fix 2).
+    throw new Error(
+      `Site taranamadı: ${urls.length} sayfa denendi ancak hiçbiri başarıyla taranamadı (${domain})`,
+    );
+  }
   const technicalScore = pagesAudited
     ? Math.round(pageScores.reduce((sum, page) => sum + page.technicalScore, 0) / pagesAudited)
     : 0;

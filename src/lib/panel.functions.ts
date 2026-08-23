@@ -598,11 +598,13 @@ export const getCitationDiscoveryAnalytics = createServerFn({ method: "POST" })
       { name: "Kendi siteniz", value: citationRows.filter((c) => c.is_own_domain).length },
       {
         name: "Rakip",
-        value: citationRows.filter((c) => !c.is_own_domain && c.citation_type === "competitor").length,
+        value: citationRows.filter((c) => !c.is_own_domain && c.citation_type === "competitor")
+          .length,
       },
       {
         name: "Tarafsız kaynak",
-        value: citationRows.filter((c) => !c.is_own_domain && c.citation_type !== "competitor").length,
+        value: citationRows.filter((c) => !c.is_own_domain && c.citation_type !== "competitor")
+          .length,
       },
     ];
 
@@ -1173,6 +1175,12 @@ export const getOutcomeControlCenter = createServerFn({ method: "POST" })
         .from("findings" as never)
         .select("id,title,impact,effort,confidence,evidence_count,status,created_at" as never)
         .eq("brand_id" as never, data.brandId)
+        // site_health bulgularının impact/effort/confidence her zaman NULL
+        // (0'a coerce edilir) — bu, taramadan sonra 100+ satırla üst-20
+        // penceresini doldurup gerçek araştırma bulgularını dışarı atar ve
+        // etki-efor haritasını sıfır-boyutlu noktalar yığınına çevirir. Aynı
+        // dışlama app.geo-tasks.tsx'teki excludeType="site_health" ile.
+        .neq("finding_type" as never, "site_health")
         .order("created_at" as never, { ascending: false })
         .limit(20),
       context.supabase.from("geo_tasks").select("status,updated_at").eq("brand_id", data.brandId),
@@ -2133,9 +2141,7 @@ export const getPlanUsage = createServerFn({ method: "POST" })
     const { getUserPlan, countApprovedPrompts } = await import("./plan.server");
     const limits = await getUserPlan(context.supabase, context.userId);
     const [{ count: brandCount }, approvedPrompts] = await Promise.all([
-      context.supabase
-        .from("brands")
-        .select("id", { count: "exact", head: true }),
+      context.supabase.from("brands").select("id", { count: "exact", head: true }),
       data.brandId ? countApprovedPrompts(context.supabase, data.brandId) : Promise.resolve(0),
     ]);
     return {
