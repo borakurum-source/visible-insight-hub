@@ -82,6 +82,7 @@ const NAV_GROUPS: NavGroup[] = [
         exact: false,
         children: [
           { to: "/app/geo-tasks", label: "Bulgular & Görevler" },
+          { to: "/app/site-health", label: "Site Sağlığı" },
           { to: "/app/content", label: "İçerik Üretimi" },
           { to: "/app/report", label: "Müşteri Raporu" },
         ],
