@@ -450,58 +450,6 @@ export const listPrompts = createServerFn({ method: "POST" })
     return prompts.map((row) => ({ ...row, lastRun: latest.get(row.id) ?? null }));
   });
 
-export type DiscoveredPrompt = {
-  text: string;
-  cluster: string;
-  intent: string;
-  rationale: string;
-  opportunityScore: number;
-};
-
-export const discoverPromptCandidates = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: { brandId: string }) => input)
-  .handler(async ({ data, context }): Promise<DiscoveredPrompt[]> => {
-    const { aiJson } = await import("./ai.server");
-    const [{ data: brand }, { data: intel }, { data: existing }] = await Promise.all([
-      context.supabase.from("brands").select("name, domain").eq("id", data.brandId).single(),
-      context.supabase
-        .from("brand_intelligence")
-        .select("*")
-        .eq("brand_id", data.brandId)
-        .maybeSingle(),
-      context.supabase.from("prompts").select("text").eq("brand_id", data.brandId).limit(60),
-    ]);
-    if (!brand) throw new Error("Marka bulunamadı");
-
-    const { resolveSystemPrompt } = await import("./system-prompts.server");
-    const result = await aiJson<{ items: DiscoveredPrompt[] }>(
-      [
-        {
-          role: "system",
-          content: await resolveSystemPrompt(context.supabase, "prompt_discovery"),
-        },
-        {
-          role: "user",
-          content: `Marka: ${brand.name} (${brand.domain})\nÖzet: ${intel?.summary ?? ""}\nÜrünler: ${JSON.stringify(intel?.products ?? [])}\nKitle: ${JSON.stringify(intel?.audiences ?? [])}\nRakipler: ${JSON.stringify(intel?.competitors ?? [])}\nMevcut sorular (tekrar etme): ${(existing ?? []).map((p) => p.text).join(" | ")}`,
-        },
-      ],
-      { items: [] },
-    );
-
-    return (result.items ?? [])
-      .slice(0, 12)
-      .map((item) => ({
-        text: String(item.text ?? ""),
-        cluster: String(item.cluster ?? "genel"),
-        intent: String(item.intent ?? "bilgi"),
-        rationale: String(item.rationale ?? ""),
-        opportunityScore: Math.max(0, Math.min(100, Number(item.opportunityScore) || 0)),
-      }))
-      .filter((item) => item.text.length > 4)
-      .sort((a, b) => b.opportunityScore - a.opportunityScore);
-  });
-
 export const addDiscoveredPrompts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
