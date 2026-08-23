@@ -71,6 +71,7 @@ import { Route as AuthenticatedAppPromptDiscoveryRouteImport } from './routes/_a
 import { Route as AuthenticatedAppPromptsRouteImport } from './routes/_authenticated/app.prompts'
 import { Route as AuthenticatedAppReportRouteImport } from './routes/_authenticated/app.report'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
+import { Route as AuthenticatedAppSiteHealthRouteImport } from './routes/_authenticated/app.site-health'
 import { Route as AuthenticatedAppSystemPromptsRouteImport } from './routes/_authenticated/app.system-prompts'
 import { Route as ApiV1ReportsRouteImport } from './routes/api/v1/reports'
 import { Route as AuthenticatedAppTrafficMetricRouteImport } from './routes/_authenticated/app.traffic.$metric'
@@ -411,6 +412,12 @@ const AuthenticatedAppSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppSiteHealthRoute =
+  AuthenticatedAppSiteHealthRouteImport.update({
+    id: '/site-health',
+    path: '/site-health',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppSystemPromptsRoute =
   AuthenticatedAppSystemPromptsRouteImport.update({
     id: '/system-prompts',
@@ -565,6 +572,7 @@ export interface FileRoutesByFullPath {
   '/app/prompts': typeof AuthenticatedAppPromptsRoute
   '/app/report': typeof AuthenticatedAppReportRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/site-health': typeof AuthenticatedAppSiteHealthRoute
   '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/api/v1/reports': typeof ApiV1ReportsRouteWithChildren
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -640,6 +648,7 @@ export interface FileRoutesByTo {
   '/app/prompts': typeof AuthenticatedAppPromptsRoute
   '/app/report': typeof AuthenticatedAppReportRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/app/site-health': typeof AuthenticatedAppSiteHealthRoute
   '/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/api/v1/reports': typeof ApiV1ReportsRouteWithChildren
   '/app': typeof AuthenticatedAppIndexRoute
@@ -721,6 +730,7 @@ export interface FileRoutesById {
   '/_authenticated/app/prompts': typeof AuthenticatedAppPromptsRoute
   '/_authenticated/app/report': typeof AuthenticatedAppReportRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/_authenticated/app/site-health': typeof AuthenticatedAppSiteHealthRoute
   '/_authenticated/app/system-prompts': typeof AuthenticatedAppSystemPromptsRoute
   '/api/v1/reports': typeof ApiV1ReportsRouteWithChildren
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -802,6 +812,7 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
+    | '/app/site-health'
     | '/app/system-prompts'
     | '/api/v1/reports'
     | '/app/'
@@ -877,6 +888,7 @@ export interface FileRouteTypes {
     | '/app/prompts'
     | '/app/report'
     | '/app/settings'
+    | '/app/site-health'
     | '/app/system-prompts'
     | '/api/v1/reports'
     | '/app'
@@ -957,6 +969,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/prompts'
     | '/_authenticated/app/report'
     | '/_authenticated/app/settings'
+    | '/_authenticated/app/site-health'
     | '/_authenticated/app/system-prompts'
     | '/api/v1/reports'
     | '/_authenticated/app/'
@@ -1456,6 +1469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/site-health': {
+      id: '/_authenticated/app/site-health'
+      path: '/site-health'
+      fullPath: '/app/site-health'
+      preLoaderRoute: typeof AuthenticatedAppSiteHealthRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/system-prompts': {
       id: '/_authenticated/app/system-prompts'
       path: '/system-prompts'
@@ -1590,6 +1610,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppPromptsRoute: typeof AuthenticatedAppPromptsRoute
   AuthenticatedAppReportRoute: typeof AuthenticatedAppReportRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
+  AuthenticatedAppSiteHealthRoute: typeof AuthenticatedAppSiteHealthRoute
   AuthenticatedAppSystemPromptsRoute: typeof AuthenticatedAppSystemPromptsRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppTrafficMetricRoute: typeof AuthenticatedAppTrafficMetricRoute
@@ -1615,6 +1636,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppPromptsRoute: AuthenticatedAppPromptsRoute,
   AuthenticatedAppReportRoute: AuthenticatedAppReportRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
+  AuthenticatedAppSiteHealthRoute: AuthenticatedAppSiteHealthRoute,
   AuthenticatedAppSystemPromptsRoute: AuthenticatedAppSystemPromptsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppTrafficMetricRoute: AuthenticatedAppTrafficMetricRoute,
